@@ -1,4 +1,29 @@
 import { useState, useEffect } from 'react';
+import { collection, getDocs, query, orderBy } from 'firebase/firestore';
+import { db } from './firebase';
+
+export interface Property {
+  id: string;
+  title: string;
+  titleAr?: string;
+  price: number;
+  currency?: string;
+  location: string;
+  locationAr?: string;
+  type: string;
+  bedrooms?: number;
+  bathrooms?: number;
+  area?: number;
+  image?: string;
+  images?: string[];
+  description?: string;
+  descriptionAr?: string;
+  featured?: boolean;
+  lat?: number;
+  lng?: number;
+  vrUrl?: string;
+  createdAt?: any;
+}
 
 export function useProperties() {
   const [properties, setProperties] = useState<Property[]>([]);
@@ -6,44 +31,26 @@ export function useProperties() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // Sample data - استبدلها بـ Firebase لاحقاً
-    const sampleProperties: Property[] = [
-      {
-        id: '1',
-        title: 'Luxury Villa — Palm Jumeirah',
-        titleAr: 'فيلا فاخرة — نخلة جميرا',
-        price: 28500,
-        currency: 'Pi',
-        location: 'Dubai, UAE',
-        locationAr: 'دبي، الإمارات',
-        type: 'sale',
-        bedrooms: 5,
-        bathrooms: 4,
-        area: 620,
-        featured: true,
-        lat: 25.1124,
-        lng: 55.1390,
-      },
-      {
-        id: '2',
-        title: 'Nile Tower — Luxury Apartment',
-        titleAr: 'برج النيل — شقة فاخرة',
-        price: 85000,
-        currency: 'Pi',
-        location: 'Cairo, Egypt',
-        locationAr: 'القاهرة، مصر',
-        type: 'sale',
-        bedrooms: 3,
-        bathrooms: 2,
-        area: 150,
-        featured: true,
-        lat: 30.0444,
-        lng: 31.2357,
-      },
-    ];
-
-    setProperties(sampleProperties);
-    setLoading(false);
+    async function fetchProperties() {
+      try {
+        const q = query(
+          collection(db, 'properties'),
+          orderBy('createdAt', 'desc')
+        );
+        const snapshot = await getDocs(q);
+        const data = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        })) as Property[];
+        setProperties(data);
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load properties');
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProperties();
   }, []);
 
   return { properties, loading, error };
