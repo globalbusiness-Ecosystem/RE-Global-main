@@ -45,6 +45,7 @@ html {
         <meta name="apple-mobile-web-app-status-bar-style" content="black" />
         <meta name="apple-mobile-web-app-title" content="RE Platform" />
         <meta name="theme-color" content="#000000" />
+        <script src="https://sdk.minepi.com/pi-sdk.js"></script>
       </head>
       <body className="dark">
         <AppWrapper>{children}</AppWrapper>
