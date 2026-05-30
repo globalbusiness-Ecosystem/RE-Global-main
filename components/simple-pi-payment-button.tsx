@@ -47,7 +47,7 @@ export function SimplePiPaymentButton({
             {
               onReadyForServerApproval: async (paymentId: string) => {
                 console.log('[v0] Payment ready for approval:', paymentId);
-                resolve({ paymentId, status: 'ready' });
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentId }) }).then(() => resolve({ paymentId, status: "ready" }));
               },
               onReadyForServerCompletion: async (paymentId: string, txid: string) => {
                 console.log('[v0] Payment completed:', paymentId, txid);
