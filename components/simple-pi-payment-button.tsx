@@ -34,11 +34,20 @@ export function SimplePiPaymentButton({
     setErrorMessage('');
 
     try {
-      // Step 1: Create intent first
+      // Step 1: Authenticate with Pi Network to get accessToken
+      const authResult = await window.Pi.authenticate(['payments'], () => {});
+      const accessToken = authResult.accessToken;
+      const piUsername = authResult.user.username;
+      console.log('[v0] Pi authenticated:', piUsername);
+
+      // Step 2: Create intent
       const intentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/create-intent`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reAmount }),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`,
+        },
+        body: JSON.stringify({ reAmount, piUsername }),
       });
 
       if (!intentResponse.ok) {
@@ -48,7 +57,7 @@ export function SimplePiPaymentButton({
       const { intentId, piAmount } = await intentResponse.json();
       console.log('[v0] Intent created:', intentId, 'piAmount:', piAmount);
 
-      // Step 2: Start Pi payment
+      // Step 3: Start Pi payment
       const paymentResult = await new Promise<{ paymentId: string; txid?: string; status: string }>(
         (resolve, reject) => {
           window.Pi.createPayment(
@@ -62,13 +71,23 @@ export function SimplePiPaymentButton({
                 console.log('[v0] Payment ready for approval:', paymentId);
                 fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/approve`, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ intentId, piPaymentId: paymentId }),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                  },
+                  body: JSON.stringify({ intentId, piPaymentId: paymentId, piUsername }),
                 }).then(() => resolve({ paymentId, status: 'ready' }));
               },
               onReadyForServerCompletion: async (paymentId: string, txid: string) => {
                 console.log('[v0] Payment completed:', paymentId, txid);
-                resolve({ paymentId, txid, status: 'completed' });
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/complete`, {
+                  method: 'POST',
+                  headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${accessToken}`,
+                  },
+                  body: JSON.stringify({ intentId, piPaymentId: paymentId, txid, piUsername }),
+                }).then(() => resolve({ paymentId, txid, status: 'completed' }));
               },
               onCancel: () => {
                 console.log('[v0] Payment cancelled');
