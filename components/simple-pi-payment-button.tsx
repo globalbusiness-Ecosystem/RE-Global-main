@@ -5,6 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 
 interface SimplePiPaymentButtonProps {
   propertyId?: string;
+  reAmount?: number;
   language?: 'en' | 'ar';
   onSuccess?: (result: any) => void;
   onError?: (error: Error) => void;
@@ -13,6 +14,7 @@ interface SimplePiPaymentButtonProps {
 
 export function SimplePiPaymentButton({
   propertyId = 'default-property',
+  reAmount = 1000,
   language = 'en',
   onSuccess,
   onError,
@@ -32,22 +34,37 @@ export function SimplePiPaymentButton({
     setErrorMessage('');
 
     try {
-      console.log('[v0] Initiating Pi payment: amount=1, memo=Property Purchase');
+      // Step 1: Create intent first
+      const intentResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/create-intent`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ reAmount }),
+      });
 
+      if (!intentResponse.ok) {
+        throw new Error('Failed to create payment intent');
+      }
+
+      const { intentId, piAmount } = await intentResponse.json();
+      console.log('[v0] Intent created:', intentId, 'piAmount:', piAmount);
+
+      // Step 2: Start Pi payment
       const paymentResult = await new Promise<{ paymentId: string; txid?: string; status: string }>(
         (resolve, reject) => {
           window.Pi.createPayment(
             {
-              amount: 1,
+              amount: piAmount,
               memo: 'Property Purchase',
-              metadata: {
-                propertyId,
-              },
+              metadata: { propertyId, intentId },
             },
             {
               onReadyForServerApproval: async (paymentId: string) => {
                 console.log('[v0] Payment ready for approval:', paymentId);
-                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/approve`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ paymentId }) }).then(() => resolve({ paymentId, status: "ready" }));
+                fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/token-sale/approve`, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ intentId, piPaymentId: paymentId }),
+                }).then(() => resolve({ paymentId, status: 'ready' }));
               },
               onReadyForServerCompletion: async (paymentId: string, txid: string) => {
                 console.log('[v0] Payment completed:', paymentId, txid);
@@ -67,11 +84,8 @@ export function SimplePiPaymentButton({
       );
 
       console.log('[v0] Payment successful:', paymentResult);
-
       setShowSuccess(true);
-      if (onSuccess) {
-        onSuccess(paymentResult);
-      }
+      if (onSuccess) onSuccess(paymentResult);
 
       setTimeout(() => {
         setShowSuccess(false);
@@ -82,10 +96,7 @@ export function SimplePiPaymentButton({
       console.log('[v0] Payment error caught:', errorMsg);
       setErrorMessage(language === 'en' ? errorMsg : `خطأ: ${errorMsg}`);
       setIsProcessing(false);
-
-      if (onError && error instanceof Error) {
-        onError(error);
-      }
+      if (onError && error instanceof Error) onError(error);
     }
   };
 
@@ -115,7 +126,7 @@ export function SimplePiPaymentButton({
         {isProcessing ? (
           <span>{language === 'en' ? 'Processing...' : 'جاري المعالجة...'}</span>
         ) : (
-          <span>{language === 'en' ? 'Pay 1 Pi' : 'ادفع 1 Pi'}</span>
+          <span>{language === 'en' ? 'Pay with Pi' : 'ادفع بـ Pi'}</span>
         )}
       </button>
       {errorMessage && (
