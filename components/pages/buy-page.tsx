@@ -348,15 +348,9 @@ function FirebasePropertyModal({
           )}
 
           {/* Buy Button */}
-          <UnifiedPaymentButton
-            propertyId={property.id}
-            propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
-            price={1}
-            transactionType="buy"
-            language={language}
-            currency="PI"
-            className="w-full"
-          />
+          <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition text-base">
+            {language === 'en' ? '🛒 Buy Now with Pi' : '🛒 اشتري الآن بـ Pi'}
+          </button>
 
         </div>
       </div>
