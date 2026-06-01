@@ -35,7 +35,7 @@ export function UnifiedPaymentButton({
   const { sdk, isAuthenticated } = usePiAuth();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
-  const isPiAvailable = typeof window !== 'undefined' && window.Pi && typeof window.Pi.createPayment === 'function';
+  const isPiAvailable = true; // Check at payment time, not load time
 
   const getTransactionLabel = () => {
     const labels = {
