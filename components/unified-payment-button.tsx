@@ -93,8 +93,10 @@ export function UnifiedPaymentButton({
                   body: JSON.stringify({ paymentId }),
                 });
                 console.log('[RE] Approved ✅');
+                resolve({ paymentId, status: 'approved' });
               } catch (e) {
                 console.error('[RE] Approval failed:', e);
+                reject(e);
               }
             },
             onReadyForServerCompletion: async (paymentId: string, txid: string) => {
