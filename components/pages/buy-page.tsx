@@ -348,7 +348,33 @@ function FirebasePropertyModal({
           )}
 
           {/* Buy Button */}
-          <button className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition text-base">
+          <button
+            className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition text-base"
+            onClick={() => {
+              if (!window.Pi || typeof window.Pi.createPayment !== 'function') return;
+              window.Pi.createPayment(
+                { amount: 1, memo: 'Property Purchase', metadata: { propertyId: property.id } },
+                {
+                  onReadyForServerApproval: async (paymentId: string) => {
+                    await fetch('/api/payments/approve', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ paymentId }),
+                    });
+                  },
+                  onReadyForServerCompletion: async (paymentId: string, txid: string) => {
+                    await fetch('/api/payments/complete', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ paymentId, txid }),
+                    });
+                  },
+                  onCancel: () => console.log('Payment cancelled'),
+                  onError: (err: any) => console.error('Payment error:', err),
+                }
+              );
+            }}
+          >
             {language === 'en' ? '🛒 Buy Now with Pi' : '🛒 اشتري الآن بـ Pi'}
           </button>
 
