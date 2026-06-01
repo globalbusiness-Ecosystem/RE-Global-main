@@ -3,7 +3,7 @@
 import { useProperties } from '@/lib/useProperties';
 import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
-import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
+import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
@@ -182,9 +182,13 @@ const PropertyCard = memo(({
       </div>
 
       <div className="grid grid-cols-3 gap-2 pt-2">
-        <SimplePiPaymentButton
+        <UnifiedPaymentButton
           propertyId={property.id}
+          propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
+          price={1}
+          transactionType="buy"
           language={language}
+          currency="PI"
           className="col-span-1"
         />
         <button
