@@ -145,6 +145,14 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         version: "2.0",
         sandbox: PI_NETWORK_CONFIG.SANDBOX,
       });
+      setAuthMessage("Authenticating with Pi...");
+      const authResult = await window.Pi.authenticate(
+        ['payments', 'username'],
+        (payment: any) => {
+          console.log('[PiAuth] Incomplete payment found:', payment);
+        }
+      );
+      console.log('[PiAuth] Authenticated:', authResult.user.username);
       setAuthMessage("Loading SDKLite...");
       await loadSDKLite();
 

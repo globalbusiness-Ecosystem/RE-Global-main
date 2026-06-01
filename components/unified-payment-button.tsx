@@ -85,12 +85,32 @@ export function UnifiedPaymentButton({
           },
           {
             onReadyForServerApproval: async (paymentId: string) => {
-              console.log('[v0] Payment ready for approval:', paymentId);
-              resolve({ paymentId, status: 'ready' });
+              console.log('[RE] Approving payment:', paymentId);
+              try {
+                await fetch('/api/payments/approve', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ paymentId }),
+                });
+                console.log('[RE] Approved ✅');
+              } catch (e) {
+                console.error('[RE] Approval failed:', e);
+              }
             },
             onReadyForServerCompletion: async (paymentId: string, txid: string) => {
-              console.log('[v0] Payment ready for completion:', paymentId, txid);
-              resolve({ paymentId, txid, status: 'completed' });
+              console.log('[RE] Completing payment:', paymentId, txid);
+              try {
+                await fetch('/api/payments/complete', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ paymentId, txid }),
+                });
+                resolve({ paymentId, txid, status: 'completed' });
+                console.log('[RE] Completed ✅');
+              } catch (e) {
+                console.error('[RE] Completion failed:', e);
+                reject(e);
+              }
             },
             onCancel: () => {
               console.log('[v0] Payment cancelled by user');
