@@ -351,9 +351,9 @@ function FirebasePropertyModal({
           <button
             className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition text-base"
             onClick={() => {
-              if (!window.Pi || typeof window.Pi.createPayment !== 'function') return;
-              window.Pi.createPayment(
-                { amount: 1, memo: 'Property Purchase', metadata: { propertyId: property.id } },
+              // @ts-ignore
+              (window.Pi as any).createPayment(
+                { amount: 1, memo: 'Property Purchase', metadata: { propertyId: prop.id } },
                 {
                   onReadyForServerApproval: async (paymentId: string) => {
                     await fetch('/api/payments/approve', {
