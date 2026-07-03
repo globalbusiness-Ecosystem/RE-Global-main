@@ -137,8 +137,9 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const [showPanoramicTour, setShowPanoramicTour] = useState(false);
   const updateThrottleRef = useRef(0);
 
-  const filteredProperties = useMemo(() => {
   const { properties: firebaseProps } = useProperties();
+
+  const filteredProperties = useMemo(() => {
     const allProperties = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1}))];
     let filtered = allProperties.filter((p) => {
       const matchType = filterType === 'all' || p.type === filterType;
@@ -164,7 +165,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
     }
 
     return filtered;
-  }, [filterType, searchTerm, priceRange, selectedCountries, sortBy]);
+  }, [properties, firebaseProps, filterType, searchTerm, priceRange, selectedCountries, sortBy]);
 
   const countries = useMemo(() => {
     const unique = Array.from(new Set(properties.map(p => p.country))).sort();
