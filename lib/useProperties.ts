@@ -38,10 +38,19 @@ export function useProperties() {
           orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => ({
-          id: doc.id,
-          ...doc.data()
-        })) as Property[];
+        const data = snapshot.docs.map(doc => {
+          const raw = doc.data();
+          return {
+            id: doc.id,
+            ...raw,
+            price: Number(raw.price) || 0,
+            bedrooms: raw.bedrooms !== undefined ? Number(raw.bedrooms) || 0 : undefined,
+            bathrooms: raw.bathrooms !== undefined ? Number(raw.bathrooms) || 0 : undefined,
+            area: raw.area !== undefined ? Number(raw.area) || 0 : undefined,
+            lat: raw.lat !== undefined ? Number(raw.lat) : undefined,
+            lng: raw.lng !== undefined ? Number(raw.lng) : undefined,
+          };
+        }) as Property[];
         setProperties(data);
       } catch (err) {
         console.error(err);

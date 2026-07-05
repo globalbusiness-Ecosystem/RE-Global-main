@@ -132,7 +132,7 @@ export const PanormicViewer = ({
   const qualityConfig = QUALITY_CONFIG[currentQuality];
 
   // Get the current room's panorama URL
-  const selectedPanoramaUrl = ROOMS[currentRoomIndex]?.panoramaUrl || ROOM_PANORAMA_URLS[0];
+  const selectedPanoramaUrl = ROOMS[currentRoomIndex]?.panoramaUrl || PANNELLUM_SAMPLES[0];
   const currentRoomData = ROOM_DATA[ROOMS[currentRoomIndex]?.name] || ROOM_DATA['Living Room'];
 
   // Helper to get room facts for chat

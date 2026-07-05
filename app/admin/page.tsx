@@ -3,11 +3,11 @@ import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
 
-const ADMIN_PIN = '3027913091994Qwertyuiop*#@';
-
 export default function AdminDashboard() {
   const [pin, setPin] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
+  const [checkingSession, setCheckingSession] = useState(true);
+  const [loginError, setLoginError] = useState('');
   const [properties, setProperties] = useState<any[]>([]);
   const [form, setForm] = useState({
     title: '', price: '', currency: 'Pi', location: '', type: 'buy',
@@ -16,9 +16,27 @@ export default function AdminDashboard() {
     tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
   });
 
-  const handleLogin = () => {
-    if (pin === ADMIN_PIN) setAuthenticated(true);
-    else alert('PIN غلط!');
+  useEffect(() => {
+    fetch('/api/admin-auth')
+      .then(res => res.json())
+      .then(data => setAuthenticated(!!data.ok))
+      .catch(() => setAuthenticated(false))
+      .finally(() => setCheckingSession(false));
+  }, []);
+
+  const handleLogin = async () => {
+    setLoginError('');
+    try {
+      const res = await fetch('/api/admin-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+      if (res.ok) setAuthenticated(true);
+      else setLoginError('PIN غلط!');
+    } catch {
+      setLoginError('حصل خطأ في الاتصال، حاول تاني.');
+    }
   };
 
   const loadProperties = async () => {
@@ -31,6 +49,10 @@ export default function AdminDashboard() {
   const handleAdd = async () => {
     await addDoc(collection(db, 'properties'), {
       ...form,
+      price: Number(form.price) || 0,
+      bedrooms: Number(form.bedrooms) || 0,
+      bathrooms: Number(form.bathrooms) || 0,
+      area: Number(form.area) || 0,
       images: form.images.split(',').map(s => s.trim()).filter(Boolean)
     });
     alert('✅ تم إضافة العقار!');
@@ -60,6 +82,8 @@ export default function AdminDashboard() {
       {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
     </select>
   );
+
+  if (checkingSession) return null;
 
   if (!authenticated) return (
     <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

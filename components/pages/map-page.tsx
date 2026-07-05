@@ -174,7 +174,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
   const mapStats = useMemo(() => {
     const countries = new Set(filteredProperties.map((p) => p.country));
-    const totalValue = filteredProperties.reduce((sum, p) => sum + p.price, 0);
+    const totalValue = filteredProperties.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
     const upTrend = filteredProperties.filter(p => p.marketTrend === 'up').length;
     const downTrend = filteredProperties.filter(p => p.marketTrend === 'down').length;
     

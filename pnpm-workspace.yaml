@@ -1,3 +1,5 @@
 allowBuilds:
+  '@firebase/util': true
   '@tailwindcss/oxide': true
+  protobufjs: false
   sharp: true
