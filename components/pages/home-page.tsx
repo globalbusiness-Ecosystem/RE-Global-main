@@ -13,6 +13,8 @@ import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 interface HomePageProps {
   language: 'en' | 'ar';
   onCategoryClick?: (categoryId: string) => void;
+  properties?: any[];
+  propertiesLoading?: boolean;
 }
 
 const categories = [

@@ -3,6 +3,7 @@ import { streamText, convertToModelMessages } from 'ai';
 interface UserContext {
   username?: string;
   balance?: number;
+  language?: string;
 }
 
 interface RequestBody {

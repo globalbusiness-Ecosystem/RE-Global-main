@@ -9,7 +9,7 @@ export type { CapturedMedia } from '@/lib/device-media-service';
 
 interface MediaCaptureProps {
   onMediaCapture?: (media: CapturedMedia) => void;
-  onMediaUpload?: (result: { url: string; id: string }) => void;
+  onMediaUpload?: (result: { url: string; id: string; analysis?: any }) => void;
   language?: 'en' | 'ar';
   maxSize?: number;
 }

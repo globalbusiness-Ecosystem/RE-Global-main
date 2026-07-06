@@ -23,11 +23,13 @@ export interface UserPurchaseBalance {
 
 export interface Product {
   id: string;
+  slug: string;
   name: string;
   description: string;
   price_in_pi: number;
   total_quantity: number;
   is_active: boolean;
+  is_consumable: boolean;
   created_at: string;
 }
 
@@ -73,6 +75,8 @@ declare global {
     };
     Pi: {
       init: (config: { version: string; sandbox?: boolean }) => Promise<void>;
+      authenticate: (scopes: string[], onIncompletePaymentFound?: (payment: any) => void) => Promise<{ user: { uid: string; username: string }; accessToken: string }>;
+      createPayment: (paymentData: { amount: number; memo: string; metadata: Record<string, any>; }, callbacks: { onReadyForServerApproval: (paymentId: string) => void; onReadyForServerCompletion: (paymentId: string, txid: string) => void; onCancel: (paymentId: string) => void; onError: (error: Error, payment?: any) => void; }) => void;
     };
   }
 }

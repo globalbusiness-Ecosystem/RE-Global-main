@@ -19,7 +19,7 @@ const markerClusterGroup = new Map(); // Cache for performance
 const geoJsonCache = new Map(); // Cache for geojson layers
 
 interface Property {
-  id: number;
+  id: number | string;
   lat: number;
   lng: number;
   title: string;
@@ -102,7 +102,7 @@ async function initializeMap() {
 
 interface MapPageProps {
   language: 'en' | 'ar';
-  onPropertySelect?: (propertyId: number) => void;
+  onPropertySelect?: (propertyId: number | string) => void;
 }
 
 interface RegionStats {
@@ -140,7 +140,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const { properties: firebaseProps } = useProperties();
 
   const filteredProperties = useMemo(() => {
-    const allProperties = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1}))];
+    const allProperties: Property[] = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1} as Property))];
     let filtered = allProperties.filter((p) => {
       const matchType = filterType === 'all' || p.type === filterType;
       const matchSearch =

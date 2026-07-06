@@ -78,7 +78,7 @@ Keep it concise and data-driven.`,
       model: 'openai/gpt-4o-mini',
       prompt: reportPrompts[language],
       temperature: 0.6,
-      maxTokens: 600,
+      maxOutputTokens: 600,
     });
 
     // Update cache

@@ -202,7 +202,6 @@ function QRPaymentButtonComponent({
       <div className={`space-y-1 ${className}`}>
         <button
           onClick={handlePurchase}
-          disabled={paymentState.status === 'processing'}
           className="w-full py-2 px-3 rounded-lg text-xs font-medium bg-red-600/20 text-red-400 border border-red-600/50 flex items-center justify-center gap-2 hover:bg-red-600/30 transition"
         >
           <AlertCircle className="w-3 h-3" />

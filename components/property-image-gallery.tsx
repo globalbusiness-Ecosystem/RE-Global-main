@@ -29,7 +29,7 @@ export const PropertyImageGallery = ({
   }, [images.length]);
 
   const handleKeyDown = useCallback(
-    (e: KeyboardEvent) => {
+    (e: React.KeyboardEvent) => {
       if (e.key === 'ArrowRight') handleNext();
       if (e.key === 'ArrowLeft') handlePrev();
       if (e.key === 'Escape') setIsExpanded(false);

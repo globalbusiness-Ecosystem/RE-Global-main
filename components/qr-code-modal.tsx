@@ -50,7 +50,6 @@ export const QRCodeModal = ({
       city,
       bedrooms,
       area,
-      currency: 'π',
     });
   };
 
