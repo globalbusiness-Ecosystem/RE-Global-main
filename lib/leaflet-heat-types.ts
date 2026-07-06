@@ -21,7 +21,7 @@ declare global {
       options?: HeatLayerOptions
     ): HeatLatLng;
 
-    class HeatLatLng extends Layer {
+    class HeatLatLng {
       addLatLng(latlng: [number, number, number]): this;
       setLatLngs(latlngs: Array<[number, number, number]>): this;
     }

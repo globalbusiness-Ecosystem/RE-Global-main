@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Download, Copy, Printer, QrCode, Grid, List } from 'lucide-react';
+import { Download, Copy, Printer, QrCode, Grid, List, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { QRCodeGenerator } from './qr-code-generator';
 import { downloadQRCode, copyQRCodeToClipboard } from '@/lib/qr-code-utils';

@@ -1,17 +1,14 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-
-declare global {
-  interface Window { Pi: any; }
-}
+import { PI_NETWORK_CONFIG } from '@/lib/system-config';
 
 export default function PaymentPage() {
   const [status, setStatus] = useState('');
 
   useEffect(() => {
     if (window.Pi) {
-      window.Pi.init({ version: '2.0', sandbox: false });
+      window.Pi.init({ version: '2.0', sandbox: PI_NETWORK_CONFIG.SANDBOX });
     }
   }, []);
 

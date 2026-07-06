@@ -126,7 +126,7 @@ export function getRegionStats(properties: any[], region: string) {
   const regionConfig = GLOBAL_REGIONS[region as keyof typeof GLOBAL_REGIONS];
   if (!regionConfig) return null;
 
-  const regionProps = properties.filter(p => regionConfig.countries.includes(p.country));
+  const regionProps = properties.filter(p => (regionConfig.countries as readonly string[]).includes(p.country));
   const totalValue = regionProps.reduce((sum, p) => sum + p.price, 0);
   const avgROI = regionProps.length > 0 
     ? Math.round(regionProps.reduce((sum, p) => sum + (p.roiScore || 0), 0) / regionProps.length)
