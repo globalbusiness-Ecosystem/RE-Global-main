@@ -114,12 +114,37 @@ export function UnifiedPaymentButton({
                 reject(e);
               }
             },
-            onCancel: () => {
-              console.log('[v0] Payment cancelled by user');
+            onCancel: async (paymentId: string) => {
+              console.log('[v0] Payment cancelled by user:', paymentId);
+              try {
+                if (paymentId) {
+                  await fetch('/api/payments/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId }),
+                  });
+                  console.log('[RE] Cancelled on Pi servers ✅');
+                }
+              } catch (e) {
+                console.error('[RE] Failed to cancel on Pi servers:', e);
+              }
               reject(new Error('Payment cancelled by user'));
             },
-            onError: (error: any) => {
+            onError: async (error: any, payment?: any) => {
               console.log('[v0] Payment error:', error);
+              try {
+                const paymentId = payment?.identifier;
+                if (paymentId) {
+                  await fetch('/api/payments/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ paymentId }),
+                  });
+                  console.log('[RE] Cancelled on Pi servers after error ✅');
+                }
+              } catch (e) {
+                console.error('[RE] Failed to cancel on Pi servers after error:', e);
+              }
               reject(error);
             },
           }
