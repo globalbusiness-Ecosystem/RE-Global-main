@@ -148,8 +148,28 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       setAuthMessage("Authenticating with Pi...");
       const authResult = await window.Pi.authenticate(
         ['payments', 'username'],
-        (payment: any) => {
+        async (payment: any) => {
           console.log('[PiAuth] Incomplete payment found:', payment);
+          try {
+            const txid = payment?.transaction?.txid;
+            if (txid) {
+              await fetch('/api/payments/complete', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: payment.identifier, txid }),
+              });
+              console.log('[PiAuth] Completed stale payment:', payment.identifier);
+            } else {
+              await fetch('/api/payments/cancel', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ paymentId: payment.identifier }),
+              });
+              console.log('[PiAuth] Cancelled stale payment:', payment.identifier);
+            }
+          } catch (e) {
+            console.error('[PiAuth] Failed to resolve incomplete payment:', e);
+          }
         }
       );
       console.log('[PiAuth] Authenticated:', authResult.user.username);
