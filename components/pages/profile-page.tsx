@@ -199,7 +199,7 @@ export default function ProfilePage({ language = 'en', userId = 'user_123', onBa
           <Button
             variant="ghost"
             className="w-full text-muted-foreground hover:text-foreground"
-            onClick={() => window.open('/privacy', '_blank')}
+            onClick={() => { window.location.href = '/privacy'; }}
           >
             <FileText className="w-4 h-4 mr-2" />
             {isArabic ? 'سياسة الخصوصية' : 'Privacy Policy'}
@@ -208,7 +208,7 @@ export default function ProfilePage({ language = 'en', userId = 'user_123', onBa
           <Button
             variant="ghost"
             className="w-full text-muted-foreground hover:text-foreground"
-            onClick={() => window.open('/terms', '_blank')}
+            onClick={() => { window.location.href = '/terms'; }}
           >
             <ScrollText className="w-4 h-4 mr-2" />
             {isArabic ? 'شروط الخدمة' : 'Terms of Service'}
