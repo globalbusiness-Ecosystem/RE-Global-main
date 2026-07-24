@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText } from 'lucide-react';
+import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface ProfilePageProps {
@@ -199,9 +199,19 @@ export default function ProfilePage({ language = 'en', userId = 'user_123', onBa
           <Button
             variant="ghost"
             className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => window.open('/privacy', '_blank')}
           >
             <FileText className="w-4 h-4 mr-2" />
             {isArabic ? 'سياسة الخصوصية' : 'Privacy Policy'}
+          </Button>
+
+          <Button
+            variant="ghost"
+            className="w-full text-muted-foreground hover:text-foreground"
+            onClick={() => window.open('/terms', '_blank')}
+          >
+            <ScrollText className="w-4 h-4 mr-2" />
+            {isArabic ? 'شروط الخدمة' : 'Terms of Service'}
           </Button>
         </CardContent>
       </Card>
