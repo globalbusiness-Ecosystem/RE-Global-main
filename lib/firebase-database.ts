@@ -54,6 +54,23 @@ export interface Transaction {
   createdAt: Date;
 }
 
+export interface SmartContract {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  buyerUsername: string;
+  sellerUsername: string;
+  type: 'buy' | 'rent' | 'invest' | 'tokenized';
+  amount: number;
+  currency: string;
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  contractIdOnChain?: string;
+  paymentId?: string;
+  txid?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 class FirebaseDatabase {
   private collectionsCache: Map<string, any[]> = new Map();
 
@@ -281,6 +298,75 @@ class FirebaseDatabase {
     }
   }
 
+  // Smart Contract Operations
+  async addContract(contract: Omit<SmartContract, 'id' | 'createdAt' | 'updatedAt'>): Promise<SmartContract | null> {
+    try {
+      const docRef = await addDoc(collection(db, 'contracts'), {
+        ...contract,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      return { id: docRef.id, ...contract, createdAt: new Date(), updatedAt: new Date() };
+    } catch (error) {
+      console.error('[DB] Add contract error:', error);
+      return null;
+    }
+  }
+
+  async getContractsForUser(username: string): Promise<SmartContract[]> {
+    try {
+      const buyerQuery = query(collection(db, 'contracts'), where('buyerUsername', '==', username));
+      const sellerQuery = query(collection(db, 'contracts'), where('sellerUsername', '==', username));
+      const [buyerSnap, sellerSnap] = await Promise.all([getDocs(buyerQuery), getDocs(sellerQuery)]);
+      const contracts: Map<string, SmartContract> = new Map();
+      [buyerSnap, sellerSnap].forEach((snap) => {
+        snap.forEach((docSnap) => {
+          contracts.set(docSnap.id, {
+            id: docSnap.id,
+            ...docSnap.data(),
+            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+          } as SmartContract);
+        });
+      });
+      return Array.from(contracts.values()).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('[DB] Get contracts for user error:', error);
+      return [];
+    }
+  }
+
+  async getAllContracts(): Promise<SmartContract[]> {
+    try {
+      const q = query(collection(db, 'contracts'));
+      const querySnapshot = await getDocs(q);
+      const contracts: SmartContract[] = [];
+      querySnapshot.forEach((docSnap) => {
+        contracts.push({
+          id: docSnap.id,
+          ...docSnap.data(),
+          createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+          updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+        } as SmartContract);
+      });
+      return contracts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('[DB] Get all contracts error:', error);
+      return [];
+    }
+  }
+
+  async updateContract(id: string, updates: Partial<SmartContract>): Promise<boolean> {
+    try {
+      const docRef = doc(db, 'contracts', id);
+      await updateDoc(docRef, { ...updates, updatedAt: Timestamp.now() });
+      return true;
+    } catch (error) {
+      console.error('[DB] Update contract error:', error);
+      return false;
+    }
+  }
+
   // Cache management
   private invalidateCache(collection: string): void {
     for (const key of this.collectionsCache.keys()) {
@@ -325,6 +411,16 @@ export function useFirebaseDatabase() {
       firebaseDB.getTransactions(userId),
     updateTransaction: (id: string, updates: Partial<Transaction>) =>
       firebaseDB.updateTransaction(id, updates),
+
+    // Smart Contracts
+    addContract: (contract: Omit<SmartContract, 'id' | 'createdAt' | 'updatedAt'>) =>
+      firebaseDB.addContract(contract),
+    getContractsForUser: (username: string) =>
+      firebaseDB.getContractsForUser(username),
+    getAllContracts: () =>
+      firebaseDB.getAllContracts(),
+    updateContract: (id: string, updates: Partial<SmartContract>) =>
+      firebaseDB.updateContract(id, updates),
 
     // Cache
     clearCache: () => firebaseDB.clearCache(),

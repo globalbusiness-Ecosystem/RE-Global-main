@@ -56,6 +56,10 @@ const AnalyticsPage = dynamic(() => import('@/components/pages/analytics-page'),
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
+const ContractsPage = dynamic(() => import('@/components/pages/contracts-page'), { 
+  ssr: false, 
+  loading: () => <div className="w-full h-full bg-background" /> 
+});
 
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
@@ -209,6 +213,12 @@ export default function App() {
         return (
           <div className="animate-in slide-in-from-right duration-300">
             <AnalyticsPage language={language} currency={currency} />
+          </div>
+        );
+      case 'contracts':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <ContractsPage language={language} onBack={() => handlePageChange('home')} />
           </div>
         );
       case 'settings':
