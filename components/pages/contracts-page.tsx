@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode } from 'lucide-react';
+import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode, Link2, Loader2, ShieldAlert } from 'lucide-react';
 import { QRScannerModal } from '@/components/qr-scanner-modal';
+import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
@@ -31,6 +32,58 @@ const typeLabelAr: Record<SmartContract['type'], string> = {
   invest: 'استثمار',
   tokenized: 'رمزي',
 };
+
+function VerifyOnChain({ txid, language }: { txid: string; language: 'en' | 'ar' }) {
+  const isArabic = language === 'ar';
+  const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
+  const [result, setResult] = useState<StellarVerificationResult | null>(null);
+
+  const handleVerify = async () => {
+    setStatus('loading');
+    const res = await verifyTransactionOnStellar(txid);
+    setResult(res);
+    setStatus('done');
+  };
+
+  if (status === 'idle') {
+    return (
+      <button
+        onClick={handleVerify}
+        className="flex items-center gap-1.5 text-[11px] text-accent underline"
+      >
+        <Link2 className="w-3 h-3" />
+        {isArabic ? 'تحقق على Stellar' : 'Verify on Stellar'}
+      </button>
+    );
+  }
+
+  if (status === 'loading') {
+    return (
+      <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+        <Loader2 className="w-3 h-3 animate-spin" />
+        {isArabic ? 'جاري التحقق...' : 'Verifying...'}
+      </span>
+    );
+  }
+
+  if (result?.found && result.successful) {
+    return (
+      <span className="flex items-center gap-1.5 text-[11px] text-green-400">
+        <ShieldCheck className="w-3 h-3" />
+        {isArabic
+          ? `مؤكد على السلسلة · ليدجر ${result.ledger}`
+          : `Confirmed on-chain · Ledger ${result.ledger}`}
+      </span>
+    );
+  }
+
+  return (
+    <span className="flex items-center gap-1.5 text-[11px] text-red-400">
+      <ShieldAlert className="w-3 h-3" />
+      {isArabic ? 'لم يتم التحقق' : (result?.error || 'Not verified')}
+    </span>
+  );
+}
 
 function CopyId({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
@@ -367,6 +420,12 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                       {c.contractIdOnChain}
                     </code>
                     <CopyId value={c.contractIdOnChain} />
+                  </div>
+                )}
+
+                {c.txid && (
+                  <div>
+                    <VerifyOnChain txid={c.txid} language={language} />
                   </div>
                 )}
 
