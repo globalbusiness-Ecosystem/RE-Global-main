@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal } from 'lucide-react';
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
@@ -60,6 +60,10 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [showPinPrompt, setShowPinPrompt] = useState(false);
   const [pin, setPin] = useState('');
   const [pinError, setPinError] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusFilter, setStatusFilter] = useState<'all' | SmartContract['status']>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | SmartContract['type']>('all');
+  const [showFilters, setShowFilters] = useState(false);
 
   const load = async (asAdmin: boolean) => {
     setLoading(true);
@@ -104,6 +108,30 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
       setPin('');
     }
   };
+
+  const filteredContracts = contracts.filter((c) => {
+    if (statusFilter !== 'all' && c.status !== statusFilter) return false;
+    if (typeFilter !== 'all' && c.type !== typeFilter) return false;
+    if (searchQuery.trim()) {
+      const q = searchQuery.trim().toLowerCase();
+      const haystack = [
+        c.propertyTitle,
+        c.id,
+        c.buyerUsername,
+        c.sellerUsername,
+        c.contractIdOnChain,
+        c.paymentId,
+        c.txid,
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    return true;
+  });
+
+  const activeFilterCount = (statusFilter !== 'all' ? 1 : 0) + (typeFilter !== 'all' ? 1 : 0);
 
   return (
     <main className="min-h-screen bg-background text-foreground pb-20">
@@ -182,20 +210,128 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           </div>
         )}
 
+        {/* Search + Filters */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder={
+                  isArabic
+                    ? 'ابحث بالاسم، اليوزرنيم، أو رقم العقد...'
+                    : 'Search by property, username, or contract ID...'
+                }
+                className="w-full bg-card border border-border rounded-lg py-2.5 pl-9 pr-9 text-sm outline-none focus:border-accent"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 rounded hover:bg-white/10"
+                >
+                  <X className="w-3.5 h-3.5 text-muted-foreground" />
+                </button>
+              )}
+            </div>
+            <button
+              onClick={() => setShowFilters((v) => !v)}
+              className={`relative shrink-0 p-2.5 rounded-lg border transition ${
+                showFilters || activeFilterCount > 0
+                  ? 'bg-accent/20 border-accent text-accent'
+                  : 'border-border text-muted-foreground'
+              }`}
+            >
+              <SlidersHorizontal className="w-4 h-4" />
+              {activeFilterCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-accent text-[10px] text-accent-foreground flex items-center justify-center">
+                  {activeFilterCount}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showFilters && (
+            <div className="bg-card border border-border rounded-lg p-3 space-y-3">
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">{isArabic ? 'الحالة' : 'Status'}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(['all', 'pending', 'active', 'completed', 'cancelled'] as const).map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setStatusFilter(s)}
+                      className={`text-xs px-2.5 py-1 rounded-full border ${
+                        statusFilter === s
+                          ? 'bg-accent text-accent-foreground border-accent'
+                          : 'border-border text-muted-foreground'
+                      }`}
+                    >
+                      {s === 'all'
+                        ? (isArabic ? 'الكل' : 'All')
+                        : isArabic
+                        ? statusLabelAr[s]
+                        : s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1.5">{isArabic ? 'النوع' : 'Type'}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {(['all', 'buy', 'rent', 'invest', 'tokenized'] as const).map((t) => (
+                    <button
+                      key={t}
+                      onClick={() => setTypeFilter(t)}
+                      className={`text-xs px-2.5 py-1 rounded-full border ${
+                        typeFilter === t
+                          ? 'bg-accent text-accent-foreground border-accent'
+                          : 'border-border text-muted-foreground'
+                      }`}
+                    >
+                      {t === 'all' ? (isArabic ? 'الكل' : 'All') : isArabic ? typeLabelAr[t] : t}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              {activeFilterCount > 0 && (
+                <button
+                  onClick={() => {
+                    setStatusFilter('all');
+                    setTypeFilter('all');
+                  }}
+                  className="text-xs text-accent underline"
+                >
+                  {isArabic ? 'مسح الفلاتر' : 'Clear filters'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {(searchQuery || activeFilterCount > 0) && !loading && (
+            <p className="text-xs text-muted-foreground">
+              {isArabic
+                ? `${filteredContracts.length} نتيجة من ${contracts.length}`
+                : `${filteredContracts.length} of ${contracts.length} results`}
+            </p>
+          )}
+        </div>
+
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-10">
             {isArabic ? 'جاري التحميل...' : 'Loading...'}
           </p>
-        ) : contracts.length === 0 ? (
+        ) : filteredContracts.length === 0 ? (
           <div className="text-center py-16 space-y-2">
             <ScrollText className="w-10 h-10 mx-auto text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              {isArabic ? 'لا توجد عقود حتى الآن' : 'No contracts yet'}
+              {contracts.length === 0
+                ? (isArabic ? 'لا توجد عقود حتى الآن' : 'No contracts yet')
+                : (isArabic ? 'لا توجد نتائج مطابقة' : 'No matching results')}
             </p>
           </div>
         ) : (
           <div className="space-y-3">
-            {contracts.map((c) => (
+            {filteredContracts.map((c) => (
               <div key={c.id} className="bg-card border border-border rounded-lg p-4 space-y-2.5">
                 <div className="flex items-start justify-between gap-2">
                   <div>
