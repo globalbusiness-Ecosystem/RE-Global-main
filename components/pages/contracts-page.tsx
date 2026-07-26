@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal } from 'lucide-react';
+import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode } from 'lucide-react';
+import { QRScannerModal } from '@/components/qr-scanner-modal';
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
@@ -64,6 +65,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [statusFilter, setStatusFilter] = useState<'all' | SmartContract['status']>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | SmartContract['type']>('all');
   const [showFilters, setShowFilters] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   const load = async (asAdmin: boolean) => {
     setLoading(true);
@@ -235,6 +237,13 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               )}
             </div>
             <button
+              onClick={() => setShowScanner(true)}
+              className="shrink-0 p-2.5 rounded-lg border border-border text-muted-foreground hover:text-accent hover:border-accent transition"
+              title={isArabic ? 'مسح QR' : 'Scan QR'}
+            >
+              <QrCode className="w-4 h-4" />
+            </button>
+            <button
               onClick={() => setShowFilters((v) => !v)}
               className={`relative shrink-0 p-2.5 rounded-lg border transition ${
                 showFilters || activeFilterCount > 0
@@ -373,6 +382,17 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           </div>
         )}
       </div>
+
+      {showScanner && (
+        <QRScannerModal
+          language={language}
+          onClose={() => setShowScanner(false)}
+          onScan={(value) => {
+            setSearchQuery(value);
+            setShowScanner(false);
+          }}
+        />
+      )}
     </main>
   );
 }
