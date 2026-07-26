@@ -34,6 +34,13 @@ const categories = [
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
 ];
 
+const FEATURE_ITEMS = [
+  { en: '360° Virtual Tours', ar: 'جولات افتراضية 360 درجة', icon: Glasses },
+  { en: 'Pi Network Payments', ar: 'دفع عبر شبكة Pi', icon: Zap },
+  { en: 'Tokenized Real Estate', ar: 'عقارات رمزية', icon: Building2 },
+  { en: 'Global Coverage', ar: 'تغطية عالمية', icon: Globe },
+];
+
 export default function HomePage({
   language,
   onCategoryClick,
@@ -103,24 +110,56 @@ export default function HomePage({
           })}
         </div>
 
-        {/* Why Choose RE */}
-        <div className="rounded-lg p-6 mb-8" style={{ backgroundColor: 'rgba(255,255,255,0.05)', borderLeft: '3px solid rgba(212,175,55,0.8)' }}>
-          <h3 className="text-lg font-semibold text-white mb-4">
+        {/* Why Choose RE — premium ticker */}
+        <div
+          className="rounded-lg py-6 mb-8 relative overflow-hidden"
+          style={{
+            background: 'linear-gradient(135deg, rgba(212,175,55,0.08), rgba(0,0,0,0.2))',
+            border: '1px solid rgba(212,175,55,0.25)',
+          }}
+        >
+          <h3 className="text-lg font-semibold text-white mb-5 px-6 flex items-center gap-2">
+            <span
+              className="w-1.5 h-1.5 rounded-full"
+              style={{ background: '#D4AF37', boxShadow: '0 0 8px #D4AF37' }}
+            />
             {language === 'en' ? 'Why Choose RE?' : 'لماذا تختار RE؟'}
           </h3>
-          <ul className="space-y-3">
-            {[
-              { en: '360° Virtual Tours', ar: 'جولات افتراضية 360 درجة' },
-              { en: 'Pi Network Payments', ar: 'دفع عبر شبكة Pi' },
-              { en: 'Tokenized Real Estate', ar: 'عقارات رمزية' },
-              { en: 'Global Coverage', ar: 'تغطية عالمية' },
-            ].map((item) => (
-              <li key={item.en} className="flex gap-3">
-                <span className="text-accent text-lg">✓</span>
-                <span className="text-sm text-gray-300">{language === 'en' ? item.en : item.ar}</span>
-              </li>
-            ))}
-          </ul>
+
+          <div className="relative">
+            <div
+              className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(90deg, #0d0d0d, transparent)' }}
+            />
+            <div
+              className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none"
+              style={{ background: 'linear-gradient(270deg, #0d0d0d, transparent)' }}
+            />
+
+            <div className="flex overflow-hidden">
+              <div className="flex gap-4 animate-marquee shrink-0 pr-4">
+                {[...FEATURE_ITEMS, ...FEATURE_ITEMS].map((item, i) => {
+                  const FeatureIcon = item.icon;
+                  return (
+                    <div
+                      key={`${item.en}-${i}`}
+                      className="flex items-center gap-2.5 shrink-0 px-4 py-2.5 rounded-full"
+                      style={{
+                        background: 'rgba(212,175,55,0.08)',
+                        border: '1px solid rgba(212,175,55,0.35)',
+                        boxShadow: '0 0 12px rgba(212,175,55,0.12)',
+                      }}
+                    >
+                      <FeatureIcon className="w-4 h-4 shrink-0" style={{ color: '#D4AF37' }} />
+                      <span className="text-sm text-gray-200 whitespace-nowrap">
+                        {language === 'en' ? item.en : item.ar}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Pi Payment */}
