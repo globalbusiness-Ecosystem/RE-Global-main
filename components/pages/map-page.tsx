@@ -874,7 +874,6 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 </button>
                 <button
                   onClick={() => {
-                    setSelectedProperty(null);
                     setShowPanoramicTour(true);
                   }}
                   className="flex-1 py-2.5 px-3 bg-gradient-to-r from-[#F59E0B] to-[#d97706] hover:from-[#d97706] hover:to-[#b45309] text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg"
@@ -1059,7 +1058,10 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     className="flex-1 bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent/90 transition flex items-center justify-center gap-2"
                   />
                   <button
-                    onClick={() => setShowPanoramicTour(true)}
+                    onClick={() => {
+                      setShowDetailPanel(false);
+                      setShowPanoramicTour(true);
+                    }}
                     className="flex-1 bg-gray-800 hover:bg-gray-700 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
                   >
                     <Globe className="w-4 h-4" />

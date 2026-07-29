@@ -31,7 +31,7 @@ export const VRPropertyTourViewer = ({
   const [showHotspots, setShowHotspots] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
   const [zoom, setZoom] = useState(75);
-  const [showImageGallery, setShowImageGallery] = useState(true);
+  const [showImageGallery, setShowImageGallery] = useState(false);
 
   const currentRoom = property.rooms[currentRoomIndex];
 
