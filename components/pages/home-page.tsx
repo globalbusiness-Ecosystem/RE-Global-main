@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages } from 'lucide-react';
 import { useState } from 'react';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
@@ -39,6 +39,13 @@ const FEATURE_ITEMS = [
   { en: 'Pi Network Payments', ar: 'دفع عبر شبكة Pi', icon: Zap },
   { en: 'Tokenized Real Estate', ar: 'عقارات رمزية', icon: Building2 },
   { en: 'Global Coverage', ar: 'تغطية عالمية', icon: Globe },
+  { en: 'AI Advisor — Aladdin', ar: 'مستشار ذكاء اصطناعي — علاء الدين', icon: Bot },
+  { en: 'Smart Contracts on Stellar', ar: 'عقود ذكية على شبكة Stellar', icon: ScrollText },
+  { en: 'Verified On-Chain Transactions', ar: 'معاملات موثّقة على البلوكشين', icon: ShieldCheck },
+  { en: 'AI-Guided Property Tours', ar: 'جولات عقارية بالذكاء الاصطناعي', icon: Video },
+  { en: 'Live Market Analytics', ar: 'تحليلات سوق لحظية', icon: BarChart3 },
+  { en: 'Off-Plan & Investment Options', ar: 'خيارات عقارات تحت الإنشاء واستثمار', icon: TrendingUp },
+  { en: 'Multi-language Experience', ar: 'تجربة متعددة اللغات', icon: Languages },
 ];
 
 export default function HomePage({
