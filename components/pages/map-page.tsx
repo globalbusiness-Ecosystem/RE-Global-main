@@ -11,6 +11,8 @@ import {
 } from 'lucide-react';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { PropertyQRCode } from '@/components/property-qr-code';
 
 // Leaflet lazy imports with performance optimization
 let L: any;
@@ -1032,13 +1034,34 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   </div>
                 </div>
 
+                {/* QR Code */}
+                <div className="flex items-center justify-between bg-gray-900/50 rounded-lg p-3 mb-3">
+                  <div>
+                    <p className="text-xs text-gray-400">
+                      {language === 'ar' ? 'كود العقار' : 'Property Code'}
+                    </p>
+                    <p className="text-[11px] text-gray-500 font-mono mt-0.5">
+                      #{selectedProperty.id}
+                    </p>
+                  </div>
+                  <PropertyQRCode propertyId={selectedProperty.id} size={72} className="rounded" />
+                </div>
+
                 {/* Action Buttons */}
                 <div className="flex gap-2 pb-4">
-                  <button className="flex-1 bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent/90 transition flex items-center justify-center gap-2">
-                    <ShoppingCart className="w-4 h-4" />
-                    {language === 'ar' ? 'شراء الآن' : 'Buy Now'}
-                  </button>
-                  <button className="flex-1 bg-gray-800 hover:bg-gray-700 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2">
+                  <UnifiedPaymentButton
+                    propertyId={String(selectedProperty.id)}
+                    propertyTitle={language === 'ar' ? selectedProperty.titleAr : selectedProperty.title}
+                    price={selectedProperty.price}
+                    transactionType={selectedProperty.type === 'invest' ? 'invest' : selectedProperty.type === 'rent' ? 'rent' : selectedProperty.type === 'hotel' ? 'hotel' : 'buy'}
+                    language={language}
+                    currency="PI"
+                    className="flex-1 bg-accent text-black font-semibold py-3 rounded-lg hover:bg-accent/90 transition flex items-center justify-center gap-2"
+                  />
+                  <button
+                    onClick={() => setShowPanoramicTour(true)}
+                    className="flex-1 bg-gray-800 hover:bg-gray-700 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
+                  >
                     <Globe className="w-4 h-4" />
                     {language === 'ar' ? 'جولة 360' : '360° Tour'}
                   </button>
