@@ -6,17 +6,15 @@
 import { VRPropertyTour, VRRoom, Hotspot, PropertyImage } from './vr-tour-types';
 
 // Premium luxury interior photography URLs for VR tours
+// NOTE: these must be true equirectangular (2:1) panoramas for Pannellum to render them.
+// Using Pannellum's own verified demo panoramas as placeholders until real 360° photography
+// of each property is captured and uploaded.
 const ROOM_IMAGES = {
-  // Modern luxury living room with contemporary furnishings
-  livingRoom: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg',
-  // Elegant master bedroom with soft lighting
-  bedroom: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg',
-  // Modern luxury kitchen with high-end appliances
-  kitchen: 'https://images.pexels.com/photos/2089698/pexels-photo-2089698.jpeg',
-  // Spa-style luxury marble bathroom
-  bathroom: 'https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg',
-  // Luxury villa exterior with pool and terrace
-  outdoor: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg',
+  livingRoom: 'https://pannellum.org/images/alma.jpg',
+  bedroom: 'https://pannellum.org/images/tocopilla.jpg',
+  kitchen: 'https://pannellum.org/images/lascar.jpg',
+  bathroom: 'https://pannellum.org/images/cerro-toco-0.jpg',
+  outdoor: 'https://pannellum.org/images/from-tree.jpg',
 };
 
 // Real estate property photos for each room (2D gallery)
