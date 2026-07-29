@@ -43,16 +43,20 @@ export const VRPropertyTourViewer = ({
         const link = document.createElement('link');
         link.id = 'pannellum-css';
         link.rel = 'stylesheet';
-        link.href = 'https://pannellum.org/css/pannellum.css';
+        link.href = 'https://cdn.pannellum.org/2.5/pannellum.css';
         document.head.appendChild(link);
       }
 
       // Load Script
       if (!window.pannellum) {
         const script = document.createElement('script');
-        script.src = 'https://pannellum.org/js/pannellum.js';
+        script.src = 'https://cdn.pannellum.org/2.5/pannellum.js';
         script.async = true;
         script.onload = () => initPannellum();
+        script.onerror = () => {
+          console.error('[VRTour] Failed to load Pannellum script');
+          setIsLoading(false);
+        };
         document.body.appendChild(script);
       } else {
         initPannellum();
