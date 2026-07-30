@@ -3,6 +3,7 @@
 import { Globe, Bed, Maximize2, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
@@ -346,6 +347,10 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
                   <p className="text-lg font-bold text-accent">
                     {property.price.toLocaleString()} {currency}
                   </p>
+                </div>
+                <div className="flex flex-col items-end">
+                  <PropertyQRCode propertyId={property.id} size={52} className="rounded" />
+                  <p className="text-[10px] text-muted-foreground font-mono mt-1">#{property.id}</p>
                 </div>
               </div>
 
