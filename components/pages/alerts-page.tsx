@@ -112,7 +112,7 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
     <main className="w-full min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
-        <div className="px-4 py-4 max-w-md mx-auto">
+        <div className="px-4 py-4 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-accent">
@@ -138,7 +138,7 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-md mx-auto space-y-4">
+      <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-4">
         {alerts.length === 0 ? (
           <Card className="bg-card border border-border p-12 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
@@ -210,7 +210,7 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
 
       {/* Alert Settings */}
       {alerts.length > 0 && (
-        <div className="px-4 py-6 max-w-md mx-auto border-t border-border mt-4">
+        <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto border-t border-border mt-4">
           <Button variant="outline" className="w-full border-border">
             {language === 'en' ? 'Manage Alert Settings' : 'إدارة إعدادات التنبيهات'}
           </Button>

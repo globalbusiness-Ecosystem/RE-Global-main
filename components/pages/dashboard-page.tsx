@@ -77,7 +77,7 @@ export default function DashboardPage({ language, onBack }: DashboardPageProps) 
     <main className="w-full min-h-screen bg-background pb-24">
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
-        <div className="px-4 py-4 max-w-md mx-auto">
+        <div className="px-4 py-4 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
           <h1 className="text-2xl font-bold text-accent">
             {language === 'en' ? 'Dashboard' : 'لوحة التحكم'}
           </h1>
@@ -87,7 +87,7 @@ export default function DashboardPage({ language, onBack }: DashboardPageProps) 
         </div>
       </div>
 
-      <div className="px-4 py-6 max-w-md mx-auto space-y-6">
+      <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-6">
         {/* Stats Cards */}
         <div className="grid grid-cols-3 gap-3">
           {stats.map((stat, idx) => {

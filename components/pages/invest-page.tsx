@@ -110,7 +110,7 @@ export default function InvestPage({ language, currency, favorites, toggleFavori
   
   const activeTourProperty = investProperties.find((p) => p.id === activeTourId);
   return (
-    <main className="px-4 py-6 max-w-md mx-auto">
+    <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         {showBackButton && (
           <button

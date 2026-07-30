@@ -46,7 +46,7 @@ export default function SettingsPage({
   };
 
   return (
-    <main className="px-4 py-6 max-w-md mx-auto pb-24 space-y-4">
+    <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto pb-24 space-y-4">
       {/* Header with Back Arrow */}
       <div className="flex items-center justify-between mb-6 -mx-4 px-4">
         <button

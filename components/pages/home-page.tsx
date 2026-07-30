@@ -65,7 +65,7 @@ export default function HomePage({
       />
       <PanoramicBanner />
 
-      <div className="px-4 py-8 max-w-md mx-auto relative z-10 bg-black">
+      <div className="px-4 py-8 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto relative z-10 bg-black">
 
         {/* Stats */}
         <div className="mb-12 overflow-x-auto">
