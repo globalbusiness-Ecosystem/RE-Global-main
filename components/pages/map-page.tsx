@@ -905,10 +905,11 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           ref={mapContainerRef}
           className="w-full bg-gray-950 flex-1 transition-all duration-300 ease-in-out"
           style={{
-            height: showDetailPanel ? '0' : 'calc(100vh - 160px)',
-            opacity: showDetailPanel ? 0 : 1,
+            height: (showDetailPanel || showPanoramicTour) ? '0' : 'calc(100vh - 160px)',
+            opacity: (showDetailPanel || showPanoramicTour) ? 0 : 1,
+            visibility: showPanoramicTour ? 'hidden' : 'visible',
             transition: 'height 0.3s ease, opacity 0.3s ease',
-            pointerEvents: showDetailPanel ? 'none' : 'auto',
+            pointerEvents: (showDetailPanel || showPanoramicTour) ? 'none' : 'auto',
           }}
         />
 

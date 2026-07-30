@@ -236,7 +236,7 @@ export const VRPropertyTourViewer = ({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-black"
+      className="fixed inset-0 z-[9999] bg-black"
       style={{ width: '100%', height: '100%' }}
     >
       {/* Dedicated container for Pannellum - it takes over this div's DOM directly */}
