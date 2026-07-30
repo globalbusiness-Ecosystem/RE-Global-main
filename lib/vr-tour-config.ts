@@ -143,6 +143,20 @@ export const DEMO_PROPERTY: VRPropertyTour = {
   piPrice: 85000,
 };
 
+// Multiple test properties - all share the same placeholder room images/tour for now.
+// Replace `propertyName`, `price`, `piPrice` per property once real data/photos are ready.
+export const TEST_PROPERTIES: VRPropertyTour[] = [
+  { propertyId: 'tour-1', propertyName: 'Luxury Downtown Penthouse', rooms: DEMO_ROOMS, price: 850000, piPrice: 85000 },
+  { propertyId: 'tour-2', propertyName: 'Modern Apartment Manhattan', rooms: DEMO_ROOMS, price: 650000, piPrice: 65000 },
+  { propertyId: 'tour-3', propertyName: 'Beachfront Villa Thailand', rooms: DEMO_ROOMS, price: 450000, piPrice: 45000 },
+  { propertyId: 'tour-4', propertyName: 'Contemporary House London', rooms: DEMO_ROOMS, price: 750000, piPrice: 75000 },
+  { propertyId: 'tour-5', propertyName: 'Urban Condo Tokyo', rooms: DEMO_ROOMS, price: 520000, piPrice: 52000 },
+  { propertyId: 'tour-6', propertyName: 'Hillside Estate Paris', rooms: DEMO_ROOMS, price: 920000, piPrice: 92000 },
+];
+
+export const getTestPropertyById = (id: string): VRPropertyTour =>
+  TEST_PROPERTIES.find((p) => p.propertyId === id) || DEMO_PROPERTY;
+
 // Hotspot styling configuration
 export const HOTSPOT_STYLES = {
   width: '50px',
