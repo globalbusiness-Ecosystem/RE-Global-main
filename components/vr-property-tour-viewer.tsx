@@ -131,7 +131,7 @@ export const VRPropertyTourViewer = ({
         }
       }
     };
-  }, [currentRoom, autoRotate, zoom]);
+  }, [currentRoom]);
 
   // Custom styling for 360° hotspots
   const addCustomStyling = () => {
@@ -220,7 +220,7 @@ export const VRPropertyTourViewer = ({
   const handleZoom = (direction: 'in' | 'out') => {
     setZoom((prev) => {
       const newZoom = direction === 'in' ? prev - 10 : prev + 10;
-      return Math.max(30, Math.min(120, newZoom));
+      return (() => { const c = Math.max(30, Math.min(120, newZoom)); viewerRef.current?.setHfov?.(c, false); return c; })();
     });
   };
 
