@@ -7,7 +7,8 @@ import {
   ShoppingCart, Search, X, 
   MapPin, Star,
   Filter, Globe, Bed, Maximize2, TrendingUp,
-  TrendingDown, Activity, DollarSign, Users, Zap, Target, Eye, Home, Video
+  TrendingDown, Activity, DollarSign, Users, Zap, Target, Eye, Home, Video,
+  LocateFixed, Loader2, Car, Footprints
 } from 'lucide-react';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
@@ -121,6 +122,11 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const userMarkerRef = useRef<any>(null);
+
+  const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
+  const [locatingUser, setLocatingUser] = useState(false);
+  const [locateError, setLocateError] = useState<string | null>(null);
   
   const [selectedProperty, setSelectedProperty] = useState<Property | null>(null);
   const [showDetailPanel, setShowDetailPanel] = useState(false);
@@ -353,6 +359,64 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
     });
   }, [filteredProperties, language, onPropertySelect, heatmapEnabled]);
 
+  const locateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      setLocateError(language === 'ar' ? 'المتصفح لا يدعم تحديد الموقع' : 'Geolocation not supported');
+      return;
+    }
+    setLocatingUser(true);
+    setLocateError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const coords = { lat: position.coords.latitude, lng: position.coords.longitude };
+        setUserLocation(coords);
+        setLocatingUser(false);
+
+        if (mapInstanceRef.current && L) {
+          if (userMarkerRef.current) {
+            mapInstanceRef.current.removeLayer(userMarkerRef.current);
+          }
+          const userIcon = L.divIcon({
+            className: 'user-location-marker',
+            html: `<div style="width:16px;height:16px;background:#3B82F6;border:3px solid white;border-radius:50%;box-shadow:0 0 0 6px rgba(59,130,246,0.3);"></div>`,
+            iconSize: [16, 16],
+            iconAnchor: [8, 8],
+          });
+          userMarkerRef.current = L.marker([coords.lat, coords.lng], { icon: userIcon, zIndexOffset: 1000 })
+            .addTo(mapInstanceRef.current)
+            .bindPopup(language === 'ar' ? 'موقعك الحالي' : 'Your location');
+          mapInstanceRef.current.flyTo([coords.lat, coords.lng], 6, { duration: 1.5 });
+        }
+      },
+      (error) => {
+        setLocatingUser(false);
+        setLocateError(
+          language === 'ar'
+            ? 'تعذر تحديد موقعك، تأكد من إذن الموقع'
+            : 'Could not get your location, check location permission'
+        );
+        console.error('[Geolocation] error:', error);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, [language]);
+
+  // Haversine distance in km between user location and a given point
+  const distanceToProperty = useMemo(() => {
+    if (!userLocation || !selectedProperty) return null;
+    const R = 6371; // Earth radius in km
+    const dLat = ((selectedProperty.lat - userLocation.lat) * Math.PI) / 180;
+    const dLng = ((selectedProperty.lng - userLocation.lng) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((userLocation.lat * Math.PI) / 180) *
+        Math.cos((selectedProperty.lat * Math.PI) / 180) *
+        Math.sin(dLng / 2) *
+        Math.sin(dLng / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }, [userLocation, selectedProperty]);
+
   useEffect(() => {
     if (mapInstanceRef.current) {
       updateMarkers(mapInstanceRef.current);
@@ -561,6 +625,22 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 transition"
               >
                 <Filter className="w-4 h-4" />
+              </button>
+              <button
+                onClick={locateUser}
+                disabled={locatingUser}
+                className={`border rounded-lg px-3 py-2 transition ${
+                  userLocation
+                    ? 'bg-accent/20 border-accent text-accent'
+                    : 'bg-gray-800 hover:bg-gray-700 border-gray-700'
+                }`}
+                title={language === 'ar' ? 'حدد موقعي' : 'Locate me'}
+              >
+                {locatingUser ? (
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                ) : (
+                  <LocateFixed className="w-4 h-4" />
+                )}
               </button>
             </div>
 
@@ -1033,6 +1113,58 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     </div>
                   </div>
                 </div>
+
+                {/* Distance from user */}
+                {userLocation && distanceToProperty !== null && (
+                  <div className="bg-gray-900/50 rounded-lg p-3 mb-3 space-y-2">
+                    <p className="text-xs text-gray-400">
+                      {language === 'ar' ? 'المسافة من موقعك' : 'Distance from you'}
+                    </p>
+                    <p className="text-lg font-bold text-blue-400">
+                      {distanceToProperty < 1
+                        ? `${Math.round(distanceToProperty * 1000)} m`
+                        : `${distanceToProperty.toFixed(1)} km`}
+                    </p>
+                    <div className="flex gap-4 text-xs text-gray-300">
+                      <span className="flex items-center gap-1.5">
+                        <Car className="w-3.5 h-3.5 text-accent" />
+                        {language === 'ar' ? '~' : '~'}
+                        {Math.max(1, Math.round((distanceToProperty / 50) * 60))}{' '}
+                        {language === 'ar' ? 'د بالسيارة' : 'min drive'}
+                      </span>
+                      <span className="flex items-center gap-1.5">
+                        <Footprints className="w-3.5 h-3.5 text-accent" />
+                        {distanceToProperty < 20
+                          ? `${Math.max(1, Math.round((distanceToProperty / 5) * 60))} ${
+                              language === 'ar' ? 'د مشياً' : 'min walk'
+                            }`
+                          : language === 'ar'
+                          ? 'بعيد جداً للمشي'
+                          : 'too far to walk'}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-gray-500">
+                      {language === 'ar' ? '* تقدير تقريبي (خط مستقيم)' : '* Estimated (straight-line)'}
+                    </p>
+                  </div>
+                )}
+                {!userLocation && (
+                  <button
+                    onClick={locateUser}
+                    disabled={locatingUser}
+                    className="w-full flex items-center justify-center gap-2 text-xs text-accent border border-accent/40 rounded-lg py-2 mb-3 hover:bg-accent/10 transition"
+                  >
+                    {locatingUser ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <LocateFixed className="w-3.5 h-3.5" />
+                    )}
+                    {language === 'ar' ? 'حدد موقعك لمعرفة المسافة' : 'Locate yourself to see distance'}
+                  </button>
+                )}
+                {locateError && (
+                  <p className="text-xs text-red-400 mb-3">{locateError}</p>
+                )}
 
                 {/* QR Code */}
                 <div className="flex items-center justify-between bg-gray-900/50 rounded-lg p-3 mb-3">
