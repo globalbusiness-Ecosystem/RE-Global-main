@@ -18,31 +18,27 @@ const ROOM_IMAGES = {
 };
 
 // Real estate property photos for each room (2D gallery)
+// Real NYC penthouse photos stored locally in /public/property-photos/nyc-penthouse/
 const PROPERTY_IMAGES: Record<string, PropertyImage[]> = {
   livingRoom: [
-    { id: 'lr-1', url: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg', caption: 'Modern Living Room - Front View', featured: true },
-    { id: 'lr-2', url: 'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg', caption: 'Living Room - Side Angle' },
-    { id: 'lr-3', url: 'https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg', caption: 'Luxury Seating Area' },
+    { id: 'lr-1', url: '/property-photos/nyc-penthouse/photo-01.jpg', caption: 'Living Room - Main View', featured: true },
+    { id: 'lr-2', url: '/property-photos/nyc-penthouse/photo-02.jpg', caption: 'Living Room - Seating Area' },
+    { id: 'lr-3', url: '/property-photos/nyc-penthouse/photo-03.jpg', caption: 'Living Room - City View' },
   ],
   bedroom: [
-    { id: 'br-1', url: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg', caption: 'Master Bedroom - Main View', featured: true },
-    { id: 'br-2', url: 'https://images.pexels.com/photos/221457/pexels-photo-221457.jpeg', caption: 'Bedroom - Luxury Bed Frame' },
-    { id: 'br-3', url: 'https://images.pexels.com/photos/1595521/pexels-photo-1595521.jpeg', caption: 'Bedroom - Window View' },
+    { id: 'br-1', url: '/property-photos/nyc-penthouse/photo-04.jpg', caption: 'Master Bedroom - Main View', featured: true },
+    { id: 'br-2', url: '/property-photos/nyc-penthouse/photo-05.jpg', caption: 'Bedroom - Window View' },
   ],
   kitchen: [
-    { id: 'k-1', url: 'https://images.pexels.com/photos/2089698/pexels-photo-2089698.jpeg', caption: 'Modern Kitchen - Island View', featured: true },
-    { id: 'k-2', url: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg', caption: 'Kitchen - Appliances Close-up' },
-    { id: 'k-3', url: 'https://images.pexels.com/photos/2398220/pexels-photo-2398220.jpeg', caption: 'Kitchen - Dining Area' },
+    { id: 'k-1', url: '/property-photos/nyc-penthouse/photo-06.jpg', caption: 'Kitchen - Main View', featured: true },
   ],
   bathroom: [
-    { id: 'bth-1', url: 'https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg', caption: 'Spa Bathroom - Main View', featured: true },
-    { id: 'bth-2', url: 'https://images.pexels.com/photos/1547276/pexels-photo-1547276.jpeg', caption: 'Bathroom - Luxury Fixtures' },
-    { id: 'bth-3', url: 'https://images.pexels.com/photos/2111591/pexels-photo-2111591.jpeg', caption: 'Bathroom - Modern Sink' },
+    { id: 'bth-1', url: '/property-photos/nyc-penthouse/photo-07.jpg', caption: 'Bathroom - Main View', featured: true },
   ],
   outdoor: [
-    { id: 'od-1', url: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg', caption: 'Outdoor Terrace - Pool View', featured: true },
-    { id: 'od-2', url: 'https://images.pexels.com/photos/1579974/pexels-photo-1579974.jpeg', caption: 'Luxury Garden Area' },
-    { id: 'od-3', url: 'https://images.pexels.com/photos/279810/pexels-photo-279810.jpeg', caption: 'Exterior - Evening Lighting' },
+    { id: 'od-1', url: '/property-photos/nyc-penthouse/photo-08.jpg', caption: 'Outdoor - Terrace View', featured: true },
+    { id: 'od-2', url: '/property-photos/nyc-penthouse/photo-09.jpg', caption: 'Outdoor - Skyline View' },
+    { id: 'od-3', url: '/property-photos/nyc-penthouse/photo-10.jpg', caption: 'Outdoor - Evening View' },
   ],
 };
 
