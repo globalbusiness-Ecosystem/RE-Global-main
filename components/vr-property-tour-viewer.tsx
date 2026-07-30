@@ -25,6 +25,7 @@ export const VRPropertyTourViewer = ({
   onBuyClick,
 }: VRPropertyTourViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const pannellumContainerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
@@ -64,7 +65,7 @@ export const VRPropertyTourViewer = ({
     };
 
     const initPannellum = () => {
-      if (!containerRef.current) return;
+      if (!pannellumContainerRef.current) return;
 
       const hotspots = (currentRoom.hotspots || []).map((hotspot, idx) => ({
         pitch: hotspot.pitch,
@@ -103,7 +104,7 @@ export const VRPropertyTourViewer = ({
           viewerRef.current.destroy?.();
         }
 
-        viewerRef.current = window.pannellum.viewer(containerRef.current, config);
+        viewerRef.current = window.pannellum.viewer(pannellumContainerRef.current, config);
 
         viewerRef.current.on('load', () => {
           setIsLoading(false);
@@ -238,6 +239,9 @@ export const VRPropertyTourViewer = ({
       className="fixed inset-0 z-50 bg-black"
       style={{ width: '100%', height: '100%' }}
     >
+      {/* Dedicated container for Pannellum - it takes over this div's DOM directly */}
+      <div ref={pannellumContainerRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+
       {/* Close Button - Gold X */}
       <button
         onClick={onClose}
