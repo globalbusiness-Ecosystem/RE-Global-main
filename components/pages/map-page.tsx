@@ -8,8 +8,9 @@ import {
   MapPin, Star,
   Filter, Globe, Bed, Maximize2, TrendingUp,
   TrendingDown, Activity, DollarSign, Users, Zap, Target, Eye, Home, Video,
-  LocateFixed, Loader2, Car, Footprints
+  LocateFixed, Loader2, Car, Footprints, Navigation
 } from 'lucide-react';
+import { NavigationPanel } from '@/components/navigation-panel';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
@@ -143,6 +144,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const [showStats, setShowStats] = useState(true);
   const [marketView, setMarketView] = useState<'markers' | 'heatmap' | 'clusters'>('markers');
   const [showPanoramicTour, setShowPanoramicTour] = useState(false);
+  const [showNavigation, setShowNavigation] = useState(false);
   const updateThrottleRef = useRef(0);
 
   const { properties: firebaseProps } = useProperties();
@@ -980,6 +982,20 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           />
         )}
 
+        {/* Live Navigation */}
+        {showNavigation && selectedProperty && (
+          <NavigationPanel
+            language={language}
+            destination={{
+              lat: selectedProperty.lat,
+              lng: selectedProperty.lng,
+              title: language === 'ar' ? selectedProperty.titleAr : selectedProperty.title,
+            }}
+            onClose={() => setShowNavigation(false)}
+            L={L}
+          />
+        )}
+
         {/* Map Div - Hidden when detail panel is open */}
         <div
           ref={mapContainerRef}
@@ -1165,6 +1181,14 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 {locateError && (
                   <p className="text-xs text-red-400 mb-3">{locateError}</p>
                 )}
+
+                <button
+                  onClick={() => setShowNavigation(true)}
+                  className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg mb-3 transition"
+                >
+                  <Navigation className="w-4 h-4" />
+                  {language === 'ar' ? 'ابدأ الملاحة الحية' : 'Start Live Navigation'}
+                </button>
 
                 {/* QR Code */}
                 <div className="flex items-center justify-between bg-gray-900/50 rounded-lg p-3 mb-3">
