@@ -105,8 +105,8 @@ importers:
         specifier: 1.1.6
         version: 1.1.6(@types/react-dom@19.2.3(@types/react@19.2.17))(@types/react@19.2.17)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       '@stellar/stellar-sdk':
-        specifier: ^16.0.1
-        version: 16.0.1
+        specifier: ^16.2.0
+        version: 16.2.0
       '@tanstack/react-query':
         specifier: ^5.96.2
         version: 5.101.2(react@19.2.7)
@@ -153,8 +153,11 @@ importers:
         specifier: ^1.4.0
         version: 1.4.0
       leaflet:
-        specifier: 1.9.4
+        specifier: ^1.9.4
         version: 1.9.4
+      leaflet-routing-machine:
+        specifier: ^3.2.12
+        version: 3.2.12
       leaflet.heat:
         specifier: 0.2.0
         version: 0.2.0
@@ -182,6 +185,9 @@ importers:
       react-hook-form:
         specifier: ^7.60.0
         version: 7.80.0(react@19.2.7)
+      react-leaflet:
+        specifier: ^5.0.0
+        version: 5.0.0(leaflet@1.9.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
       react-resizable-panels:
         specifier: ^2.1.7
         version: 2.1.9(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
@@ -702,6 +708,13 @@ packages:
 
   '@jridgewell/trace-mapping@0.3.31':
     resolution: {integrity: sha512-zzNR+SdQSDJzc8joaeP8QQoCQr8NuYx2dIIytl1QeBEZHJ9uW6hebsrYgbz8hJwUQao3TWCMtmfV8Nu1twOLAw==}
+
+  '@mapbox/corslite@0.0.7':
+    resolution: {integrity: sha512-w/uS474VFjmqQ7fFWIMZINQM1BAQxDLuoJaZZIPES1BmeYpCtlh9MtbFxKGGDAsfvut8/HircIsVvEYRjQ+iMg==}
+
+  '@mapbox/polyline@0.2.0':
+    resolution: {integrity: sha512-GCddO0iw6AzOQqZgBmjEQI9Pgo40/yRgkTkikGctE01kNBN0ThWYuAnTD+hRWrAWMV6QJ0rNm4m8DAsaAXE7Pg==}
+    hasBin: true
 
   '@next/env@15.5.20':
     resolution: {integrity: sha512-dXh51Wvddf8daEyBXryZZEe1FdVxEWx9lgaTseLZUtC1XP/W8Wri+Z+VPOElHlByk23CyqHdc2oVByX7wsTWsw==}
@@ -1452,6 +1465,13 @@ packages:
   '@radix-ui/rect@1.1.0':
     resolution: {integrity: sha512-A9+lCBZoaMJlVKcRBz2YByCG+Cp2t6nAnMnNba+XiWxnj6r4JUFqfsgwocMBZU9LPtdxC6wB56ySYpc7LQIoJg==}
 
+  '@react-leaflet/core@3.0.0':
+    resolution: {integrity: sha512-3EWmekh4Nz+pGcr+xjf0KNyYfC3U2JjnkWsh0zcqaexYqmmB5ZhH37kz41JXGmKzpaMZCnPofBBm64i+YrEvGQ==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
+
   '@stablelib/base64@1.0.1':
     resolution: {integrity: sha512-1bnPQqSxSuc3Ii6MhBysoWCg58j97aUjuCSZrGSmDxNqtytIi0k8utUenAwTZN4V5mXXYGsVUI9zeBqy+jBOSQ==}
 
@@ -1462,8 +1482,8 @@ packages:
     resolution: {integrity: sha512-+NmNa7Tk5BI5XFdy/6xGTqAN4J9a9KgCrCGhj2uEUTCBhLkch0M+QbKzNH8zEnejWe0p8w+0q5hUVX6L3OzoVA==}
     engines: {node: '>=20.0.0', pnpm: '>=9.0.0'}
 
-  '@stellar/stellar-sdk@16.0.1':
-    resolution: {integrity: sha512-bxKohaiyKVqoudRhbOOHeHhHIaeYV5Zab4rCjxhP4Ty1h1ozTLBOv8lWFnZz9ilBzXG8Bb7usQI3rlEcfvUynA==}
+  '@stellar/stellar-sdk@16.2.0':
+    resolution: {integrity: sha512-FV/Rm11QvrFzR5X9fIfb6Pg30KyYyrRkNezELGFmYDAYrzoPTjqo7vklnEPd2HEontzjJmZizWk8CjyIh5vp0w==}
     engines: {node: '>=22.0.0'}
     hasBin: true
 
@@ -1647,8 +1667,8 @@ packages:
     peerDependencies:
       postcss: ^8.1.0
 
-  axios@1.16.1:
-    resolution: {integrity: sha512-caYkukvroVPO8KrzuJEb50Hm07KwfBZPEC3VeFHTsqWHvKTsy54hjJz9BS/cdaypROE2rH6xvm9mHX4fgWkr3A==}
+  axios@1.18.0:
+    resolution: {integrity: sha512-E32NzpYKp++W7XRe52rHiXV2ehxmh3wbdgO7MHeFM+vqxLBYHzt0ElkiImtOBxtOmyp0yoC8C6uESVV84Y2/hw==}
 
   axios@1.18.1:
     resolution: {integrity: sha512-3nTvFlvpn9Zu/RkHUqtc7/+al4UpRW5az71ap5zccp6e8RAYEzhMTecX8Dz1wWDYrPpUoB1HAQEGEAEvUr7S9g==}
@@ -2018,6 +2038,9 @@ packages:
   jsqr@1.4.0:
     resolution: {integrity: sha512-dxLob7q65Xg2DvstYkRpkYtmKm2sPJ9oFhrhmudT1dZvNFFTlroai3AWSpLey/w5vMcLBXRgOJsbXpdN9HzU/A==}
 
+  leaflet-routing-machine@3.2.12:
+    resolution: {integrity: sha512-HLde58G1YtD9xSIzZavJ6BPABZaV1hHeGst8ouhzuxmSC3s32NVtADT+njbIUMW1maHRCrsgTk/E4hz5QH7FrA==}
+
   leaflet.heat@0.2.0:
     resolution: {integrity: sha512-Cd5PbAA/rX3X3XKxfDoUGi9qp78FyhWYurFg3nsfhntcM/MCNK08pRkf4iEenO1KNqwVPKCmkyktjW3UD+h9bQ==}
 
@@ -2184,6 +2207,9 @@ packages:
     resolution: {integrity: sha512-rJgTQnkUnH1sFw8yT6VSU3zD3sWmu6sZhIseY8VX+GRu3P6F7Fu+JNDoXfklElbLJSnc3FUQHVe4cU5hj+BcUg==}
     engines: {node: '>=0.10.0'}
 
+  osrm-text-instructions@0.13.4:
+    resolution: {integrity: sha512-ge4ZTIetMQKAHKq2MwWf83ntzdJN20ndRKRaVNoZ3SkDkBNO99Qddz7r6+hrVx38I+ih6Rk5T1yslczAB6Q9Pg==}
+
   p-limit@2.3.0:
     resolution: {integrity: sha512-//88mFWSJx8lxCzwdAABTJL2MyWB12+eIY7MDL2SqLmAkeKU9qxRvWuSyTjm3FUmpBEMuFfckAIqEaVGUDxb6w==}
     engines: {node: '>=6'}
@@ -2259,6 +2285,13 @@ packages:
 
   react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
+
+  react-leaflet@5.0.0:
+    resolution: {integrity: sha512-CWbTpr5vcHw5bt9i4zSlPEVQdTVcML390TjeDG0cK59z1ylexpqC6M1PJFjV8jD7CF+ACBFsLIDs6DRMoLEofw==}
+    peerDependencies:
+      leaflet: ^1.9.0
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   react-remove-scroll-bar@2.3.8:
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
@@ -2348,8 +2381,8 @@ packages:
     resolution: {integrity: sha512-Ou9I5Ft9WNcCbXrU9cMgPBcCK8LiwLqcbywW3t4oDV37n1pzpuNLsYiAV8eODnjbtQlSDwZ2cUEeQz4E54Hltg==}
     engines: {node: ^18.17.0 || ^20.3.0 || >=21.0.0}
 
-  smol-toml@1.7.0:
-    resolution: {integrity: sha512-aqVvWoyO21L23mb+drl4RmMXbf6N7FdHjAhTRA9ZBL7apWBgfWC16KjrASI+1p9GAroljyMHj6fK67i0UiTNvQ==}
+  smol-toml@1.7.1:
+    resolution: {integrity: sha512-PPlsspAZ4jbMBu5DMFhfUGDQLu/vrL4SyBROVS37x8ynnVmFIs1VPBz1Co8Xks3TvpIaZXmU85y4DrQ+UyVFoQ==}
     engines: {node: '>= 18'}
 
   sonner@2.0.7:
@@ -3065,6 +3098,10 @@ snapshots:
     dependencies:
       '@jridgewell/resolve-uri': 3.1.2
       '@jridgewell/sourcemap-codec': 1.5.5
+
+  '@mapbox/corslite@0.0.7': {}
+
+  '@mapbox/polyline@0.2.0': {}
 
   '@next/env@15.5.20': {}
 
@@ -3810,25 +3847,31 @@ snapshots:
 
   '@radix-ui/rect@1.1.0': {}
 
+  '@react-leaflet/core@3.0.0(leaflet@1.9.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)':
+    dependencies:
+      leaflet: 1.9.4
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
+
   '@stablelib/base64@1.0.1': {}
 
   '@standard-schema/spec@1.1.0': {}
 
   '@stellar/js-xdr@4.0.0': {}
 
-  '@stellar/stellar-sdk@16.0.1':
+  '@stellar/stellar-sdk@16.2.0':
     dependencies:
       '@noble/ed25519': 3.1.0
       '@noble/hashes': 2.2.0
       '@stellar/js-xdr': 4.0.0
-      axios: 1.16.1
+      axios: 1.18.0
       base32.js: 0.1.0
       bignumber.js: 11.1.5
       buffer: 6.0.3
       commander: 14.0.3
       eventsource: 4.1.0
       feaxios: 0.0.23
-      smol-toml: 1.7.0
+      smol-toml: 1.7.1
       uint8array-extras: 1.5.0
     transitivePeerDependencies:
       - debug
@@ -3991,7 +4034,7 @@ snapshots:
       postcss: 8.5.16
       postcss-value-parser: 4.2.0
 
-  axios@1.16.1:
+  axios@1.18.0:
     dependencies:
       follow-redirects: 1.16.0
       form-data: 4.0.6
@@ -4357,6 +4400,12 @@ snapshots:
 
   jsqr@1.4.0: {}
 
+  leaflet-routing-machine@3.2.12:
+    dependencies:
+      '@mapbox/corslite': 0.0.7
+      '@mapbox/polyline': 0.2.0
+      osrm-text-instructions: 0.13.4
+
   leaflet.heat@0.2.0: {}
 
   leaflet@1.9.4: {}
@@ -4483,6 +4532,8 @@ snapshots:
 
   object-assign@4.1.1: {}
 
+  osrm-text-instructions@0.13.4: {}
+
   p-limit@2.3.0:
     dependencies:
       p-try: 2.2.0
@@ -4562,6 +4613,13 @@ snapshots:
   react-is@16.13.1: {}
 
   react-is@18.3.1: {}
+
+  react-leaflet@5.0.0(leaflet@1.9.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
+    dependencies:
+      '@react-leaflet/core': 3.0.0(leaflet@1.9.4)(react-dom@19.2.7(react@19.2.7))(react@19.2.7)
+      leaflet: 1.9.4
+      react: 19.2.7
+      react-dom: 19.2.7(react@19.2.7)
 
   react-remove-scroll-bar@2.3.8(@types/react@19.2.17)(react@19.2.7):
     dependencies:
@@ -4676,7 +4734,7 @@ snapshots:
       '@img/sharp-win32-x64': 0.34.5
     optional: true
 
-  smol-toml@1.7.0: {}
+  smol-toml@1.7.1: {}
 
   sonner@2.0.7(react-dom@19.2.7(react@19.2.7))(react@19.2.7):
     dependencies:
