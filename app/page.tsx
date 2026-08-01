@@ -2,6 +2,8 @@
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useProperties } from '@/lib/useProperties';
+import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useFirebaseDatabase } from '@/lib/firebase-database';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import Header from '@/components/header';
@@ -63,6 +65,8 @@ const ContractsPage = dynamic(() => import('@/components/pages/contracts-page'),
 
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
+  const { username } = usePiAuth();
+  const { getFavoritesForUser, addFavorite, removeFavorite } = useFirebaseDatabase();
   const [currentPage, setCurrentPage] = useState('home');
   const [previousPage, setPreviousPage] = useState('home');
   const [language, setLanguage] = useState<'en' | 'ar'>('en');
@@ -70,6 +74,14 @@ export default function App() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPin, setShowAdminPin] = useState(false);
+
+  // Load this user's own favorites from Firestore once we know who they are
+  useEffect(() => {
+    if (!username) return;
+    getFavoritesForUser(username).then((favs) => {
+      setFavorites(favs.map((f) => f.propertyId));
+    });
+  }, [username]);
 
   // Memoize featured properties
   const featuredProperties = useMemo(
@@ -119,11 +131,19 @@ export default function App() {
 
   const toggleFavorite = (propertyId: string) => {
     try {
+      const isCurrentlyFavorite = favorites.includes(propertyId);
       setFavorites((prev) =>
         prev.includes(propertyId)
           ? prev.filter((id) => id !== propertyId)
           : [...prev, propertyId]
       );
+      if (username) {
+        if (isCurrentlyFavorite) {
+          removeFavorite(username, propertyId);
+        } else {
+          addFavorite(username, propertyId);
+        }
+      }
     } catch (error) {
       console.error('Toggle favorite error:', error);
       toast.error('Something went wrong, please try again');
@@ -161,7 +181,7 @@ export default function App() {
           />
         );
       case 'dashboard':
-        return <DashboardPage language={language} onBack={() => handlePageChange('home')} />;
+        return <DashboardPage language={language} onBack={() => handlePageChange('home')} favorites={favorites} />;
       case 'alerts':
         return <AlertsPage language={language} onBack={() => handlePageChange('home')} />;
       case 'map':

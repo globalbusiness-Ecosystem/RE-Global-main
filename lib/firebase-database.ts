@@ -54,6 +54,13 @@ export interface Transaction {
   createdAt: Date;
 }
 
+export interface Favorite {
+  id: string;
+  username: string;
+  propertyId: string;
+  createdAt: Date;
+}
+
 export interface SmartContract {
   id: string;
   propertyId: string;
@@ -367,6 +374,52 @@ class FirebaseDatabase {
     }
   }
 
+  // Favorites
+  async getFavoritesForUser(username: string): Promise<Favorite[]> {
+    try {
+      const q = query(collection(db, 'favorites'), where('username', '==', username));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt: d.data().createdAt?.toDate() || new Date(),
+      })) as Favorite[];
+    } catch (error) {
+      console.error('[DB] Get favorites error:', error);
+      return [];
+    }
+  }
+
+  async addFavorite(username: string, propertyId: string): Promise<boolean> {
+    try {
+      await addDoc(collection(db, 'favorites'), {
+        username,
+        propertyId,
+        createdAt: Timestamp.now(),
+      });
+      return true;
+    } catch (error) {
+      console.error('[DB] Add favorite error:', error);
+      return false;
+    }
+  }
+
+  async removeFavorite(username: string, propertyId: string): Promise<boolean> {
+    try {
+      const q = query(
+        collection(db, 'favorites'),
+        where('username', '==', username),
+        where('propertyId', '==', propertyId)
+      );
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map((d) => deleteDoc(doc(db, 'favorites', d.id))));
+      return true;
+    } catch (error) {
+      console.error('[DB] Remove favorite error:', error);
+      return false;
+    }
+  }
+
   // Cache management
   private invalidateCache(collection: string): void {
     for (const key of this.collectionsCache.keys()) {
@@ -421,6 +474,11 @@ export function useFirebaseDatabase() {
       firebaseDB.getAllContracts(),
     updateContract: (id: string, updates: Partial<SmartContract>) =>
       firebaseDB.updateContract(id, updates),
+
+    // Favorites
+    getFavoritesForUser: (username: string) => firebaseDB.getFavoritesForUser(username),
+    addFavorite: (username: string, propertyId: string) => firebaseDB.addFavorite(username, propertyId),
+    removeFavorite: (username: string, propertyId: string) => firebaseDB.removeFavorite(username, propertyId),
 
     // Cache
     clearCache: () => firebaseDB.clearCache(),
