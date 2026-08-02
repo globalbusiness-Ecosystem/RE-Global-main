@@ -1,48 +1,98 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText } from 'lucide-react';
+import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useFirebaseDatabase } from '@/lib/firebase-database';
 
 interface ProfilePageProps {
   language: 'en' | 'ar';
-  userId?: string;
+  favorites?: string[];
   onBack?: () => void;
 }
 
-export default function ProfilePage({ language = 'en', userId = 'user_123', onBack }: ProfilePageProps) {
+const EMPTY_PROFILE = {
+  fullName: '',
+  email: '',
+  phone: '',
+  location: '',
+  bio: '',
+  companyName: '',
+  websiteUrl: '',
+};
+
+export default function ProfilePage({ language = 'en', favorites = [], onBack }: ProfilePageProps) {
   const isArabic = language === 'ar';
-  const [loading, setLoading] = useState(false);
-  const [profile, setProfile] = useState({
-    fullName: 'Ahmed Al-Mansouri',
-    email: 'ahmed@globalbusiness.com',
-    phone: '+201010810558',
-    location: 'Cairo, Egypt',
-    bio: 'Real estate investor and property developer',
-    companyName: 'Global Business',
-    websiteUrl: 'https://globalbusiness.com',
-  });
+  const { username } = usePiAuth();
+  const { getProfile, saveProfile, getContractsForUser } = useFirebaseDatabase();
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [profile, setProfile] = useState(EMPTY_PROFILE);
+  const [contractsCount, setContractsCount] = useState(0);
+
+  useEffect(() => {
+    if (!username) {
+      setLoading(false);
+      return;
+    }
+    Promise.all([getProfile(username), getContractsForUser(username)]).then(([p, contracts]) => {
+      if (p) {
+        setProfile({
+          fullName: p.fullName || '',
+          email: p.email || '',
+          phone: p.phone || '',
+          location: p.location || '',
+          bio: p.bio || '',
+          companyName: p.companyName || '',
+          websiteUrl: p.websiteUrl || '',
+        });
+      }
+      setContractsCount(contracts.length);
+      setLoading(false);
+    });
+  }, [username]);
 
   const handleSaveProfile = async () => {
-    setLoading(true);
+    if (!username) {
+      toast.error(isArabic ? 'يجب تسجيل الدخول عبر Pi أولاً' : 'You need to sign in with Pi first');
+      return;
+    }
+    setSaving(true);
     try {
-      // Save to database
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success(isArabic ? 'تم حفظ الملف الشخصي' : 'Profile saved successfully');
+      const ok = await saveProfile(username, profile);
+      if (ok) {
+        toast.success(isArabic ? 'تم حفظ الملف الشخصي' : 'Profile saved successfully');
+      } else {
+        toast.error(isArabic ? 'خطأ في الحفظ' : 'Error saving profile');
+      }
     } catch (error) {
       toast.error(isArabic ? 'خطأ في الحفظ' : 'Error saving profile');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
+  const handleLogout = () => {
+    toast.info(isArabic ? 'جاري تحديث الجلسة...' : 'Refreshing session...');
+    setTimeout(() => window.location.reload(), 800);
+  };
+
+  if (loading) {
+    return (
+      <div className="w-full min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
+
   return (
     <div className={`w-full min-h-screen bg-background p-4 pb-24 ${isArabic ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
       <div className="flex items-center gap-3 mb-6">
         {onBack && (
           <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
@@ -55,18 +105,26 @@ export default function ProfilePage({ language = 'en', userId = 'user_123', onBa
         </div>
       </div>
 
+      {!username && (
+        <div className="mb-6 bg-yellow-500/10 border border-yellow-500/25 rounded-lg p-3 text-xs text-yellow-300">
+          {isArabic
+            ? 'مش شايفين حساب Pi متصل — لن يتم حفظ بياناتك حتى تسجل الدخول.'
+            : "No connected Pi account detected — your info won't be saved until you sign in."}
+        </div>
+      )}
+
       {/* Profile Stats */}
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">{isArabic ? 'الخصائص' : 'Properties'}</p>
-            <p className="text-2xl font-bold text-foreground">24</p>
+            <p className="text-sm text-muted-foreground">{isArabic ? 'عقودي' : 'Contracts'}</p>
+            <p className="text-2xl font-bold text-foreground">{contractsCount}</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
             <p className="text-sm text-muted-foreground">{isArabic ? 'المفضلة' : 'Favorites'}</p>
-            <p className="text-2xl font-bold text-foreground">12</p>
+            <p className="text-2xl font-bold text-foreground">{favorites.length}</p>
           </CardContent>
         </Card>
       </div>
@@ -181,14 +239,15 @@ export default function ProfilePage({ language = 'en', userId = 'user_123', onBa
         <CardContent className="space-y-3">
           <Button
             onClick={handleSaveProfile}
-            disabled={loading}
+            disabled={saving}
             className="w-full bg-accent hover:bg-accent/90 text-black font-semibold"
           >
             <Save className="w-4 h-4 mr-2" />
-            {loading ? (isArabic ? 'جاري الحفظ...' : 'Saving...') : (isArabic ? 'حفظ التغييرات' : 'Save Changes')}
+            {saving ? (isArabic ? 'جاري الحفظ...' : 'Saving...') : (isArabic ? 'حفظ التغييرات' : 'Save Changes')}
           </Button>
 
           <Button
+            onClick={handleLogout}
             variant="outline"
             className="w-full border-border hover:bg-destructive/10 text-destructive hover:text-destructive"
           >

@@ -190,7 +190,7 @@ export default function App() {
         return (
           <ProfilePage
             language={language}
-            userId="user_123"
+            favorites={favorites}
             onBack={() => handlePageChange('home')}
           />
         );

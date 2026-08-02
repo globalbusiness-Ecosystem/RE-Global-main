@@ -61,6 +61,18 @@ export interface Favorite {
   createdAt: Date;
 }
 
+export interface UserProfile {
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  location: string;
+  bio: string;
+  companyName: string;
+  websiteUrl: string;
+  updatedAt: Date;
+}
+
 export interface SmartContract {
   id: string;
   propertyId: string;
@@ -374,6 +386,37 @@ class FirebaseDatabase {
     }
   }
 
+  // User Profile
+  async getProfile(username: string): Promise<UserProfile | null> {
+    try {
+      const docRef = doc(db, 'profiles', username);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) return null;
+      return {
+        ...docSnap.data(),
+        updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+      } as UserProfile;
+    } catch (error) {
+      console.error('[DB] Get profile error:', error);
+      return null;
+    }
+  }
+
+  async saveProfile(username: string, profile: Omit<UserProfile, 'username' | 'updatedAt'>): Promise<boolean> {
+    try {
+      const docRef = doc(db, 'profiles', username);
+      await setDoc(docRef, {
+        ...profile,
+        username,
+        updatedAt: Timestamp.now(),
+      });
+      return true;
+    } catch (error) {
+      console.error('[DB] Save profile error:', error);
+      return false;
+    }
+  }
+
   // Favorites
   async getFavoritesForUser(username: string): Promise<Favorite[]> {
     try {
@@ -479,6 +522,11 @@ export function useFirebaseDatabase() {
     getFavoritesForUser: (username: string) => firebaseDB.getFavoritesForUser(username),
     addFavorite: (username: string, propertyId: string) => firebaseDB.addFavorite(username, propertyId),
     removeFavorite: (username: string, propertyId: string) => firebaseDB.removeFavorite(username, propertyId),
+
+    // User Profile
+    getProfile: (username: string) => firebaseDB.getProfile(username),
+    saveProfile: (username: string, profile: Omit<UserProfile, 'username' | 'updatedAt'>) =>
+      firebaseDB.saveProfile(username, profile),
 
     // Cache
     clearCache: () => firebaseDB.clearCache(),
