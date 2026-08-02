@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { getStoredTheme, applyTheme } from '@/lib/theme';
 
 interface SettingsPageProps {
   language: 'en' | 'ar';
@@ -17,7 +18,7 @@ export default function SettingsPage({
   onWhitePaperClick,
   onBack,
 }: SettingsPageProps) {
-  const [darkMode, setDarkMode] = useState(true);
+  const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
   const [notifications, setNotifications] = useState(true);
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
@@ -108,7 +109,11 @@ export default function SettingsPage({
             </p>
           </div>
           <button
-            onClick={() => setDarkMode(!darkMode)}
+            onClick={() => {
+              const next = !darkMode;
+              setDarkMode(next);
+              applyTheme(next ? 'dark' : 'light');
+            }}
             className={`w-12 h-7 rounded-full transition flex items-center ${
               darkMode ? 'bg-accent' : 'bg-muted'
             }`}
