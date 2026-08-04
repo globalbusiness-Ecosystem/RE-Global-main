@@ -58,6 +58,7 @@ export interface Favorite {
   id: string;
   username: string;
   propertyId: string;
+  priceAtFavorite?: number;
   createdAt: Date;
 }
 
@@ -433,11 +434,12 @@ class FirebaseDatabase {
     }
   }
 
-  async addFavorite(username: string, propertyId: string): Promise<boolean> {
+  async addFavorite(username: string, propertyId: string, priceAtFavorite?: number): Promise<boolean> {
     try {
       await addDoc(collection(db, 'favorites'), {
         username,
         propertyId,
+        ...(priceAtFavorite !== undefined ? { priceAtFavorite } : {}),
         createdAt: Timestamp.now(),
       });
       return true;
@@ -520,7 +522,8 @@ export function useFirebaseDatabase() {
 
     // Favorites
     getFavoritesForUser: (username: string) => firebaseDB.getFavoritesForUser(username),
-    addFavorite: (username: string, propertyId: string) => firebaseDB.addFavorite(username, propertyId),
+    addFavorite: (username: string, propertyId: string, priceAtFavorite?: number) =>
+      firebaseDB.addFavorite(username, propertyId, priceAtFavorite),
     removeFavorite: (username: string, propertyId: string) => firebaseDB.removeFavorite(username, propertyId),
 
     // User Profile

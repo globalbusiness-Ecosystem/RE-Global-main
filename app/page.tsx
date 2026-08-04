@@ -141,7 +141,8 @@ export default function App() {
         if (isCurrentlyFavorite) {
           removeFavorite(username, propertyId);
         } else {
-          addFavorite(username, propertyId);
+          const prop = properties.find((p) => p.id === propertyId);
+          addFavorite(username, propertyId, prop?.price);
         }
       }
     } catch (error) {

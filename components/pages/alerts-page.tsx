@@ -1,136 +1,77 @@
 'use client';
 
-import { Bell, X, CheckCircle, AlertCircle, Zap, Home } from 'lucide-react';
-import { useState } from 'react';
-import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2 } from 'lucide-react';
 import { Card } from '@/components/ui/card';
+import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useFirebaseDatabase } from '@/lib/firebase-database';
+import { useProperties } from '@/lib/useProperties';
+import { generateSmartAlerts, type SmartAlert } from '@/lib/smart-alerts';
 
 interface AlertsPageProps {
   language: 'en' | 'ar';
   onBack?: () => void;
 }
 
+const ICONS: Record<SmartAlert['type'], any> = {
+  'price-up': TrendingUp,
+  'price-down': TrendingDown,
+  'contract-status': ScrollText,
+  recommendation: Sparkles,
+};
+
+const COLORS: Record<SmartAlert['type'], string> = {
+  'price-up': 'border-red-500/30 bg-red-500/5 text-red-400',
+  'price-down': 'border-green-500/30 bg-green-500/5 text-green-400',
+  'contract-status': 'border-blue-500/30 bg-blue-500/5 text-blue-400',
+  recommendation: 'border-purple-500/30 bg-purple-500/5 text-purple-400',
+};
+
 export default function AlertsPage({ language, onBack }: AlertsPageProps) {
-  const [alerts, setAlerts] = useState([
-    {
-      id: 1,
-      titleEn: 'New Listing Match',
-      titleAr: 'قائمة جديدة مطابقة',
-      descriptionEn: 'New luxury apartment in Downtown Cairo matching your criteria',
-      descriptionAr: 'شقة فاخرة جديدة في وسط القاهرة تطابق معاييرك',
-      type: 'new-listing',
-      icon: Home,
-      price: '450π',
-      time: '1 hour ago',
-      timeAr: 'قبل ساعة',
-      unread: true,
-    },
-    {
-      id: 2,
-      titleEn: 'Price Drop Alert',
-      titleAr: 'تنبيه انخفاض السعر',
-      descriptionEn: 'Your favorite property dropped by 15%',
-      descriptionAr: 'انخفض السعر بنسبة 15% للعقار المفضل لديك',
-      type: 'price-drop',
-      icon: AlertCircle,
-      price: '320π → 272π',
-      time: '3 hours ago',
-      timeAr: 'قبل 3 ساعات',
-      unread: true,
-    },
-    {
-      id: 3,
-      titleEn: 'Offer Received',
-      titleAr: 'تم استقبال عرض',
-      descriptionEn: 'Agent interested in your property inquiry',
-      descriptionAr: 'وكيل مهتم برغبتك في العقار',
-      type: 'offer',
-      icon: CheckCircle,
-      time: '5 hours ago',
-      timeAr: 'قبل 5 ساعات',
-      unread: false,
-    },
-    {
-      id: 4,
-      titleEn: 'Trending Location',
-      titleAr: 'موقع يكتسب شهرة',
-      descriptionEn: 'Sheikh Zayed City is trending with 24% growth',
-      descriptionAr: 'مدينة الشيخ زايد تكتسب شهرة برواج 24%',
-      type: 'trending',
-      icon: Zap,
-      time: '1 day ago',
-      timeAr: 'منذ يوم',
-      unread: false,
-    },
-  ]);
+  const isArabic = language === 'ar';
+  const { username } = usePiAuth();
+  const { getFavoritesForUser, getContractsForUser } = useFirebaseDatabase();
+  const { properties } = useProperties();
 
-  const handleDismiss = (id: number) => {
-    setAlerts(alerts.filter((alert) => alert.id !== id));
-  };
+  const [alerts, setAlerts] = useState<SmartAlert[]>([]);
+  const [dismissed, setDismissed] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(true);
 
-  const handleMarkAsRead = (id: number) => {
-    setAlerts(
-      alerts.map((alert) =>
-        alert.id === id ? { ...alert, unread: false } : alert
-      )
+  useEffect(() => {
+    if (!username) {
+      setLoading(false);
+      return;
+    }
+    Promise.all([getFavoritesForUser(username), getContractsForUser(username)]).then(
+      ([favorites, contracts]) => {
+        setAlerts(generateSmartAlerts(favorites, properties, contracts));
+        setLoading(false);
+      }
     );
-  };
+  }, [username, properties]);
 
-  const unreadCount = alerts.filter((a) => a.unread).length;
-
-  const getAlertColor = (type: string) => {
-    switch (type) {
-      case 'new-listing':
-        return 'border-blue-500/30 bg-blue-500/5';
-      case 'price-drop':
-        return 'border-green-500/30 bg-green-500/5';
-      case 'offer':
-        return 'border-accent/30 bg-accent/5';
-      case 'trending':
-        return 'border-purple-500/30 bg-purple-500/5';
-      default:
-        return 'border-border bg-card';
-    }
-  };
-
-  const getAlertIconColor = (type: string) => {
-    switch (type) {
-      case 'new-listing':
-        return 'text-blue-500';
-      case 'price-drop':
-        return 'text-green-500';
-      case 'offer':
-        return 'text-accent';
-      case 'trending':
-        return 'text-purple-500';
-      default:
-        return 'text-muted-foreground';
-    }
-  };
+  const visibleAlerts = alerts.filter((a) => !dismissed.has(a.id));
 
   return (
     <main className="w-full min-h-screen bg-background pb-24">
-      {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
         <div className="px-4 py-4 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-accent">
-                {language === 'en' ? 'Alerts' : 'التنبيهات'}
+                {isArabic ? 'التنبيهات الذكية' : 'Smart Alerts'}
               </h1>
-              {unreadCount > 0 && (
-                <p className="text-sm text-muted-foreground mt-1">
-                  {language === 'en'
-                    ? `${unreadCount} new alert${unreadCount !== 1 ? 's' : ''}`
-                    : `${unreadCount} تنبيهات جديدة`}
-                </p>
-              )}
+              <p className="text-sm text-muted-foreground mt-1">
+                {isArabic
+                  ? 'مبنية على مفضلاتك وعقودك الفعلية'
+                  : 'Based on your real favorites and contracts'}
+              </p>
             </div>
             <div className="relative">
               <Bell className="w-6 h-6 text-accent" />
-              {unreadCount > 0 && (
+              {visibleAlerts.length > 0 && (
                 <div className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
-                  {unreadCount}
+                  {visibleAlerts.length}
                 </div>
               )}
             </div>
@@ -139,83 +80,58 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
       </div>
 
       <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-4">
-        {alerts.length === 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : !username ? (
+          <Card className="bg-card border border-border p-12 text-center">
+            <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <p className="text-muted-foreground text-sm">
+              {isArabic ? 'سجّل الدخول عبر Pi لرؤية تنبيهاتك' : 'Sign in with Pi to see your alerts'}
+            </p>
+          </Card>
+        ) : visibleAlerts.length === 0 ? (
           <Card className="bg-card border border-border p-12 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <p className="text-muted-foreground">
-              {language === 'en' ? 'No alerts at this time' : 'لا توجد تنبيهات في الوقت الحالي'}
+              {isArabic ? 'لا توجد تنبيهات في الوقت الحالي' : 'No alerts at this time'}
+            </p>
+            <p className="text-xs text-muted-foreground/70 mt-2">
+              {isArabic
+                ? 'حفظ عقارات في المفضلة يساعدنا نبعتلك تنبيهات تغيّر السعر والتوصيات'
+                : 'Saving properties to favorites helps us send you price-change and recommendation alerts'}
             </p>
           </Card>
         ) : (
-          alerts.map((alert) => {
-            const AlertIcon = alert.icon;
+          visibleAlerts.map((alert) => {
+            const AlertIcon = ICONS[alert.type];
             return (
-              <Card
-                key={alert.id}
-                className={`border transition-all ${getAlertColor(
-                  alert.type
-                )} p-4 ${alert.unread ? 'ring-1 ring-accent/50' : ''}`}
-              >
-                <div className="flex gap-3 mb-3">
-                  <div
-                    className={`p-2 rounded-lg flex-shrink-0 ${getAlertColor(
-                      alert.type
-                    )}`}
-                  >
-                    <AlertIcon
-                      className={`w-5 h-5 ${getAlertIconColor(alert.type)}`}
-                    />
+              <Card key={alert.id} className={`border transition-all ${COLORS[alert.type]} p-4`}>
+                <div className="flex gap-3">
+                  <div className={`p-2 rounded-lg flex-shrink-0 ${COLORS[alert.type]}`}>
+                    <AlertIcon className="w-5 h-5" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground text-sm">
-                      {language === 'en' ? alert.titleEn : alert.titleAr}
+                      {isArabic ? alert.titleAr : alert.titleEn}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {language === 'en' ? alert.descriptionEn : alert.descriptionAr}
+                      {isArabic ? alert.descriptionAr : alert.descriptionEn}
                     </p>
                   </div>
                   <button
-                    onClick={() => handleDismiss(alert.id)}
+                    onClick={() => setDismissed((prev) => new Set(prev).add(alert.id))}
                     className="text-muted-foreground hover:text-foreground transition flex-shrink-0"
                   >
                     <X className="w-4 h-4" />
                   </button>
-                </div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    {alert.price && (
-                      <span className="text-sm font-semibold text-accent">
-                        {alert.price}
-                      </span>
-                    )}
-                    <span className="text-xs text-muted-foreground">
-                      {language === 'en' ? alert.time : alert.timeAr}
-                    </span>
-                  </div>
-                  {alert.unread && (
-                    <button
-                      onClick={() => handleMarkAsRead(alert.id)}
-                      className="text-xs font-medium text-accent hover:text-accent/80 transition"
-                    >
-                      {language === 'en' ? 'Mark as read' : 'وضع علامة مقروء'}
-                    </button>
-                  )}
                 </div>
               </Card>
             );
           })
         )}
       </div>
-
-      {/* Alert Settings */}
-      {alerts.length > 0 && (
-        <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto border-t border-border mt-4">
-          <Button variant="outline" className="w-full border-border">
-            {language === 'en' ? 'Manage Alert Settings' : 'إدارة إعدادات التنبيهات'}
-          </Button>
-        </div>
-      )}
     </main>
   );
 }
