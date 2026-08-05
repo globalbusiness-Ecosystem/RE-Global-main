@@ -66,13 +66,6 @@ const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), {
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
-  ssr: false, 
-  loading: () => <div className="w-full h-full bg-background" /> 
-});
-  ssr: false, 
-  loading: () => <div className="w-full h-full bg-background" /> 
-});
-
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
   const { username } = usePiAuth();
