@@ -66,11 +66,9 @@ const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), {
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
-const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), { 
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
-const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), { 
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
