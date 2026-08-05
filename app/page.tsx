@@ -62,6 +62,10 @@ const ContractsPage = dynamic(() => import('@/components/pages/contracts-page'),
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
+const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), { 
+  ssr: false, 
+  loading: () => <div className="w-full h-full bg-background" /> 
+});
 
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
@@ -240,6 +244,12 @@ export default function App() {
         return (
           <div className="animate-in slide-in-from-right duration-300">
             <ContractsPage language={language} onBack={() => handlePageChange('home')} />
+          </div>
+        );
+      case 'retoken':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <RETokenPage language={language} onBack={() => handlePageChange('home')} onNavigate={handlePageChange} />
           </div>
         );
       case 'settings':
