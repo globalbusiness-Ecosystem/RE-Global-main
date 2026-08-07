@@ -66,6 +66,10 @@ const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), {
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
+const InspectionsPage = dynamic(() => import('@/components/pages/inspections-page'), { 
+  ssr: false, 
+  loading: () => <div className="w-full h-full bg-background" /> 
+});
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
   const { username } = usePiAuth();
@@ -243,6 +247,12 @@ export default function App() {
         return (
           <div className="animate-in slide-in-from-right duration-300">
             <ContractsPage language={language} onBack={() => handlePageChange('home')} />
+          </div>
+        );
+      case 'inspections':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <InspectionsPage language={language} onBack={() => handlePageChange('home')} onNavigate={handlePageChange} />
           </div>
         );
       case 'retoken':

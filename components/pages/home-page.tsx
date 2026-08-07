@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine } from 'lucide-react';
 import { useState } from 'react';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
@@ -32,6 +32,7 @@ const categories = [
   { id: 'ai-tour', titleEn: 'AI Tour', titleAr: 'جولة ذكية', icon: Video },
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
+  { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
   { id: 'retoken', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
 ];
 
