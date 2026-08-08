@@ -15,17 +15,6 @@ import type {
   UserPurchaseBalance,
 } from "@/lib/sdklite-types";
 
-export interface PiUser {
-  uid: string;
-  username: string;
-}
-
-export interface UserLocation {
-  lat: number;
-  lng: number;
-  label?: string; // reverse-geocoded city/area, filled in async
-}
-
 interface PiAuthContextType {
   isAuthenticated: boolean;
   isInitialized: boolean;
@@ -34,10 +23,6 @@ interface PiAuthContextType {
   sdk: SDKLiteInstance | null;
   products: Product[] | null;
   restoredPurchases: UserPurchaseBalance[] | null;
-  user: PiUser | null;
-  location: UserLocation | null;
-  locationError: string | null;
-  requestLocation: () => void;
   reinitialize: () => Promise<void>;
 }
 
@@ -101,28 +86,6 @@ const loadSDKLite = (): Promise<void> => {
   });
 };
 
-// Reverse geocode via OpenStreetMap Nominatim — no API key needed.
-// Swap for Google Geocoding if you already have a key configured elsewhere.
-async function reverseGeocode(lat: number, lng: number): Promise<string | undefined> {
-  try {
-    const res = await fetch(
-      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
-      { headers: { Accept: "application/json" } }
-    );
-    if (!res.ok) return undefined;
-    const data = await res.json();
-    return (
-      data?.address?.suburb ||
-      data?.address?.city ||
-      data?.display_name ||
-      undefined
-    );
-  } catch (e) {
-    console.error("[PiAuth] Reverse geocode failed:", e);
-    return undefined;
-  }
-}
-
 export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
@@ -133,9 +96,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [restoredPurchases, setRestoredPurchases] = useState<
     UserPurchaseBalance[] | null
   >(null);
-  const [user, setUser] = useState<PiUser | null>(null);
-  const [location, setLocation] = useState<UserLocation | null>(null);
-  const [locationError, setLocationError] = useState<string | null>(null);
 
   useEffect(() => {
     console.log("[PiAuthProvider] Mounted, initializing...");
@@ -155,29 +115,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const requestLocation = () => {
-    if (typeof window === "undefined" || !navigator.geolocation) {
-      setLocationError("Geolocation not supported on this device");
-      return;
-    }
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setLocation({ lat, lng });
-        const label = await reverseGeocode(lat, lng);
-        if (label) {
-          setLocation({ lat, lng, label });
-        }
-      },
-      (err) => {
-        console.error("[PiAuth] Location request failed:", err);
-        setLocationError(err.message);
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
   const initialize = async () => {
     console.log("[PiAuth] Initialize called");
     const isPiBrowser =
@@ -190,7 +127,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       // ✅ Chrome / Vercel - نفتح المنصة بدون Pi auth
       console.log("[PiAuth] Not in Pi Browser - opening app normally");
       flushSync(() => {
-        setIsAuthenticated(true);
+        setIsAuthenticated(true); // ← التعديل هنا
         setAuthMessage("App loaded successfully");
         setIsInitialized(true);
       });
@@ -216,13 +153,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         }
       );
       console.log('[PiAuth] Authenticated:', authResult.user.username);
-
-      // Persist the authenticated user so the rest of the app (dashboard, etc.) can read it
-      setUser({
-        uid: authResult.user.uid,
-        username: authResult.user.username,
-      });
-
       setAuthMessage("Loading SDKLite...");
       await loadSDKLite();
 
@@ -246,9 +176,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         console.error("[PiAuth] Failed to restore purchases:", e);
         setRestoredPurchases([]);
       }
-
-      // Ask for real location once the user is authenticated (not blocking)
-      requestLocation();
     } catch (err) {
       console.error("SDKLite initialization failed:", err);
       setHasError(true);
@@ -275,10 +202,6 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     sdk,
     products,
     restoredPurchases,
-    user,
-    location,
-    locationError,
-    requestLocation,
     reinitialize: initialize,
   };
 

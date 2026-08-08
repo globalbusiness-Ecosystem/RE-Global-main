@@ -1,6 +1,6 @@
 'use client';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, Coins } from 'lucide-react';
 import { useState } from 'react';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
@@ -31,6 +31,7 @@ const categories = [
   { id: 'vr-tour', titleEn: 'VR Tour', titleAr: 'جولة واقع معزز', icon: Glasses },
   { id: 'ai-tour', titleEn: 'AI Tour', titleAr: 'جولة ذكية', icon: Video },
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
+  { id: 're-token', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
 ];
 
 export default function HomePage({
