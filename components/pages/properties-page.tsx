@@ -144,7 +144,7 @@ export default function PropertiesPage({
   };
 
   return (
-    <main className="px-4 py-6 max-w-md mx-auto">
+    <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
       <h2 className="text-2xl font-bold text-accent mb-6">
         {language === 'en' ? 'Properties' : 'العقارات'}
       </h2>

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { X } from 'lucide-react';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
-import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { getTestPropertyById } from '@/lib/vr-tour-config';
 
 interface PropertyTourSelectorProps {
   language: 'en' | 'ar';
@@ -85,7 +85,7 @@ export default function PropertyTourSelector({ language, onClose }: PropertyTour
   if (selected) {
     return (
       <VRPropertyTourViewer
-        property={DEMO_PROPERTY}
+        property={getTestPropertyById(selected.id)}
         onClose={() => setSelectedProperty(null)}
         onBuyClick={() => {
           alert('Buy with Pi feature - Integrate with Pi payment SDK');

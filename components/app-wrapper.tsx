@@ -4,9 +4,11 @@ import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { OfflineBanner } from "./offline-banner";
+import { TermsConsentModal } from "./terms-consent-modal";
 import { Toaster } from "sonner";
 import { useServiceWorker } from "@/hooks/use-service-worker";
 import { useOnlineStatus } from "@/hooks/use-online-status";
+import { getStoredTheme, applyTheme } from "@/lib/theme";
 
 function AppContent({ children }: { children: ReactNode }) {
   const { isInitialized } = usePiAuth();
@@ -15,13 +17,14 @@ function AppContent({ children }: { children: ReactNode }) {
   useServiceWorker();
   
   useEffect(() => {
-    document.documentElement.classList.add('dark');
+    applyTheme(getStoredTheme());
   }, []);
   
   // ✅ مش بنستنى Pi auth على Chrome
   return (
     <>
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
+      {isInitialized && <TermsConsentModal />}
       {children}
       <Toaster
         position="top-center"

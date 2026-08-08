@@ -25,13 +25,14 @@ export const VRPropertyTourViewer = ({
   onBuyClick,
 }: VRPropertyTourViewerProps) => {
   const containerRef = useRef<HTMLDivElement>(null);
+  const pannellumContainerRef = useRef<HTMLDivElement>(null);
   const viewerRef = useRef<any>(null);
   const [currentRoomIndex, setCurrentRoomIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [showHotspots, setShowHotspots] = useState(true);
   const [autoRotate, setAutoRotate] = useState(false);
   const [zoom, setZoom] = useState(75);
-  const [showImageGallery, setShowImageGallery] = useState(true);
+  const [showImageGallery, setShowImageGallery] = useState(false);
 
   const currentRoom = property.rooms[currentRoomIndex];
 
@@ -43,16 +44,20 @@ export const VRPropertyTourViewer = ({
         const link = document.createElement('link');
         link.id = 'pannellum-css';
         link.rel = 'stylesheet';
-        link.href = 'https://pannellum.org/css/pannellum.css';
+        link.href = 'https://cdn.pannellum.org/2.5/pannellum.css';
         document.head.appendChild(link);
       }
 
       // Load Script
       if (!window.pannellum) {
         const script = document.createElement('script');
-        script.src = 'https://pannellum.org/js/pannellum.js';
+        script.src = 'https://cdn.pannellum.org/2.5/pannellum.js';
         script.async = true;
         script.onload = () => initPannellum();
+        script.onerror = () => {
+          console.error('[VRTour] Failed to load Pannellum script');
+          setIsLoading(false);
+        };
         document.body.appendChild(script);
       } else {
         initPannellum();
@@ -60,7 +65,7 @@ export const VRPropertyTourViewer = ({
     };
 
     const initPannellum = () => {
-      if (!containerRef.current) return;
+      if (!pannellumContainerRef.current) return;
 
       const hotspots = (currentRoom.hotspots || []).map((hotspot, idx) => ({
         pitch: hotspot.pitch,
@@ -99,7 +104,7 @@ export const VRPropertyTourViewer = ({
           viewerRef.current.destroy?.();
         }
 
-        viewerRef.current = window.pannellum.viewer(containerRef.current, config);
+        viewerRef.current = window.pannellum.viewer(pannellumContainerRef.current, config);
 
         viewerRef.current.on('load', () => {
           setIsLoading(false);
@@ -127,7 +132,7 @@ export const VRPropertyTourViewer = ({
         }
       }
     };
-  }, [currentRoom, autoRotate, zoom]);
+  }, [currentRoom]);
 
   // Custom styling for 360° hotspots
   const addCustomStyling = () => {
@@ -216,7 +221,7 @@ export const VRPropertyTourViewer = ({
   const handleZoom = (direction: 'in' | 'out') => {
     setZoom((prev) => {
       const newZoom = direction === 'in' ? prev - 10 : prev + 10;
-      return Math.max(30, Math.min(120, newZoom));
+      return (() => { const c = Math.max(30, Math.min(120, newZoom)); viewerRef.current?.setHfov?.(c, false); return c; })();
     });
   };
 
@@ -231,9 +236,12 @@ export const VRPropertyTourViewer = ({
   return (
     <div
       ref={containerRef}
-      className="fixed inset-0 z-50 bg-black"
+      className="fixed inset-0 z-[9999] bg-black"
       style={{ width: '100%', height: '100%' }}
     >
+      {/* Dedicated container for Pannellum - it takes over this div's DOM directly */}
+      <div ref={pannellumContainerRef} className="absolute inset-0" style={{ width: '100%', height: '100%' }} />
+
       {/* Close Button - Gold X */}
       <button
         onClick={onClose}

@@ -54,6 +54,43 @@ export interface Transaction {
   createdAt: Date;
 }
 
+export interface Favorite {
+  id: string;
+  username: string;
+  propertyId: string;
+  priceAtFavorite?: number;
+  createdAt: Date;
+}
+
+export interface UserProfile {
+  username: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  location: string;
+  bio: string;
+  companyName: string;
+  websiteUrl: string;
+  updatedAt: Date;
+}
+
+export interface SmartContract {
+  id: string;
+  propertyId: string;
+  propertyTitle: string;
+  buyerUsername: string;
+  sellerUsername: string;
+  type: 'buy' | 'rent' | 'invest' | 'tokenized';
+  amount: number;
+  currency: string;
+  status: 'pending' | 'active' | 'completed' | 'cancelled';
+  contractIdOnChain?: string;
+  paymentId?: string;
+  txid?: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
 class FirebaseDatabase {
   private collectionsCache: Map<string, any[]> = new Map();
 
@@ -281,6 +318,153 @@ class FirebaseDatabase {
     }
   }
 
+  // Smart Contract Operations
+  async addContract(contract: Omit<SmartContract, 'id' | 'createdAt' | 'updatedAt'>): Promise<SmartContract | null> {
+    try {
+      const docRef = await addDoc(collection(db, 'contracts'), {
+        ...contract,
+        createdAt: Timestamp.now(),
+        updatedAt: Timestamp.now(),
+      });
+      return { id: docRef.id, ...contract, createdAt: new Date(), updatedAt: new Date() };
+    } catch (error) {
+      console.error('[DB] Add contract error:', error);
+      return null;
+    }
+  }
+
+  async getContractsForUser(username: string): Promise<SmartContract[]> {
+    try {
+      const buyerQuery = query(collection(db, 'contracts'), where('buyerUsername', '==', username));
+      const sellerQuery = query(collection(db, 'contracts'), where('sellerUsername', '==', username));
+      const [buyerSnap, sellerSnap] = await Promise.all([getDocs(buyerQuery), getDocs(sellerQuery)]);
+      const contracts: Map<string, SmartContract> = new Map();
+      [buyerSnap, sellerSnap].forEach((snap) => {
+        snap.forEach((docSnap) => {
+          contracts.set(docSnap.id, {
+            id: docSnap.id,
+            ...docSnap.data(),
+            createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+            updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+          } as SmartContract);
+        });
+      });
+      return Array.from(contracts.values()).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('[DB] Get contracts for user error:', error);
+      return [];
+    }
+  }
+
+  async getAllContracts(): Promise<SmartContract[]> {
+    try {
+      const q = query(collection(db, 'contracts'));
+      const querySnapshot = await getDocs(q);
+      const contracts: SmartContract[] = [];
+      querySnapshot.forEach((docSnap) => {
+        contracts.push({
+          id: docSnap.id,
+          ...docSnap.data(),
+          createdAt: docSnap.data().createdAt?.toDate() || new Date(),
+          updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+        } as SmartContract);
+      });
+      return contracts.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+    } catch (error) {
+      console.error('[DB] Get all contracts error:', error);
+      return [];
+    }
+  }
+
+  async updateContract(id: string, updates: Partial<SmartContract>): Promise<boolean> {
+    try {
+      const docRef = doc(db, 'contracts', id);
+      await updateDoc(docRef, { ...updates, updatedAt: Timestamp.now() });
+      return true;
+    } catch (error) {
+      console.error('[DB] Update contract error:', error);
+      return false;
+    }
+  }
+
+  // User Profile
+  async getProfile(username: string): Promise<UserProfile | null> {
+    try {
+      const docRef = doc(db, 'profiles', username);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) return null;
+      return {
+        ...docSnap.data(),
+        updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+      } as UserProfile;
+    } catch (error) {
+      console.error('[DB] Get profile error:', error);
+      return null;
+    }
+  }
+
+  async saveProfile(username: string, profile: Omit<UserProfile, 'username' | 'updatedAt'>): Promise<boolean> {
+    try {
+      const docRef = doc(db, 'profiles', username);
+      await setDoc(docRef, {
+        ...profile,
+        username,
+        updatedAt: Timestamp.now(),
+      });
+      return true;
+    } catch (error) {
+      console.error('[DB] Save profile error:', error);
+      return false;
+    }
+  }
+
+  // Favorites
+  async getFavoritesForUser(username: string): Promise<Favorite[]> {
+    try {
+      const q = query(collection(db, 'favorites'), where('username', '==', username));
+      const snapshot = await getDocs(q);
+      return snapshot.docs.map((d) => ({
+        id: d.id,
+        ...d.data(),
+        createdAt: d.data().createdAt?.toDate() || new Date(),
+      })) as Favorite[];
+    } catch (error) {
+      console.error('[DB] Get favorites error:', error);
+      return [];
+    }
+  }
+
+  async addFavorite(username: string, propertyId: string, priceAtFavorite?: number): Promise<boolean> {
+    try {
+      await addDoc(collection(db, 'favorites'), {
+        username,
+        propertyId,
+        ...(priceAtFavorite !== undefined ? { priceAtFavorite } : {}),
+        createdAt: Timestamp.now(),
+      });
+      return true;
+    } catch (error) {
+      console.error('[DB] Add favorite error:', error);
+      return false;
+    }
+  }
+
+  async removeFavorite(username: string, propertyId: string): Promise<boolean> {
+    try {
+      const q = query(
+        collection(db, 'favorites'),
+        where('username', '==', username),
+        where('propertyId', '==', propertyId)
+      );
+      const snapshot = await getDocs(q);
+      await Promise.all(snapshot.docs.map((d) => deleteDoc(doc(db, 'favorites', d.id))));
+      return true;
+    } catch (error) {
+      console.error('[DB] Remove favorite error:', error);
+      return false;
+    }
+  }
+
   // Cache management
   private invalidateCache(collection: string): void {
     for (const key of this.collectionsCache.keys()) {
@@ -325,6 +509,27 @@ export function useFirebaseDatabase() {
       firebaseDB.getTransactions(userId),
     updateTransaction: (id: string, updates: Partial<Transaction>) =>
       firebaseDB.updateTransaction(id, updates),
+
+    // Smart Contracts
+    addContract: (contract: Omit<SmartContract, 'id' | 'createdAt' | 'updatedAt'>) =>
+      firebaseDB.addContract(contract),
+    getContractsForUser: (username: string) =>
+      firebaseDB.getContractsForUser(username),
+    getAllContracts: () =>
+      firebaseDB.getAllContracts(),
+    updateContract: (id: string, updates: Partial<SmartContract>) =>
+      firebaseDB.updateContract(id, updates),
+
+    // Favorites
+    getFavoritesForUser: (username: string) => firebaseDB.getFavoritesForUser(username),
+    addFavorite: (username: string, propertyId: string, priceAtFavorite?: number) =>
+      firebaseDB.addFavorite(username, propertyId, priceAtFavorite),
+    removeFavorite: (username: string, propertyId: string) => firebaseDB.removeFavorite(username, propertyId),
+
+    // User Profile
+    getProfile: (username: string) => firebaseDB.getProfile(username),
+    saveProfile: (username: string, profile: Omit<UserProfile, 'username' | 'updatedAt'>) =>
+      firebaseDB.saveProfile(username, profile),
 
     // Cache
     clearCache: () => firebaseDB.clearCache(),

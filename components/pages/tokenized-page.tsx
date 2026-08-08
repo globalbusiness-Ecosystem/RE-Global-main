@@ -3,6 +3,7 @@
 import { Zap, Bed, Maximize2, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
@@ -233,7 +234,7 @@ export default function TokenizedPage({ language, currency, favorites, toggleFav
   
   const activeTourProperty = tokenizedProperties.find((p) => p.id === activeTourId);
   return (
-    <main className="px-4 py-6 max-w-md mx-auto">
+    <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
         {showBackButton && (
           <button
@@ -301,13 +302,19 @@ export default function TokenizedPage({ language, currency, favorites, toggleFav
               </div>
 
               <div className="space-y-2">
-                <div>
-                  <p className="text-muted-foreground text-xs">
-                    {language === 'en' ? 'Price' : 'السعر'}
-                  </p>
-                  <p className="text-lg font-bold text-accent">
-                    {property.price.toLocaleString()} π
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-muted-foreground text-xs">
+                      {language === 'en' ? 'Price' : 'السعر'}
+                    </p>
+                    <p className="text-lg font-bold text-accent">
+                      {property.price.toLocaleString()} π
+                    </p>
+                  </div>
+                  <div className="flex flex-col items-end">
+                    <PropertyQRCode propertyId={property.id} size={52} className="rounded" />
+                    <p className="text-[10px] text-muted-foreground font-mono mt-1">#{property.id}</p>
+                  </div>
                 </div>
                 <p className="text-xs text-muted-foreground bg-secondary/50 rounded px-2 py-1.5">
                   {language === 'en' ? 'Token Share from 1π' : 'حصة رمزية من 1π'}

@@ -6,45 +6,39 @@
 import { VRPropertyTour, VRRoom, Hotspot, PropertyImage } from './vr-tour-types';
 
 // Premium luxury interior photography URLs for VR tours
+// NOTE: these must be true equirectangular (2:1) panoramas for Pannellum to render them.
+// Using Pannellum's own verified demo panoramas as placeholders until real 360° photography
+// of each property is captured and uploaded.
 const ROOM_IMAGES = {
-  // Modern luxury living room with contemporary furnishings
-  livingRoom: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg',
-  // Elegant master bedroom with soft lighting
-  bedroom: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg',
-  // Modern luxury kitchen with high-end appliances
-  kitchen: 'https://images.pexels.com/photos/2089698/pexels-photo-2089698.jpeg',
-  // Spa-style luxury marble bathroom
-  bathroom: 'https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg',
-  // Luxury villa exterior with pool and terrace
-  outdoor: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg',
+  livingRoom: 'https://pannellum.org/images/alma.jpg',
+  bedroom: 'https://pannellum.org/images/tocopilla.jpg',
+  kitchen: 'https://pannellum.org/images/lascar.jpg',
+  bathroom: 'https://pannellum.org/images/cerro-toco-0.jpg',
+  outdoor: 'https://pannellum.org/images/from-tree.jpg',
 };
 
 // Real estate property photos for each room (2D gallery)
+// Real NYC penthouse photos stored locally in /public/property-photos/nyc-penthouse/
 const PROPERTY_IMAGES: Record<string, PropertyImage[]> = {
   livingRoom: [
-    { id: 'lr-1', url: 'https://images.pexels.com/photos/1571460/pexels-photo-1571460.jpeg', caption: 'Modern Living Room - Front View', featured: true },
-    { id: 'lr-2', url: 'https://images.pexels.com/photos/1350789/pexels-photo-1350789.jpeg', caption: 'Living Room - Side Angle' },
-    { id: 'lr-3', url: 'https://images.pexels.com/photos/1648776/pexels-photo-1648776.jpeg', caption: 'Luxury Seating Area' },
+    { id: 'lr-1', url: '/property-photos/nyc-penthouse/photo-01.jpg', caption: 'Living Room - Main View', featured: true },
+    { id: 'lr-2', url: '/property-photos/nyc-penthouse/photo-02.jpg', caption: 'Living Room - Seating Area' },
+    { id: 'lr-3', url: '/property-photos/nyc-penthouse/photo-03.jpg', caption: 'Living Room - City View' },
   ],
   bedroom: [
-    { id: 'br-1', url: 'https://images.pexels.com/photos/164595/pexels-photo-164595.jpeg', caption: 'Master Bedroom - Main View', featured: true },
-    { id: 'br-2', url: 'https://images.pexels.com/photos/221457/pexels-photo-221457.jpeg', caption: 'Bedroom - Luxury Bed Frame' },
-    { id: 'br-3', url: 'https://images.pexels.com/photos/1595521/pexels-photo-1595521.jpeg', caption: 'Bedroom - Window View' },
+    { id: 'br-1', url: '/property-photos/nyc-penthouse/photo-04.jpg', caption: 'Master Bedroom - Main View', featured: true },
+    { id: 'br-2', url: '/property-photos/nyc-penthouse/photo-05.jpg', caption: 'Bedroom - Window View' },
   ],
   kitchen: [
-    { id: 'k-1', url: 'https://images.pexels.com/photos/2089698/pexels-photo-2089698.jpeg', caption: 'Modern Kitchen - Island View', featured: true },
-    { id: 'k-2', url: 'https://images.pexels.com/photos/1624487/pexels-photo-1624487.jpeg', caption: 'Kitchen - Appliances Close-up' },
-    { id: 'k-3', url: 'https://images.pexels.com/photos/2398220/pexels-photo-2398220.jpeg', caption: 'Kitchen - Dining Area' },
+    { id: 'k-1', url: '/property-photos/nyc-penthouse/photo-06.jpg', caption: 'Kitchen - Main View', featured: true },
   ],
   bathroom: [
-    { id: 'bth-1', url: 'https://images.pexels.com/photos/1910472/pexels-photo-1910472.jpeg', caption: 'Spa Bathroom - Main View', featured: true },
-    { id: 'bth-2', url: 'https://images.pexels.com/photos/1547276/pexels-photo-1547276.jpeg', caption: 'Bathroom - Luxury Fixtures' },
-    { id: 'bth-3', url: 'https://images.pexels.com/photos/2111591/pexels-photo-2111591.jpeg', caption: 'Bathroom - Modern Sink' },
+    { id: 'bth-1', url: '/property-photos/nyc-penthouse/photo-07.jpg', caption: 'Bathroom - Main View', featured: true },
   ],
   outdoor: [
-    { id: 'od-1', url: 'https://images.pexels.com/photos/1396122/pexels-photo-1396122.jpeg', caption: 'Outdoor Terrace - Pool View', featured: true },
-    { id: 'od-2', url: 'https://images.pexels.com/photos/1579974/pexels-photo-1579974.jpeg', caption: 'Luxury Garden Area' },
-    { id: 'od-3', url: 'https://images.pexels.com/photos/279810/pexels-photo-279810.jpeg', caption: 'Exterior - Evening Lighting' },
+    { id: 'od-1', url: '/property-photos/nyc-penthouse/photo-08.jpg', caption: 'Outdoor - Terrace View', featured: true },
+    { id: 'od-2', url: '/property-photos/nyc-penthouse/photo-09.jpg', caption: 'Outdoor - Skyline View' },
+    { id: 'od-3', url: '/property-photos/nyc-penthouse/photo-10.jpg', caption: 'Outdoor - Evening View' },
   ],
 };
 
@@ -144,6 +138,20 @@ export const DEMO_PROPERTY: VRPropertyTour = {
   price: 850000,
   piPrice: 85000,
 };
+
+// Multiple test properties - all share the same placeholder room images/tour for now.
+// Replace `propertyName`, `price`, `piPrice` per property once real data/photos are ready.
+export const TEST_PROPERTIES: VRPropertyTour[] = [
+  { propertyId: 'tour-1', propertyName: 'Luxury Downtown Penthouse', rooms: DEMO_ROOMS, price: 850000, piPrice: 85000 },
+  { propertyId: 'tour-2', propertyName: 'Modern Apartment Manhattan', rooms: DEMO_ROOMS, price: 650000, piPrice: 65000 },
+  { propertyId: 'tour-3', propertyName: 'Beachfront Villa Thailand', rooms: DEMO_ROOMS, price: 450000, piPrice: 45000 },
+  { propertyId: 'tour-4', propertyName: 'Contemporary House London', rooms: DEMO_ROOMS, price: 750000, piPrice: 75000 },
+  { propertyId: 'tour-5', propertyName: 'Urban Condo Tokyo', rooms: DEMO_ROOMS, price: 520000, piPrice: 52000 },
+  { propertyId: 'tour-6', propertyName: 'Hillside Estate Paris', rooms: DEMO_ROOMS, price: 920000, piPrice: 92000 },
+];
+
+export const getTestPropertyById = (id: string): VRPropertyTour =>
+  TEST_PROPERTIES.find((p) => p.propertyId === id) || DEMO_PROPERTY;
 
 // Hotspot styling configuration
 export const HOTSPOT_STYLES = {

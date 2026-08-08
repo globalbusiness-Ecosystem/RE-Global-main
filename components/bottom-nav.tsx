@@ -20,7 +20,7 @@ const navItems = [
 
 export default function BottomNav({ currentPage, setCurrentPage, language = 'en' }: BottomNavProps) {
   return (
-    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-1 py-2 flex justify-around items-center md:max-w-md md:mx-auto md:left-0 md:right-0 z-30">
+    <nav className="fixed bottom-0 left-0 right-0 bg-background border-t border-border px-1 py-2 flex justify-around items-center md:max-w-2xl lg:max-w-5xl md:mx-auto md:left-0 md:right-0 z-30">
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = currentPage === item.id;
