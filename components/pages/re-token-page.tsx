@@ -20,12 +20,20 @@ const RE_TOKEN_PRICE_PI = 0.01; // 1 $RE = 0.01 π (تقدر تغيّرها لا
 const RE_TOTAL_SUPPLY = 100_000_000;
 
 const PRESET_AMOUNTS = [1000, 5000, 10000, 50000];
+const MIN_RE = 10; // أصغر كمية شراء مسموحة
 
 export default function RETokenPage({ language = 'en', onBack }: RETokenPageProps) {
   const { user, isAuthenticated } = usePiAuth();
   const [wallet, setWallet] = useState<WalletData | null>(null);
   const [loading, setLoading] = useState(true);
   const [selectedAmount, setSelectedAmount] = useState(PRESET_AMOUNTS[0]);
+  const [customAmount, setCustomAmount] = useState('');
+
+  // الكمية الفعلية: لو المستخدم كاتب رقم يدوي بنستخدمه، غير كده بنستخدم الزرار المختار
+  const activeAmount = customAmount !== '' ? Number(customAmount) : selectedAmount;
+  const isAmountValid = Number.isFinite(activeAmount) && activeAmount >= MIN_RE;
+  // حساب دقيق بالقسمة على 100 بدل الضرب في 0.01 لتفادي أخطاء الفاصلة العشرية
+  const piCost = isAmountValid ? activeAmount / 100 : 0;
 
   const isArabic = language === 'ar';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -126,9 +134,12 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             {PRESET_AMOUNTS.map((amount) => (
               <button
                 key={amount}
-                onClick={() => setSelectedAmount(amount)}
+                onClick={() => {
+                  setSelectedAmount(amount);
+                  setCustomAmount('');
+                }}
                 className={`py-2 rounded-lg text-sm font-medium border transition ${
-                  selectedAmount === amount
+                  selectedAmount === amount && customAmount === ''
                     ? 'bg-accent text-accent-foreground border-accent'
                     : 'bg-background text-muted-foreground border-border hover:border-accent/50'
                 }`}
@@ -138,19 +149,38 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             ))}
           </div>
 
+          <div>
+            <input
+              type="number"
+              min={MIN_RE}
+              step="1"
+              value={customAmount}
+              onChange={(e) => setCustomAmount(e.target.value)}
+              placeholder={isArabic ? `أو اكتب كمية (الحد الأدنى ${MIN_RE})` : `Or enter amount (min ${MIN_RE})`}
+              className="w-full py-2 px-3 rounded-lg text-sm bg-background text-foreground border border-border focus:border-accent focus:outline-none"
+            />
+            {customAmount !== '' && !isAmountValid && (
+              <p className="text-xs text-destructive mt-1">
+                {isArabic ? `أقل كمية للشراء هي ${MIN_RE} $RE` : `Minimum purchase is ${MIN_RE} $RE`}
+              </p>
+            )}
+          </div>
+
           <p className="text-sm text-muted-foreground text-center">
             {isArabic ? 'ستدفع' : 'You will pay'}:{' '}
             <span className="text-foreground font-semibold">
-              {(selectedAmount * RE_TOKEN_PRICE_PI).toFixed(2)} π
+              {piCost.toFixed(2)} π
             </span>
           </p>
 
-          <SimplePiPaymentButton
-            reAmount={selectedAmount}
-            language={language}
-            onSuccess={handlePurchaseSuccess}
-            onError={(err) => console.error('[v0] RE Token purchase failed:', err)}
-          />
+          {isAmountValid && (
+            <SimplePiPaymentButton
+              reAmount={activeAmount}
+              language={language}
+              onSuccess={handlePurchaseSuccess}
+              onError={(err) => console.error('[v0] RE Token purchase failed:', err)}
+            />
+          )}
         </div>
 
         {/* طرق ثانية للكسب */}
