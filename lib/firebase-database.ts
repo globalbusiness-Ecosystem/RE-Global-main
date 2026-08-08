@@ -387,6 +387,20 @@ class FirebaseDatabase {
     }
   }
 
+  // Inspections (RE Inspect public certificates)
+  async getInspectionByCertHash(certHash: string): Promise<import('./inspections').PropertyInspection | null> {
+    try {
+      const q = query(collection(db, 'inspections'), where('blockchainCertHash', '==', certHash));
+      const snap = await getDocs(q);
+      if (snap.empty) return null;
+      const docSnap = snap.docs[0];
+      return { id: docSnap.id, ...docSnap.data() } as import('./inspections').PropertyInspection;
+    } catch (error) {
+      console.error('[DB] Get inspection by cert hash error:', error);
+      return null;
+    }
+  }
+
   // User Profile
   async getProfile(username: string): Promise<UserProfile | null> {
     try {
@@ -525,6 +539,9 @@ export function useFirebaseDatabase() {
     addFavorite: (username: string, propertyId: string, priceAtFavorite?: number) =>
       firebaseDB.addFavorite(username, propertyId, priceAtFavorite),
     removeFavorite: (username: string, propertyId: string) => firebaseDB.removeFavorite(username, propertyId),
+
+    // Inspections (RE Inspect public certificates)
+    getInspectionByCertHash: (certHash: string) => firebaseDB.getInspectionByCertHash(certHash),
 
     // User Profile
     getProfile: (username: string) => firebaseDB.getProfile(username),

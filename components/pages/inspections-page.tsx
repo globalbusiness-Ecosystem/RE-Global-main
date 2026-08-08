@@ -24,6 +24,7 @@ import {
   type InspectionSubScore,
 } from '@/lib/inspections';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
+import InspectionSimulationScene from '@/components/InspectionSimulationScene';
 
 interface InspectionsPageProps {
   language: 'en' | 'ar';
@@ -175,6 +176,13 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
       </div>
 
       <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-8">
+        {/* How the scan actually happens — per-property drone + robot simulation */}
+        <InspectionSimulationScene
+          propertyTitleEn={demo.propertyTitleEn}
+          propertyTitleAr={demo.propertyTitleAr}
+          isArabic={isArabic}
+        />
+
         {/* Hero: live health score demo */}
         <section className="bg-card border border-border rounded-2xl p-6">
           <div className="flex items-center justify-center gap-2 mb-1">
@@ -210,6 +218,23 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                 {isArabic ? '— بواسطة علاء الدين (Aladdin AI)' : '— by Aladdin AI'}
               </span>
             </p>
+          </div>
+
+          <div className="mt-4 flex items-center justify-between gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2.5">
+            <span className="text-muted-foreground">
+              {isArabic
+                ? 'أي شهادة معتمدة قابلة للتحقق علنًا — بدون حساب أو تسجيل دخول'
+                : 'Every certified report is publicly verifiable — no account or login needed'}
+            </span>
+            <a
+              href="/verify/demo-cert-hash"
+              target="_blank"
+              rel="noreferrer"
+              className="shrink-0 flex items-center gap-1 text-accent font-medium hover:underline"
+            >
+              {isArabic ? 'مثال' : 'Example'}
+              <ChevronRight className={`w-3.5 h-3.5 ${isArabic ? 'rotate-180' : ''}`} />
+            </a>
           </div>
         </section>
 
