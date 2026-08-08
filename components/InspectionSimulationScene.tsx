@@ -1,13 +1,10 @@
 'use client';
 
-// Real, per-property animated simulation of how RE Inspect physically works —
-// not static icons. Takes the property's own title so it reads correctly for
-// whichever listing is being inspected. Pure SVG/CSS motion, no external
-// images (keeps it fast and avoids photo licensing entirely).
-//
-// Sequence (loops): exterior drone scan -> interior robot scan -> AI analysis
-// -> on-chain certification. Each stage highlights its own icon + caption so
-// it doubles as a legend, not just decoration.
+// Real, per-property animated simulation of how RE Inspect physically works.
+// Rebuilt with plain CSS keyframe animation on positioned divs (not SVG/SMIL)
+// because SMIL (<animateMotion>, <animate>) renders unreliably inside some
+// embedded webviews (e.g. Pi Browser). Div + CSS transform is universally
+// supported and matches how the rest of the app already animates.
 
 import { useEffect, useState } from 'react';
 import { Plane, Bot as RobotIcon, Sparkles, Link2 } from 'lucide-react';
@@ -45,6 +42,39 @@ export default function InspectionSimulationScene({
 
   return (
     <div className="bg-card border border-border rounded-2xl overflow-hidden">
+      <style jsx>{`
+        @keyframes droneOrbit {
+          0% { left: 95%; top: 50%; }
+          12.5% { left: 81.8%; top: 81.8%; }
+          25% { left: 50%; top: 95%; }
+          37.5% { left: 18.2%; top: 81.8%; }
+          50% { left: 5%; top: 50%; }
+          62.5% { left: 18.2%; top: 18.2%; }
+          75% { left: 50%; top: 5%; }
+          87.5% { left: 81.8%; top: 18.2%; }
+          100% { left: 95%; top: 50%; }
+        }
+        @keyframes robotSweep {
+          0%, 8% { left: 30%; top: 72%; }
+          42%, 50% { left: 68%; top: 72%; }
+          58%, 66% { left: 68%; top: 34%; }
+          92%, 100% { left: 30%; top: 34%; }
+        }
+        @keyframes glowPulse {
+          0%, 100% { opacity: 0.25; }
+          50% { opacity: 0.9; }
+        }
+        .drone-dot {
+          animation: droneOrbit 3.4s linear infinite;
+        }
+        .robot-dot {
+          animation: robotSweep 3.4s ease-in-out infinite;
+        }
+        .glow-pulse {
+          animation: glowPulse 1.5s ease-in-out infinite;
+        }
+      `}</style>
+
       <div className="px-5 pt-5">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-0.5">
           {isArabic ? 'محاكاة حية' : 'Live simulation'}
@@ -55,89 +85,47 @@ export default function InspectionSimulationScene({
       </div>
 
       {/* Scene */}
-      <div className="relative mt-3 h-[220px] bg-background/60">
-        <svg viewBox="0 0 400 220" className="absolute inset-0 w-full h-full" preserveAspectRatio="xMidYMid meet">
-          {/* Ground */}
-          <line x1="0" y1="196" x2="400" y2="196" stroke="hsl(var(--border))" strokeWidth="1" />
+      <div className="relative mt-3 h-56 bg-background/60">
+        {/* Building block, centered, always visible */}
+        <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] h-[70%] border border-border/70 grid grid-cols-2 grid-rows-4">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <div key={i} className="border border-border/30" />
+          ))}
+        </div>
 
-          {/* Building */}
-          <rect x="140" y="60" width="120" height="136" fill="none" stroke="hsl(var(--border))" strokeWidth="1.5" />
-          {/* Floor lines */}
-          <line x1="140" y1="94" x2="260" y2="94" stroke="hsl(var(--border))" strokeWidth="1" />
-          <line x1="140" y1="128" x2="260" y2="128" stroke="hsl(var(--border))" strokeWidth="1" />
-          <line x1="140" y1="162" x2="260" y2="162" stroke="hsl(var(--border))" strokeWidth="1" />
-          {/* Room dividers */}
-          <line x1="200" y1="60" x2="200" y2="196" stroke="hsl(var(--border))" strokeWidth="1" opacity="0.6" />
+        {/* Ground line */}
+        <div className="absolute left-0 right-0 bottom-[15%] h-px bg-border/50" />
 
-          {/* Drone orbit path (dotted) */}
-          <ellipse
-            cx="200"
-            cy="128"
-            rx="112"
-            ry="66"
-            fill="none"
-            stroke="hsl(var(--border))"
-            strokeDasharray="2 5"
-            strokeWidth="1"
-            opacity={stage === 'exterior' ? 0.9 : 0.25}
+        {/* Drone orbit ring, visible during exterior stage */}
+        {stage === 'exterior' && (
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] h-[70%] rounded-full border border-dashed border-accent/25" />
+        )}
+
+        {/* Drone marker */}
+        {stage === 'exterior' && (
+          <div
+            className="drone-dot absolute w-2.5 h-2.5 -ml-1.5 -mt-1.5 rounded-full bg-accent shadow-[0_0_10px_2px_rgba(201,151,77,0.6)]"
+            style={{ left: '95%', top: '50%' }}
           />
+        )}
 
-          {/* Drone + scan beam, active during exterior stage */}
-          {stage === 'exterior' && (
-            <g>
-              <circle r="5" fill="#c9974d">
-                <animateMotion
-                  dur="3.2s"
-                  repeatCount="1"
-                  path="M 312,128 A 112,66 0 1,1 88,128 A 112,66 0 1,1 312,128"
-                />
-              </circle>
-              <line x1="200" y1="10" x2="200" y2="60" stroke="#c9974d" strokeWidth="1" opacity="0.5">
-                <animate attributeName="opacity" values="0.15;0.6;0.15" dur="1.4s" repeatCount="indefinite" />
-              </line>
-            </g>
-          )}
+        {/* Ground robot marker */}
+        {stage === 'interior' && (
+          <div
+            className="robot-dot absolute w-2.5 h-2.5 -ml-1.5 -mt-1.5 rounded-sm bg-emerald-400 shadow-[0_0_10px_2px_rgba(61,220,151,0.6)]"
+            style={{ left: '30%', top: '72%' }}
+          />
+        )}
 
-          {/* Ground robot, active during interior stage — sweeps room by room */}
-          {stage === 'interior' && (
-            <g>
-              <rect width="8" height="8" x="-4" y="-4" fill="#3ddc97" rx="1.5">
-                <animateMotion
-                  dur="3s"
-                  repeatCount="1"
-                  keyPoints="0;0.5;0.5;1"
-                  keyTimes="0;0.45;0.55;1"
-                  calcMode="linear"
-                  path="M 155,178 L 245,178 L 245,110 L 155,110"
-                />
-              </rect>
-            </g>
-          )}
+        {/* AI analysis pulse over the building */}
+        {stage === 'analysis' && (
+          <div className="glow-pulse absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[45%] h-[70%] bg-accent/20 rounded-sm" />
+        )}
 
-          {/* AI analysis pulse over the whole building */}
-          {stage === 'analysis' && (
-            <rect x="140" y="60" width="120" height="136" fill="#c9974d" opacity="0.06">
-              <animate attributeName="opacity" values="0.02;0.14;0.02" dur="1.6s" repeatCount="indefinite" />
-            </rect>
-          )}
-
-          {/* Certification glow */}
-          {stage === 'certify' && (
-            <rect
-              x="138"
-              y="58"
-              width="124"
-              height="140"
-              fill="none"
-              stroke="#3ddc97"
-              strokeWidth="1.5"
-              rx="2"
-              opacity="0.7"
-            >
-              <animate attributeName="opacity" values="0.3;0.9;0.3" dur="1.2s" repeatCount="indefinite" />
-            </rect>
-          )}
-        </svg>
+        {/* Certification glow */}
+        {stage === 'certify' && (
+          <div className="glow-pulse absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[47%] h-[72%] border-2 border-emerald-400 rounded-sm" />
+        )}
 
         {/* Stage caption */}
         <div className="absolute left-3 bottom-3 flex items-center gap-2 bg-background/80 backdrop-blur px-2.5 py-1.5 rounded-lg border border-border">
