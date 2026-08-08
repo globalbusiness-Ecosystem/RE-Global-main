@@ -261,18 +261,6 @@ export default function App() {
             <RETokenPage language={language} onBack={() => handlePageChange('home')} onNavigate={handlePageChange} />
           </div>
         );
-      case 'retoken':
-        return (
-          <div className="animate-in slide-in-from-right duration-300">
-            <RETokenPage language={language} onBack={() => handlePageChange('home')} onNavigate={handlePageChange} />
-          </div>
-        );
-      case 'retoken':
-        return (
-          <div className="animate-in slide-in-from-right duration-300">
-            <RETokenPage language={language} onBack={() => handlePageChange('home')} onNavigate={handlePageChange} />
-          </div>
-        );
       case 'settings':
         return (
           <SettingsPage
