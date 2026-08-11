@@ -1,8 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Coins, TrendingUp, RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Coins, TrendingUp, RefreshCw, Info } from 'lucide-react';
 import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
@@ -16,11 +15,21 @@ interface WalletData {
   piUsername: string;
 }
 
-const RE_TOKEN_PRICE_PI = 0.01; // 1 $RE = 0.01 π (تقدر تغيّرها لاحقًا من الباك اند)
-const RE_TOTAL_SUPPLY = 100_000_000;
+interface Quote {
+  reAmount: number;
+  unitPriceUsd: number;
+  valueUsd: number;
+  piUsdRate: number;
+  networkFeePi: number;
+  totalPi: number;
+  priceType: string;
+  quotedAt: string;
+}
 
+const RE_TOTAL_SUPPLY = 100_000_000;
 const PRESET_AMOUNTS = [1000, 5000, 10000, 50000];
-const MIN_RE = 10; // أصغر كمية شراء مسموحة
+const MIN_RE = 10;
+const QUOTE_DEBOUNCE_MS = 400;
 
 export default function RETokenPage({ language = 'en', onBack }: RETokenPageProps) {
   const { user, isAuthenticated } = usePiAuth();
@@ -29,11 +38,12 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
   const [selectedAmount, setSelectedAmount] = useState(PRESET_AMOUNTS[0]);
   const [customAmount, setCustomAmount] = useState('');
 
-  // الكمية الفعلية: لو المستخدم كاتب رقم يدوي بنستخدمه، غير كده بنستخدم الزرار المختار
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState('');
+
   const activeAmount = customAmount !== '' ? Number(customAmount) : selectedAmount;
   const isAmountValid = Number.isFinite(activeAmount) && activeAmount >= MIN_RE;
-  // حساب دقيق بالقسمة على 100 بدل الضرب في 0.01 لتفادي أخطاء الفاصلة العشرية
-  const piCost = isAmountValid ? activeAmount / 100 : 0;
 
   const isArabic = language === 'ar';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
@@ -45,6 +55,34 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
       setLoading(false);
     }
   }, [isAuthenticated, user]);
+
+  // نجيب السعر الحقيقي من الباك اند كل ما الكمية تتغيّر (مع debounce بسيط)
+  useEffect(() => {
+    if (!isAmountValid) {
+      setQuote(null);
+      return;
+    }
+    setQuoteError('');
+    const timer = setTimeout(() => fetchQuote(activeAmount), QUOTE_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAmount, isAmountValid]);
+
+  const fetchQuote = async (reAmount: number) => {
+    try {
+      setQuoteLoading(true);
+      const res = await fetch(`${apiUrl}/api/token-sale/quote?reAmount=${reAmount}`);
+      if (!res.ok) throw new Error('quote_failed');
+      const data = await res.json();
+      setQuote(data);
+    } catch (error) {
+      console.error('[v0] RE Token quote fetch error:', error);
+      setQuote(null);
+      setQuoteError(isArabic ? 'تعذّر جلب السعر الحالي' : 'Could not fetch current price');
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
 
   const loadWallet = async (piUsername: string) => {
     try {
@@ -111,7 +149,10 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             <p className="text-sm text-muted-foreground mb-1">
               {isArabic ? 'سعر التوكن' : 'Token Price'}
             </p>
-            <p className="text-lg font-bold text-accent">1 $RE = {RE_TOKEN_PRICE_PI}π</p>
+            <p className="text-lg font-bold text-accent">1 $RE = $0.01</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isArabic ? 'ثابت بالدولار — لا يتغيّر بالتداول' : 'Fixed in USD — never floats with trading'}
+            </p>
           </div>
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-sm text-muted-foreground mb-1">
@@ -166,14 +207,52 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             )}
           </div>
 
-          <p className="text-sm text-muted-foreground text-center">
-            {isArabic ? 'ستدفع' : 'You will pay'}:{' '}
-            <span className="text-foreground font-semibold">
-              {piCost.toFixed(2)} π
-            </span>
-          </p>
+          {/* تفاصيل التسعير الشفافة — من الباك اند مباشرة */}
+          <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Info className="w-3.5 h-3.5 text-muted-foreground" />
+              <p className="text-xs font-medium text-muted-foreground">
+                {isArabic ? 'تفاصيل السعر' : 'Price Breakdown'}
+              </p>
+            </div>
 
-          {isAmountValid && (
+            {quoteLoading && (
+              <p className="text-xs text-muted-foreground">
+                {isArabic ? 'جاري حساب السعر...' : 'Calculating price...'}
+              </p>
+            )}
+
+            {quoteError && !quoteLoading && (
+              <p className="text-xs text-destructive">{quoteError}</p>
+            )}
+
+            {quote && !quoteLoading && !quoteError && (
+              <>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {isArabic ? `قيمة ${quote.reAmount.toLocaleString()} $RE` : `Value of ${quote.reAmount.toLocaleString()} $RE`}
+                  </span>
+                  <span className="text-foreground font-medium">${quote.valueUsd.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {isArabic ? 'سعر π/دولار الحالي' : 'Current π/USD rate'}
+                  </span>
+                  <span className="text-foreground font-medium">${quote.piUsdRate.toFixed(6)}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">{isArabic ? 'رسوم الشبكة' : 'Network fee'}</span>
+                  <span className="text-foreground font-medium">{quote.networkFeePi} π</span>
+                </div>
+                <div className="flex justify-between text-sm pt-1.5 border-t border-border">
+                  <span className="text-foreground font-semibold">{isArabic ? 'الإجمالي' : 'Total'}</span>
+                  <span className="text-accent font-bold">{quote.totalPi.toFixed(4)} π</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {isAmountValid && quote && !quoteLoading && (
             <SimplePiPaymentButton
               reAmount={activeAmount}
               language={language}
