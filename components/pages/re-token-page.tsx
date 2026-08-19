@@ -1,148 +1,280 @@
 'use client';
 
-import { useState } from 'react';
-import { Coins, TrendingUp, ShoppingCart, Zap, Users, Link2, Loader2, ShieldCheck, ShieldAlert, Copy, Check } from 'lucide-react';
-import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
+import { useEffect, useState } from 'react';
+import { Coins, TrendingUp, RefreshCw, Info } from 'lucide-react';
+import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
+import { usePiAuth } from '@/contexts/pi-auth-context';
 
 interface RETokenPageProps {
   language: 'en' | 'ar';
   onBack?: () => void;
-  onNavigate?: (pageId: string) => void;
+  onNavigate?: (newPage: string) => void;
 }
 
-const RE_TOKEN_CONTRACT = 'CBSNKBKIAUWS7XIC7M4AMY5273XH6OV757XOH32HCNSC6VQP4DG6VROY';
-
-function CopyBtn({ value }: { value: string }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <button
-      onClick={async () => {
-        try {
-          await navigator.clipboard.writeText(value);
-          setCopied(true);
-          setTimeout(() => setCopied(false), 1200);
-        } catch {}
-      }}
-      className="shrink-0 p-1 rounded hover:bg-white/10"
-    >
-      {copied ? <Check className="w-3.5 h-3.5 text-green-400" /> : <Copy className="w-3.5 h-3.5 text-muted-foreground" />}
-    </button>
-  );
+interface WalletData {
+  balance: number;
+  piUsername: string;
 }
 
-export default function RETokenPage({ language, onBack, onNavigate }: RETokenPageProps) {
+interface Quote {
+  reAmount: number;
+  unitPriceUsd: number;
+  valueUsd: number;
+  piUsdRate: number;
+  networkFeePi: number;
+  totalPi: number;
+  priceType: string;
+  quotedAt: string;
+}
+
+const RE_TOTAL_SUPPLY = 100_000_000;
+const PRESET_AMOUNTS = [1000, 5000, 10000, 50000];
+const MIN_RE = 10;
+const QUOTE_DEBOUNCE_MS = 400;
+
+export default function RETokenPage({ language = 'en', onBack }: RETokenPageProps) {
+  const { user, isAuthenticated } = usePiAuth();
+  const [wallet, setWallet] = useState<WalletData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [selectedAmount, setSelectedAmount] = useState(PRESET_AMOUNTS[0]);
+  const [customAmount, setCustomAmount] = useState('');
+
+  const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteLoading, setQuoteLoading] = useState(false);
+  const [quoteError, setQuoteError] = useState('');
+
+  const activeAmount = customAmount !== '' ? Number(customAmount) : selectedAmount;
+  const isAmountValid = Number.isFinite(activeAmount) && activeAmount >= MIN_RE;
+
   const isArabic = language === 'ar';
-  const [verifyStatus, setVerifyStatus] = useState<'idle' | 'loading' | 'done'>('idle');
-  const [verifyResult, setVerifyResult] = useState<StellarVerificationResult | null>(null);
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
-  const earnActions = [
-    { labelEn: 'Buy Properties', labelAr: 'شراء العقارات', icon: ShoppingCart, pageId: 'buy' },
-    { labelEn: 'Invest in Tokenized Assets', labelAr: 'الاستثمار في الأصول الرمزية', icon: TrendingUp, pageId: 'tokenized' },
-    { labelEn: 'Refer Friends', labelAr: 'اطلب من الأصدقاء', icon: Users, pageId: 'partners' },
-  ];
+  useEffect(() => {
+    if (isAuthenticated && user?.username) {
+      loadWallet(user.username);
+    } else {
+      setLoading(false);
+    }
+  }, [isAuthenticated, user]);
+
+  // نجيب السعر الحقيقي من الباك اند كل ما الكمية تتغيّر (مع debounce بسيط)
+  useEffect(() => {
+    if (!isAmountValid) {
+      setQuote(null);
+      return;
+    }
+    setQuoteError('');
+    const timer = setTimeout(() => fetchQuote(activeAmount), QUOTE_DEBOUNCE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeAmount, isAmountValid]);
+
+  const fetchQuote = async (reAmount: number) => {
+    try {
+      setQuoteLoading(true);
+      const res = await fetch(`${apiUrl}/api/token-sale/quote?reAmount=${reAmount}`);
+      if (!res.ok) throw new Error('quote_failed');
+      const data = await res.json();
+      setQuote(data);
+    } catch (error) {
+      console.error('[v0] RE Token quote fetch error:', error);
+      setQuote(null);
+      setQuoteError(isArabic ? 'تعذّر جلب السعر الحالي' : 'Could not fetch current price');
+    } finally {
+      setQuoteLoading(false);
+    }
+  };
+
+  const loadWallet = async (piUsername: string) => {
+    try {
+      setLoading(true);
+      const res = await fetch(`${apiUrl}/api/token-sale/wallet/${piUsername}`);
+      if (res.ok) {
+        const data = await res.json();
+        setWallet(data);
+      }
+    } catch (error) {
+      console.error('[v0] RE Token wallet fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePurchaseSuccess = () => {
+    if (user?.username) loadWallet(user.username);
+  };
 
   return (
-    <main className="w-full min-h-screen bg-background pb-24">
-      <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
-        <div className="px-4 py-4 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center gap-2">
-          <Coins className="w-6 h-6 text-accent" />
-          <div>
-            <h1 className="text-2xl font-bold text-accent">RE Token</h1>
-            <p className="text-sm text-muted-foreground">{isArabic ? 'عملة المنصة' : "The platform's currency"}</p>
-          </div>
-        </div>
-      </div>
-
-      <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-6">
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card border border-border rounded-lg p-4">
-            <p className="text-xs text-muted-foreground mb-1">{isArabic ? 'سعر الرمز' : 'Token Price'}</p>
-            <p className="text-xl font-bold text-accent">1 $RE = 0.01π</p>
-          </div>
-          <div className="bg-card border border-border rounded-lg p-4">
-            <p className="text-xs text-muted-foreground mb-1">{isArabic ? 'الإمداد الكلي' : 'Total Supply'}</p>
-            <p className="text-xl font-bold text-accent">100M $RE</p>
-          </div>
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-foreground mb-3">
-            {isArabic ? 'كيفية الكسب' : 'How to Earn'}
-          </h2>
-          <div className="space-y-2">
-            {earnActions.map((action) => {
-              const Icon = action.icon;
-              return (
-                <button
-                  key={action.pageId}
-                  onClick={() => onNavigate?.(action.pageId)}
-                  className="w-full flex items-center gap-3 bg-card border border-border hover:border-accent/50 rounded-lg p-3.5 transition text-left"
-                >
-                  <div className="bg-accent/15 p-2 rounded-lg">
-                    <Icon className="w-4 h-4 text-accent" />
-                  </div>
-                  <span className="text-sm font-medium flex-1">
-                    {isArabic ? action.labelAr : action.labelEn}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
-        </div>
-
-        <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-          <h2 className="font-semibold text-sm flex items-center gap-2">
-            <Zap className="w-4 h-4 text-accent" />
-            {isArabic ? 'العقد على البلوكشين' : 'On-Chain Contract'}
-          </h2>
-          <div className="flex items-center gap-1.5 bg-background/60 rounded px-2 py-2">
-            <code className="text-[11px] text-muted-foreground break-all flex-1">{RE_TOKEN_CONTRACT}</code>
-            <CopyBtn value={RE_TOKEN_CONTRACT} />
-          </div>
-          <p className="text-xs text-muted-foreground">Pi Testnet</p>
-
-          {verifyStatus === 'idle' && (
-            <button
-              onClick={async () => {
-                setVerifyStatus('loading');
-                const r = await verifyTransactionOnStellar(RE_TOKEN_CONTRACT);
-                setVerifyResult(r);
-                setVerifyStatus('done');
-              }}
-              className="flex items-center gap-1.5 text-xs text-accent underline"
-            >
-              <Link2 className="w-3 h-3" />
-              {isArabic ? 'تحقق على Stellar' : 'Verify on Stellar'}
+    <div className={`flex flex-col h-full bg-background pb-24 ${isArabic ? 'rtl' : 'ltr'}`}>
+      {/* Header */}
+      <div className="bg-gradient-to-r from-accent/20 to-accent/10 p-4 border-b border-border sticky top-0 z-10">
+        <div className="flex items-center justify-between mb-2">
+          {onBack && (
+            <button onClick={onBack} className="text-muted-foreground hover:text-foreground transition">
+              ←
             </button>
           )}
-          {verifyStatus === 'loading' && (
-            <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-              <Loader2 className="w-3 h-3 animate-spin" />
-              {isArabic ? 'جاري التحقق...' : 'Verifying...'}
-            </span>
-          )}
-          {verifyStatus === 'done' && verifyResult?.found && verifyResult.successful && (
-            <span className="flex items-center gap-1.5 text-xs text-green-400">
-              <ShieldCheck className="w-3 h-3" />
-              {isArabic ? `مؤكد · ليدجر ${verifyResult.ledger}` : `Confirmed · Ledger ${verifyResult.ledger}`}
-            </span>
-          )}
-          {verifyStatus === 'done' && !(verifyResult?.found && verifyResult.successful) && (
-            <span className="flex items-center gap-1.5 text-xs text-yellow-400">
-              <ShieldAlert className="w-3 h-3" />
-              {isArabic
-                ? 'هذا معرّف عقد وليس معاملة — استخدم مستكشف Stellar لعرض تفاصيله الكاملة'
-                : "This is a contract ID, not a transaction — use a Stellar explorer to view full details"}
-            </span>
+          <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
+            <Coins className="w-5 h-5 text-accent" />
+            {isArabic ? 'عملة RE Token' : 'RE Token'}
+          </h1>
+          <button
+            onClick={() => user?.username && loadWallet(user.username)}
+            className="text-muted-foreground hover:text-foreground transition"
+            disabled={loading}
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
+          </button>
+        </div>
+        <p className="text-sm text-muted-foreground">
+          {isArabic ? 'عملة المنصة الرسمية' : "The platform's currency"}
+        </p>
+      </div>
+
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {/* رصيدك */}
+        {isAuthenticated && (
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">
+              {isArabic ? 'رصيدك الحالي' : 'Your Balance'}
+            </p>
+            <p className="text-2xl font-bold text-foreground">
+              {loading ? '...' : `${(wallet?.balance ?? 0).toLocaleString()} $RE`}
+            </p>
+          </div>
+        )}
+
+        {/* السعر والسوبلاي */}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">
+              {isArabic ? 'سعر التوكن' : 'Token Price'}
+            </p>
+            <p className="text-lg font-bold text-accent">1 $RE = $0.01</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {isArabic ? 'ثابت بالدولار — لا يتغيّر بالتداول' : 'Fixed in USD — never floats with trading'}
+            </p>
+          </div>
+          <div className="bg-card border border-border rounded-xl p-4">
+            <p className="text-sm text-muted-foreground mb-1">
+              {isArabic ? 'إجمالي المعروض' : 'Total Supply'}
+            </p>
+            <p className="text-lg font-bold text-foreground">
+              {(RE_TOTAL_SUPPLY / 1_000_000).toFixed(0)}M $RE
+            </p>
+          </div>
+        </div>
+
+        {/* شراء توكن */}
+        <div className="bg-card border border-border rounded-xl p-4 space-y-3">
+          <h2 className="font-semibold text-foreground flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-accent" />
+            {isArabic ? 'اشترِ $RE' : 'Buy $RE'}
+          </h2>
+
+          <div className="grid grid-cols-4 gap-2">
+            {PRESET_AMOUNTS.map((amount) => (
+              <button
+                key={amount}
+                onClick={() => {
+                  setSelectedAmount(amount);
+                  setCustomAmount('');
+                }}
+                className={`py-2 rounded-lg text-sm font-medium border transition ${
+                  selectedAmount === amount && customAmount === ''
+                    ? 'bg-accent text-accent-foreground border-accent'
+                    : 'bg-background text-muted-foreground border-border hover:border-accent/50'
+                }`}
+              >
+                {amount.toLocaleString()}
+              </button>
+            ))}
+          </div>
+
+          <div>
+            <input
+              type="number"
+              min={MIN_RE}
+              step="1"
+              value={customAmount}
+              onChange={(e) => setCustomAmount(e.target.value)}
+              placeholder={isArabic ? `أو اكتب كمية (الحد الأدنى ${MIN_RE})` : `Or enter amount (min ${MIN_RE})`}
+              className="w-full py-2 px-3 rounded-lg text-sm bg-background text-foreground border border-border focus:border-accent focus:outline-none"
+            />
+            {customAmount !== '' && !isAmountValid && (
+              <p className="text-xs text-destructive mt-1">
+                {isArabic ? `أقل كمية للشراء هي ${MIN_RE} $RE` : `Minimum purchase is ${MIN_RE} $RE`}
+              </p>
+            )}
+          </div>
+
+          {/* تفاصيل التسعير الشفافة — من الباك اند مباشرة */}
+          <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
+            <div className="flex items-center gap-1.5 mb-1">
+              <Info className="w-3.5 h-3.5 text-muted-foreground" />
+              <p className="text-xs font-medium text-muted-foreground">
+                {isArabic ? 'تفاصيل السعر' : 'Price Breakdown'}
+              </p>
+            </div>
+
+            {quoteLoading && (
+              <p className="text-xs text-muted-foreground">
+                {isArabic ? 'جاري حساب السعر...' : 'Calculating price...'}
+              </p>
+            )}
+
+            {quoteError && !quoteLoading && (
+              <p className="text-xs text-destructive">{quoteError}</p>
+            )}
+
+            {quote && !quoteLoading && !quoteError && (
+              <>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {isArabic ? `قيمة ${quote.reAmount.toLocaleString()} $RE` : `Value of ${quote.reAmount.toLocaleString()} $RE`}
+                  </span>
+                  <span className="text-foreground font-medium">${quote.valueUsd.toLocaleString()}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">
+                    {isArabic ? 'سعر π/دولار الحالي' : 'Current π/USD rate'}
+                  </span>
+                  <span className="text-foreground font-medium">${quote.piUsdRate.toFixed(6)}</span>
+                </div>
+                <div className="flex justify-between text-xs">
+                  <span className="text-muted-foreground">{isArabic ? 'رسوم الشبكة' : 'Network fee'}</span>
+                  <span className="text-foreground font-medium">{quote.networkFeePi} π</span>
+                </div>
+                <div className="flex justify-between text-sm pt-1.5 border-t border-border">
+                  <span className="text-foreground font-semibold">{isArabic ? 'الإجمالي' : 'Total'}</span>
+                  <span className="text-accent font-bold">{quote.totalPi.toFixed(4)} π</span>
+                </div>
+              </>
+            )}
+          </div>
+
+          {isAmountValid && quote && !quoteLoading && (
+            <SimplePiPaymentButton
+              reAmount={activeAmount}
+              language={language}
+              onSuccess={handlePurchaseSuccess}
+              onError={(err) => console.error('[v0] RE Token purchase failed:', err)}
+            />
           )}
         </div>
 
-        <p className="text-[11px] text-muted-foreground text-center">
-          {isArabic
-            ? 'RE Token يعمل حالياً على شبكة Pi Testnet — القيم هنا للاختبار وليست ذات قيمة نقدية حقيقية.'
-            : 'RE Token currently runs on Pi Testnet — values shown are for testing and have no real monetary value.'}
-        </p>
+        {/* طرق ثانية للكسب */}
+        <div className="bg-card border border-border rounded-xl p-4">
+          <h2 className="font-semibold text-foreground mb-3">
+            {isArabic ? 'طرق أخرى للحصول على $RE' : 'How to Earn'}
+          </h2>
+          <div className="space-y-2 text-sm text-muted-foreground">
+            <p>• {isArabic ? 'شراء عقارات' : 'Buy Properties'}</p>
+            <p>• {isArabic ? 'الاستثمار في أصول مُرمّزة' : 'Invest in Tokenized Assets'}</p>
+            <p>• {isArabic ? 'دعوة أصدقاء' : 'Refer Friends'}</p>
+          </div>
+        </div>
       </div>
-    </main>
+    </div>
   );
 }

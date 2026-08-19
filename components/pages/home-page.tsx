@@ -34,7 +34,7 @@ const categories = [
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
-  { id: 'retoken', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
+  { id: 're-token', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
   { id: 'secondary-market', titleEn: 'Secondary Market', titleAr: 'السوق الثانوي', icon: ArrowLeftRight },
 ];
 

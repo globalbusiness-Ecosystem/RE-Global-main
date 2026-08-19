@@ -50,6 +50,10 @@ const PartnersPage = dynamic(() => import('@/components/pages/partners-page'), {
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
+const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), {
+  ssr: false,
+  loading: () => <div className="w-full h-full bg-background" />
+});
 const WhitePaperPage = dynamic(() => import('@/components/pages/whitepaper-page'), { 
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
@@ -59,10 +63,6 @@ const AnalyticsPage = dynamic(() => import('@/components/pages/analytics-page'),
   loading: () => <div className="w-full h-full bg-background" /> 
 });
 const ContractsPage = dynamic(() => import('@/components/pages/contracts-page'), { 
-  ssr: false, 
-  loading: () => <div className="w-full h-full bg-background" /> 
-});
-const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), { 
   ssr: false, 
   loading: () => <div className="w-full h-full bg-background" /> 
 });
@@ -269,6 +269,15 @@ export default function App() {
             onWhitePaperClick={() => handlePageChange('whitepaper')}
             onBack={() => handlePageChange('home')}
           />
+        );
+      case 're-token':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <RETokenPage
+              language={language}
+              onBack={goBack}
+            />
+          </div>
         );
       case 'whitepaper':
         return (
