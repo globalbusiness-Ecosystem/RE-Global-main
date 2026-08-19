@@ -1,7 +1,8 @@
 'use client';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight } from 'lucide-react';
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
@@ -34,6 +35,7 @@ const categories = [
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
   { id: 'retoken', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
+  { id: 'secondary-market', titleEn: 'Secondary Market', titleAr: 'السوق الثانوي', icon: ArrowLeftRight },
 ];
 
 const FEATURE_ITEMS = [
@@ -57,6 +59,7 @@ export default function HomePage({
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [useVoiceAdvisor, setUseVoiceAdvisor] = useState(false);
   const [showVRTour, setShowVRTour] = useState(false);
+  const router = useRouter();
 
   return (
     <main className="min-h-screen relative overflow-hidden pb-4">
@@ -101,6 +104,8 @@ export default function HomePage({
                     setShowVRTour(true);
                   } else if (cat.id === 'ai-advisor') {
                     setShowAdvisor(true);
+                  } else if (cat.id === 'secondary-market') {
+                    router.push('/secondary-market');
                   } else {
                     onCategoryClick?.(cat.id);
                   }

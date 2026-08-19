@@ -24,6 +24,7 @@ interface PiAuthContextType {
   products: Product[] | null;
   restoredPurchases: UserPurchaseBalance[] | null;
   username: string | null;
+  accessToken: string | null;
   reinitialize: () => Promise<void>;
 }
 
@@ -94,6 +95,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [hasError, setHasError] = useState(false);
   const [sdk, setSdk] = useState<SDKLiteInstance | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[] | null>(null);
   const [restoredPurchases, setRestoredPurchases] = useState<
     UserPurchaseBalance[] | null
@@ -176,6 +178,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       );
       console.log('[PiAuth] Authenticated:', authResult.user.username);
       setUsername(authResult.user.username);
+      setAccessToken(authResult.accessToken);
       setAuthMessage("Loading SDKLite...");
       await loadSDKLite();
 
@@ -226,6 +229,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     products,
     restoredPurchases,
     username,
+    accessToken,
     reinitialize: initialize,
   };
 
