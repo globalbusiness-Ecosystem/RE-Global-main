@@ -34,8 +34,7 @@ const categories = [
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
-  { id: 're-token', titleEn: 'RE Token', titleAr: 'عملة RE', icon: Coins },
-  { id: 'secondary-market', titleEn: 'Secondary Market', titleAr: 'السوق الثانوي', icon: ArrowLeftRight },
+  { id: 're-token', titleEn: 'Platform Credits', titleAr: 'رصيد المنصة', icon: Coins },
 ];
 
 const FEATURE_ITEMS = [
@@ -104,8 +103,6 @@ export default function HomePage({
                     setShowVRTour(true);
                   } else if (cat.id === 'ai-advisor') {
                     setShowAdvisor(true);
-                  } else if (cat.id === 'secondary-market') {
-                    router.push('/secondary-market');
                   } else {
                     onCategoryClick?.(cat.id);
                   }
