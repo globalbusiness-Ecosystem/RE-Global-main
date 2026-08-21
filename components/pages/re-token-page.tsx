@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Coins, TrendingUp, RefreshCw, Info } from 'lucide-react';
+import { Wallet, RefreshCw, Info } from 'lucide-react';
 import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
@@ -27,8 +27,7 @@ interface Quote {
   quotedAt: string;
 }
 
-const RE_TOTAL_SUPPLY = 100_000_000;
-const PRESET_AMOUNTS = [1000, 5000, 10000, 50000];
+const PRESET_AMOUNTS = [50, 100, 250, 500];
 const MIN_RE = 10;
 const QUOTE_DEBOUNCE_MS = 400;
 
@@ -57,7 +56,6 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
     }
   }, [isAuthenticated, user]);
 
-  // نجيب السعر الحقيقي من الباك اند كل ما الكمية تتغيّر (مع debounce بسيط)
   useEffect(() => {
     if (!isAmountValid) {
       setQuote(null);
@@ -77,7 +75,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
       const data = await res.json();
       setQuote(data);
     } catch (error) {
-      console.error('[v0] RE Token quote fetch error:', error);
+      console.error('[v0] Credits quote fetch error:', error);
       setQuote(null);
       setQuoteError(isArabic ? 'تعذّر جلب السعر الحالي' : 'Could not fetch current price');
     } finally {
@@ -94,7 +92,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
         setWallet(data);
       }
     } catch (error) {
-      console.error('[v0] RE Token wallet fetch error:', error);
+      console.error('[v0] Credits wallet fetch error:', error);
     } finally {
       setLoading(false);
     }
@@ -106,7 +104,6 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
 
   return (
     <div className={`flex flex-col h-full bg-background pb-24 ${isArabic ? 'rtl' : 'ltr'}`}>
-      {/* Header */}
       <div className="bg-gradient-to-r from-accent/20 to-accent/10 p-4 border-b border-border sticky top-0 z-10">
         <div className="flex items-center justify-between mb-2">
           {onBack && (
@@ -115,8 +112,8 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             </button>
           )}
           <h1 className="text-xl font-bold text-foreground flex items-center gap-2">
-            <Coins className="w-5 h-5 text-accent" />
-            {isArabic ? 'عملة RE Token' : 'RE Token'}
+            <Wallet className="w-5 h-5 text-accent" />
+            {isArabic ? 'رصيد المنصة' : 'Platform Credits'}
           </h1>
           <button
             onClick={() => user?.username && loadWallet(user.username)}
@@ -127,50 +124,31 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
           </button>
         </div>
         <p className="text-sm text-muted-foreground">
-          {isArabic ? 'عملة المنصة الرسمية' : "The platform's currency"}
+          {isArabic ? 'رصيد استخدام خدمات المنصة' : 'Balance for using platform services'}
         </p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {/* رصيدك */}
         {isAuthenticated && (
           <div className="bg-card border border-border rounded-xl p-4">
             <p className="text-sm text-muted-foreground mb-1">
               {isArabic ? 'رصيدك الحالي' : 'Your Balance'}
             </p>
             <p className="text-2xl font-bold text-foreground">
-              {loading ? '...' : `${(wallet?.balance ?? 0).toLocaleString()} $RE`}
+              {loading ? '...' : `${(wallet?.balance ?? 0).toLocaleString()} ${isArabic ? 'رصيد' : 'Credits'}`}
             </p>
           </div>
         )}
 
-        {/* السعر والسوبلاي */}
-        <div className="grid grid-cols-2 gap-3">
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">
-              {isArabic ? 'سعر التوكن' : 'Token Price'}
-            </p>
-            <p className="text-lg font-bold text-accent">1 $RE = $0.01</p>
-            <p className="text-xs text-muted-foreground mt-1">
-              {isArabic ? 'ثابت بالدولار — لا يتغيّر بالتداول' : 'Fixed in USD — never floats with trading'}
-            </p>
-          </div>
-          <div className="bg-card border border-border rounded-xl p-4">
-            <p className="text-sm text-muted-foreground mb-1">
-              {isArabic ? 'إجمالي المعروض' : 'Total Supply'}
-            </p>
-            <p className="text-lg font-bold text-foreground">
-              {(RE_TOTAL_SUPPLY / 1_000_000).toFixed(0)}M $RE
-            </p>
-          </div>
-        </div>
-
-        {/* شراء توكن */}
         <div className="bg-card border border-border rounded-xl p-4 space-y-3">
-          <h2 className="font-semibold text-foreground flex items-center gap-2">
-            <TrendingUp className="w-4 h-4 text-accent" />
-            {isArabic ? 'اشترِ $RE' : 'Buy $RE'}
+          <h2 className="font-semibold text-foreground">
+            {isArabic ? 'اشحن رصيدك' : 'Top Up Your Credits'}
           </h2>
+          <p className="text-xs text-muted-foreground -mt-2">
+            {isArabic
+              ? 'استخدم رصيدك في: الجولات الافتراضية، الفحص، Aladdin، والتحليلات'
+              : 'Use your credits for: VR/AI Tours, Inspect, Aladdin, and Analytics'}
+          </p>
 
           <div className="grid grid-cols-4 gap-2">
             {PRESET_AMOUNTS.map((amount) => (
@@ -203,12 +181,11 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
             />
             {customAmount !== '' && !isAmountValid && (
               <p className="text-xs text-destructive mt-1">
-                {isArabic ? `أقل كمية للشراء هي ${MIN_RE} $RE` : `Minimum purchase is ${MIN_RE} $RE`}
+                {isArabic ? `أقل كمية للشحن هي ${MIN_RE}` : `Minimum top-up is ${MIN_RE}`}
               </p>
             )}
           </div>
 
-          {/* تفاصيل التسعير الشفافة — من الباك اند مباشرة */}
           <div className="bg-background border border-border rounded-lg p-3 space-y-1.5">
             <div className="flex items-center gap-1.5 mb-1">
               <Info className="w-3.5 h-3.5 text-muted-foreground" />
@@ -231,7 +208,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
               <>
                 <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">
-                    {isArabic ? `قيمة ${quote.reAmount.toLocaleString()} $RE` : `Value of ${quote.reAmount.toLocaleString()} $RE`}
+                    {isArabic ? 'قيمة الرصيد' : 'Credit value'}
                   </span>
                   <span className="text-foreground font-medium">${quote.valueUsd.toLocaleString()}</span>
                 </div>
@@ -258,21 +235,9 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
               reAmount={activeAmount}
               language={language}
               onSuccess={handlePurchaseSuccess}
-              onError={(err) => console.error('[v0] RE Token purchase failed:', err)}
+              onError={(err) => console.error('[v0] Credits top-up failed:', err)}
             />
           )}
-        </div>
-
-        {/* طرق ثانية للكسب */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h2 className="font-semibold text-foreground mb-3">
-            {isArabic ? 'طرق أخرى للحصول على $RE' : 'How to Earn'}
-          </h2>
-          <div className="space-y-2 text-sm text-muted-foreground">
-            <p>• {isArabic ? 'شراء عقارات' : 'Buy Properties'}</p>
-            <p>• {isArabic ? 'الاستثمار في أصول مُرمّزة' : 'Invest in Tokenized Assets'}</p>
-            <p>• {isArabic ? 'دعوة أصدقاء' : 'Refer Friends'}</p>
-          </div>
         </div>
       </div>
     </div>
