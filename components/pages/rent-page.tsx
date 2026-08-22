@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
@@ -8,7 +9,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
 interface RentPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   favorites: string[];
   toggleFavorite: (id: string) => void;
@@ -114,7 +115,7 @@ const RentPropertyCard = memo(({
   onTourClick,
 }: {
   property: typeof rentProperties[0];
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   isFavorite: boolean;
   onToggleFavorite: () => void;

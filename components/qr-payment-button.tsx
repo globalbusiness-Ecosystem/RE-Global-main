@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useEffect, useCallback, useMemo, memo } from 'react';
 import { Loader2, CheckCircle, AlertCircle, QrCode } from 'lucide-react';
@@ -8,7 +9,7 @@ import type { Product } from '@/lib/sdklite-types';
 
 interface QRPaymentButtonProps {
   propertyId: string;
-  language: 'en' | 'ar';
+  language: NavLanguage;
   className?: string;
   onSuccess?: (result: any) => void;
   onError?: (error: Error) => void;

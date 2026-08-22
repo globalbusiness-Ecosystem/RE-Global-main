@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useEffect } from 'react';
 import { Download, Copy, Printer, QrCode, Grid, List, Check } from 'lucide-react';
@@ -17,7 +18,7 @@ interface PropertyQRData {
 
 interface QRCodesManagerProps {
   properties: PropertyQRData[];
-  language: 'en' | 'ar';
+  language: NavLanguage;
 }
 
 export const QRCodesManager = ({ properties, language }: QRCodesManagerProps) => {

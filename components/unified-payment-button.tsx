@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
@@ -9,7 +10,7 @@ interface UnifiedPaymentButtonProps {
   propertyTitle: string;
   price: number;
   transactionType: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized';
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   className?: string;
   onSuccess?: (result: any) => void;

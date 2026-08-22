@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +12,7 @@ import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 
 interface ProfilePageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   favorites?: string[];
   onBack?: () => void;
 }

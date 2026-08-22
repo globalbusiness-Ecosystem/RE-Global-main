@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Home, LayoutDashboard, AlertCircle, MapPin, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
@@ -6,7 +7,7 @@ import { toast } from 'sonner';
 interface BottomNavProps {
   currentPage: string;
   setCurrentPage: (page: string) => void;
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
 }
 
 const navItems = [

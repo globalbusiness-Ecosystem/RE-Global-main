@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, X } from 'lucide-react';
@@ -6,7 +7,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
 interface PropertiesPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   favorites: string[];
   toggleFavorite: (id: string) => void;

@@ -1,11 +1,12 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useRef, useState } from 'react';
 import { X, Camera, AlertTriangle } from 'lucide-react';
 import jsQR from 'jsqr';
 
 interface QRScannerModalProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onScan: (value: string) => void;
   onClose: () => void;
 }

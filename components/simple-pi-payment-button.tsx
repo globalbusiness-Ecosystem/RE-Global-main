@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { ShoppingCart } from 'lucide-react';
@@ -6,7 +7,7 @@ import { ShoppingCart } from 'lucide-react';
 interface SimplePiPaymentButtonProps {
   propertyId?: string;
   reAmount?: number;
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   onSuccess?: (result: any) => void;
   onError?: (error: Error) => void;
   className?: string;

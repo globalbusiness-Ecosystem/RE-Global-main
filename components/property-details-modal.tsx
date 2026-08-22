@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useState, useCallback } from 'react';
 import { X, MapPin, Bed, Maximize2, Heart, Share2, Phone, Mail, Download } from 'lucide-react';
@@ -31,7 +32,7 @@ interface PropertyDetailsModalProps {
       email?: string;
     };
   };
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onFavoriteClick?: () => void;
   isFavorite?: boolean;
   onBuyClick?: () => void;

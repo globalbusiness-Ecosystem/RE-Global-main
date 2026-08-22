@@ -7,7 +7,7 @@ import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
 
 interface SettingsPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   setLanguage: (lang: 'en' | 'ar') => void;
   onWhitePaperClick?: () => void;
   onBack?: () => void;

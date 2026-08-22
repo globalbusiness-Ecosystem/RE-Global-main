@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useMemo, memo, useCallback } from 'react';
 import { X, Zap, TrendingUp, AlertCircle } from 'lucide-react';
@@ -10,7 +11,7 @@ interface AIPriceEstimateProps {
   propertyTitle: string;
   listedPrice: number;
   city: string;
-  language: 'en' | 'ar';
+  language: NavLanguage;
   category?: string;
 }
 

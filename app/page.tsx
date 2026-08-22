@@ -1,8 +1,10 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useProperties } from '@/lib/useProperties';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
@@ -73,10 +75,10 @@ const InspectionsPage = dynamic(() => import('@/components/pages/inspections-pag
 export default function App() {
   const { properties, loading: propertiesLoading } = useProperties();
   const { username } = usePiAuth();
+  const { language, setLanguage } = useLanguage();
   const { getFavoritesForUser, addFavorite, removeFavorite } = useFirebaseDatabase();
   const [currentPage, setCurrentPage] = useState('home');
   const [previousPage, setPreviousPage] = useState('home');
-  const [language, setLanguage] = useState<'en' | 'ar'>('en');
   const [currency, setCurrency] = useState<'PI' | 'USD'>('PI');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [logoTaps, setLogoTaps] = useState(0);
@@ -438,7 +440,7 @@ export default function App() {
 }
 
 interface AdminPinModalProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onClose: () => void;
 }
 

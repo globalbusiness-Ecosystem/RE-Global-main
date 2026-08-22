@@ -1,10 +1,11 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useCallback, useState } from 'react';
 import { X, ChevronDown } from 'lucide-react';
 
 interface SearchFilterProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onSearch: (query: string) => void;
   onFilterChange: (filters: FilterOptions) => void;
   cities?: string[];

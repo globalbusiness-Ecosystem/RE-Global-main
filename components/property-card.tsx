@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useMemo, useState, useCallback } from 'react';
 import { Bed, Maximize2, Heart, MapPin, Camera, Zap, Image as ImageIcon, QrCode } from 'lucide-react';
@@ -21,7 +22,7 @@ interface PropertyCardProps {
   category?: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized' | 'abroad' | 'offplan';
   isFavorite: boolean;
   onToggleFavorite: (id: string) => void;
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onPropertyClick?: (id: string) => void;
   panoramaUrl?: string;
   onTourClick?: (id: string) => void;

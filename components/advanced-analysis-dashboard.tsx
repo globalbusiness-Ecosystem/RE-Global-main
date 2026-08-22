@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
+import type { NavLanguage } from '@/lib/nav-i18n';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AdvancedAnalysisProps {
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   userId: string;
 }
 

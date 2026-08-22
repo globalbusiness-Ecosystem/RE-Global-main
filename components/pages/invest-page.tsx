@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { MapPin, Bed, Maximize2, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
@@ -8,7 +9,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
 interface InvestPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   favorites: string[];
   toggleFavorite: (id: string) => void;

@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Send, Bot, Loader, Volume2, VolumeX, Mic, MicOff, Phone, Settings, Image } from 'lucide-react';
@@ -18,7 +19,7 @@ interface Message {
 }
 
 interface AIAdvisorVoiceChatProps {
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   onClose: () => void;
   enableVoice?: boolean;
 }
@@ -71,7 +72,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
   const [isLoading, setIsLoading] = useState(false);
   const [isListening, setIsListening] = useState(false);
   const [isSpeaking, setIsSpeaking] = useState(false);
-  const [currentLang, setCurrentLang] = useState<'en' | 'ar'>(language);
+  const [currentLang, setCurrentLang] = useState<'en' | 'ar'>(language === 'ar' ? 'ar' : 'en');
   const [voiceError, setVoiceError] = useState<string>('');
   const [showSettings, setShowSettings] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);

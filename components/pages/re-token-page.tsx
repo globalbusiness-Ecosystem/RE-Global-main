@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import { Wallet, RefreshCw, Info } from 'lucide-react';
@@ -6,7 +7,7 @@ import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
 interface RETokenPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack?: () => void;
   onNavigate?: (newPage: string) => void;
 }

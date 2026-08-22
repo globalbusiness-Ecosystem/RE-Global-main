@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Phone, Lock, CheckCircle2, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface OTPAuthProps {
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   onSuccess?: (session: any) => void;
   onCancel?: () => void;
 }

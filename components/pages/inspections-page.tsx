@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useMemo, useState } from 'react';
 import {
@@ -27,7 +28,7 @@ import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/li
 import InspectionSimulationScene from '@/components/InspectionSimulationScene';
 
 interface InspectionsPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack?: () => void;
   onNavigate?: (pageId: string) => void;
 }

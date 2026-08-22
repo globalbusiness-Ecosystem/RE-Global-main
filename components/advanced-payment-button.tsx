@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { Loader2, CheckCircle2, AlertCircle, ShoppingCart } from 'lucide-react';
@@ -13,7 +14,7 @@ interface AdvancedPaymentButtonProps {
   price: number;
   currency: 'PI' | 'USD';
   transactionType: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized';
-  language: 'en' | 'ar';
+  language: NavLanguage;
   userId?: string;
   onSuccess?: (result: any) => void;
   onError?: (error: string) => void;

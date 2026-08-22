@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
@@ -6,7 +7,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { getTestPropertyById } from '@/lib/vr-tour-config';
 
 interface PropertyTourSelectorProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onClose: () => void;
 }
 

@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useState, useCallback } from 'react';
 import { PropertyCard } from './property-card';
@@ -7,7 +8,7 @@ import { SampleProperty, SAMPLE_PROPERTIES } from '@/lib/sample-properties';
 import { PropertyImage } from './property-images-carousel';
 
 interface PropertiesGridProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   category?: string;
   properties?: SampleProperty[];
   onBuyClick?: (propertyId: string) => void;

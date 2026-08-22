@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2 } from 'lucide-react';
@@ -9,7 +10,7 @@ import { useProperties } from '@/lib/useProperties';
 import { generateSmartAlerts, type SmartAlert } from '@/lib/smart-alerts';
 
 interface AlertsPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack?: () => void;
 }
 

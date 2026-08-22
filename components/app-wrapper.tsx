@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
+import { LanguageProvider } from "@/contexts/language-context";
 import { OfflineBanner } from "./offline-banner";
 import { TermsConsentModal } from "./terms-consent-modal";
 import { Toaster } from "sonner";
@@ -13,14 +14,13 @@ import { getStoredTheme, applyTheme } from "@/lib/theme";
 function AppContent({ children }: { children: ReactNode }) {
   const { isInitialized } = usePiAuth();
   const { showBanner, setShowBanner } = useOnlineStatus();
-  
+
   useServiceWorker();
-  
+
   useEffect(() => {
     applyTheme(getStoredTheme());
   }, []);
-  
-  // ✅ مش بنستنى Pi auth على Chrome
+
   return (
     <>
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
@@ -44,7 +44,9 @@ function AppContent({ children }: { children: ReactNode }) {
 export function AppWrapper({ children }: { children: ReactNode }) {
   return (
     <PiAuthProvider>
-      <AppContent>{children}</AppContent>
+      <LanguageProvider>
+        <AppContent>{children}</AppContent>
+      </LanguageProvider>
     </PiAuthProvider>
   );
 }

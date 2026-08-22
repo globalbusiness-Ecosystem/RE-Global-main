@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo } from 'react';
 import { 
@@ -32,7 +33,7 @@ interface PropertyAnalysis {
 
 interface PropertyPhotoAnalysisCardProps {
   analysis: PropertyAnalysis;
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   onInvest?: () => void;
 }
 

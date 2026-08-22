@@ -3,11 +3,12 @@
 import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard, Settings as SettingsIcon, Moon, Sun, Globe2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useLanguage } from '@/contexts/language-context';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
 
 interface HeaderProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onSettingsClick?: () => void;
   onMenuItemClick?: (category: string) => void;
   currentPage?: string;
@@ -19,15 +20,11 @@ const NAV_LANG_KEY = 're_nav_language';
 export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
-  const [navLang, setNavLang] = useState<NavLanguage>(language);
   const { username, isAuthenticated } = usePiAuth();
+  const { language: navLang } = useLanguage();
 
   useEffect(() => {
     setDarkMode(getStoredTheme() === 'dark');
-    try {
-      const stored = localStorage.getItem(NAV_LANG_KEY) as NavLanguage | null;
-      if (stored) setNavLang(stored);
-    } catch {}
   }, []);
 
   const t = NAV_DICTIONARY[navLang];

@@ -1,11 +1,12 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Car, Footprints, Bike, Volume2, VolumeX, Navigation as NavigationIcon, Loader2 } from 'lucide-react';
 import { fetchRoute, haversineMeters, type Route, type TravelMode } from '@/lib/routing';
 
 interface NavigationPanelProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   destination: { lat: number; lng: number; title: string };
   onClose: () => void;
   L: any; // Leaflet instance (already loaded by the map page)
@@ -64,7 +65,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
     async (from: { lat: number; lng: number }) => {
       setLoading(true);
       setError(null);
-      const r = await fetchRoute(mode, from, destination, language);
+      const r = await fetchRoute(mode, from, destination, (language === 'ar' ? 'ar' : 'en'));
       if (!r) {
         setError(isArabic ? 'تعذر جلب المسار' : 'Could not fetch route');
         setLoading(false);

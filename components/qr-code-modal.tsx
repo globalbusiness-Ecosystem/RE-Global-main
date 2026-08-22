@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { X, Download, Copy, Printer, Check } from 'lucide-react';
@@ -15,7 +16,7 @@ interface QRCodeModalProps {
   city: string;
   bedrooms: number;
   area: number;
-  language: 'en' | 'ar';
+  language: NavLanguage;
 }
 
 export const QRCodeModal = ({

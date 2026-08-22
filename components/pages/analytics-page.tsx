@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { TrendingUp, MapPin, Home, DollarSign, Users, Activity, ArrowUp, ArrowDown } from 'lucide-react';
 import { useMemo } from 'react';
@@ -6,7 +7,7 @@ import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import AIMarketAnalysisDashboard from '@/components/ai-market-analysis-dashboard';
 
 interface AnalyticsPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
 }
 

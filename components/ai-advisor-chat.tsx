@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload } from 'lucide-react';
@@ -17,7 +18,7 @@ interface Message {
 }
 
 interface AIAdvisorChatProps {
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   onClose: () => void;
 }
 
@@ -41,7 +42,7 @@ const SUGGESTED_QUESTIONS = {
 };
 
 // Text-to-Speech utility
-const speakMessage = (text: string, language: 'en' | 'ar' = 'en', onComplete?: () => void) => {
+const speakMessage = (text: string, language: NavLanguage = 'en', onComplete?: () => void) => {
   // Check browser support
   if (!window.speechSynthesis) {
     console.warn('[v0] Speech Synthesis not supported');
@@ -854,7 +855,8 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
       else if (lowerMessage.includes('uk') || lowerMessage.includes('england') || lowerMessage.includes('london') || lowerMessage.includes('britain')) country = 'UK';
       else if (lowerMessage.includes('uae') || lowerMessage.includes('dubai') || lowerMessage.includes('emirates')) country = 'UAE';
 
-      const legalInfo = LEGAL_FRAMEWORK[language][country as keyof typeof LEGAL_FRAMEWORK[typeof language]];
+      const legalLang = (language === 'ar' ? 'ar' : 'en') as 'en' | 'ar';
+      const legalInfo = LEGAL_FRAMEWORK[legalLang][country as keyof typeof LEGAL_FRAMEWORK[typeof legalLang]];
       const disclaimer = language === 'en'
         ? '\n\n⚠️ LEGAL DISCLAIMER: This is general legal guidance only. It is not a substitute for professional legal advice. Always consult a licensed lawyer in your jurisdiction before making any real estate decisions or signing contracts.'
         : '\n\n⚠️ تنويه قانوني: هذا إرشاد قانوني عام فقط. إنه ليس بديلاً عن المشورة القانونية المتخصصة. استشر دائماً محامياً مرخصاً في نطاقك القضائي قبل اتخاذ أي قرار عقاري أو توقيع عقود.';

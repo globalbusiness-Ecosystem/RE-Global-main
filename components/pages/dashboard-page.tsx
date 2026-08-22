@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import {
@@ -14,7 +15,7 @@ import { useProperties } from '@/lib/useProperties';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 
 interface DashboardPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack?: () => void;
   favorites: string[];
 }
@@ -44,7 +45,7 @@ function CopyBtn({ value }: { value: string }) {
   );
 }
 
-function VerifyRow({ txid, language }: { txid: string; language: 'en' | 'ar' }) {
+function VerifyRow({ txid, language }: { txid: string; language: NavLanguage }) {
   const isArabic = language === 'ar';
   const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
   const [result, setResult] = useState<StellarVerificationResult | null>(null);

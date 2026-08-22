@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { PropertiesGrid } from '@/components/properties-grid';
@@ -6,7 +7,7 @@ import { SAMPLE_PROPERTIES } from '@/lib/sample-properties';
 import { Search, MapPin, Home } from 'lucide-react';
 
 interface PropertiesPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
 }
 
 export default function PropertiesPage({ language }: PropertiesPageProps) {

@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Heart } from 'lucide-react';
 import { MapPin, Bed, Maximize2, Video } from 'lucide-react';
@@ -10,7 +11,7 @@ import { PropertyQRCode } from '@/components/property-qr-code';
 import { useProperties } from '@/lib/useProperties';
 
 interface FavoritesPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   favorites: string[];
   toggleFavorite: (id: string) => void;

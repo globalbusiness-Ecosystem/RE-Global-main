@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode, Link2, Loader2, ShieldAlert } from 'lucide-react';
@@ -8,7 +9,7 @@ import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database
 import { usePiAuth } from '@/contexts/pi-auth-context';
 
 interface ContractsPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack?: () => void;
 }
 
@@ -33,7 +34,7 @@ const typeLabelAr: Record<SmartContract['type'], string> = {
   tokenized: 'رمزي',
 };
 
-function VerifyOnChain({ txid, language }: { txid: string; language: 'en' | 'ar' }) {
+function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage }) {
   const isArabic = language === 'ar';
   const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
   const [result, setResult] = useState<StellarVerificationResult | null>(null);

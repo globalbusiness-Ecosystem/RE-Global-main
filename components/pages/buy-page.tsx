@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useProperties } from '@/lib/useProperties';
 import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
@@ -10,7 +11,7 @@ import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
 
 interface BuyPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   favorites: string[];
   toggleFavorite: (id: string) => void;
@@ -120,7 +121,7 @@ const PropertyCard = memo(({
   onTourClick,
 }: {
   property: typeof buyProperties[0];
-  language: 'en' | 'ar';
+  language: NavLanguage;
   currency: 'PI' | 'USD';
   isFavorite: boolean;
   onToggleFavorite: () => void;
@@ -240,7 +241,7 @@ function FirebasePropertyModal({
   onClose,
 }: {
   prop: Property;
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onClose: () => void;
 }) {
   const title = language === 'ar' && prop.titleAr ? prop.titleAr : prop.title;

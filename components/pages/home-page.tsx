@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight } from 'lucide-react';
 import { useState } from 'react';
@@ -12,7 +13,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 
 interface HomePageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onCategoryClick?: (categoryId: string) => void;
   properties?: any[];
   propertiesLoading?: boolean;

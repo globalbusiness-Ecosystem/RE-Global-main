@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useProperties } from '@/lib/useProperties';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
@@ -105,7 +106,7 @@ async function initializeMap() {
 }
 
 interface MapPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onPropertySelect?: (propertyId: number | string) => void;
 }
 

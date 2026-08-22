@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 import { CreditCard, TrendingUp, TrendingDown, RefreshCw, Send } from 'lucide-react';
@@ -9,7 +10,7 @@ import type { Wallet, Transaction } from '@/lib/transaction-manager';
 import { useTransactionManager } from '@/lib/transaction-manager';
 
 interface PaymentPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   userId?: string;
   onBack?: () => void;
 }

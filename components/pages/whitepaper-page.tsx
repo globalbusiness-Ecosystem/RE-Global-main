@@ -1,10 +1,11 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { ChevronDown, Mail } from 'lucide-react';
 import { useState } from 'react';
 
 interface WhitePaperPageProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onBack: () => void;
   showBackButton?: boolean;
 }

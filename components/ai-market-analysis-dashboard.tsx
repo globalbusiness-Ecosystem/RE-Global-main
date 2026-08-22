@@ -1,11 +1,12 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useMemo, useState, useEffect, memo, useCallback } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { TrendingUp, TrendingDown, Calendar, Download, RefreshCw, Brain } from 'lucide-react';
 
 interface MarketAnalysisDashboardProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
 }
 
 // Monthly price trend data for cities

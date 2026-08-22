@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
 
@@ -16,7 +17,7 @@ interface Slide {
 }
 
 interface HeroSliderProps {
-  language: 'en' | 'ar';
+  language: NavLanguage;
   onInvestClick?: () => void;
   onTokenizedClick?: () => void;
 }

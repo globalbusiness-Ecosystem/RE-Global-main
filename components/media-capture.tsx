@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
@@ -10,7 +11,7 @@ export type { CapturedMedia } from '@/lib/device-media-service';
 interface MediaCaptureProps {
   onMediaCapture?: (media: CapturedMedia) => void;
   onMediaUpload?: (result: { url: string; id: string; analysis?: any }) => void;
-  language?: 'en' | 'ar';
+  language?: NavLanguage;
   maxSize?: number;
 }
 

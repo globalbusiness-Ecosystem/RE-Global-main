@@ -1,4 +1,5 @@
 'use client';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useRef } from 'react';
 import { Upload, X, Plus, Image as ImageIcon } from 'lucide-react';
@@ -7,7 +8,7 @@ import { Button } from './ui/button';
 
 interface PropertyImageUploadProps {
   onImagesChange: (images: PropertyImage[]) => void;
-  language: 'en' | 'ar';
+  language: NavLanguage;
   maxImages?: number;
   maxFileSize?: number; // in MB
 }
