@@ -1,26 +1,20 @@
 'use client';
 
 import { useState } from 'react';
-import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft, Check } from 'lucide-react';
+import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
-import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
 
 interface SettingsPageProps {
   language: 'en' | 'ar';
-  // Display language for nav chrome — this is now the single place in the app
-  // where the user picks a language (moved here from the old drawer picker).
-  // Picking 'en' or 'ar' also updates `language` above (handled by the parent).
-  navLanguage: NavLanguage;
-  onNavLanguageChange: (lang: NavLanguage) => void;
+  setLanguage: (lang: 'en' | 'ar') => void;
   onWhitePaperClick?: () => void;
   onBack?: () => void;
 }
 
 export default function SettingsPage({
   language,
-  navLanguage,
-  onNavLanguageChange,
+  setLanguage,
   onWhitePaperClick,
   onBack,
 }: SettingsPageProps) {
@@ -79,27 +73,28 @@ export default function SettingsPage({
         <h3 className="font-semibold text-foreground mb-3">
           {language === 'en' ? 'Language' : 'اللغة'}
         </h3>
-        <div className="grid grid-cols-2 gap-2">
-          {LANGUAGE_OPTIONS.map((opt) => (
-            <button
-              key={opt.code}
-              onClick={() => onNavLanguageChange(opt.code)}
-              className={`flex items-center justify-between gap-2 py-2 px-3 rounded-lg font-medium transition ${
-                navLanguage === opt.code
-                  ? 'bg-accent text-accent-foreground'
-                  : 'border border-border text-foreground hover:border-accent'
-              }`}
-            >
-              <span>{opt.native}</span>
-              {navLanguage === opt.code && <Check className="w-4 h-4" />}
-            </button>
-          ))}
+        <div className="flex gap-2">
+          <button
+            onClick={() => setLanguage('en')}
+            className={`flex-1 py-2 rounded-lg font-medium transition ${
+              language === 'en'
+                ? 'bg-accent text-accent-foreground'
+                : 'border border-border text-foreground hover:border-accent'
+            }`}
+          >
+            English
+          </button>
+          <button
+            onClick={() => setLanguage('ar')}
+            className={`flex-1 py-2 rounded-lg font-medium transition ${
+              language === 'ar'
+                ? 'bg-accent text-accent-foreground'
+                : 'border border-border text-foreground hover:border-accent'
+            }`}
+          >
+            العربية
+          </button>
         </div>
-        {navLanguage !== 'en' && navLanguage !== 'ar' && (
-          <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-            {NAV_DICTIONARY[navLanguage].translationNote}
-          </p>
-        )}
       </div>
 
       {/* 2. Dark Mode */}

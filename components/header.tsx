@@ -1,32 +1,38 @@
 'use client';
 
-import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard, Settings as SettingsIcon, Moon, Sun } from 'lucide-react';
+import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard, Settings as SettingsIcon, Moon, Sun, Globe2, Check } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
-import { NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
+import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
 
 interface HeaderProps {
   language: 'en' | 'ar';
-  // Display language is now set only from the Settings page (single source of truth).
-  navLanguage: NavLanguage;
   onSettingsClick?: () => void;
   onMenuItemClick?: (category: string) => void;
   currentPage?: string;
   onLogoTap?: () => void;
 }
 
-export default function Header({ language, navLanguage, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
+const NAV_LANG_KEY = 're_nav_language';
+
+export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [showLangPicker, setShowLangPicker] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
+  const [navLang, setNavLang] = useState<NavLanguage>(language);
   const { username, isAuthenticated } = usePiAuth();
 
   useEffect(() => {
     setDarkMode(getStoredTheme() === 'dark');
+    try {
+      const stored = localStorage.getItem(NAV_LANG_KEY) as NavLanguage | null;
+      if (stored) setNavLang(stored);
+    } catch {}
   }, []);
 
-  const t = NAV_DICTIONARY[navLanguage];
-  const isRtl = navLanguage === 'ar' || navLanguage === 'ur';
+  const t = NAV_DICTIONARY[navLang];
+  const isRtl = navLang === 'ar' || navLang === 'ur';
 
   const menuGroups: { titleKey: keyof typeof t; items: { id: string; labelKey: keyof typeof t }[] }[] = [
     {
@@ -75,6 +81,14 @@ export default function Header({ language, navLanguage, onSettingsClick, onMenuI
     const next = !darkMode;
     setDarkMode(next);
     applyTheme(next ? 'dark' : 'light');
+  };
+
+  const selectNavLang = (code: NavLanguage) => {
+    setNavLang(code);
+    setShowLangPicker(false);
+    try {
+      localStorage.setItem(NAV_LANG_KEY, code);
+    } catch {}
   };
 
   return (
@@ -184,6 +198,37 @@ export default function Header({ language, navLanguage, onSettingsClick, onMenuI
                     <Moon className="w-3 h-3" /> {t.darkMode}
                   </span>
                 </button>
+              </div>
+
+              <div>
+                <button
+                  onClick={() => setShowLangPicker((v) => !v)}
+                  className="w-full flex items-center justify-between px-1 py-1.5"
+                >
+                  <span className="text-xs text-gray-400 flex items-center gap-1.5">
+                    <Globe2 className="w-3.5 h-3.5" /> {t.displayLanguage}
+                  </span>
+                  <span className="text-xs text-accent">
+                    {LANGUAGE_OPTIONS.find((l) => l.code === navLang)?.native}
+                  </span>
+                </button>
+                {showLangPicker && (
+                  <div className="mt-1.5 bg-gray-900 border border-gray-800 rounded-lg overflow-hidden">
+                    {LANGUAGE_OPTIONS.map((opt) => (
+                      <button
+                        key={opt.code}
+                        onClick={() => selectNavLang(opt.code)}
+                        className="w-full flex items-center justify-between px-3 py-2 text-sm hover:bg-white/5 transition"
+                      >
+                        <span className={navLang === opt.code ? 'text-accent' : 'text-gray-300'}>{opt.native}</span>
+                        {navLang === opt.code && <Check className="w-3.5 h-3.5 text-accent" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {navLang !== 'en' && navLang !== 'ar' && (
+                  <p className="text-[10px] text-gray-500 mt-2 px-1 leading-relaxed">{t.translationNote}</p>
+                )}
               </div>
             </div>
           </div>
