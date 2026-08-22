@@ -11,6 +11,9 @@ import AIAdvisorChat from '@/components/ai-advisor-chat';
 import AIAdvisorVoiceChat from '@/components/ai-advisor-voice-chat';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { HOME_CATEGORIES, HOME_FEATURES, HOME_STATS, HOME_UI, tt } from '@/lib/home-i18n';
+
+const FEATURE_ICONS = [Glasses, Zap, Building2, Globe, Bot, ScrollText, ShieldCheck, Video, BarChart3, TrendingUp, Languages];
 
 interface HomePageProps {
   language: NavLanguage;
@@ -76,13 +79,13 @@ export default function HomePage({
         <div className="mb-12 overflow-x-auto">
           <div className="flex gap-3 pb-2 min-w-min">
             {[
-              { en: 'Properties', ar: 'العقارات', val: '12.5K' },
-              { en: 'Countries', ar: 'الدول', val: '195' },
-              { en: 'Investors', ar: 'المستثمرون', val: '45.2K' },
-              { en: 'Volume', ar: 'الحجم', val: '$2.3B' },
+              { key: 'properties', val: '12.5K' },
+              { key: 'countries', val: '195' },
+              { key: 'investors', val: '45.2K' },
+              { key: 'volume', val: '$2.3B' },
             ].map((s) => (
-              <div key={s.en} className="flex-shrink-0 rounded-lg p-3 flex flex-col items-center gap-1" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-gray-400 text-xs">{language === 'en' ? s.en : s.ar}</p>
+              <div key={s.key} className="flex-shrink-0 rounded-lg p-3 flex flex-col items-center gap-1" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
+                <p className="text-gray-400 text-xs">{tt(HOME_STATS[s.key], language)}</p>
                 <p className="text-xl font-bold text-accent">{s.val}</p>
               </div>
             ))}
@@ -91,7 +94,7 @@ export default function HomePage({
 
         {/* Categories */}
         <h3 className="text-lg font-semibold text-white mb-6 tracking-wide">
-          {language === 'en' ? 'Explore Categories' : 'استكشف الفئات'}
+          {tt(HOME_UI.exploreCategories, language)}
         </h3>
         <div className="grid grid-cols-3 gap-5 mb-12">
           {categories.map((cat) => {
@@ -115,7 +118,7 @@ export default function HomePage({
                   <Icon className="w-7 h-7 text-accent" />
                 </div>
                 <span className="text-xs font-medium text-white text-center leading-tight">
-                  {language === 'en' ? cat.titleEn : cat.titleAr}
+                  {tt(HOME_CATEGORIES[cat.id], language)}
                 </span>
               </button>
             );
@@ -135,7 +138,7 @@ export default function HomePage({
               className="w-1.5 h-1.5 rounded-full"
               style={{ background: '#D4AF37', boxShadow: '0 0 8px #D4AF37' }}
             />
-            {language === 'en' ? 'Why Choose RE?' : 'لماذا تختار RE؟'}
+            {tt(HOME_UI.whyChoose, language)}
           </h3>
 
           <div className="relative">
@@ -150,11 +153,11 @@ export default function HomePage({
 
             <div className="flex overflow-hidden">
               <div className="flex gap-4 animate-marquee shrink-0 pr-4">
-                {[...FEATURE_ITEMS, ...FEATURE_ITEMS].map((item, i) => {
-                  const FeatureIcon = item.icon;
+                {[...HOME_FEATURES, ...HOME_FEATURES].map((item, i) => {
+                  const FeatureIcon = FEATURE_ICONS[i % FEATURE_ICONS.length];
                   return (
                     <div
-                      key={`${item.en}-${i}`}
+                      key={`feat-${i}`}
                       className="flex items-center gap-2.5 shrink-0 px-4 py-2.5 rounded-full"
                       style={{
                         background: 'rgba(212,175,55,0.08)',
@@ -164,7 +167,7 @@ export default function HomePage({
                     >
                       <FeatureIcon className="w-4 h-4 shrink-0" style={{ color: '#D4AF37' }} />
                       <span className="text-sm text-gray-200 whitespace-nowrap">
-                        {language === 'en' ? item.en : item.ar}
+                        {tt(item, language)}
                       </span>
                     </div>
                   );
@@ -179,17 +182,15 @@ export default function HomePage({
           <div className="flex items-center gap-2 mb-4">
             <ShoppingCart className="w-5 h-5 text-accent" />
             <h3 className="text-lg font-semibold text-accent">
-              {language === 'en' ? 'Pay with Pi' : 'ادفع بـ Pi'}
+              {tt(HOME_UI.payWithPi, language)}
             </h3>
           </div>
           <p className="text-sm text-gray-300 mb-4">
-            {language === 'en'
-              ? 'Experience seamless property transactions powered by Pi Network'
-              : 'اختبر معاملات العقارات السلسة المدعومة بشبكة Pi'}
+            {tt(HOME_UI.payDesc, language)}
           </p>
           <UnifiedPaymentButton
             propertyId="showcase-property-001"
-            propertyTitle={language === 'en' ? 'Sample Luxury Property' : 'عقار فاخر للعينة'}
+            propertyTitle={tt(HOME_UI.sampleProperty, language)}
             price={50}
             transactionType="buy"
             language={language}
@@ -199,7 +200,7 @@ export default function HomePage({
             onError={(error) => { console.error('Payment error:', error); }}
           />
           <p className="text-xs text-gray-400 mt-3 text-center">
-            {language === 'en' ? 'Secure • Fast • Decentralized' : 'آمن • سريع • لامركزي'}
+            {tt(HOME_UI.secureFast, language)}
           </p>
         </div>
 
