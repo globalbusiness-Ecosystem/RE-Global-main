@@ -1,9 +1,10 @@
 'use client';
 
-import { useState } from 'react';
-import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
+import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
 
 interface SettingsPageProps {
   language: 'en' | 'ar';
@@ -11,6 +12,10 @@ interface SettingsPageProps {
   onWhitePaperClick?: () => void;
   onBack?: () => void;
 }
+
+// Same key the header drawer already reads on load — writing here keeps
+// them in sync without adding any new props between components.
+const NAV_LANG_KEY = 're_nav_language';
 
 export default function SettingsPage({
   language,
@@ -24,6 +29,25 @@ export default function SettingsPage({
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [pinCode, setPinCode] = useState('');
   const [pinError, setPinError] = useState('');
+  const [navLanguage, setNavLanguage] = useState<NavLanguage>(language);
+
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(NAV_LANG_KEY) as NavLanguage | null;
+      if (stored) setNavLanguage(stored);
+    } catch {}
+  }, []);
+
+  const handleLanguagePick = (code: NavLanguage) => {
+    setNavLanguage(code);
+    try {
+      localStorage.setItem(NAV_LANG_KEY, code);
+    } catch {}
+    // Only English/Arabic have full page-content translations today.
+    if (code === 'en' || code === 'ar') {
+      setLanguage(code);
+    }
+  };
 
   const handleLogoTap = () => {
     const newTaps = logoTaps + 1;
@@ -73,28 +97,27 @@ export default function SettingsPage({
         <h3 className="font-semibold text-foreground mb-3">
           {language === 'en' ? 'Language' : 'اللغة'}
         </h3>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setLanguage('en')}
-            className={`flex-1 py-2 rounded-lg font-medium transition ${
-              language === 'en'
-                ? 'bg-accent text-accent-foreground'
-                : 'border border-border text-foreground hover:border-accent'
-            }`}
-          >
-            English
-          </button>
-          <button
-            onClick={() => setLanguage('ar')}
-            className={`flex-1 py-2 rounded-lg font-medium transition ${
-              language === 'ar'
-                ? 'bg-accent text-accent-foreground'
-                : 'border border-border text-foreground hover:border-accent'
-            }`}
-          >
-            العربية
-          </button>
+        <div className="grid grid-cols-2 gap-2">
+          {LANGUAGE_OPTIONS.map((opt) => (
+            <button
+              key={opt.code}
+              onClick={() => handleLanguagePick(opt.code)}
+              className={`flex items-center justify-between gap-2 py-2 px-3 rounded-lg font-medium transition ${
+                navLanguage === opt.code
+                  ? 'bg-accent text-accent-foreground'
+                  : 'border border-border text-foreground hover:border-accent'
+              }`}
+            >
+              <span>{opt.native}</span>
+              {navLanguage === opt.code && <Check className="w-4 h-4" />}
+            </button>
+          ))}
         </div>
+        {navLanguage !== 'en' && navLanguage !== 'ar' && (
+          <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
+            {NAV_DICTIONARY[navLanguage].translationNote}
+          </p>
+        )}
       </div>
 
       {/* 2. Dark Mode */}
