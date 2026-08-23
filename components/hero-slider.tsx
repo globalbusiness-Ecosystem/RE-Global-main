@@ -2,6 +2,7 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
+import { HERO_SLIDES, HERO_STAT_LABELS, tt } from '@/lib/hero-i18n';
 
 interface Slide {
   id: number;
@@ -140,7 +141,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
     return () => clearInterval(interval);
   }, []);
 
-  const slide = slides[currentSlide];
+  const slide = HERO_SLIDES[currentSlide];
 
   return (
     <div className="relative w-full h-96 bg-black overflow-hidden">
@@ -172,13 +173,13 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
           fade ? 'opacity-100' : 'opacity-0'
         }`}>
           <h1 className="text-4xl md:text-5xl font-bold mb-4 tracking-tight text-pretty">
-            {language === 'en' ? slide.titleEn : slide.titleAr}
+            {tt(slide.title, language)}
           </h1>
           <p className="text-lg text-gray-200 max-w-lg mx-auto mb-6">
-            {language === 'en' ? slide.subtitleEn : slide.subtitleAr}
+            {tt(slide.subtitle, language)}
           </p>
 
-          {slide.type === 'action' && slide.buttonEn && (
+          {slide.type === 'action' && slide.button && (
             <button 
               onClick={() => {
                 if (slide.id === 2) {
@@ -200,7 +201,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
                 e.currentTarget.style.backgroundColor = 'rgba(212, 175, 55, 0.1)';
                 e.currentTarget.style.color = 'rgb(212, 175, 55)';
               }}>
-              {language === 'en' ? slide.buttonEn : slide.buttonAr}
+              {tt(slide.button!, language)}
             </button>
           )}
 
@@ -212,7 +213,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
                     <AnimatedCounter value={stat.value} duration={2000} />
                     {stat.value > 1000 && <span>K</span>}
                   </div>
-                  <p className="text-sm text-gray-300">{stat.label}</p>
+                  <p className="text-sm text-gray-300">{tt(HERO_STAT_LABELS[stat.labelKey], language)}</p>
                 </div>
               ))}
             </div>
@@ -222,7 +223,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
 
       {/* Dot Indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-        {slides.map((_, index) => (
+        {HERO_SLIDES.map((_, index) => (
           <button
             key={index}
             onClick={() => {
