@@ -3,6 +3,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { firebaseDB } from '@/lib/firebase-database';
 import { ShoppingCart, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface UnifiedPaymentButtonProps {
@@ -33,7 +34,7 @@ export function UnifiedPaymentButton({
   onSuccess,
   onError,
 }: UnifiedPaymentButtonProps) {
-  const { sdk, isAuthenticated } = usePiAuth();
+  const { sdk, isAuthenticated, username } = usePiAuth();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPiAvailable = true; // Check at payment time, not load time
@@ -108,8 +109,27 @@ export function UnifiedPaymentButton({
                   headers: { 'Content-Type': 'application/json' },
                   body: JSON.stringify({ paymentId, txid }),
                 });
-                resolve({ paymentId, txid, status: 'completed' });
                 console.log('[RE] Completed ✅');
+
+                try {
+                  await firebaseDB.addContract({
+                    propertyId,
+                    propertyTitle,
+                    buyerUsername: username || 'guest',
+                    sellerUsername: 'RE-Global-Platform',
+                    type: transactionType === 'hotel' ? 'buy' : transactionType,
+                    amount: price,
+                    currency,
+                    status: 'completed',
+                    paymentId,
+                    txid,
+                  });
+                  console.log('[RE] Contract recorded ✅');
+                } catch (contractError) {
+                  console.error('[RE] Failed to record contract:', contractError);
+                }
+
+                resolve({ paymentId, txid, status: 'completed' });
               } catch (e) {
                 console.error('[RE] Completion failed:', e);
                 reject(e);
