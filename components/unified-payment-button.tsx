@@ -112,8 +112,7 @@ export function UnifiedPaymentButton({
                 console.log('[RE] Completed ✅');
 
                 try {
-                  alert('DEBUG: about to call addContract');
-                  const result = await firebaseDB.addContract({
+                  await firebaseDB.addContract({
                     propertyId,
                     propertyTitle,
                     buyerUsername: username || 'guest',
@@ -125,10 +124,8 @@ export function UnifiedPaymentButton({
                     paymentId,
                     txid,
                   });
-                  alert('DEBUG: addContract result = ' + JSON.stringify(result));
                   console.log('[RE] Contract recorded ✅');
-                } catch (contractError: any) {
-                  alert('DEBUG: addContract FAILED: ' + (contractError?.message || String(contractError)));
+                } catch (contractError) {
                   console.error('[RE] Failed to record contract:', contractError);
                 }
 
