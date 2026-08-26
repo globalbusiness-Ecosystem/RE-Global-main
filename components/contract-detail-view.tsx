@@ -2,6 +2,8 @@
 import { useState } from 'react';
 import { ShieldCheck, Key, Link2, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
 import type { SmartContract } from '@/lib/firebase-database';
+import { useEffect, useRef } from 'react';
+import QRCode from 'qrcode';
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -35,6 +37,20 @@ function Seal() {
       </div>
     </div>
   );
+}
+
+function VerifyQR({ contractId, size = 84 }: { contractId: string; size?: number }) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    const value = `${typeof window !== 'undefined' ? window.location.origin : 'https://re-global.app'}/verify/${contractId}`;
+    QRCode.toCanvas(canvasRef.current, value, {
+      width: size,
+      margin: 1,
+      color: { dark: '#0e0e11', light: '#f5f1e8' },
+    }).catch((e) => console.error('[VerifyQR] generation error:', e));
+  }, [contractId, size]);
+  return <canvas ref={canvasRef} width={size} height={size} className="rounded-[2px]" />;
 }
 
 export function ContractDetailView({ contract, onClose }: { contract: SmartContract; onClose?: () => void }) {
@@ -121,6 +137,21 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
             </div>
             {contract.platformPublicKey && <CopyField label="Public key" value={contract.platformPublicKey} />}
             {contract.contractHash && <CopyField label="Document hash" value={contract.contractHash} />}
+          </div>
+        </div>
+
+        <div className="mx-6 mb-5 rounded-[4px] border border-amber-500/15 bg-amber-500/[0.03] p-3.5 flex items-center gap-3.5">
+          <div className="p-1.5 bg-[#f5f1e8] rounded-[3px] shrink-0">
+            <VerifyQR contractId={contract.id} size={70} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-[10.5px] uppercase tracking-[0.12em] text-amber-300 mb-1">Linked verification</p>
+            <p className="text-[11.5px] text-stone-300 leading-snug">
+              Scan to open the public, no-login record for <span className="text-stone-100">{contract.propertyTitle}</span> — this contract and its property.
+            </p>
+            {contract.inspectionCertHash && (
+              <p className="mt-1 text-[10.5px] text-emerald-400">✓ Linked inspection certificate on record</p>
+            )}
           </div>
         </div>
 
