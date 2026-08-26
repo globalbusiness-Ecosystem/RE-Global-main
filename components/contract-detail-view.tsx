@@ -64,15 +64,52 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
     const margin = 48;
     let y = margin;
     const lineHeight = 16;
+    const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+    const maxWidth = pageWidth - margin * 2;
+    const fingerprint = `${contract.id}-${(contract.contractHash || '').slice(0, 12)}`;
+
+    const drawWatermark = () => {
+      doc.saveGraphicsState();
+      // @ts-ignore - GState exists on jsPDF instance at runtime
+      doc.setGState(new (doc as any).GState({ opacity: 0.07 }));
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(13);
+      doc.setTextColor(120, 90, 20);
+      const stampText = `RE GLOBAL · VERIFIED · ${fingerprint}`;
+      for (let row = 0; row < 10; row++) {
+        for (let col = 0; col < 3; col++) {
+          doc.text(stampText, col * 260 - 40, row * 100 + 60, { angle: 35 });
+        }
+      }
+      doc.restoreGraphicsState();
+    };
+
+    const drawFooter = () => {
+      const pageNum = doc.internal.getNumberOfPages();
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(7);
+      doc.setTextColor(140, 140, 140);
+      const footerY = pageHeight - 24;
+      doc.text(`Document hash: ${contract.contractHash || 'N/A'}`, margin, footerY);
+      doc.text(`Platform key: ${contract.platformPublicKey || 'N/A'}`, margin, footerY + 9);
+      doc.text(`Page ${pageNum}`, pageWidth - margin - 40, footerY);
+    };
+
+    drawWatermark();
 
     const writeLine = (text: string, size = 11, bold = false) => {
       doc.setFontSize(size);
       doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      doc.setTextColor(20, 20, 20);
       const lines = doc.splitTextToSize(text, maxWidth);
       lines.forEach((line: string) => {
-        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+        if (y > pageHeight - margin - 20) {
+          drawFooter();
+          doc.addPage();
+          y = margin;
+          drawWatermark();
+        }
         doc.text(line, margin, y);
         y += lineHeight;
       });
@@ -99,6 +136,7 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
       writeLine(contract.contractText, 9.5);
     }
 
+    drawFooter();
     doc.save(`RE-Global-Contract-${contract.id}.pdf`);
   };
 
