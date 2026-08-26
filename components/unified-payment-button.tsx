@@ -112,6 +112,31 @@ export function UnifiedPaymentButton({
                 console.log('[RE] Completed ✅');
 
                 try {
+                  const contractId = `${paymentId}-${Date.now().toString(36)}`;
+                  let signingData: any = {};
+                  try {
+                    const signRes = await fetch('/api/contracts/sign', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        contractId,
+                        propertyId,
+                        propertyTitle,
+                        buyerUsername: username || 'guest',
+                        sellerUsername: 'RE-Global-Platform',
+                        type: transactionType === 'hotel' ? 'buy' : transactionType,
+                        amount: price,
+                        currency,
+                        paymentId,
+                        txid,
+                      }),
+                    });
+                    if (signRes.ok) signingData = await signRes.json();
+                    else console.error('[RE] Contract signing request failed:', signRes.status);
+                  } catch (signError) {
+                    console.error('[RE] Contract signing error:', signError);
+                  }
+
                   await firebaseDB.addContract({
                     propertyId,
                     propertyTitle,
@@ -123,6 +148,13 @@ export function UnifiedPaymentButton({
                     status: 'completed',
                     paymentId,
                     txid,
+                    ...(signingData.contractText ? {
+                      contractText: signingData.contractText,
+                      contractHash: signingData.contractHash,
+                      platformSignature: signingData.platformSignature,
+                      platformPublicKey: signingData.platformPublicKey,
+                      signedAt: signingData.signedAt,
+                    } : {}),
                   });
                   console.log('[RE] Contract recorded ✅');
                 } catch (contractError) {

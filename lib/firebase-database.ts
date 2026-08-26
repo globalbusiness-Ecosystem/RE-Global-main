@@ -87,6 +87,13 @@ export interface SmartContract {
   contractIdOnChain?: string;
   paymentId?: string;
   txid?: string;
+  // Detailed signed-contract fields
+  contractText?: string;
+  contractHash?: string;
+  platformSignature?: string;
+  platformPublicKey?: string;
+  signedAt?: string;
+  inspectionCertHash?: string;
   createdAt: Date;
   updatedAt: Date;
 }
