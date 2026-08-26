@@ -4,6 +4,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { useEffect, useState } from 'react';
 import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode, Link2, Loader2, ShieldAlert } from 'lucide-react';
 import { QRScannerModal } from '@/components/qr-scanner-modal';
+import { ContractDetailView } from '@/components/contract-detail-view';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
@@ -120,6 +121,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [typeFilter, setTypeFilter] = useState<'all' | SmartContract['type']>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [selectedContract, setSelectedContract] = useState<SmartContract | null>(null);
 
   const load = async (asAdmin: boolean) => {
     setLoading(true);
@@ -430,13 +432,21 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                   </div>
                 )}
 
-                <p className="text-[11px] text-muted-foreground/70">
-                  {c.createdAt.toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
-                    year: 'numeric',
-                    month: 'short',
-                    day: 'numeric',
-                  })}
-                </p>
+                <div className="flex items-center justify-between">
+                  <p className="text-[11px] text-muted-foreground/70">
+                    {c.createdAt.toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                    })}
+                  </p>
+                  <button
+                    onClick={() => setSelectedContract(c)}
+                    className="text-[11px] text-accent underline"
+                  >
+                    {isArabic ? 'عرض العقد الكامل' : 'View Full Contract'}
+                  </button>
+                </div>
               </div>
             ))}
           </div>
@@ -452,6 +462,14 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             setShowScanner(false);
           }}
         />
+      )}
+
+      {selectedContract && (
+        <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center overflow-y-auto p-4">
+          <div className="mt-6 mb-6">
+            <ContractDetailView contract={selectedContract} onClose={() => setSelectedContract(null)} />
+          </div>
+        </div>
       )}
     </main>
   );
