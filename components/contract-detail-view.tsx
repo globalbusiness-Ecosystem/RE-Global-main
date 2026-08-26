@@ -130,6 +130,37 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
     writeLine(`Platform: ${contract.sellerUsername}`);
     if (contract.platformPublicKey) writeLine(`Public key: ${contract.platformPublicKey}`);
     if (contract.contractHash) writeLine(`Document hash: ${contract.contractHash}`);
+
+    try {
+      const verifyUrl = `${typeof window !== 'undefined' ? window.location.origin : 'https://re-global.app'}/verify/${contract.id}`;
+      const qrDataUrl = await QRCode.toDataURL(verifyUrl, { width: 200, margin: 1, color: { dark: '#0e0e11', light: '#ffffff' } });
+      const qrSize = 90;
+      if (y > pageHeight - margin - qrSize - 30) { drawFooter(); doc.addPage(); y = margin; drawWatermark(); }
+      y += 12;
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(20, 20, 20);
+      doc.text('LINKED VERIFICATION', margin, y);
+      y += 14;
+      doc.addImage(qrDataUrl, 'PNG', margin, y, qrSize, qrSize);
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      const captionX = margin + qrSize + 14;
+      const captionWidth = maxWidth - qrSize - 14;
+      const captionLines = doc.splitTextToSize(
+        `Scan to open the public, no-login record for ${contract.propertyTitle} — this contract and its property.`,
+        captionWidth
+      );
+      let capY = y + 12;
+      captionLines.forEach((line: string) => { doc.text(line, captionX, capY); capY += 12; });
+      doc.setTextColor(120, 120, 120);
+      doc.setFontSize(7.5);
+      doc.text(verifyUrl, captionX, capY + 4);
+      y += qrSize + 16;
+    } catch (e) {
+      console.error('[downloadPdf] QR generation failed:', e);
+    }
+
     if (contract.contractText) {
       y += 10;
       writeLine('FULL CONTRACT TEXT', 11, true);
