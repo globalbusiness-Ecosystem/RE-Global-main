@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import { ShieldCheck, Key, Link2, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
 import type { SmartContract } from '@/lib/firebase-database';
+import { Download } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 
@@ -57,6 +58,50 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
   const [showFullText, setShowFullText] = useState(false);
   const isSigned = Boolean(contract.contractHash && contract.platformSignature);
 
+  const downloadPdf = async () => {
+    const { jsPDF } = await import('jspdf');
+    const doc = new jsPDF({ unit: 'pt', format: 'a4' });
+    const margin = 48;
+    let y = margin;
+    const lineHeight = 16;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const maxWidth = doc.internal.pageSize.getWidth() - margin * 2;
+
+    const writeLine = (text: string, size = 11, bold = false) => {
+      doc.setFontSize(size);
+      doc.setFont('helvetica', bold ? 'bold' : 'normal');
+      const lines = doc.splitTextToSize(text, maxWidth);
+      lines.forEach((line: string) => {
+        if (y > pageHeight - margin) { doc.addPage(); y = margin; }
+        doc.text(line, margin, y);
+        y += lineHeight;
+      });
+    };
+
+    writeLine('RE GLOBAL — PROPERTY TRANSACTION CONTRACT', 14, true);
+    writeLine('Status: PILOT / TESTNET — Pending UAE Legal Review', 9);
+    y += 6;
+    writeLine(contract.propertyTitle, 13, true);
+    writeLine(`Contract No: ${contract.id}`);
+    writeLine(`Type: ${contract.type}   Amount: ${contract.amount} ${contract.currency}   Status: ${contract.status}`);
+    y += 10;
+    writeLine('SIGNATURES', 11, true);
+    writeLine(`Buyer: @${contract.buyerUsername}`);
+    if (contract.paymentId) writeLine(`Payment ID: ${contract.paymentId}`);
+    if (contract.txid) writeLine(`Transaction ID: ${contract.txid}`);
+    y += 6;
+    writeLine(`Platform: ${contract.sellerUsername}`);
+    if (contract.platformPublicKey) writeLine(`Public key: ${contract.platformPublicKey}`);
+    if (contract.contractHash) writeLine(`Document hash: ${contract.contractHash}`);
+    if (contract.contractText) {
+      y += 10;
+      writeLine('FULL CONTRACT TEXT', 11, true);
+      writeLine(contract.contractText, 9.5);
+    }
+
+    doc.save(`RE-Global-Contract-${contract.id}.pdf`);
+  };
+
   return (
     <div className="w-full max-w-[560px] mx-auto">
       <div className="flex items-center justify-between mb-4 px-1">
@@ -83,6 +128,13 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
             </div>
             <Seal />
           </div>
+
+          <button
+            onClick={downloadPdf}
+            className="mt-4 w-full inline-flex items-center justify-center gap-2 text-[12.5px] text-stone-950 bg-amber-400 hover:bg-amber-300 transition-colors rounded-[3px] py-2.5 font-medium"
+          >
+            <Download size={14} /> Download as PDF
+          </button>
 
           <div className="mt-5 grid grid-cols-3 gap-2.5">
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
