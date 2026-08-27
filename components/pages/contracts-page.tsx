@@ -458,8 +458,19 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           language={language}
           onClose={() => setShowScanner(false)}
           onScan={(value) => {
-            setSearchQuery(value);
             setShowScanner(false);
+            const match = value.match(/\/verify\/([^/?#]+)/);
+            if (match) {
+              const contractId = match[1];
+              const found = contracts.find((c) => c.id === contractId);
+              if (found) {
+                setSelectedContract(found);
+              } else {
+                window.location.href = `/verify/${contractId}`;
+              }
+              return;
+            }
+            setSearchQuery(value);
           }}
         />
       )}
