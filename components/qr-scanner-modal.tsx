@@ -2,7 +2,7 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useRef, useState } from 'react';
-import { X, Camera, AlertTriangle } from 'lucide-react';
+import { X, Camera, AlertTriangle, ImageUp } from 'lucide-react';
 import jsQR from 'jsqr';
 
 interface QRScannerModalProps {
@@ -17,7 +17,32 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const rafRef = useRef<number | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const handleFileUpload = (file: File) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, imageData.width, imageData.height, {
+        inversionAttempts: 'attemptBoth',
+      });
+      URL.revokeObjectURL(url);
+      if (code && code.data) {
+        onScan(code.data);
+      } else {
+        setError(isArabic ? 'لم يتم العثور على QR في هذه الصورة' : 'No QR code found in this image');
+      }
+    };
+    img.src = url;
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -93,9 +118,29 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
             {isArabic ? 'وجّه الكاميرا نحو الـ QR' : 'Point the camera at the QR code'}
           </span>
         </div>
-        <button onClick={onClose} className="p-1.5 rounded-md hover:bg-white/10 text-white">
-          <X className="w-5 h-5" />
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center gap-1.5 text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md hover:bg-white/10"
+          >
+            <ImageUp className="w-4 h-4" />
+            {isArabic ? 'رفع صورة' : 'Upload image'}
+          </button>
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) handleFileUpload(file);
+              e.target.value = '';
+            }}
+          />
+          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-white/10 text-white">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 relative flex items-center justify-center overflow-hidden">

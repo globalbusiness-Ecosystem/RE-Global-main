@@ -57,8 +57,11 @@ function VerifyQR({ contractId, size = 84 }: { contractId: string; size?: number
 export function ContractDetailView({ contract, onClose }: { contract: SmartContract; onClose?: () => void }) {
   const [showFullText, setShowFullText] = useState(false);
   const isSigned = Boolean(contract.contractHash && contract.platformSignature);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const downloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
     const { jsPDF } = await import('jspdf');
     const doc = new jsPDF({ unit: 'pt', format: 'a4' });
     const margin = 48;
@@ -168,7 +171,39 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
     }
 
     drawFooter();
-    doc.save(`RE-Global-Contract-${contract.id}.pdf`);
+
+    const filename = `RE-Global-Contract-${contract.id}.pdf`;
+    try {
+      // Primary path: works in normal desktop/mobile browsers
+      doc.save(filename);
+    } catch (saveErr) {
+      console.error('[downloadPdf] doc.save failed, falling back to blob URL:', saveErr);
+      try {
+        // Fallback for restricted in-app webviews (e.g. Pi Browser) that block
+        // the anchor-click download trick used internally by doc.save()
+        const blob = doc.output('blob');
+        const blobUrl = URL.createObjectURL(blob);
+        const opened = window.open(blobUrl, '_blank');
+        if (!opened) {
+          window.location.href = blobUrl;
+        }
+      } catch (blobErr) {
+        console.error('[downloadPdf] blob fallback failed, falling back to data URI:', blobErr);
+        try {
+          const dataUri = doc.output('datauristring');
+          window.open(dataUri, '_blank');
+        } catch (dataErr) {
+          console.error('[downloadPdf] all fallbacks failed:', dataErr);
+          alert('تعذر تنزيل الملف داخل هذا المتصفح. جرّب فتح الصفحة في متصفح خارجي (Safari أو Chrome) بدل متصفح Pi الداخلي.');
+        }
+      }
+    }
+    } catch (err) {
+      console.error('[downloadPdf] generation failed:', err);
+      alert('حدث خطأ أثناء إنشاء ملف PDF. حاول مرة أخرى.');
+    } finally {
+      setIsGeneratingPdf(false);
+    }
   };
 
   return (
