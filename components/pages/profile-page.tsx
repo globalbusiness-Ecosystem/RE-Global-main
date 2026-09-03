@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
+import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
@@ -15,6 +15,32 @@ interface ProfilePageProps {
   language: NavLanguage;
   favorites?: string[];
   onBack?: () => void;
+}
+
+function FacebookIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M22 12.06C22 6.51 17.52 2 12 2S2 6.51 2 12.06c0 5 3.66 9.15 8.44 9.94v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.23.19 2.23.19v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.89h2.78l-.44 2.91h-2.34V22c4.78-.79 8.44-4.94 8.44-9.94z" />
+    </svg>
+  );
+}
+
+function TwitterIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M18.24 2H21.5l-7.5 8.57L22.9 22h-6.9l-5.4-7.06L4.4 22H1.14l8.02-9.17L1.4 2h7.06l4.88 6.46L18.24 2zm-1.2 18h1.9L7.02 4H5l12.04 16z" />
+    </svg>
+  );
+}
+
+function InstagramIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className} aria-hidden="true">
+      <rect x="3" y="3" width="18" height="18" rx="5" ry="5" />
+      <circle cx="12" cy="12" r="4" />
+      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+    </svg>
+  );
 }
 
 const EMPTY_PROFILE = {
@@ -249,7 +275,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
         <CardContent className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-              <Facebook className="w-4 h-4" /> Facebook
+              <FacebookIcon className="w-4 h-4" /> Facebook
             </label>
             <Input
               value={profile.facebookUrl}
@@ -261,7 +287,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-              <Twitter className="w-4 h-4" /> Twitter / X
+              <TwitterIcon className="w-4 h-4" /> Twitter / X
             </label>
             <Input
               value={profile.twitterUrl}
@@ -273,7 +299,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-              <Instagram className="w-4 h-4" /> Instagram
+              <InstagramIcon className="w-4 h-4" /> Instagram
             </label>
             <Input
               value={profile.instagramUrl}
