@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2, Facebook, Twitter, Instagram } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
@@ -25,6 +25,9 @@ const EMPTY_PROFILE = {
   bio: '',
   companyName: '',
   websiteUrl: '',
+  facebookUrl: '',
+  twitterUrl: '',
+  instagramUrl: '',
 };
 
 export default function ProfilePage({ language = 'en', favorites = [], onBack }: ProfilePageProps) {
@@ -52,6 +55,9 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
           bio: p.bio || '',
           companyName: p.companyName || '',
           websiteUrl: p.websiteUrl || '',
+          facebookUrl: p.facebookUrl || '',
+          twitterUrl: p.twitterUrl || '',
+          instagramUrl: p.instagramUrl || '',
         });
       }
       setContractsCount(contracts.length);
@@ -227,6 +233,53 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
               onChange={(e) => setProfile({ ...profile, websiteUrl: e.target.value })}
               className="bg-background border-border text-foreground"
               placeholder="https://example.com"
+            />
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Social Media */}
+      <Card className="mb-6 bg-card border-border">
+        <CardHeader>
+          <CardTitle>{isArabic ? 'التواصل الاجتماعي' : 'Social Media'}</CardTitle>
+          <CardDescription>
+            {isArabic ? 'اربط حساباتك ليراها الآخرون في ملفك العام' : 'Link your accounts to show on your public profile'}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <Facebook className="w-4 h-4" /> Facebook
+            </label>
+            <Input
+              value={profile.facebookUrl}
+              onChange={(e) => setProfile({ ...profile, facebookUrl: e.target.value })}
+              className="bg-background border-border text-foreground"
+              placeholder="https://facebook.com/yourpage"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <Twitter className="w-4 h-4" /> Twitter / X
+            </label>
+            <Input
+              value={profile.twitterUrl}
+              onChange={(e) => setProfile({ ...profile, twitterUrl: e.target.value })}
+              className="bg-background border-border text-foreground"
+              placeholder="https://x.com/yourhandle"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
+              <Instagram className="w-4 h-4" /> Instagram
+            </label>
+            <Input
+              value={profile.instagramUrl}
+              onChange={(e) => setProfile({ ...profile, instagramUrl: e.target.value })}
+              className="bg-background border-border text-foreground"
+              placeholder="https://instagram.com/yourhandle"
             />
           </div>
         </CardContent>
