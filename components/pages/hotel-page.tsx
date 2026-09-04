@@ -1,12 +1,13 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { MapPin, Bed, Maximize2, Video, Heart } from 'lucide-react';
+import { MapPin, Bed, Maximize2, Video, Heart, Eye } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { useProperties, Property } from '@/lib/useProperties';
 
 interface HotelPageProps {
   language: NavLanguage;
@@ -109,8 +110,97 @@ const hotelProperties = [
   },
 ];
 
+// ─── Firebase Property Detail Modal ───────────────────────────────────────────
+function FirebaseHotelModal({
+  prop,
+  language,
+  onClose,
+}: {
+  prop: Property;
+  language: NavLanguage;
+  onClose: () => void;
+}) {
+  const title = language === 'ar' && prop.titleAr ? prop.titleAr : prop.title;
+  const location = language === 'ar' && prop.locationAr ? prop.locationAr : prop.location;
+
+  return (
+    <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4">
+      <div className="bg-[#0f1923] border border-accent/30 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-accent/20 bg-[#0f1923] z-10">
+          <h2 className="text-lg font-bold text-white truncate flex-1">{title}</h2>
+          <button onClick={onClose} className="p-2 hover:bg-white/10 rounded-lg ml-2 transition">
+            ✕
+          </button>
+        </div>
+        <div className="p-4 space-y-4">
+          {prop.image && (
+            <img src={prop.image} alt={title} className="w-full h-52 object-cover rounded-xl" />
+          )}
+          <div>
+            <p className="text-3xl font-bold text-accent">{prop.price.toLocaleString()} π</p>
+            <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
+              <MapPin className="w-4 h-4" /> {location}
+            </p>
+          </div>
+          {(prop.bedrooms || prop.area) && (
+            <div className="flex gap-4 text-sm text-gray-300 border border-white/10 rounded-xl p-3">
+              {prop.bedrooms && (
+                <div className="flex items-center gap-1">
+                  <Bed className="w-4 h-4 text-accent" />
+                  <span>{prop.bedrooms} {language === 'en' ? 'Beds' : 'غرف'}</span>
+                </div>
+              )}
+              {prop.area && (
+                <div className="flex items-center gap-1">
+                  <Maximize2 className="w-4 h-4 text-accent" />
+                  <span>{prop.area} m²</span>
+                </div>
+              )}
+            </div>
+          )}
+          {prop.description && (
+            <p className="text-gray-400 text-sm leading-relaxed">
+              {language === 'ar' && prop.descriptionAr ? prop.descriptionAr : prop.description}
+            </p>
+          )}
+          {prop.lat && prop.lng ? (
+            <div className="rounded-xl overflow-hidden border border-accent/20">
+              <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
+                📍 {language === 'en' ? 'Property Location' : 'موقع العقار'}
+              </p>
+              <iframe
+                src={`https://www.openstreetmap.org/export/embed.html?bbox=${prop.lng - 0.01},${prop.lat - 0.01},${prop.lng + 0.01},${prop.lat + 0.01}&layer=mapnik&marker=${prop.lat},${prop.lng}`}
+                className="w-full h-48"
+                style={{ border: 0 }}
+                loading="lazy"
+                title="property-map"
+              />
+            </div>
+          ) : null}
+          <UnifiedPaymentButton
+            propertyId={prop.id}
+            propertyTitle={title}
+            price={prop.price}
+            transactionType="hotel"
+            language={language}
+            currency="PI"
+            className="w-full"
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function HotelPage({ language, currency, favorites, toggleFavorite, onBack, showBackButton }: HotelPageProps) {
+  const { properties, loading: propertiesLoading } = useProperties();
   const [activeTourId, setActiveTourId] = useState<string | null>(null);
+  const [selectedProp, setSelectedProp] = useState<Property | null>(null);
+
+  const firebaseProperties = useMemo(
+    () => properties.filter(p => p.type === 'hotel'),
+    [properties]
+  );
   
   // If viewing tour, show VR Tour viewer
   if (activeTourId) {
@@ -143,7 +233,61 @@ export default function HotelPage({ language, currency, favorites, toggleFavorit
         </h1>
       </div>
 
+      {/* Firebase Properties (dynamic, added via Admin) */}
+      {propertiesLoading ? (
+        <div className="text-center text-gray-400 py-4">
+          {language === 'en' ? 'Loading...' : 'جاري التحميل...'}
+        </div>
+      ) : firebaseProperties.length > 0 ? (
+        <div className="space-y-4 mb-6">
+          <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
+            {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {firebaseProperties.map((prop) => (
+              <div
+                key={prop.id}
+                onClick={() => setSelectedProp(prop)}
+                className="rounded-lg border border-accent/40 overflow-hidden hover:border-accent transition cursor-pointer"
+                style={{ backgroundColor: '#1a2332' }}
+              >
+                {prop.image && (
+                  <img src={prop.image} alt={prop.title} className="w-full h-44 object-cover" />
+                )}
+                <div className="p-4">
+                  <div className="flex justify-between items-start mb-1">
+                    <h4 className="text-white font-semibold text-base">
+                      {language === 'ar' && prop.titleAr ? prop.titleAr : prop.title}
+                    </h4>
+                    {prop.featured && (
+                      <span className="text-xs bg-accent text-black px-2 py-0.5 rounded font-bold">
+                        {language === 'en' ? 'Featured' : 'مميز'}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-gray-400 text-sm mb-2">
+                    {language === 'ar' && prop.locationAr ? prop.locationAr : prop.location}
+                  </p>
+                  <div className="flex justify-between items-center">
+                    <p className="text-accent font-bold text-lg">{prop.price.toLocaleString()} π</p>
+                    <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
+                      <Eye className="w-3 h-3" />
+                      {language === 'en' ? 'Details' : 'تفاصيل'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+
       <div className="space-y-4">
+        {firebaseProperties.length === 0 && (
+          <h2 className="text-lg font-semibold text-white border-b border-gray-700 pb-2 mb-2">
+            {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
+          </h2>
+        )}
         {hotelProperties.map((property) => (
           <div key={property.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition">
             <div className="relative h-48 bg-muted overflow-hidden">
@@ -257,6 +401,15 @@ export default function HotelPage({ language, currency, favorites, toggleFavorit
           onBuyClick={() => {
             alert('Buy with Pi feature - Integrate with Pi payment SDK');
           }}
+        />
+      )}
+
+      {/* Firebase Property Detail Modal */}
+      {selectedProp && (
+        <FirebaseHotelModal
+          prop={selectedProp}
+          language={language}
+          onClose={() => setSelectedProp(null)}
         />
       )}
     </main>
