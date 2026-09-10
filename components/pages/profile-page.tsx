@@ -10,6 +10,7 @@ import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loa
 import { toast } from 'sonner';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
+import { PROFILE_I18N } from '@/lib/profile-i18n';
 
 interface ProfilePageProps {
   language: NavLanguage;
@@ -57,7 +58,8 @@ const EMPTY_PROFILE = {
 };
 
 export default function ProfilePage({ language = 'en', favorites = [], onBack }: ProfilePageProps) {
-  const isArabic = language === 'ar';
+  const t = PROFILE_I18N[language];
+  const isRTL = language === 'ar' || language === 'ur';
   const { username } = usePiAuth();
   const { getProfile, saveProfile, getContractsForUser } = useFirebaseDatabase();
 
@@ -93,26 +95,26 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
 
   const handleSaveProfile = async () => {
     if (!username) {
-      toast.error(isArabic ? 'يجب تسجيل الدخول عبر Pi أولاً' : 'You need to sign in with Pi first');
+      toast.error(t.mustSignInFirst);
       return;
     }
     setSaving(true);
     try {
       const ok = await saveProfile(username, profile);
       if (ok) {
-        toast.success(isArabic ? 'تم حفظ الملف الشخصي' : 'Profile saved successfully');
+        toast.success(t.profileSaved);
       } else {
-        toast.error(isArabic ? 'خطأ في الحفظ' : 'Error saving profile');
+        toast.error(t.errorSaving);
       }
     } catch (error) {
-      toast.error(isArabic ? 'خطأ في الحفظ' : 'Error saving profile');
+      toast.error(t.errorSaving);
     } finally {
       setSaving(false);
     }
   };
 
   const handleLogout = () => {
-    toast.info(isArabic ? 'جاري تحديث الجلسة...' : 'Refreshing session...');
+    toast.info(t.refreshingSession);
     setTimeout(() => window.location.reload(), 800);
   };
 
@@ -125,7 +127,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
   }
 
   return (
-    <div className={`w-full min-h-screen bg-background p-4 pb-24 ${isArabic ? 'rtl' : 'ltr'}`}>
+    <div className={`w-full min-h-screen bg-background p-4 pb-24 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center gap-3 mb-6">
         {onBack && (
           <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
@@ -133,16 +135,14 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
           </button>
         )}
         <div>
-          <h1 className="text-2xl font-bold text-foreground">{isArabic ? 'الملف الشخصي' : 'My Profile'}</h1>
-          <p className="text-sm text-muted-foreground">{isArabic ? 'إدارة معلوماتك الشخصية' : 'Manage your information'}</p>
+          <h1 className="text-2xl font-bold text-foreground">{t.myProfile}</h1>
+          <p className="text-sm text-muted-foreground">{t.manageInfo}</p>
         </div>
       </div>
 
       {!username && (
         <div className="mb-6 bg-yellow-500/10 border border-yellow-500/25 rounded-lg p-3 text-xs text-yellow-300">
-          {isArabic
-            ? 'مش شايفين حساب Pi متصل — لن يتم حفظ بياناتك حتى تسجل الدخول.'
-            : "No connected Pi account detected — your info won't be saved until you sign in."}
+          {t.noPiAccountWarning}
         </div>
       )}
 
@@ -150,13 +150,13 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       <div className="grid grid-cols-2 gap-3 mb-6">
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">{isArabic ? 'عقودي' : 'Contracts'}</p>
+            <p className="text-sm text-muted-foreground">{t.contracts}</p>
             <p className="text-2xl font-bold text-foreground">{contractsCount}</p>
           </CardContent>
         </Card>
         <Card className="bg-card border-border">
           <CardContent className="p-4">
-            <p className="text-sm text-muted-foreground">{isArabic ? 'المفضلة' : 'Favorites'}</p>
+            <p className="text-sm text-muted-foreground">{t.favorites}</p>
             <p className="text-2xl font-bold text-foreground">{favorites.length}</p>
           </CardContent>
         </Card>
@@ -165,25 +165,25 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       {/* Personal Information */}
       <Card className="mb-6 bg-card border-border">
         <CardHeader>
-          <CardTitle>{isArabic ? 'المعلومات الشخصية' : 'Personal Information'}</CardTitle>
+          <CardTitle>{t.personalInformation}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {isArabic ? 'الاسم الكامل' : 'Full Name'}
+              {t.fullName}
             </label>
             <Input
               value={profile.fullName}
               onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
               className="bg-background border-border text-foreground"
-              placeholder={isArabic ? 'أدخل اسمك الكامل' : 'Enter your full name'}
+              placeholder={t.enterFullName}
             />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                <Mail className="w-4 h-4" /> {isArabic ? 'البريد' : 'Email'}
+                <Mail className="w-4 h-4" /> {t.email}
               </label>
               <Input
                 type="email"
@@ -195,7 +195,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-                <Phone className="w-4 h-4" /> {isArabic ? 'الهاتف' : 'Phone'}
+                <Phone className="w-4 h-4" /> {t.phone}
               </label>
               <Input
                 value={profile.phone}
@@ -208,25 +208,25 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
-              <MapPin className="w-4 h-4" /> {isArabic ? 'الموقع' : 'Location'}
+              <MapPin className="w-4 h-4" /> {t.location}
             </label>
             <Input
               value={profile.location}
               onChange={(e) => setProfile({ ...profile, location: e.target.value })}
               className="bg-background border-border text-foreground"
-              placeholder={isArabic ? 'المدينة والدولة' : 'City, Country'}
+              placeholder={t.cityCountry}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {isArabic ? 'السيرة الذاتية' : 'Bio'}
+              {t.bio}
             </label>
             <Textarea
               value={profile.bio}
               onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
               className="bg-background border-border text-foreground min-h-24"
-              placeholder={isArabic ? 'اكتب عن نفسك' : 'Tell us about yourself'}
+              placeholder={t.tellUsAboutYourself}
             />
           </div>
         </CardContent>
@@ -235,24 +235,24 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       {/* Business Information */}
       <Card className="mb-6 bg-card border-border">
         <CardHeader>
-          <CardTitle>{isArabic ? 'معلومات العمل' : 'Business Information'}</CardTitle>
+          <CardTitle>{t.businessInformation}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {isArabic ? 'اسم الشركة' : 'Company Name'}
+              {t.companyName}
             </label>
             <Input
               value={profile.companyName}
               onChange={(e) => setProfile({ ...profile, companyName: e.target.value })}
               className="bg-background border-border text-foreground"
-              placeholder={isArabic ? 'اسم شركتك' : 'Your company name'}
+              placeholder={t.yourCompanyName}
             />
           </div>
 
           <div>
             <label className="block text-sm font-medium text-foreground mb-2">
-              {isArabic ? 'موقع الويب' : 'Website URL'}
+              {t.websiteUrl}
             </label>
             <Input
               value={profile.websiteUrl}
@@ -267,10 +267,8 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       {/* Social Media */}
       <Card className="mb-6 bg-card border-border">
         <CardHeader>
-          <CardTitle>{isArabic ? 'التواصل الاجتماعي' : 'Social Media'}</CardTitle>
-          <CardDescription>
-            {isArabic ? 'اربط حساباتك ليراها الآخرون في ملفك العام' : 'Link your accounts to show on your public profile'}
-          </CardDescription>
+          <CardTitle>{t.socialMedia}</CardTitle>
+          <CardDescription>{t.linkAccountsDesc}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
@@ -314,7 +312,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       {/* Account Actions */}
       <Card className="bg-card border-border">
         <CardHeader>
-          <CardTitle>{isArabic ? 'إجراءات الحساب' : 'Account Actions'}</CardTitle>
+          <CardTitle>{t.accountActions}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-3">
           <Button
@@ -323,7 +321,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             className="w-full bg-accent hover:bg-accent/90 text-black font-semibold"
           >
             <Save className="w-4 h-4 mr-2" />
-            {saving ? (isArabic ? 'جاري الحفظ...' : 'Saving...') : (isArabic ? 'حفظ التغييرات' : 'Save Changes')}
+            {saving ? t.saving : t.saveChanges}
           </Button>
 
           <Button
@@ -332,7 +330,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             className="w-full border-border hover:bg-destructive/10 text-destructive hover:text-destructive"
           >
             <LogOut className="w-4 h-4 mr-2" />
-            {isArabic ? 'تسجيل الخروج' : 'Logout'}
+            {t.logout}
           </Button>
 
           <Button
@@ -341,7 +339,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             onClick={() => { window.location.href = '/privacy'; }}
           >
             <FileText className="w-4 h-4 mr-2" />
-            {isArabic ? 'سياسة الخصوصية' : 'Privacy Policy'}
+            {t.privacyPolicy}
           </Button>
 
           <Button
@@ -350,7 +348,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             onClick={() => { window.location.href = '/terms'; }}
           >
             <ScrollText className="w-4 h-4 mr-2" />
-            {isArabic ? 'شروط الخدمة' : 'Terms of Service'}
+            {t.termsOfService}
           </Button>
         </CardContent>
       </Card>
@@ -358,7 +356,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       {/* Version Info */}
       <div className="mt-8 text-center text-xs text-muted-foreground">
         <p>RE Platform v1.0.0</p>
-        <p>{isArabic ? 'جميع الحقوق محفوظة © 2026' : 'All rights reserved © 2026'}</p>
+        <p>{t.allRightsReserved}</p>
       </div>
     </div>
   );
