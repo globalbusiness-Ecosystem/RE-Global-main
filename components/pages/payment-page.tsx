@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import type { Wallet, Transaction } from '@/lib/transaction-manager';
 import { useTransactionManager } from '@/lib/transaction-manager';
+import { PAYMENT_I18N } from '@/lib/payment-i18n';
 
 interface PaymentPageProps {
   language: NavLanguage;
@@ -22,7 +23,8 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
   const [loading, setLoading] = useState(true);
   const [selectedType, setSelectedType] = useState<string>('all');
 
-  const isArabic = language === 'ar';
+  const t = PAYMENT_I18N[language];
+  const isRTL = language === 'ar' || language === 'ur';
 
   useEffect(() => {
     loadWalletData();
@@ -40,7 +42,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
       setTransactions(transactionsData);
     } catch (error) {
       console.error('[v0] Error loading wallet:', error);
-      toast.error(isArabic ? 'خطأ في تحميل المحفظة' : 'Error loading wallet');
+      toast.error(t.errorLoadingWallet);
     } finally {
       setLoading(false);
     }
@@ -57,15 +59,15 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
   };
 
   const transactionTypes = [
-    { id: 'all', label: isArabic ? 'الكل' : 'All' },
-    { id: 'buy', label: isArabic ? 'الشراء' : 'Buy' },
-    { id: 'rent', label: isArabic ? 'الإيجار' : 'Rent' },
-    { id: 'invest', label: isArabic ? 'الاستثمار' : 'Invest' },
-    { id: 'hotel', label: isArabic ? 'الفنادق' : 'Hotels' }
+    { id: 'all', label: t.all },
+    { id: 'buy', label: t.buy },
+    { id: 'rent', label: t.rent },
+    { id: 'invest', label: t.invest },
+    { id: 'hotel', label: t.hotels }
   ];
 
   return (
-    <div className={`flex flex-col h-full bg-background pb-24 ${isArabic ? 'rtl' : 'ltr'}`}>
+    <div className={`flex flex-col h-full bg-background pb-24 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Header */}
       <div className="bg-gradient-to-r from-accent/20 to-accent/10 p-4 border-b border-border sticky top-0 z-10">
         <div className="flex items-center justify-between mb-2">
@@ -78,7 +80,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
             </button>
           )}
           <h1 className="text-xl font-bold text-foreground">
-            {isArabic ? 'المحفظة والدفع' : 'Wallet & Payments'}
+            {t.walletAndPayments}
           </h1>
           <button
             onClick={loadWalletData}
@@ -95,7 +97,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
           <div className="text-center space-y-2">
             <div className="animate-spin w-8 h-8 border-2 border-accent border-t-transparent rounded-full mx-auto" />
             <p className="text-sm text-muted-foreground">
-              {isArabic ? 'جاري التحميل...' : 'Loading...'}
+              {t.loading}
             </p>
           </div>
         </div>
@@ -106,7 +108,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
             <div className="flex items-start justify-between mb-4">
               <div>
                 <p className="text-sm text-muted-foreground mb-1">
-                  {isArabic ? 'الرصيد الحالي' : 'Current Balance'}
+                  {t.currentBalance}
                 </p>
                 <p className="text-4xl font-bold text-foreground">
                   {wallet?.balance.toFixed(2)} <span className="text-2xl">π</span>
@@ -117,7 +119,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
             <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border/50">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">
-                  {isArabic ? 'المصروف' : 'Spent'}
+                  {t.spent}
                 </p>
                 <p className="text-lg font-semibold text-red-500">
                   -{stats.totalSpent.toFixed(2)}
@@ -125,7 +127,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
               </div>
               <div>
                 <p className="text-xs text-muted-foreground mb-1">
-                  {isArabic ? 'المكسب' : 'Earned'}
+                  {t.earned}
                 </p>
                 <p className="text-lg font-semibold text-green-500">
                   +{stats.totalEarned.toFixed(2)}
@@ -138,17 +140,17 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
           <div className="grid grid-cols-2 gap-3">
             <Button
               className="bg-accent hover:bg-accent/90 text-background"
-              onClick={() => toast.info(isArabic ? 'إضافة رصيد قريبًا' : 'Add funds coming soon')}
+              onClick={() => toast.info(t.addFundsComingSoon)}
             >
               <TrendingUp className="w-4 h-4 mr-2" />
-              {isArabic ? 'إضافة رصيد' : 'Add Funds'}
+              {t.addFunds}
             </Button>
             <Button
               variant="outline"
-              onClick={() => toast.info(isArabic ? 'سحب الأموال قريبًا' : 'Withdraw coming soon')}
+              onClick={() => toast.info(t.withdrawComingSoon)}
             >
               <Send className="w-4 h-4 mr-2" />
-              {isArabic ? 'سحب' : 'Withdraw'}
+              {t.withdraw}
             </Button>
           </div>
 
@@ -172,13 +174,13 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
           {/* Transactions List */}
           <div className="space-y-2">
             <h2 className="font-semibold text-foreground px-2">
-              {isArabic ? 'سجل المعاملات' : 'Transaction History'}
+              {t.transactionHistory}
             </h2>
             {filteredTransactions.length === 0 ? (
               <Card className="p-8 text-center">
                 <TrendingDown className="w-8 h-8 text-muted-foreground mx-auto mb-2 opacity-50" />
                 <p className="text-muted-foreground">
-                  {isArabic ? 'لا توجد معاملات' : 'No transactions'}
+                  {t.noTransactions}
                 </p>
               </Card>
             ) : (
@@ -196,7 +198,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
                         {transactionManager.getTransactionLabel(transaction.transactionType, language)}
                       </p>
                       <p className="text-xs text-muted-foreground/70 mt-1">
-                        {new Date(transaction.timestamp).toLocaleDateString(language === 'ar' ? 'ar-SA' : 'en-US')}
+                        {new Date(transaction.timestamp).toLocaleDateString(t.dateLocale)}
                       </p>
                     </div>
                     <div className="text-right">
@@ -218,9 +220,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
           {/* Info Section */}
           <Card className="p-4 bg-muted/30 border-dashed">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {isArabic
-                ? 'تُحفظ جميع معاملاتك بأمان. يمكنك عرض سجل المعاملات الكامل وإدارة محفظتك من هنا.'
-                : 'All your transactions are securely saved. You can view your complete transaction history and manage your wallet from here.'}
+              {t.infoNote}
             </p>
           </Card>
         </div>

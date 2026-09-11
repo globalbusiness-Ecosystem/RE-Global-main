@@ -1,0 +1,173 @@
+import type { NavLanguage } from './nav-i18n';
+
+export interface PaymentStrings {
+  errorLoadingWallet: string;
+  all: string;
+  buy: string;
+  rent: string;
+  invest: string;
+  hotels: string;
+  walletAndPayments: string;
+  loading: string;
+  currentBalance: string;
+  spent: string;
+  earned: string;
+  addFundsComingSoon: string;
+  addFunds: string;
+  withdrawComingSoon: string;
+  withdraw: string;
+  transactionHistory: string;
+  noTransactions: string;
+  infoNote: string;
+  dateLocale: string;
+}
+
+export const PAYMENT_I18N: Record<NavLanguage, PaymentStrings> = {
+  en: {
+    errorLoadingWallet: 'Error loading wallet',
+    all: 'All',
+    buy: 'Buy',
+    rent: 'Rent',
+    invest: 'Invest',
+    hotels: 'Hotels',
+    walletAndPayments: 'Wallet & Payments',
+    loading: 'Loading...',
+    currentBalance: 'Current Balance',
+    spent: 'Spent',
+    earned: 'Earned',
+    addFundsComingSoon: 'Add funds coming soon',
+    addFunds: 'Add Funds',
+    withdrawComingSoon: 'Withdraw coming soon',
+    withdraw: 'Withdraw',
+    transactionHistory: 'Transaction History',
+    noTransactions: 'No transactions',
+    infoNote: 'All your transactions are securely saved. You can view your complete transaction history and manage your wallet from here.',
+    dateLocale: 'en-US',
+  },
+  ar: {
+    errorLoadingWallet: 'خطأ في تحميل المحفظة',
+    all: 'الكل',
+    buy: 'الشراء',
+    rent: 'الإيجار',
+    invest: 'الاستثمار',
+    hotels: 'الفنادق',
+    walletAndPayments: 'المحفظة والدفع',
+    loading: 'جاري التحميل...',
+    currentBalance: 'الرصيد الحالي',
+    spent: 'المصروف',
+    earned: 'المكسب',
+    addFundsComingSoon: 'إضافة رصيد قريبًا',
+    addFunds: 'إضافة رصيد',
+    withdrawComingSoon: 'سحب الأموال قريبًا',
+    withdraw: 'سحب',
+    transactionHistory: 'سجل المعاملات',
+    noTransactions: 'لا توجد معاملات',
+    infoNote: 'تُحفظ جميع معاملاتك بأمان. يمكنك عرض سجل المعاملات الكامل وإدارة محفظتك من هنا.',
+    dateLocale: 'ar-EG',
+  },
+  fr: {
+    errorLoadingWallet: 'Erreur lors du chargement du portefeuille',
+    all: 'Tout',
+    buy: 'Achat',
+    rent: 'Location',
+    invest: 'Investissement',
+    hotels: 'Hôtels',
+    walletAndPayments: 'Portefeuille et paiements',
+    loading: 'Chargement...',
+    currentBalance: 'Solde actuel',
+    spent: 'Dépensé',
+    earned: 'Gagné',
+    addFundsComingSoon: 'Ajout de fonds bientôt disponible',
+    addFunds: 'Ajouter des fonds',
+    withdrawComingSoon: 'Retrait bientôt disponible',
+    withdraw: 'Retirer',
+    transactionHistory: 'Historique des transactions',
+    noTransactions: 'Aucune transaction',
+    infoNote: 'Toutes vos transactions sont enregistrées en toute sécurité. Vous pouvez consulter votre historique complet et gérer votre portefeuille ici.',
+    dateLocale: 'fr-FR',
+  },
+  es: {
+    errorLoadingWallet: 'Error al cargar la billetera',
+    all: 'Todo',
+    buy: 'Compra',
+    rent: 'Alquiler',
+    invest: 'Inversión',
+    hotels: 'Hoteles',
+    walletAndPayments: 'Billetera y pagos',
+    loading: 'Cargando...',
+    currentBalance: 'Saldo actual',
+    spent: 'Gastado',
+    earned: 'Ganado',
+    addFundsComingSoon: 'Agregar fondos próximamente',
+    addFunds: 'Agregar fondos',
+    withdrawComingSoon: 'Retiro próximamente',
+    withdraw: 'Retirar',
+    transactionHistory: 'Historial de transacciones',
+    noTransactions: 'Sin transacciones',
+    infoNote: 'Todas tus transacciones se guardan de forma segura. Puedes ver tu historial completo y administrar tu billetera aquí.',
+    dateLocale: 'es-ES',
+  },
+  pt: {
+    errorLoadingWallet: 'Erro ao carregar a carteira',
+    all: 'Todos',
+    buy: 'Compra',
+    rent: 'Aluguel',
+    invest: 'Investimento',
+    hotels: 'Hotéis',
+    walletAndPayments: 'Carteira e pagamentos',
+    loading: 'Carregando...',
+    currentBalance: 'Saldo atual',
+    spent: 'Gasto',
+    earned: 'Ganho',
+    addFundsComingSoon: 'Adicionar fundos em breve',
+    addFunds: 'Adicionar fundos',
+    withdrawComingSoon: 'Saque em breve',
+    withdraw: 'Sacar',
+    transactionHistory: 'Histórico de transações',
+    noTransactions: 'Nenhuma transação',
+    infoNote: 'Todas as suas transações são salvas com segurança. Você pode ver seu histórico completo e gerenciar sua carteira aqui.',
+    dateLocale: 'pt-PT',
+  },
+  ur: {
+    errorLoadingWallet: 'والیٹ لوڈ کرنے میں خرابی',
+    all: 'تمام',
+    buy: 'خریداری',
+    rent: 'کرایہ',
+    invest: 'سرمایہ کاری',
+    hotels: 'ہوٹلز',
+    walletAndPayments: 'والیٹ اور ادائیگیاں',
+    loading: 'لوڈ ہو رہا ہے...',
+    currentBalance: 'موجودہ بیلنس',
+    spent: 'خرچ شدہ',
+    earned: 'کمایا گیا',
+    addFundsComingSoon: 'فنڈز شامل کرنا جلد آ رہا ہے',
+    addFunds: 'فنڈز شامل کریں',
+    withdrawComingSoon: 'رقم نکالنا جلد آ رہا ہے',
+    withdraw: 'نکالیں',
+    transactionHistory: 'لین دین کی تاریخ',
+    noTransactions: 'کوئی لین دین نہیں',
+    infoNote: 'آپ کے تمام لین دین محفوظ طریقے سے محفوظ کیے جاتے ہیں۔ آپ یہاں سے اپنی مکمل لین دین کی تاریخ دیکھ سکتے ہیں اور اپنا والیٹ منظم کر سکتے ہیں۔',
+    dateLocale: 'ur-PK',
+  },
+  zh: {
+    errorLoadingWallet: '加载钱包出错',
+    all: '全部',
+    buy: '购买',
+    rent: '租赁',
+    invest: '投资',
+    hotels: '酒店',
+    walletAndPayments: '钱包与支付',
+    loading: '加载中...',
+    currentBalance: '当前余额',
+    spent: '已花费',
+    earned: '已赚取',
+    addFundsComingSoon: '充值功能即将上线',
+    addFunds: '充值',
+    withdrawComingSoon: '提现功能即将上线',
+    withdraw: '提现',
+    transactionHistory: '交易记录',
+    noTransactions: '暂无交易',
+    infoNote: '您的所有交易均被安全保存。您可以在这里查看完整的交易记录并管理您的钱包。',
+    dateLocale: 'zh-CN',
+  },
+};

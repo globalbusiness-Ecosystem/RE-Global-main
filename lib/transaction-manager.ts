@@ -118,7 +118,7 @@ export class TransactionManager {
     return icons[type];
   }
 
-  getTransactionLabel(type: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized', language: 'en' | 'ar'): string {
+  getTransactionLabel(type: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized', language: 'en' | 'ar' | 'fr' | 'es' | 'pt' | 'ur' | 'zh'): string {
     const labels = {
       en: {
         buy: 'Property Purchase',
@@ -132,7 +132,42 @@ export class TransactionManager {
         rent: 'استئجار عقار',
         hotel: 'حجز فندق',
         invest: 'استثمار',
-        tokenized: 'عقار معروق'
+        tokenized: 'عقار مرمز'
+      },
+      fr: {
+        buy: 'Achat de propriété',
+        rent: 'Location de propriété',
+        hotel: "Réservation d'hôtel",
+        invest: 'Investissement',
+        tokenized: 'Propriété tokenisée'
+      },
+      es: {
+        buy: 'Compra de propiedad',
+        rent: 'Alquiler de propiedad',
+        hotel: 'Reserva de hotel',
+        invest: 'Inversión',
+        tokenized: 'Propiedad tokenizada'
+      },
+      pt: {
+        buy: 'Compra de imóvel',
+        rent: 'Aluguel de imóvel',
+        hotel: 'Reserva de hotel',
+        invest: 'Investimento',
+        tokenized: 'Imóvel tokenizado'
+      },
+      ur: {
+        buy: 'جائیداد کی خریداری',
+        rent: 'جائیداد کا کرایہ',
+        hotel: 'ہوٹل بکنگ',
+        invest: 'سرمایہ کاری',
+        tokenized: 'ٹوکنائزڈ جائیداد'
+      },
+      zh: {
+        buy: '房产购买',
+        rent: '房产租赁',
+        hotel: '酒店预订',
+        invest: '投资',
+        tokenized: '代币化房产'
       }
     };
     return labels[language][type];
