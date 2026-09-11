@@ -16,6 +16,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
+import { MAP_I18N, getMapPropertyTitle } from '@/lib/map-i18n';
 
 // Leaflet lazy imports with performance optimization
 let L: any;
@@ -121,6 +122,7 @@ interface RegionStats {
 }
 
 export default function MapPage({ language = 'en', onPropertySelect }: MapPageProps) {
+  const t = MAP_I18N[language];
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -364,7 +366,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
   const locateUser = useCallback(() => {
     if (!navigator.geolocation) {
-      setLocateError(language === 'ar' ? 'المتصفح لا يدعم تحديد الموقع' : 'Geolocation not supported');
+      setLocateError(t.geoNotSupported);
       return;
     }
     setLocatingUser(true);
@@ -387,17 +389,13 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           });
           userMarkerRef.current = L.marker([coords.lat, coords.lng], { icon: userIcon, zIndexOffset: 1000 })
             .addTo(mapInstanceRef.current)
-            .bindPopup(language === 'ar' ? 'موقعك الحالي' : 'Your location');
+            .bindPopup(t.yourLocation);
           mapInstanceRef.current.flyTo([coords.lat, coords.lng], 6, { duration: 1.5 });
         }
       },
       (error) => {
         setLocatingUser(false);
-        setLocateError(
-          language === 'ar'
-            ? 'تعذر تحديد موقعك، تأكد من إذن الموقع'
-            : 'Could not get your location, check location permission'
-        );
+        setLocateError(t.locateError);
         console.error('[Geolocation] error:', error);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -617,7 +615,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 <Search className="absolute left-2 top-2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={language === 'ar' ? 'ابحث...' : 'Search properties...'}
+                  placeholder={t.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-accent"
@@ -637,7 +635,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     ? 'bg-accent/20 border-accent text-accent'
                     : 'bg-gray-800 hover:bg-gray-700 border-gray-700'
                 }`}
-                title={language === 'ar' ? 'حدد موقعي' : 'Locate me'}
+                title={t.locateMe}
               >
                 {locatingUser ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -795,7 +793,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-accent to-purple-600 text-black rounded-lg text-xs font-semibold hover:shadow-lg hover:shadow-accent/50 transition"
           >
             <Globe className="w-4 h-4" />
-            {language === 'ar' ? 'جولة عالمية' : 'Global Tour'}
+            {t.globalTour}
           </button>
 
           <button
@@ -803,7 +801,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             className="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs transition"
           >
             <Star className="w-4 h-4 text-yellow-400" />
-            {language === 'ar' ? 'الأفضل' : 'Top ROI'}
+            {t.topRoi}
           </button>
 
           {/* Region Quick Navigation */}
@@ -896,7 +894,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             }`}
           >
             <Eye className="w-4 h-4 inline mr-1" />
-            {language === 'ar' ? 'إحصائيات' : 'Stats'}
+            {t.stats}
           </button>
         </div>
       </div>
@@ -921,7 +919,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
               {/* Property Info */}
               <div className="mb-6">
                 <h3 className="text-lg font-bold text-white mb-2">
-                  {language === 'ar' ? selectedProperty.titleAr : selectedProperty.title}
+                  {getMapPropertyTitle(selectedProperty, language)}
                 </h3>
                 <p className="text-sm text-gray-300 mb-3">
                   {selectedProperty.city}, {selectedProperty.country}
@@ -935,7 +933,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 <div className="grid grid-cols-2 gap-2 text-xs text-gray-400">
                   <div>
                     <Bed className="w-3 h-3 inline mr-1" />
-                    {selectedProperty.bedrooms} {language === 'ar' ? 'غرف' : 'Beds'}
+                    {selectedProperty.bedrooms} {t.beds}
                   </div>
                   <div>
                     <Maximize2 className="w-3 h-3 inline mr-1" />
@@ -953,7 +951,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   className="flex-1 py-2.5 px-3 bg-gray-800 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
                 >
                   <MapPin className="w-4 h-4" />
-                  {language === 'ar' ? 'التفاصيل' : 'View Details'}
+                  {t.viewDetails}
                 </button>
                 <button
                   onClick={() => {
@@ -962,7 +960,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   className="flex-1 py-2.5 px-3 bg-gradient-to-r from-[#F59E0B] to-[#d97706] hover:from-[#d97706] hover:to-[#b45309] text-white font-semibold rounded-lg transition-all flex items-center justify-center gap-2 shadow-lg"
                 >
                   <Video className="w-4 h-4" />
-                  {language === 'ar' ? 'جولة ذكية' : 'AI Tour'}
+                  {t.aiTour}
                 </button>
               </div>
             </div>
@@ -990,7 +988,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             destination={{
               lat: selectedProperty.lat,
               lng: selectedProperty.lng,
-              title: language === 'ar' ? selectedProperty.titleAr : selectedProperty.title,
+              title: getMapPropertyTitle(selectedProperty, language),
             }}
             onClose={() => setShowNavigation(false)}
             L={L}
@@ -1029,7 +1027,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             >
               {/* Close Button */}
               <div className="sticky top-0 z-10 flex items-center justify-between p-4 bg-black/50 border-b border-accent/10">
-                <h2 className="font-bold text-lg">{language === 'ar' ? 'تفاصيل العقار' : 'Property Details'}</h2>
+                <h2 className="font-bold text-lg">{t.propertyDetails}</h2>
                 <button
             onClick={() => {
               try {
@@ -1050,17 +1048,17 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 {/* Header Info */}
                 <div>
                   <h3 className="text-xl font-bold text-balance mb-2">
-                    {language === 'ar' ? selectedProperty.titleAr : selectedProperty.title}
+                    {getMapPropertyTitle(selectedProperty, language)}
                   </h3>
                   <div className="flex items-center gap-2">
                     <span className="capitalize bg-accent/20 text-accent px-3 py-1 rounded-lg text-xs font-semibold">
-                      {selectedProperty.type === 'buy' && (language === 'ar' ? 'شراء' : 'Buy')}
-                      {selectedProperty.type === 'rent' && (language === 'ar' ? 'إيجار' : 'Rent')}
-                      {selectedProperty.type === 'hotel' && (language === 'ar' ? 'فندق' : 'Hotel')}
-                      {selectedProperty.type === 'invest' && (language === 'ar' ? 'استثمار' : 'Invest')}
+                      {selectedProperty.type === 'buy' && t.typeBuy}
+                      {selectedProperty.type === 'rent' && t.typeRent}
+                      {selectedProperty.type === 'hotel' && t.typeHotel}
+                      {selectedProperty.type === 'invest' && t.typeInvest}
                     </span>
                     <span className="text-sm text-gray-400">
-                      {language === 'ar' ? `قائمة منذ ${selectedProperty.daysListed} يوم` : `Listed ${selectedProperty.daysListed} days ago`}
+                      {t.listedDaysAgo(selectedProperty.daysListed)}
                     </span>
                   </div>
                 </div>
@@ -1070,7 +1068,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   <div className="flex items-start gap-3">
                     <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
                     <div>
-                      <div className="text-sm text-gray-400">{language === 'ar' ? 'الموقع' : 'Location'}</div>
+                      <div className="text-sm text-gray-400">{t.location}</div>
                       <div className="font-semibold">{selectedProperty.city}, {selectedProperty.country}</div>
                       <div className="text-xs text-gray-500">{selectedProperty.countryFlag}</div>
                     </div>
@@ -1080,11 +1078,11 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 {/* Price & ROI */}
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg p-3 border border-accent/20">
-                    <div className="text-xs text-gray-400 mb-1">{language === 'ar' ? 'السعر' : 'Price'}</div>
+                    <div className="text-xs text-gray-400 mb-1">{t.price}</div>
                     <div className="text-2xl font-bold text-accent">{selectedProperty.price}π</div>
                   </div>
                   <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-lg p-3 border border-green-500/20">
-                    <div className="text-xs text-gray-400 mb-1">{language === 'ar' ? 'ROI المتوقع' : 'Exp. ROI'}</div>
+                    <div className="text-xs text-gray-400 mb-1">{t.expRoi}</div>
                     <div className="text-2xl font-bold text-green-400">{selectedProperty.roiScore}%</div>
                   </div>
                 </div>
@@ -1094,30 +1092,30 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   <div className="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-800">
                     <Bed className="w-4 h-4 text-accent mx-auto mb-1" />
                     <div className="text-sm font-semibold">{selectedProperty.bedrooms}</div>
-                    <div className="text-xs text-gray-500">{language === 'ar' ? 'غرف نوم' : 'Bedrooms'}</div>
+                    <div className="text-xs text-gray-500">{t.bedrooms}</div>
                   </div>
                   <div className="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-800">
                     <Maximize2 className="w-4 h-4 text-accent mx-auto mb-1" />
                     <div className="text-sm font-semibold">{selectedProperty.area}m²</div>
-                    <div className="text-xs text-gray-500">{language === 'ar' ? 'المساحة' : 'Area'}</div>
+                    <div className="text-xs text-gray-500">{t.area}</div>
                   </div>
                   <div className="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-800">
                     <TrendingUp className="w-4 h-4 mx-auto mb-1" style={{ color: selectedProperty.marketTrend === 'up' ? '#10b981' : selectedProperty.marketTrend === 'down' ? '#ef4444' : '#6b7280' }} />
                     <div className="text-sm font-semibold capitalize">{selectedProperty.marketTrend}</div>
-                    <div className="text-xs text-gray-500">{language === 'ar' ? 'الاتجاه' : 'Trend'}</div>
+                    <div className="text-xs text-gray-500">{t.trend}</div>
                   </div>
                 </div>
 
                 {/* Market Stats */}
                 <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
-                  <h4 className="font-semibold mb-3">{language === 'ar' ? 'إحصائيات السوق' : 'Market Stats'}</h4>
+                  <h4 className="font-semibold mb-3">{t.marketStats}</h4>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-400">{language === 'ar' ? 'التقدير المتوقع' : 'Appreciation'}</span>
+                      <span className="text-gray-400">{t.appreciation}</span>
                       <span className="font-semibold text-green-400">+{selectedProperty.appreciation}%</span>
                     </div>
                     <div className="flex justify-between items-center">
-                      <span className="text-gray-400">{language === 'ar' ? 'درجة الاستثمار' : 'ROI Score'}</span>
+                      <span className="text-gray-400">{t.roiScore}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-32 bg-gray-800 rounded-full h-2">
                           <div
@@ -1135,7 +1133,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 {userLocation && distanceToProperty !== null && (
                   <div className="bg-gray-900/50 rounded-lg p-3 mb-3 space-y-2">
                     <p className="text-xs text-gray-400">
-                      {language === 'ar' ? 'المسافة من موقعك' : 'Distance from you'}
+                      {t.distanceFromYou}
                     </p>
                     <p className="text-lg font-bold text-blue-400">
                       {distanceToProperty < 1
@@ -1145,23 +1143,19 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     <div className="flex gap-4 text-xs text-gray-300">
                       <span className="flex items-center gap-1.5">
                         <Car className="w-3.5 h-3.5 text-accent" />
-                        {language === 'ar' ? '~' : '~'}
+                        ~
                         {Math.max(1, Math.round((distanceToProperty / 50) * 60))}{' '}
-                        {language === 'ar' ? 'د بالسيارة' : 'min drive'}
+                        {t.minDrive}
                       </span>
                       <span className="flex items-center gap-1.5">
                         <Footprints className="w-3.5 h-3.5 text-accent" />
                         {distanceToProperty < 20
-                          ? `${Math.max(1, Math.round((distanceToProperty / 5) * 60))} ${
-                              language === 'ar' ? 'د مشياً' : 'min walk'
-                            }`
-                          : language === 'ar'
-                          ? 'بعيد جداً للمشي'
-                          : 'too far to walk'}
+                          ? `${Math.max(1, Math.round((distanceToProperty / 5) * 60))} ${t.minWalk}`
+                          : t.tooFarToWalk}
                       </span>
                     </div>
                     <p className="text-[10px] text-gray-500">
-                      {language === 'ar' ? '* تقدير تقريبي (خط مستقيم)' : '* Estimated (straight-line)'}
+                      {t.estimatedStraightLine}
                     </p>
                   </div>
                 )}
@@ -1176,7 +1170,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     ) : (
                       <LocateFixed className="w-3.5 h-3.5" />
                     )}
-                    {language === 'ar' ? 'حدد موقعك لمعرفة المسافة' : 'Locate yourself to see distance'}
+                    {t.locateYourselfDistance}
                   </button>
                 )}
                 {locateError && (
@@ -1188,14 +1182,14 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold py-3 rounded-lg mb-3 transition"
                 >
                   <Navigation className="w-4 h-4" />
-                  {language === 'ar' ? 'ابدأ الملاحة الحية' : 'Start Live Navigation'}
+                  {t.startLiveNav}
                 </button>
 
                 {/* QR Code */}
                 <div className="flex items-center justify-between bg-gray-900/50 rounded-lg p-3 mb-3">
                   <div>
                     <p className="text-xs text-gray-400">
-                      {language === 'ar' ? 'كود العقار' : 'Property Code'}
+                      {t.propertyCode}
                     </p>
                     <p className="text-[11px] text-gray-500 font-mono mt-0.5">
                       #{selectedProperty.id}
@@ -1208,7 +1202,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 <div className="flex gap-2 pb-4">
                   <UnifiedPaymentButton
                     propertyId={String(selectedProperty.id)}
-                    propertyTitle={language === 'ar' ? selectedProperty.titleAr : selectedProperty.title}
+                    propertyTitle={getMapPropertyTitle(selectedProperty, language)}
                     price={selectedProperty.price}
                     transactionType={selectedProperty.type === 'invest' ? 'invest' : selectedProperty.type === 'rent' ? 'rent' : selectedProperty.type === 'hotel' ? 'hotel' : 'buy'}
                     language={language}
@@ -1223,7 +1217,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     className="flex-1 bg-gray-800 hover:bg-gray-700 font-semibold py-3 rounded-lg transition flex items-center justify-center gap-2"
                   >
                     <Globe className="w-4 h-4" />
-                    {language === 'ar' ? 'جولة 360' : '360° Tour'}
+                    {t.tour360}
                   </button>
                 </div>
               </div>
@@ -1236,13 +1230,13 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           <div className="bg-gradient-to-r from-black/90 to-black/80 backdrop-blur-lg border-t border-accent/20 p-4 animate-in slide-in-from-bottom duration-300">
             <div className="max-w-full flex items-center justify-between gap-4">
               <div className="flex-1 min-w-0">
-                <h3 className="font-bold text-base truncate">{language === 'ar' ? selectedProperty.titleAr : selectedProperty.title}</h3>
+                <h3 className="font-bold text-base truncate">{getMapPropertyTitle(selectedProperty, language)}</h3>
                 <div className="flex items-center gap-3 mt-1 text-sm text-gray-400">
                   <span className="capitalize bg-gray-800/50 px-2 py-1 rounded text-xs font-medium">
-                    {selectedProperty.type === 'buy' && (language === 'ar' ? 'شراء' : 'Buy')}
-                    {selectedProperty.type === 'rent' && (language === 'ar' ? 'إيجار' : 'Rent')}
-                    {selectedProperty.type === 'hotel' && (language === 'ar' ? 'فندق' : 'Hotel')}
-                    {selectedProperty.type === 'invest' && (language === 'ar' ? 'استثمار' : 'Invest')}
+                    {selectedProperty.type === 'buy' && t.typeBuy}
+                    {selectedProperty.type === 'rent' && t.typeRent}
+                    {selectedProperty.type === 'hotel' && t.typeHotel}
+                    {selectedProperty.type === 'invest' && t.typeInvest}
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="w-4 h-4 text-accent" />
