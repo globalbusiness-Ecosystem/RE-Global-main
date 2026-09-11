@@ -8,6 +8,7 @@ import { ContractDetailView } from '@/components/contract-detail-view';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { CONTRACTS_I18N } from '@/lib/contracts-i18n';
 
 interface ContractsPageProps {
   language: NavLanguage;
@@ -21,22 +22,8 @@ const statusStyles: Record<SmartContract['status'], string> = {
   cancelled: 'bg-red-500/15 text-red-400 border-red-500/30',
 };
 
-const statusLabelAr: Record<SmartContract['status'], string> = {
-  pending: 'قيد الانتظار',
-  active: 'نشط',
-  completed: 'مكتمل',
-  cancelled: 'ملغي',
-};
-
-const typeLabelAr: Record<SmartContract['type'], string> = {
-  buy: 'شراء',
-  rent: 'إيجار',
-  invest: 'استثمار',
-  tokenized: 'رمزي',
-};
-
 function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage }) {
-  const isArabic = language === 'ar';
+  const t = CONTRACTS_I18N[language];
   const [status, setStatus] = useState<'idle' | 'loading' | 'done'>('idle');
   const [result, setResult] = useState<StellarVerificationResult | null>(null);
 
@@ -54,7 +41,7 @@ function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage
         className="flex items-center gap-1.5 text-[11px] text-accent underline"
       >
         <Link2 className="w-3 h-3" />
-        {isArabic ? 'تحقق على Stellar' : 'Verify on Stellar'}
+        {t.verifyOnStellar}
       </button>
     );
   }
@@ -63,7 +50,7 @@ function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage
     return (
       <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
         <Loader2 className="w-3 h-3 animate-spin" />
-        {isArabic ? 'جاري التحقق...' : 'Verifying...'}
+        {t.verifying}
       </span>
     );
   }
@@ -72,9 +59,7 @@ function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage
     return (
       <span className="flex items-center gap-1.5 text-[11px] text-green-400">
         <ShieldCheck className="w-3 h-3" />
-        {isArabic
-          ? `مؤكد على السلسلة · ليدجر ${result.ledger}`
-          : `Confirmed on-chain · Ledger ${result.ledger}`}
+        {t.confirmedOnChainLedger(result.ledger ?? '')}
       </span>
     );
   }
@@ -82,7 +67,7 @@ function VerifyOnChain({ txid, language }: { txid: string; language: NavLanguage
   return (
     <span className="flex items-center gap-1.5 text-[11px] text-red-400">
       <ShieldAlert className="w-3 h-3" />
-      {isArabic ? 'لم يتم التحقق' : (result?.error || 'Not verified')}
+      {result?.error || t.notVerified}
     </span>
   );
 }
@@ -106,7 +91,7 @@ function CopyId({ value }: { value: string }) {
 }
 
 export default function ContractsPage({ language, onBack }: ContractsPageProps) {
-  const isArabic = language === 'ar';
+  const t = CONTRACTS_I18N[language];
   const { username } = usePiAuth();
   const { getContractsForUser, getAllContracts } = useFirebaseDatabase();
 
@@ -204,12 +189,10 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             <div>
               <h1 className="text-xl font-bold text-accent flex items-center gap-2">
                 <ScrollText className="w-5 h-5" />
-                {isArabic ? 'العقود الذكية' : 'Smart Contracts'}
+                {t.smartContracts}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {adminMode
-                  ? (isArabic ? 'عرض الأدمن: كل العقود' : 'Admin view: all contracts')
-                  : (isArabic ? 'عقودك أنت فقط' : 'Your contracts only')}
+                {adminMode ? t.adminViewAll : t.yourContractsOnly}
               </p>
             </div>
           </div>
@@ -223,14 +206,14 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             }`}
           >
             {adminMode ? <ShieldCheck className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-            {adminMode ? (isArabic ? 'أدمن' : 'Admin') : (isArabic ? 'عرض الكل' : 'View All')}
+            {adminMode ? t.admin : t.viewAll}
           </button>
         </div>
 
         {showPinPrompt && (
           <div className="bg-card border border-border rounded-lg p-4 space-y-3">
             <p className="text-sm text-muted-foreground">
-              {isArabic ? 'أدخل PIN الأدمن لعرض كل العقود' : 'Enter admin PIN to view all contracts'}
+              {t.enterAdminPin}
             </p>
             <input
               type="password"
@@ -246,14 +229,14 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               autoFocus
             />
             {pinError && (
-              <p className="text-xs text-red-400">{isArabic ? 'PIN غير صحيح' : 'Incorrect PIN'}</p>
+              <p className="text-xs text-red-400">{t.incorrectPin}</p>
             )}
             <div className="flex gap-2">
               <button
                 onClick={submitPin}
                 className="flex-1 py-2 rounded-md bg-accent text-accent-foreground font-semibold"
               >
-                {isArabic ? 'دخول' : 'Unlock'}
+                {t.unlock}
               </button>
               <button
                 onClick={() => {
@@ -262,7 +245,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                 }}
                 className="flex-1 py-2 rounded-md border border-border text-muted-foreground"
               >
-                {isArabic ? 'إلغاء' : 'Cancel'}
+                {t.cancel}
               </button>
             </div>
           </div>
@@ -276,11 +259,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={
-                  isArabic
-                    ? 'ابحث بالاسم، اليوزرنيم، أو رقم العقد...'
-                    : 'Search by property, username, or contract ID...'
-                }
+                placeholder={t.searchPlaceholder}
                 className="w-full bg-card border border-border rounded-lg py-2.5 pl-9 pr-9 text-sm outline-none focus:border-accent"
               />
               {searchQuery && (
@@ -295,7 +274,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             <button
               onClick={() => setShowScanner(true)}
               className="shrink-0 p-2.5 rounded-lg border border-border text-muted-foreground hover:text-accent hover:border-accent transition"
-              title={isArabic ? 'مسح QR' : 'Scan QR'}
+              title={t.scanQr}
             >
               <QrCode className="w-4 h-4" />
             </button>
@@ -319,7 +298,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           {showFilters && (
             <div className="bg-card border border-border rounded-lg p-3 space-y-3">
               <div>
-                <p className="text-xs text-muted-foreground mb-1.5">{isArabic ? 'الحالة' : 'Status'}</p>
+                <p className="text-xs text-muted-foreground mb-1.5">{t.status}</p>
                 <div className="flex flex-wrap gap-1.5">
                   {(['all', 'pending', 'active', 'completed', 'cancelled'] as const).map((s) => (
                     <button
@@ -331,29 +310,25 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                           : 'border-border text-muted-foreground'
                       }`}
                     >
-                      {s === 'all'
-                        ? (isArabic ? 'الكل' : 'All')
-                        : isArabic
-                        ? statusLabelAr[s]
-                        : s}
+                      {s === 'all' ? t.all : t.statusLabels[s]}
                     </button>
                   ))}
                 </div>
               </div>
               <div>
-                <p className="text-xs text-muted-foreground mb-1.5">{isArabic ? 'النوع' : 'Type'}</p>
+                <p className="text-xs text-muted-foreground mb-1.5">{t.type}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {(['all', 'buy', 'rent', 'invest', 'tokenized'] as const).map((t) => (
+                  {(['all', 'buy', 'rent', 'invest', 'tokenized'] as const).map((ty) => (
                     <button
-                      key={t}
-                      onClick={() => setTypeFilter(t)}
+                      key={ty}
+                      onClick={() => setTypeFilter(ty)}
                       className={`text-xs px-2.5 py-1 rounded-full border ${
-                        typeFilter === t
+                        typeFilter === ty
                           ? 'bg-accent text-accent-foreground border-accent'
                           : 'border-border text-muted-foreground'
                       }`}
                     >
-                      {t === 'all' ? (isArabic ? 'الكل' : 'All') : isArabic ? typeLabelAr[t] : t}
+                      {ty === 'all' ? t.all : t.typeLabels[ty]}
                     </button>
                   ))}
                 </div>
@@ -366,7 +341,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                   }}
                   className="text-xs text-accent underline"
                 >
-                  {isArabic ? 'مسح الفلاتر' : 'Clear filters'}
+                  {t.clearFilters}
                 </button>
               )}
             </div>
@@ -374,24 +349,20 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
 
           {(searchQuery || activeFilterCount > 0) && !loading && (
             <p className="text-xs text-muted-foreground">
-              {isArabic
-                ? `${filteredContracts.length} نتيجة من ${contracts.length}`
-                : `${filteredContracts.length} of ${contracts.length} results`}
+              {t.resultsOf(filteredContracts.length, contracts.length)}
             </p>
           )}
         </div>
 
         {loading ? (
           <p className="text-sm text-muted-foreground text-center py-10">
-            {isArabic ? 'جاري التحميل...' : 'Loading...'}
+            {t.loading}
           </p>
         ) : filteredContracts.length === 0 ? (
           <div className="text-center py-16 space-y-2">
             <ScrollText className="w-10 h-10 mx-auto text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">
-              {contracts.length === 0
-                ? (isArabic ? 'لا توجد عقود حتى الآن' : 'No contracts yet')
-                : (isArabic ? 'لا توجد نتائج مطابقة' : 'No matching results')}
+              {contracts.length === 0 ? t.noContractsYet : t.noMatchingResults}
             </p>
           </div>
         ) : (
@@ -402,18 +373,18 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                   <div>
                     <p className="font-medium">{c.propertyTitle}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {isArabic ? typeLabelAr[c.type] : c.type} · {c.amount.toLocaleString()} {c.currency}
+                      {t.typeLabels[c.type]} · {c.amount.toLocaleString()} {c.currency}
                     </p>
                   </div>
                   <span className={`shrink-0 text-xs px-2 py-1 rounded-full border ${statusStyles[c.status]}`}>
-                    {isArabic ? statusLabelAr[c.status] : c.status}
+                    {t.statusLabels[c.status]}
                   </span>
                 </div>
 
                 {adminMode && (
                   <div className="text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
-                    <span>{isArabic ? 'المشتري' : 'Buyer'}: {c.buyerUsername}</span>
-                    <span>{isArabic ? 'البائع' : 'Seller'}: {c.sellerUsername}</span>
+                    <span>{t.buyer}: {c.buyerUsername}</span>
+                    <span>{t.seller}: {c.sellerUsername}</span>
                   </div>
                 )}
 
@@ -434,7 +405,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
 
                 <div className="flex items-center justify-between">
                   <p className="text-[11px] text-muted-foreground/70">
-                    {c.createdAt.toLocaleDateString(isArabic ? 'ar-EG' : 'en-US', {
+                    {c.createdAt.toLocaleDateString(t.dateLocale, {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -444,7 +415,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                     onClick={() => setSelectedContract(c)}
                     className="text-[11px] text-accent underline"
                   >
-                    {isArabic ? 'عرض العقد الكامل' : 'View Full Contract'}
+                    {t.viewFullContract}
                   </button>
                 </div>
               </div>
