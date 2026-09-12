@@ -5,6 +5,7 @@ import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft, Check } from 'luc
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
+import { SETTINGS_I18N } from '@/lib/settings-i18n';
 
 interface SettingsPageProps {
   language: NavLanguage;
@@ -23,6 +24,7 @@ export default function SettingsPage({
   onWhitePaperClick,
   onBack,
 }: SettingsPageProps) {
+  const t = SETTINGS_I18N[language];
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
   const [notifications, setNotifications] = useState(true);
   const [logoTaps, setLogoTaps] = useState(0);
@@ -63,10 +65,10 @@ export default function SettingsPage({
     // Verify PIN (placeholder - in production would verify against Google Sheets)
     if (pinCode === '202500') {
       setPinError('');
-      alert(language === 'en' ? 'Admin access granted' : 'تم منح الوصول الإداري');
+      alert(t.adminAccessGranted);
       setShowAdminPanel(false);
     } else {
-      setPinError(language === 'en' ? 'Invalid PIN' : 'رمز PIN غير صحيح');
+      setPinError(t.invalidPin);
     }
   };
 
@@ -77,12 +79,12 @@ export default function SettingsPage({
         <button
           onClick={onBack}
           className="p-1 hover:opacity-70 transition text-accent"
-          title={language === 'en' ? 'Back to Home' : 'العودة للصفحة الرئيسية'}
+          title={t.backToHome}
         >
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h2 className="text-2xl font-bold text-accent flex-1 text-center">
-          {language === 'en' ? 'Settings' : 'الإعدادات'}
+          {t.settings}
         </h2>
         <button
           onClick={() => {}}
@@ -95,7 +97,7 @@ export default function SettingsPage({
       {/* 1. Language */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h3 className="font-semibold text-foreground mb-3">
-          {language === 'en' ? 'Language' : 'اللغة'}
+          {t.language}
         </h3>
         <div className="grid grid-cols-2 gap-2">
           {LANGUAGE_OPTIONS.map((opt) => (
@@ -125,10 +127,10 @@ export default function SettingsPage({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-foreground">
-              {language === 'en' ? 'Dark Mode' : 'الوضع الليلي'}
+              {t.darkMode}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {language === 'en' ? 'Luxury dark theme' : 'مظهر مظلم فاخر'}
+              {t.luxuryDarkTheme}
             </p>
           </div>
           <button
@@ -155,12 +157,10 @@ export default function SettingsPage({
         <div className="flex items-center justify-between">
           <div>
             <h3 className="font-semibold text-foreground">
-              {language === 'en' ? 'Notifications' : 'الإخطارات'}
+              {t.notifications}
             </h3>
             <p className="text-xs text-muted-foreground mt-1">
-              {language === 'en'
-                ? 'Property & market alerts'
-                : 'تنبيهات العقارات والسوق'}
+              {t.propertyMarketAlerts}
             </p>
           </div>
           <button
@@ -181,34 +181,34 @@ export default function SettingsPage({
       {/* 4. RE Token */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h3 className="font-semibold text-foreground mb-4">
-          {language === 'en' ? 'RE Token' : 'رمز RE'}
+          {t.reToken}
         </h3>
         <div className="space-y-3 mb-4">
           <div className="bg-muted rounded-lg p-3">
             <p className="text-xs text-muted-foreground mb-1">
-              {language === 'en' ? 'Token Price' : 'سعر الرمز'}
+              {t.tokenPrice}
             </p>
             <p className="text-lg font-bold text-accent">1 $RE = 0.01π</p>
           </div>
           <div className="bg-muted rounded-lg p-3">
             <p className="text-xs text-muted-foreground mb-1">
-              {language === 'en' ? 'Total Supply' : 'الإمداد الكلي'}
+              {t.totalSupply}
             </p>
             <p className="text-lg font-bold text-accent">100M $RE</p>
           </div>
           <div className="bg-muted rounded-lg p-3">
             <p className="text-xs text-muted-foreground mb-2">
-              {language === 'en' ? 'How to Earn' : 'كيفية الكسب'}
+              {t.howToEarn}
             </p>
             <ul className="text-xs text-foreground space-y-1">
-              <li>• {language === 'en' ? 'Buy properties' : 'شراء العقارات'}</li>
-              <li>• {language === 'en' ? 'Invest in tokenized assets' : 'الاستثمار في الأصول الرمزية'}</li>
-              <li>• {language === 'en' ? 'Refer friends' : 'اطلب من الأصدقاء'}</li>
+              <li>• {t.buyProperties}</li>
+              <li>• {t.investTokenizedAssets}</li>
+              <li>• {t.referFriends}</li>
             </ul>
           </div>
         </div>
         <button className="w-full bg-accent text-accent-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
-          {language === 'en' ? 'Buy $RE' : 'اشتر $RE'}
+          {t.buyRE}
         </button>
       </div>
 
@@ -219,7 +219,7 @@ export default function SettingsPage({
           className="w-full flex items-center justify-between p-2 hover:bg-muted/50 transition rounded-lg"
         >
           <h3 className="font-semibold text-foreground">
-            {language === 'en' ? 'White Paper' : 'الورقة البيضاء'}
+            {t.whitePaper}
           </h3>
           <ExternalLink className="w-5 h-5 text-accent" />
         </button>
@@ -231,13 +231,11 @@ export default function SettingsPage({
           <div className="flex items-center gap-2 mb-4">
             <Lock className="w-5 h-5 text-accent" />
             <h3 className="font-semibold text-accent">
-              {language === 'en' ? 'Admin Panel' : 'لوحة التحكم'}
+              {t.adminPanel}
             </h3>
           </div>
           <p className="text-xs text-muted-foreground mb-3">
-            {language === 'en'
-              ? 'Enter PIN from Google Sheets'
-              : 'أدخل رمز PIN من Google Sheets'}
+            {t.enterPinFromSheets}
           </p>
           <input
             type="password"
@@ -252,7 +250,7 @@ export default function SettingsPage({
             onClick={handlePinSubmit}
             className="w-full bg-accent text-accent-foreground py-2 rounded-lg font-medium hover:opacity-90 transition text-sm"
           >
-            {language === 'en' ? 'Unlock Admin' : 'فتح لوحة التحكم'}
+            {t.unlockAdmin}
           </button>
         </div>
       )}
@@ -260,7 +258,7 @@ export default function SettingsPage({
       {/* 7. Contact Us */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h3 className="font-semibold text-foreground mb-3">
-          {language === 'en' ? 'Contact Us' : 'اتصل بنا'}
+          {t.contactUs}
         </h3>
         <div className="space-y-3">
           <a
@@ -270,7 +268,7 @@ export default function SettingsPage({
             <Mail className="w-5 h-5 text-accent group-hover:scale-110 transition-transform" />
             <div className="flex-1">
               <p className="text-xs text-muted-foreground">
-                {language === 'en' ? 'Email' : 'بريد إلكتروني'}
+                {t.email}
               </p>
               <p className="text-sm font-medium text-foreground group-hover:text-accent transition">globalbusiness435@gmail.com</p>
             </div>
@@ -286,7 +284,7 @@ export default function SettingsPage({
             <MessageCircle className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
             <div className="flex-1 text-left">
               <p className="text-xs text-muted-foreground">
-                {language === 'en' ? 'WhatsApp' : 'واتساب'}
+                {t.whatsapp}
               </p>
               <p className="text-sm font-semibold text-green-500">+201010810558</p>
             </div>
@@ -301,7 +299,7 @@ export default function SettingsPage({
             <ExternalLink className="w-5 h-5 text-accent group-hover:scale-110 transition-transform" />
             <div className="flex-1">
               <p className="text-xs text-muted-foreground">
-                {language === 'en' ? 'Instagram' : 'إنستاجرام'}
+                {t.instagram}
               </p>
               <p className="text-sm font-medium text-foreground group-hover:text-accent transition">@alshaibgroup.pi</p>
             </div>
@@ -313,11 +311,11 @@ export default function SettingsPage({
       {/* 8. About */}
       <div className="bg-card border border-border rounded-lg p-4">
         <h3 className="font-semibold text-foreground mb-3">
-          {language === 'en' ? 'About RE Platform' : 'حول منصة RE'}
+          {t.aboutRePlatform}
         </h3>
         <div className="space-y-2 text-xs text-muted-foreground">
           <p>RE Platform v1.0.0</p>
-          <p>{language === 'en' ? 'Powered by Pi Network' : 'مدعوم من قبل شبكة Pi'}</p>
+          <p>{t.poweredByPiNetwork}</p>
           <p>© GlobalBusiness</p>
         </div>
       </div>
