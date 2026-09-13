@@ -1,0 +1,410 @@
+import type { NavLanguage } from './nav-i18n';
+
+export interface RoadmapPhaseCopy {
+  quarter: string;
+  title: string;
+  items: string[];
+}
+
+export interface FeatureCopy {
+  title: string;
+  desc: string;
+}
+
+export interface WhitepaperStrings {
+  headerTitle: string;
+  subtitle: string;
+  heroDesc: string;
+  sectionVision: string;
+  sectionProblem: string;
+  sectionFeatures: string;
+  sectionToken: string;
+  sectionRoadmap: string;
+  sectionTeam: string;
+  visionP1: string;
+  visionP2: string;
+  barriersTitle: string;
+  barriers: string[];
+  solutionTitle: string;
+  solutions: string[];
+  features: FeatureCopy[];
+  totalSupply: string;
+  launchPrice: string;
+  tokenDistribution: string;
+  distribution: string[];
+  tokenUtilityDesc: string;
+  roadmap: RoadmapPhaseCopy[];
+  teamName: string;
+  teamDesc: string;
+  contactUsToJoin: string;
+  ctaTitle: string;
+  ctaDesc: string;
+  getStartedFree: string;
+}
+
+export const WHITEPAPER_I18N: Record<NavLanguage, WhitepaperStrings> = {
+  en: {
+    headerTitle: 'White Paper v1.0',
+    subtitle: 'Global Real Estate on Pi Network',
+    heroDesc: 'A revolutionary real estate marketplace powered by Pi cryptocurrency, connecting 195 countries with seamless transactions and tokenized properties.',
+    sectionVision: '1. Vision',
+    sectionProblem: '2. Problem & Solution',
+    sectionFeatures: '3. Key Features',
+    sectionToken: '4. RE Token Tokenomics',
+    sectionRoadmap: '5. Roadmap',
+    sectionTeam: '6. Team',
+    visionP1: 'First global real estate marketplace powered by Pi cryptocurrency',
+    visionP2: "We envision a future where real estate transactions are borderless, instant, and accessible to everyone. By leveraging Pi Network's infrastructure and blockchain technology, we eliminate intermediaries and reduce transaction costs by up to 80%, making property investment truly democratic.",
+    barriersTitle: 'Traditional Real Estate Barriers:',
+    barriers: [
+      '• High transaction fees (2-6% per transaction)',
+      '• Complex verification and paperwork (weeks to months)',
+      '• Limited to local markets and currencies',
+      '• Fractional ownership not accessible',
+    ],
+    solutionTitle: 'RE Platform Solution:',
+    solutions: [
+      '✓ Instant Pi payments with <0.1% fees',
+      '✓ Smart contracts eliminate paperwork',
+      '✓ Global access to 195+ countries',
+      '✓ Tokenized properties enable fractional investing',
+    ],
+    features: [
+      { title: '360° Virtual Tours', desc: 'Immersive property exploration' },
+      { title: 'Global Map', desc: 'Browse 195+ countries' },
+      { title: 'Instant Pi Payments', desc: 'Fast & secure transactions' },
+      { title: 'Tokenized Properties', desc: 'Fractional ownership' },
+      { title: 'Smart Contracts', desc: 'Transparent automation' },
+      { title: '7 Languages', desc: 'EN, AR, FR, ES, PT, UR, ZH' },
+    ],
+    totalSupply: 'Total Supply',
+    launchPrice: 'Launch Price',
+    tokenDistribution: 'Token Distribution',
+    distribution: ['Platform Development', 'Investors & Partners', 'Team & Operations', 'Emergency Reserve'],
+    tokenUtilityDesc: 'RE tokens power platform transactions, governance voting, and staking rewards. Early investors receive additional benefits through locked staking and rewards multipliers.',
+    roadmap: [
+      { quarter: 'Q1 2025', title: 'Launch', items: ['Platform launch', 'Core features live', '1000+ properties listed'] },
+      { quarter: 'Q2 2025', title: 'Properties', items: ['50+ countries', 'Mobile app launch', 'Advanced filtering'] },
+      { quarter: 'Q3 2025', title: 'Tokenization', items: ['Property tokenization', 'Fractional ownership', 'Secondary market'] },
+      { quarter: 'Q4 2025', title: 'Global Expansion', items: ['195+ countries', 'Enterprise features', 'DAO governance'] },
+    ],
+    teamName: 'GlobalBusiness Team',
+    teamDesc: 'A dedicated team of blockchain developers, real estate experts, and Pi Network specialists working to revolutionize global real estate.',
+    contactUsToJoin: 'Contact us to join the RE Platform team or become a partner.',
+    ctaTitle: 'Join the Real Estate Revolution',
+    ctaDesc: 'Start exploring, investing, and earning with RE Platform today.',
+    getStartedFree: 'Get Started Free',
+  },
+  ar: {
+    headerTitle: 'الورقة البيضاء v1.0',
+    subtitle: 'العقارات العالمية على شبكة Pi',
+    heroDesc: 'سوق عقارات ثوري مدعوم بعملة Pi، يربط 195 دولة مع معاملات سلسة والعقارات المرمزة.',
+    sectionVision: '1. الرؤية',
+    sectionProblem: '2. المشكلة والحل',
+    sectionFeatures: '3. الميزات الرئيسية',
+    sectionToken: '4. اقتصاديات رمز RE',
+    sectionRoadmap: '5. خريطة الطريق',
+    sectionTeam: '6. الفريق',
+    visionP1: 'أول سوق عقارات عالمي يعمل بقوة عملة Pi',
+    visionP2: 'نتصور مستقبلاً حيث تكون معاملات العقارات بلا حدود وفورية والتي يمكن للجميع الوصول إليها. من خلال الاستفادة من البنية التحتية لشبكة Pi وتكنولوجيا البلوكتشين، نلغي الوسطاء ونقلل تكاليف المعاملات بنسبة تصل إلى 80٪، مما يجعل الاستثمار في العقارات ديمقراطياً حقاً.',
+    barriersTitle: 'حواجز العقارات التقليدية:',
+    barriers: [
+      '• رسوم معاملات عالية (2-6٪ لكل معاملة)',
+      '• التحقق المعقد والأوراق (أسابيع إلى أشهر)',
+      '• محدود بالأسواق المحلية والعملات',
+      '• الملكية الكسرية غير متاحة',
+    ],
+    solutionTitle: 'حل منصة RE:',
+    solutions: [
+      '✓ دفع Pi فوري برسوم <0.1٪',
+      '✓ العقود الذكية تلغي الأوراق',
+      '✓ وصول عالمي إلى 195+ دولة',
+      '✓ العقارات المرمزة تتيح الاستثمار الكسري',
+    ],
+    features: [
+      { title: 'جولات افتراضية 360°', desc: 'استكشاف عقاري غامر' },
+      { title: 'الخريطة العالمية', desc: 'تصفح 195+ دولة' },
+      { title: 'دفع Pi الفوري', desc: 'معاملات سريعة وآمنة' },
+      { title: 'العقارات المرمزة', desc: 'الملكية الكسرية' },
+      { title: 'العقود الذكية', desc: 'أتمتة شفافة' },
+      { title: '7 لغات', desc: 'عربي، إنجليزي، فرنسي، إسباني، برتغالي، أردو، صيني' },
+    ],
+    totalSupply: 'الإمداد الكلي',
+    launchPrice: 'سعر الإطلاق',
+    tokenDistribution: 'توزيع الرموز',
+    distribution: ['تطوير المنصة', 'المستثمرون والشركاء', 'الفريق والعمليات', 'الاحتياطي الطارئ'],
+    tokenUtilityDesc: 'رموز RE تشغل معاملات المنصة والتصويت على الحوكمة ومكافآت الرهن. يحصل المستثمرون الأوائل على فوائد إضافية من خلال الرهن المقفول ومضاعفات المكافآت.',
+    roadmap: [
+      { quarter: 'الربع الأول 2025', title: 'الإطلاق', items: ['إطلاق المنصة', 'الميزات الأساسية مباشرة', '1000+ عقار معروض'] },
+      { quarter: 'الربع الثاني 2025', title: 'العقارات', items: ['50+ دولة', 'إطلاق تطبيق الهاتف الذكي', 'تصفية متقدمة'] },
+      { quarter: 'الربع الثالث 2025', title: 'الرمزنة', items: ['رمزنة العقارات', 'الملكية الكسرية', 'السوق الثانوية'] },
+      { quarter: 'الربع الرابع 2025', title: 'التوسع العالمي', items: ['195+ دولة', 'ميزات المؤسسة', 'حوكمة DAO'] },
+    ],
+    teamName: 'فريق GlobalBusiness',
+    teamDesc: 'فريق متفاني من مطوري البلوكتشين وخبراء العقارات ومتخصصي شبكة Pi يعملون على إحداث ثورة في العقارات العالمية.',
+    contactUsToJoin: 'تواصل معنا للانضمام إلى فريق منصة RE أو لتصبح شريكاً.',
+    ctaTitle: 'انضم إلى ثورة العقارات',
+    ctaDesc: 'ابدأ الاستكشاف والاستثمار والكسب مع منصة RE اليوم.',
+    getStartedFree: 'ابدأ مجاناً',
+  },
+  fr: {
+    headerTitle: 'Livre Blanc v1.0',
+    subtitle: "L'immobilier mondial sur Pi Network",
+    heroDesc: 'Une place de marché immobilière révolutionnaire propulsée par la cryptomonnaie Pi, connectant 195 pays avec des transactions fluides et des biens tokenisés.',
+    sectionVision: '1. Vision',
+    sectionProblem: '2. Problème et solution',
+    sectionFeatures: '3. Fonctionnalités clés',
+    sectionToken: '4. Tokenomics du jeton RE',
+    sectionRoadmap: '5. Feuille de route',
+    sectionTeam: '6. Équipe',
+    visionP1: 'Première place de marché immobilière mondiale propulsée par la cryptomonnaie Pi',
+    visionP2: "Nous envisageons un avenir où les transactions immobilières sont sans frontières, instantanées et accessibles à tous. En exploitant l'infrastructure de Pi Network et la technologie blockchain, nous éliminons les intermédiaires et réduisons les coûts de transaction jusqu'à 80 %, rendant l'investissement immobilier véritablement démocratique.",
+    barriersTitle: "Obstacles de l'immobilier traditionnel :",
+    barriers: [
+      '• Frais de transaction élevés (2-6 % par transaction)',
+      '• Vérification et paperasse complexes (semaines à mois)',
+      '• Limité aux marchés et devises locaux',
+      '• Propriété fractionnée inaccessible',
+    ],
+    solutionTitle: 'Solution de la plateforme RE :',
+    solutions: [
+      '✓ Paiements Pi instantanés avec des frais < 0,1 %',
+      '✓ Les contrats intelligents éliminent la paperasse',
+      '✓ Accès mondial à plus de 195 pays',
+      "✓ Les biens tokenisés permettent l'investissement fractionné",
+    ],
+    features: [
+      { title: 'Visites virtuelles 360°', desc: 'Exploration immersive des biens' },
+      { title: 'Carte mondiale', desc: 'Parcourez plus de 195 pays' },
+      { title: 'Paiements Pi instantanés', desc: 'Transactions rapides et sécurisées' },
+      { title: 'Biens tokenisés', desc: 'Propriété fractionnée' },
+      { title: 'Contrats intelligents', desc: 'Automatisation transparente' },
+      { title: '7 langues', desc: 'EN, AR, FR, ES, PT, UR, ZH' },
+    ],
+    totalSupply: 'Offre totale',
+    launchPrice: 'Prix de lancement',
+    tokenDistribution: 'Répartition des jetons',
+    distribution: ['Développement de la plateforme', 'Investisseurs et partenaires', 'Équipe et opérations', "Réserve d'urgence"],
+    tokenUtilityDesc: "Les jetons RE alimentent les transactions de la plateforme, le vote de gouvernance et les récompenses de staking. Les premiers investisseurs bénéficient d'avantages supplémentaires grâce au staking verrouillé et aux multiplicateurs de récompenses.",
+    roadmap: [
+      { quarter: 'T1 2025', title: 'Lancement', items: ['Lancement de la plateforme', 'Fonctionnalités principales en ligne', '1000+ biens listés'] },
+      { quarter: 'T2 2025', title: 'Biens', items: ['50+ pays', "Lancement de l'application mobile", 'Filtrage avancé'] },
+      { quarter: 'T3 2025', title: 'Tokenisation', items: ['Tokenisation des biens', 'Propriété fractionnée', 'Marché secondaire'] },
+      { quarter: 'T4 2025', title: 'Expansion mondiale', items: ['195+ pays', 'Fonctionnalités entreprise', 'Gouvernance DAO'] },
+    ],
+    teamName: 'Équipe GlobalBusiness',
+    teamDesc: "Une équipe dévouée de développeurs blockchain, d'experts immobiliers et de spécialistes de Pi Network œuvrant pour révolutionner l'immobilier mondial.",
+    contactUsToJoin: "Contactez-nous pour rejoindre l'équipe de la plateforme RE ou devenir partenaire.",
+    ctaTitle: "Rejoignez la révolution immobilière",
+    ctaDesc: "Commencez à explorer, investir et gagner avec RE Platform dès aujourd'hui.",
+    getStartedFree: 'Commencer gratuitement',
+  },
+  es: {
+    headerTitle: 'Libro Blanco v1.0',
+    subtitle: 'Bienes raíces globales en Pi Network',
+    heroDesc: 'Un mercado inmobiliario revolucionario impulsado por la criptomoneda Pi, que conecta 195 países con transacciones fluidas y propiedades tokenizadas.',
+    sectionVision: '1. Visión',
+    sectionProblem: '2. Problema y solución',
+    sectionFeatures: '3. Características clave',
+    sectionToken: '4. Tokenomics del token RE',
+    sectionRoadmap: '5. Hoja de ruta',
+    sectionTeam: '6. Equipo',
+    visionP1: 'El primer mercado inmobiliario global impulsado por la criptomoneda Pi',
+    visionP2: 'Visualizamos un futuro donde las transacciones inmobiliarias no tengan fronteras, sean instantáneas y accesibles para todos. Al aprovechar la infraestructura de Pi Network y la tecnología blockchain, eliminamos intermediarios y reducimos los costos de transacción hasta en un 80%, haciendo que la inversión inmobiliaria sea verdaderamente democrática.',
+    barriersTitle: 'Barreras del sector inmobiliario tradicional:',
+    barriers: [
+      '• Altas comisiones por transacción (2-6% por transacción)',
+      '• Verificación y papeleo complejos (semanas a meses)',
+      '• Limitado a mercados y monedas locales',
+      '• Propiedad fraccionada inaccesible',
+    ],
+    solutionTitle: 'Solución de la plataforma RE:',
+    solutions: [
+      '✓ Pagos Pi instantáneos con comisiones <0.1%',
+      '✓ Los contratos inteligentes eliminan el papeleo',
+      '✓ Acceso global a más de 195 países',
+      '✓ Las propiedades tokenizadas permiten la inversión fraccionada',
+    ],
+    features: [
+      { title: 'Tours virtuales 360°', desc: 'Exploración inmersiva de propiedades' },
+      { title: 'Mapa global', desc: 'Explora más de 195 países' },
+      { title: 'Pagos Pi instantáneos', desc: 'Transacciones rápidas y seguras' },
+      { title: 'Propiedades tokenizadas', desc: 'Propiedad fraccionada' },
+      { title: 'Contratos inteligentes', desc: 'Automatización transparente' },
+      { title: '7 idiomas', desc: 'EN, AR, FR, ES, PT, UR, ZH' },
+    ],
+    totalSupply: 'Oferta total',
+    launchPrice: 'Precio de lanzamiento',
+    tokenDistribution: 'Distribución de tokens',
+    distribution: ['Desarrollo de la plataforma', 'Inversionistas y socios', 'Equipo y operaciones', 'Reserva de emergencia'],
+    tokenUtilityDesc: 'Los tokens RE impulsan las transacciones de la plataforma, la votación de gobernanza y las recompensas de staking. Los primeros inversionistas reciben beneficios adicionales mediante staking bloqueado y multiplicadores de recompensas.',
+    roadmap: [
+      { quarter: 'T1 2025', title: 'Lanzamiento', items: ['Lanzamiento de la plataforma', 'Funciones principales activas', '1000+ propiedades listadas'] },
+      { quarter: 'T2 2025', title: 'Propiedades', items: ['50+ países', 'Lanzamiento de la app móvil', 'Filtrado avanzado'] },
+      { quarter: 'T3 2025', title: 'Tokenización', items: ['Tokenización de propiedades', 'Propiedad fraccionada', 'Mercado secundario'] },
+      { quarter: 'T4 2025', title: 'Expansión global', items: ['195+ países', 'Funciones empresariales', 'Gobernanza DAO'] },
+    ],
+    teamName: 'Equipo GlobalBusiness',
+    teamDesc: 'Un equipo dedicado de desarrolladores blockchain, expertos inmobiliarios y especialistas de Pi Network trabajando para revolucionar el sector inmobiliario global.',
+    contactUsToJoin: 'Contáctanos para unirte al equipo de RE Platform o convertirte en socio.',
+    ctaTitle: 'Únete a la revolución inmobiliaria',
+    ctaDesc: 'Comienza a explorar, invertir y ganar con RE Platform hoy mismo.',
+    getStartedFree: 'Comenzar gratis',
+  },
+  pt: {
+    headerTitle: 'White Paper v1.0',
+    subtitle: 'Imóveis globais na Pi Network',
+    heroDesc: 'Um mercado imobiliário revolucionário alimentado pela criptomoeda Pi, conectando 195 países com transações contínuas e imóveis tokenizados.',
+    sectionVision: '1. Visão',
+    sectionProblem: '2. Problema e solução',
+    sectionFeatures: '3. Principais recursos',
+    sectionToken: '4. Tokenomics do token RE',
+    sectionRoadmap: '5. Roteiro',
+    sectionTeam: '6. Equipe',
+    visionP1: 'O primeiro mercado imobiliário global alimentado pela criptomoeda Pi',
+    visionP2: 'Imaginamos um futuro em que as transações imobiliárias sejam sem fronteiras, instantâneas e acessíveis a todos. Ao aproveitar a infraestrutura da Pi Network e a tecnologia blockchain, eliminamos intermediários e reduzimos os custos de transação em até 80%, tornando o investimento imobiliário verdadeiramente democrático.',
+    barriersTitle: 'Barreiras do mercado imobiliário tradicional:',
+    barriers: [
+      '• Altas taxas de transação (2-6% por transação)',
+      '• Verificação e burocracia complexas (semanas a meses)',
+      '• Limitado a mercados e moedas locais',
+      '• Propriedade fracionada inacessível',
+    ],
+    solutionTitle: 'Solução da plataforma RE:',
+    solutions: [
+      '✓ Pagamentos Pi instantâneos com taxas <0,1%',
+      '✓ Contratos inteligentes eliminam a burocracia',
+      '✓ Acesso global a mais de 195 países',
+      '✓ Imóveis tokenizados permitem investimento fracionado',
+    ],
+    features: [
+      { title: 'Tours virtuais 360°', desc: 'Exploração imersiva de imóveis' },
+      { title: 'Mapa global', desc: 'Explore mais de 195 países' },
+      { title: 'Pagamentos Pi instantâneos', desc: 'Transações rápidas e seguras' },
+      { title: 'Imóveis tokenizados', desc: 'Propriedade fracionada' },
+      { title: 'Contratos inteligentes', desc: 'Automação transparente' },
+      { title: '7 idiomas', desc: 'EN, AR, FR, ES, PT, UR, ZH' },
+    ],
+    totalSupply: 'Oferta total',
+    launchPrice: 'Preço de lançamento',
+    tokenDistribution: 'Distribuição de tokens',
+    distribution: ['Desenvolvimento da plataforma', 'Investidores e parceiros', 'Equipe e operações', 'Reserva de emergência'],
+    tokenUtilityDesc: 'Os tokens RE alimentam as transações da plataforma, votação de governança e recompensas de staking. Os primeiros investidores recebem benefícios adicionais através de staking bloqueado e multiplicadores de recompensa.',
+    roadmap: [
+      { quarter: 'T1 2025', title: 'Lançamento', items: ['Lançamento da plataforma', 'Recursos principais ativos', '1000+ imóveis listados'] },
+      { quarter: 'T2 2025', title: 'Imóveis', items: ['50+ países', 'Lançamento do app móvel', 'Filtragem avançada'] },
+      { quarter: 'T3 2025', title: 'Tokenização', items: ['Tokenização de imóveis', 'Propriedade fracionada', 'Mercado secundário'] },
+      { quarter: 'T4 2025', title: 'Expansão global', items: ['195+ países', 'Recursos empresariais', 'Governança DAO'] },
+    ],
+    teamName: 'Equipe GlobalBusiness',
+    teamDesc: 'Uma equipe dedicada de desenvolvedores blockchain, especialistas imobiliários e especialistas da Pi Network trabalhando para revolucionar o mercado imobiliário global.',
+    contactUsToJoin: 'Entre em contato para se juntar à equipe da RE Platform ou se tornar um parceiro.',
+    ctaTitle: 'Junte-se à revolução imobiliária',
+    ctaDesc: 'Comece a explorar, investir e ganhar com a RE Platform hoje.',
+    getStartedFree: 'Comece grátis',
+  },
+  ur: {
+    headerTitle: 'وائٹ پیپر v1.0',
+    subtitle: 'Pi Network پر عالمی رئیل اسٹیٹ',
+    heroDesc: 'Pi کرپٹو کرنسی سے چلنے والا ایک انقلابی رئیل اسٹیٹ مارکیٹ پلیس، جو 195 ممالک کو ہموار لین دین اور ٹوکنائزڈ جائیدادوں کے ساتھ جوڑتا ہے۔',
+    sectionVision: '1. وژن',
+    sectionProblem: '2. مسئلہ اور حل',
+    sectionFeatures: '3. اہم خصوصیات',
+    sectionToken: '4. RE ٹوکن ٹوکنومکس',
+    sectionRoadmap: '5. روڈ میپ',
+    sectionTeam: '6. ٹیم',
+    visionP1: 'Pi کرپٹو کرنسی سے چلنے والا پہلا عالمی رئیل اسٹیٹ مارکیٹ پلیس',
+    visionP2: 'ہم ایک ایسے مستقبل کا تصور کرتے ہیں جہاں رئیل اسٹیٹ لین دین بلا سرحد، فوری، اور سب کے لیے قابل رسائی ہوں۔ Pi Network کے انفراسٹرکچر اور بلاک چین ٹیکنالوجی کو استعمال کر کے، ہم بیچوانوں کو ختم کرتے ہیں اور لین دین کی لاگت 80% تک کم کرتے ہیں، جس سے جائیداد میں سرمایہ کاری واقعی جمہوری بن جاتی ہے۔',
+    barriersTitle: 'روایتی رئیل اسٹیٹ کی رکاوٹیں:',
+    barriers: [
+      '• زیادہ ٹرانزیکشن فیس (2-6% فی ٹرانزیکشن)',
+      '• پیچیدہ تصدیق اور کاغذی کارروائی (ہفتوں سے مہینوں تک)',
+      '• مقامی مارکیٹس اور کرنسیوں تک محدود',
+      '• جزوی ملکیت ناقابل رسائی',
+    ],
+    solutionTitle: 'RE پلیٹ فارم کا حل:',
+    solutions: [
+      '✓ <0.1% فیس کے ساتھ فوری Pi ادائیگیاں',
+      '✓ سمارٹ کنٹریکٹس کاغذی کارروائی ختم کرتے ہیں',
+      '✓ 195+ ممالک تک عالمی رسائی',
+      '✓ ٹوکنائزڈ جائیدادیں جزوی سرمایہ کاری ممکن بناتی ہیں',
+    ],
+    features: [
+      { title: '360° ورچوئل ٹورز', desc: 'جائیداد کی جامع تلاش' },
+      { title: 'عالمی نقشہ', desc: '195+ ممالک براؤز کریں' },
+      { title: 'فوری Pi ادائیگیاں', desc: 'تیز اور محفوظ لین دین' },
+      { title: 'ٹوکنائزڈ جائیدادیں', desc: 'جزوی ملکیت' },
+      { title: 'سمارٹ کنٹریکٹس', desc: 'شفاف آٹومیشن' },
+      { title: '7 زبانیں', desc: 'انگریزی، عربی، فرانسیسی، ہسپانوی، پرتگالی، اردو، چینی' },
+    ],
+    totalSupply: 'کل سپلائی',
+    launchPrice: 'لانچ قیمت',
+    tokenDistribution: 'ٹوکن کی تقسیم',
+    distribution: ['پلیٹ فارم کی ترقی', 'سرمایہ کار اور شراکت دار', 'ٹیم اور آپریشنز', 'ہنگامی ریزرو'],
+    tokenUtilityDesc: 'RE ٹوکنز پلیٹ فارم کے لین دین، گورننس ووٹنگ، اور اسٹیکنگ ریوارڈز کو طاقت دیتے ہیں۔ ابتدائی سرمایہ کاروں کو لاکڈ اسٹیکنگ اور ریوارڈ ملٹیپلائرز کے ذریعے اضافی فوائد ملتے ہیں۔',
+    roadmap: [
+      { quarter: 'پہلی سہ ماہی 2025', title: 'لانچ', items: ['پلیٹ فارم لانچ', 'بنیادی خصوصیات لائیو', '1000+ جائیدادیں فہرست میں شامل'] },
+      { quarter: 'دوسری سہ ماہی 2025', title: 'جائیدادیں', items: ['50+ ممالک', 'موبائل ایپ لانچ', 'ایڈوانسڈ فلٹرنگ'] },
+      { quarter: 'تیسری سہ ماہی 2025', title: 'ٹوکنائزیشن', items: ['جائیداد ٹوکنائزیشن', 'جزوی ملکیت', 'سیکنڈری مارکیٹ'] },
+      { quarter: 'چوتھی سہ ماہی 2025', title: 'عالمی توسیع', items: ['195+ ممالک', 'انٹرپرائز خصوصیات', 'DAO گورننس'] },
+    ],
+    teamName: 'GlobalBusiness ٹیم',
+    teamDesc: 'بلاک چین ڈویلپرز، رئیل اسٹیٹ ماہرین، اور Pi Network کے ماہرین کی ایک وقف ٹیم عالمی رئیل اسٹیٹ میں انقلاب لانے کے لیے کام کر رہی ہے۔',
+    contactUsToJoin: 'RE پلیٹ فارم ٹیم میں شامل ہونے یا پارٹنر بننے کے لیے ہم سے رابطہ کریں۔',
+    ctaTitle: 'رئیل اسٹیٹ انقلاب میں شامل ہوں',
+    ctaDesc: 'آج ہی RE پلیٹ فارم کے ساتھ تلاش، سرمایہ کاری، اور کمائی شروع کریں۔',
+    getStartedFree: 'مفت شروع کریں',
+  },
+  zh: {
+    headerTitle: '白皮书 v1.0',
+    subtitle: 'Pi Network 上的全球房地产',
+    heroDesc: '由 Pi 加密货币驱动的革命性房地产市场，连接 195 个国家，实现无缝交易与代币化房产。',
+    sectionVision: '1. 愿景',
+    sectionProblem: '2. 问题与解决方案',
+    sectionFeatures: '3. 核心功能',
+    sectionToken: '4. RE 代币经济模型',
+    sectionRoadmap: '5. 路线图',
+    sectionTeam: '6. 团队',
+    visionP1: '首个由 Pi 加密货币驱动的全球房地产市场',
+    visionP2: '我们展望一个房地产交易无国界、即时且人人可及的未来。通过利用 Pi Network 的基础设施和区块链技术，我们消除了中间环节，将交易成本降低多达 80%，让房地产投资真正实现民主化。',
+    barriersTitle: '传统房地产的障碍：',
+    barriers: [
+      '• 高额交易费用（每笔交易 2-6%）',
+      '• 复杂的验证和文书工作（数周至数月）',
+      '• 局限于本地市场和货币',
+      '• 无法实现部分产权',
+    ],
+    solutionTitle: 'RE 平台解决方案：',
+    solutions: [
+      '✓ 即时 Pi 支付，手续费低于 0.1%',
+      '✓ 智能合约消除文书工作',
+      '✓ 覆盖 195+ 个国家的全球访问',
+      '✓ 代币化房产支持部分投资',
+    ],
+    features: [
+      { title: '360° 虚拟导览', desc: '沉浸式房产探索' },
+      { title: '全球地图', desc: '浏览 195+ 个国家' },
+      { title: '即时 Pi 支付', desc: '快速安全的交易' },
+      { title: '代币化房产', desc: '部分产权' },
+      { title: '智能合约', desc: '透明自动化' },
+      { title: '7 种语言', desc: '英语、阿拉伯语、法语、西班牙语、葡萄牙语、乌尔都语、中文' },
+    ],
+    totalSupply: '总供应量',
+    launchPrice: '发行价格',
+    tokenDistribution: '代币分配',
+    distribution: ['平台开发', '投资者与合作伙伴', '团队与运营', '应急储备'],
+    tokenUtilityDesc: 'RE 代币为平台交易、治理投票和质押奖励提供支持。早期投资者通过锁仓质押和奖励倍增器获得额外收益。',
+    roadmap: [
+      { quarter: '2025年第一季度', title: '上线', items: ['平台上线', '核心功能上线', '1000+ 房源上架'] },
+      { quarter: '2025年第二季度', title: '房产', items: ['覆盖 50+ 个国家', '移动应用上线', '高级筛选功能'] },
+      { quarter: '2025年第三季度', title: '代币化', items: ['房产代币化', '部分产权', '二级市场'] },
+      { quarter: '2025年第四季度', title: '全球扩张', items: ['覆盖 195+ 个国家', '企业级功能', 'DAO 治理'] },
+    ],
+    teamName: 'GlobalBusiness 团队',
+    teamDesc: '一支由区块链开发者、房地产专家和 Pi Network 专家组成的专业团队，致力于革新全球房地产行业。',
+    contactUsToJoin: '联系我们，加入 RE 平台团队或成为合作伙伴。',
+    ctaTitle: '加入房地产革命',
+    ctaDesc: '立即开始使用 RE 平台探索、投资和赚取收益。',
+    getStartedFree: '免费开始',
+  },
+};

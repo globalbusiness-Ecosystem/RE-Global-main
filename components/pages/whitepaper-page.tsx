@@ -3,6 +3,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { ChevronDown, Mail } from 'lucide-react';
 import { useState } from 'react';
+import { WHITEPAPER_I18N } from '@/lib/whitepaper-i18n';
 
 interface WhitePaperPageProps {
   language: NavLanguage;
@@ -15,6 +16,7 @@ export default function WhitePaperPage({
   onBack,
   showBackButton = true,
 }: WhitePaperPageProps) {
+  const t = WHITEPAPER_I18N[language];
   const [expandedSections, setExpandedSections] = useState<string[]>(['vision']);
 
   const toggleSection = (sectionId: string) => {
@@ -38,7 +40,7 @@ export default function WhitePaperPage({
               <span className="text-accent text-lg">←</span>
             </button>
             <h2 className="text-lg font-bold text-accent">
-              {language === 'en' ? 'White Paper v1.0' : 'الورقة البيضاء v1.0'}
+              {t.headerTitle}
             </h2>
           </div>
         </div>
@@ -56,21 +58,17 @@ export default function WhitePaperPage({
 
           {/* Title */}
           <h1 className="text-4xl font-bold text-accent mb-3 text-balance">
-            {language === 'en' ? 'White Paper v1.0' : 'الورقة البيضاء v1.0'}
+            {t.headerTitle}
           </h1>
 
           {/* Subtitle */}
           <p className="text-xl text-muted-foreground mb-4">
-            {language === 'en'
-              ? 'Global Real Estate on Pi Network'
-              : 'العقارات العالمية على شبكة Pi'}
+            {t.subtitle}
           </p>
 
           {/* Description */}
           <p className="text-sm text-gray-400">
-            {language === 'en'
-              ? 'A revolutionary real estate marketplace powered by Pi cryptocurrency, connecting 195 countries with seamless transactions and tokenized properties.'
-              : 'سوق عقارات ثوري مدعوم بعملة Pi، يربط 195 دولة مع معاملات سلسة والعقارات المرمزة.'}
+            {t.heroDesc}
           </p>
         </div>
       </section>
@@ -80,20 +78,16 @@ export default function WhitePaperPage({
         {/* 1. Vision */}
         <ExpandableSection
           id="vision"
-          title={language === 'en' ? '1. Vision' : '1. الرؤية'}
+          title={t.sectionVision}
           expanded={expandedSections.includes('vision')}
           onToggle={toggleSection}
         >
           <div className="space-y-4">
             <p className="text-gray-300">
-              {language === 'en'
-                ? 'First global real estate marketplace powered by Pi cryptocurrency'
-                : 'أول سوق عقارات عالمي يعمل بقوة عملة Pi'}
+              {t.visionP1}
             </p>
             <p className="text-sm text-gray-400">
-              {language === 'en'
-                ? 'We envision a future where real estate transactions are borderless, instant, and accessible to everyone. By leveraging Pi Network\'s infrastructure and blockchain technology, we eliminate intermediaries and reduce transaction costs by up to 80%, making property investment truly democratic.'
-                : 'نتصور مستقبلاً حيث تكون معاملات العقارات بلا حدود وفورية والتي يمكن للجميع الوصول إليها. من خلال الاستفادة من البنية التحتية لشبكة Pi وتكنولوجيا البلوكتشين، نلغي الوسطاء ونقلل تكاليف المعاملات بنسبة تصل إلى 80٪، مما يجعل الاستثمار في العقارات ديمقراطياً حقاً.'}
+              {t.visionP2}
             </p>
           </div>
         </ExpandableSection>
@@ -101,32 +95,30 @@ export default function WhitePaperPage({
         {/* 2. Problem & Solution */}
         <ExpandableSection
           id="problem"
-          title={language === 'en' ? '2. Problem & Solution' : '2. المشكلة والحل'}
+          title={t.sectionProblem}
           expanded={expandedSections.includes('problem')}
           onToggle={toggleSection}
         >
           <div className="space-y-4">
             <div>
               <h4 className="font-semibold text-accent mb-2">
-                {language === 'en' ? 'Traditional Real Estate Barriers:' : 'حواجز العقارات التقليدية:'}
+                {t.barriersTitle}
               </h4>
               <ul className="text-sm text-gray-400 space-y-1">
-                <li>{language === 'en' ? '• High transaction fees (2-6% per transaction)' : '• رسوم معاملات عالية (2-6٪ لكل معاملة)'}</li>
-                <li>{language === 'en' ? '• Complex verification and paperwork (weeks to months)' : '• التحقق المعقد والأوراق (أسابيع إلى أشهر)'}</li>
-                <li>{language === 'en' ? '• Limited to local markets and currencies' : '• محدود بالأسواق المحلية والعملات'}</li>
-                <li>{language === 'en' ? '• Fractional ownership not accessible' : '• الملكية الكسرية غير متاحة'}</li>
+                {t.barriers.map((b, i) => (
+                  <li key={i}>{b}</li>
+                ))}
               </ul>
             </div>
 
             <div>
               <h4 className="font-semibold text-accent mb-2">
-                {language === 'en' ? 'RE Platform Solution:' : 'حل منصة RE:'}
+                {t.solutionTitle}
               </h4>
               <ul className="text-sm text-gray-400 space-y-1">
-                <li>{language === 'en' ? '✓ Instant Pi payments with <0.1% fees' : '✓ دفع Pi فوري برسوم <0.1٪'}</li>
-                <li>{language === 'en' ? '✓ Smart contracts eliminate paperwork' : '✓ العقود الذكية تلغي الأوراق'}</li>
-                <li>{language === 'en' ? '✓ Global access to 195+ countries' : '✓ وصول عالمي إلى 195+ دولة'}</li>
-                <li>{language === 'en' ? '✓ Tokenized properties enable fractional investing' : '✓ العقارات المرمزة تتيح الاستثمار الكسري'}</li>
+                {t.solutions.map((s, i) => (
+                  <li key={i}>{s}</li>
+                ))}
               </ul>
             </div>
           </div>
@@ -135,48 +127,24 @@ export default function WhitePaperPage({
         {/* 3. Features */}
         <ExpandableSection
           id="features"
-          title={language === 'en' ? '3. Key Features' : '3. الميزات الرئيسية'}
+          title={t.sectionFeatures}
           expanded={expandedSections.includes('features')}
           onToggle={toggleSection}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <FeatureCard
-              icon="360"
-              title={language === 'en' ? '360° Virtual Tours' : 'جولات افتراضية 360°'}
-              description={language === 'en' ? 'Immersive property exploration' : 'استكشاف عقاري غامر'}
-            />
-            <FeatureCard
-              icon="🗺️"
-              title={language === 'en' ? 'Global Map' : 'الخريطة العالمية'}
-              description={language === 'en' ? 'Browse 195+ countries' : 'تصفح 195+ دولة'}
-            />
-            <FeatureCard
-              icon="π"
-              title={language === 'en' ? 'Instant Pi Payments' : 'دفع Pi الفوري'}
-              description={language === 'en' ? 'Fast & secure transactions' : 'معاملات سريعة وآمنة'}
-            />
-            <FeatureCard
-              icon="🏆"
-              title={language === 'en' ? 'Tokenized Properties' : 'العقارات المرمزة'}
-              description={language === 'en' ? 'Fractional ownership' : 'الملكية الكسرية'}
-            />
-            <FeatureCard
-              icon="✓"
-              title={language === 'en' ? 'Smart Contracts' : 'العقود الذكية'}
-              description={language === 'en' ? 'Transparent automation' : 'أتمتة شفافة'}
-            />
-            <FeatureCard
-              icon="🌐"
-              title={language === 'en' ? 'Multi-Language' : 'متعدد اللغات'}
-              description={language === 'en' ? 'EN & AR support' : 'دعم EN و AR'}
-            />
+            <FeatureCard icon="360" title={t.features[0].title} description={t.features[0].desc} />
+            <FeatureCard icon="🗺️" title={t.features[1].title} description={t.features[1].desc} />
+            <FeatureCard icon="π" title={t.features[2].title} description={t.features[2].desc} />
+            <FeatureCard icon="🏆" title={t.features[3].title} description={t.features[3].desc} />
+            <FeatureCard icon="✓" title={t.features[4].title} description={t.features[4].desc} />
+            <FeatureCard icon="🌐" title={t.features[5].title} description={t.features[5].desc} />
           </div>
         </ExpandableSection>
 
         {/* 4. RE Token */}
         <ExpandableSection
           id="token"
-          title={language === 'en' ? '4. RE Token Tokenomics' : '4. اقتصاديات رمز RE'}
+          title={t.sectionToken}
           expanded={expandedSections.includes('token')}
           onToggle={toggleSection}
         >
@@ -184,13 +152,13 @@ export default function WhitePaperPage({
             <div className="grid grid-cols-2 gap-3">
               <div className="bg-card border border-border rounded-lg p-3">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en' ? 'Total Supply' : 'الإمداد الكلي'}
+                  {t.totalSupply}
                 </p>
                 <p className="text-lg font-bold text-accent">100M RE</p>
               </div>
               <div className="bg-card border border-border rounded-lg p-3">
                 <p className="text-xs text-muted-foreground mb-1">
-                  {language === 'en' ? 'Launch Price' : 'سعر الإطلاق'}
+                  {t.launchPrice}
                 </p>
                 <p className="text-lg font-bold text-accent">0.01π</p>
               </div>
@@ -199,14 +167,14 @@ export default function WhitePaperPage({
             {/* Distribution Chart */}
             <div className="space-y-2">
               <h4 className="font-semibold text-accent mb-3">
-                {language === 'en' ? 'Token Distribution' : 'توزيع الرموز'}
+                {t.tokenDistribution}
               </h4>
 
               {/* 40% Platform */}
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gray-300">
-                    {language === 'en' ? 'Platform Development' : 'تطوير المنصة'}
+                    {t.distribution[0]}
                   </span>
                   <span className="font-semibold text-accent">40M (40%)</span>
                 </div>
@@ -222,7 +190,7 @@ export default function WhitePaperPage({
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gray-300">
-                    {language === 'en' ? 'Investors & Partners' : 'المستثمرون والشركاء'}
+                    {t.distribution[1]}
                   </span>
                   <span className="font-semibold text-accent">30M (30%)</span>
                 </div>
@@ -238,7 +206,7 @@ export default function WhitePaperPage({
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gray-300">
-                    {language === 'en' ? 'Team & Operations' : 'الفريق والعمليات'}
+                    {t.distribution[2]}
                   </span>
                   <span className="font-semibold text-accent">20M (20%)</span>
                 </div>
@@ -254,7 +222,7 @@ export default function WhitePaperPage({
               <div className="space-y-1">
                 <div className="flex justify-between items-center text-xs">
                   <span className="text-gray-300">
-                    {language === 'en' ? 'Emergency Reserve' : 'الاحتياطي الطارئ'}
+                    {t.distribution[3]}
                   </span>
                   <span className="font-semibold text-accent">10M (10%)</span>
                 </div>
@@ -268,9 +236,7 @@ export default function WhitePaperPage({
             </div>
 
             <p className="text-xs text-gray-400 mt-4">
-              {language === 'en'
-                ? 'RE tokens power platform transactions, governance voting, and staking rewards. Early investors receive additional benefits through locked staking and rewards multipliers.'
-                : 'رموز RE تشغل معاملات المنصة والتصويت على الحوكمة ومكافآت الرهن. يحصل المستثمرون الأوائل على فوائد إضافية من خلال الرهن المقفول ومضاعفات المكافآت.'}
+              {t.tokenUtilityDesc}
             </p>
           </div>
         </ExpandableSection>
@@ -278,39 +244,31 @@ export default function WhitePaperPage({
         {/* 5. Roadmap */}
         <ExpandableSection
           id="roadmap"
-          title={language === 'en' ? '5. Roadmap' : '5. خريطة الطريق'}
+          title={t.sectionRoadmap}
           expanded={expandedSections.includes('roadmap')}
           onToggle={toggleSection}
         >
           <div className="space-y-3">
             <RoadmapPhase
-              quarter={language === 'en' ? 'Q1 2025' : 'الربع الأول 2025'}
-              title={language === 'en' ? 'Launch' : 'الإطلاق'}
-              items={language === 'en'
-                ? ['Platform launch', 'Core features live', '1000+ properties listed']
-                : ['إطلاق المنصة', 'الميزات الأساسية مباشرة', '1000+ عقار معروض']}
+              quarter={t.roadmap[0].quarter}
+              title={t.roadmap[0].title}
+              items={t.roadmap[0].items}
               isFirst
             />
             <RoadmapPhase
-              quarter={language === 'en' ? 'Q2 2025' : 'الربع الثاني 2025'}
-              title={language === 'en' ? 'Properties' : 'العقارات'}
-              items={language === 'en'
-                ? ['50+ countries', 'Mobile app launch', 'Advanced filtering']
-                : ['50+ دولة', 'إطلاق تطبيق الهاتف الذكي', 'تصفية متقدمة']}
+              quarter={t.roadmap[1].quarter}
+              title={t.roadmap[1].title}
+              items={t.roadmap[1].items}
             />
             <RoadmapPhase
-              quarter={language === 'en' ? 'Q3 2025' : 'الربع الثالث 2025'}
-              title={language === 'en' ? 'Tokenization' : 'الرمزنة'}
-              items={language === 'en'
-                ? ['Property tokenization', 'Fractional ownership', 'Secondary market']
-                : ['رمزنة العقارات', 'الملكية الكسرية', 'السوق الثانوية']}
+              quarter={t.roadmap[2].quarter}
+              title={t.roadmap[2].title}
+              items={t.roadmap[2].items}
             />
             <RoadmapPhase
-              quarter={language === 'en' ? 'Q4 2025' : 'الربع الرابع 2025'}
-              title={language === 'en' ? 'Global Expansion' : 'التوسع العالمي'}
-              items={language === 'en'
-                ? ['195+ countries', 'Enterprise features', 'DAO governance']
-                : ['195+ دولة', 'ميزات المؤسسة', 'حوكمة DAO']}
+              quarter={t.roadmap[3].quarter}
+              title={t.roadmap[3].title}
+              items={t.roadmap[3].items}
               isLast
             />
           </div>
@@ -319,19 +277,17 @@ export default function WhitePaperPage({
         {/* 6. Team */}
         <ExpandableSection
           id="team"
-          title={language === 'en' ? '6. Team' : '6. الفريق'}
+          title={t.sectionTeam}
           expanded={expandedSections.includes('team')}
           onToggle={toggleSection}
         >
           <div className="space-y-4">
             <div className="bg-card border border-border rounded-lg p-4">
               <h4 className="font-semibold text-accent mb-2">
-                {language === 'en' ? 'GlobalBusiness Team' : 'فريق GlobalBusiness'}
+                {t.teamName}
               </h4>
               <p className="text-sm text-gray-400 mb-4">
-                {language === 'en'
-                  ? 'A dedicated team of blockchain developers, real estate experts, and Pi Network specialists working to revolutionize global real estate.'
-                  : 'فريق متفاني من مطوري البلوكتشين وخبراء العقارات ومتخصصي شبكة Pi يعملون على إحداث ثورة في العقارات العالمية.'}
+                {t.teamDesc}
               </p>
 
               {/* Contact */}
@@ -347,9 +303,7 @@ export default function WhitePaperPage({
             </div>
 
             <p className="text-xs text-gray-500 text-center">
-              {language === 'en'
-                ? 'Contact us to join the RE Platform team or become a partner.'
-                : 'تواصل معنا للانضمام إلى فريق منصة RE أو لتصبح شريكاً.'}
+              {t.contactUsToJoin}
             </p>
           </div>
         </ExpandableSection>
@@ -359,17 +313,13 @@ export default function WhitePaperPage({
       <section className="px-4 py-8 max-w-2xl mx-auto">
         <div className="bg-gradient-to-r from-accent/10 to-purple-600/10 border border-accent/30 rounded-lg p-6 text-center">
           <h3 className="text-xl font-bold text-accent mb-2">
-            {language === 'en'
-              ? 'Join the Real Estate Revolution'
-              : 'انضم إلى ثورة العقارات'}
+            {t.ctaTitle}
           </h3>
           <p className="text-sm text-gray-400 mb-4">
-            {language === 'en'
-              ? 'Start exploring, investing, and earning with RE Platform today.'
-              : 'ابدأ الاستكشاف والاستثمار والكسب مع منصة RE اليوم.'}
+            {t.ctaDesc}
           </p>
           <button className="w-full bg-accent text-background py-3 rounded-lg font-semibold hover:opacity-90 transition">
-            {language === 'en' ? 'Get Started Free' : 'ابدأ مجاناً'}
+            {t.getStartedFree}
           </button>
         </div>
       </section>
