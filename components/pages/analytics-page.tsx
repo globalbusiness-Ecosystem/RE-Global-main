@@ -5,6 +5,7 @@ import { TrendingUp, MapPin, Home, DollarSign, Users, Activity, ArrowUp, ArrowDo
 import { useMemo } from 'react';
 import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import AIMarketAnalysisDashboard from '@/components/ai-market-analysis-dashboard';
+import { ANALYTICS_I18N } from '@/lib/analytics-i18n';
 
 interface AnalyticsPageProps {
   language: NavLanguage;
@@ -129,6 +130,7 @@ const demandData = regionalData
   }));
 
 export default function AnalyticsPage({ language, currency }: AnalyticsPageProps) {
+  const t = ANALYTICS_I18N[language];
   // Sort by demand
   const topRegions = useMemo(() => {
     return [...regionalData].sort((a, b) => b.demand - a.demand);
@@ -153,12 +155,10 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-accent mb-2">
-          {language === 'en' ? 'Market Analytics' : 'تحليلات السوق'}
+          {t.marketAnalytics}
         </h1>
         <p className="text-muted-foreground">
-          {language === 'en'
-            ? 'Global real estate statistics and regional insights'
-            : 'إحصائيات العقارات العالمية والرؤى الإقليمية'}
+          {t.globalStatsDesc}
         </p>
       </div>
 
@@ -167,49 +167,49 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">
-              {language === 'en' ? 'Total Properties' : 'إجمالي العقارات'}
+              {t.totalProperties}
             </span>
             <Home className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-accent">
             {totalStats.totalProperties.toLocaleString()}
           </p>
-          <p className="text-xs text-green-500 mt-1">+12% this month</p>
+          <p className="text-xs text-green-500 mt-1">{t.thisMonthGrowth}</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">
-              {language === 'en' ? 'Avg Price' : 'متوسط السعر'}
+              {t.avgPriceLabel}
             </span>
             <DollarSign className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-accent">
             {Math.round(totalStats.avgPrice / 1000)}K {currency}
           </p>
-          <p className="text-xs text-green-500 mt-1">+2.1% growth</p>
+          <p className="text-xs text-green-500 mt-1">{t.growthLabel}</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">
-              {language === 'en' ? 'Active Regions' : 'المناطق النشطة'}
+              {t.activeRegions}
             </span>
             <MapPin className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-accent">{totalStats.total}</p>
-          <p className="text-xs text-green-500 mt-1">Worldwide coverage</p>
+          <p className="text-xs text-green-500 mt-1">{t.worldwideCoverage}</p>
         </div>
 
         <div className="bg-card border border-border rounded-xl p-4">
           <div className="flex items-center justify-between mb-2">
             <span className="text-muted-foreground text-sm">
-              {language === 'en' ? 'Avg Demand' : 'متوسط الطلب'}
+              {t.avgDemand}
             </span>
             <TrendingUp className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-accent">{totalStats.avgDemand}%</p>
-          <p className="text-xs text-green-500 mt-1">High interest</p>
+          <p className="text-xs text-green-500 mt-1">{t.highInterest}</p>
         </div>
       </div>
 
@@ -218,7 +218,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
         {/* Price Trend Chart */}
         <div className="bg-card border border-border rounded-xl p-4">
           <h2 className="text-lg font-semibold text-accent mb-4">
-            {language === 'en' ? 'Average Price Trend' : 'اتجاه متوسط السعر'}
+            {t.avgPriceTrend}
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <LineChart data={priceTrendData}>
@@ -246,7 +246,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
         {/* Market Distribution */}
         <div className="bg-card border border-border rounded-xl p-4">
           <h2 className="text-lg font-semibold text-accent mb-4">
-            {language === 'en' ? 'Market Distribution' : 'توزيع السوق'}
+            {t.marketDistribution}
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -272,7 +272,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
         {/* Demand by Region */}
         <div className="bg-card border border-border rounded-xl p-4">
           <h2 className="text-lg font-semibold text-accent mb-4">
-            {language === 'en' ? 'Top Markets by Demand' : 'أفضل الأسواق حسب الطلب'}
+            {t.topMarketsByDemand}
           </h2>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={demandData}>
@@ -294,7 +294,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
         {/* Regional Summary */}
         <div className="bg-card border border-border rounded-xl p-4">
           <h2 className="text-lg font-semibold text-accent mb-4">
-            {language === 'en' ? 'Regional Leaders' : 'قادة المناطق'}
+            {t.regionalLeaders}
           </h2>
           <div className="space-y-2">
             {topRegions.slice(0, 5).map((region) => (
@@ -309,7 +309,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
                       {region.region}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      {region.totalProperties} properties
+                      {region.totalProperties} {t.propertiesLabel}
                     </p>
                   </div>
                 </div>
@@ -341,29 +341,29 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
       {/* Detailed Regional Table */}
       <div className="bg-card border border-border rounded-xl p-4">
         <h2 className="text-lg font-semibold text-accent mb-4">
-          {language === 'en' ? 'Regional Statistics' : 'الإحصائيات الإقليمية'}
+          {t.regionalStatistics}
         </h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-border">
                 <th className="text-left p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Region' : 'المنطقة'}
+                  {t.region}
                 </th>
                 <th className="text-right p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Properties' : 'العقارات'}
+                  {t.properties}
                 </th>
                 <th className="text-right p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Avg Price' : 'متوسط السعر'}
+                  {t.avgPriceLabel}
                 </th>
                 <th className="text-right p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Rent Avg' : 'متوسط الإيجار'}
+                  {t.rentAvg}
                 </th>
                 <th className="text-right p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Demand' : 'الطلب'}
+                  {t.demand}
                 </th>
                 <th className="text-right p-2 text-accent font-semibold">
-                  {language === 'en' ? 'Change' : 'التغيير'}
+                  {t.change}
                 </th>
               </tr>
             </thead>
@@ -426,39 +426,31 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
       {/* Insights */}
       <div className="bg-background/50 border border-border rounded-xl p-4 space-y-3">
         <h2 className="text-lg font-semibold text-accent">
-          {language === 'en' ? 'Market Insights' : 'رؤى السوق'}
+          {t.marketInsights}
         </h2>
         <ul className="space-y-2 text-sm text-muted-foreground">
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">•</span>
             <span>
-              {language === 'en'
-                ? 'Dubai leads with 98% demand, followed by Singapore at 94%'
-                : 'دبي تتصدر بطلب بنسبة 98٪، تليها سنغافورة بنسبة 94٪'}
+              {t.insight1}
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">•</span>
             <span>
-              {language === 'en'
-                ? 'Average property prices increased 2.1% over the past year'
-                : 'ارتفعت متوسط أسعار العقارات بنسبة 2.1٪ على مدار السنة الماضية'}
+              {t.insight2}
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">•</span>
             <span>
-              {language === 'en'
-                ? 'Bangkok showing highest growth rate at 3.2% month-over-month'
-                : 'تايلاند تظهر أعلى معدل نمو بنسبة 3.2٪ من شهر لآخر'}
+              {t.insight3}
             </span>
           </li>
           <li className="flex items-start gap-2">
             <span className="text-accent mt-0.5">•</span>
             <span>
-              {language === 'en'
-                ? 'Residential properties account for 45% of market, rentals 28%'
-                : 'تمثل العقارات السكنية 45٪ من السوق، والإيجارات 28٪'}
+              {t.insight4}
             </span>
           </li>
         </ul>
