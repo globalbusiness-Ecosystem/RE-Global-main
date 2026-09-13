@@ -22,8 +22,13 @@ import {
   INSPECTION_STEPS,
   healthScoreColor,
   healthScoreLabel,
+  getDemoPropertyTitle,
+  getDemoAiSummary,
+  getStepTitle,
+  getStepDesc,
   type InspectionSubScore,
 } from '@/lib/inspections';
+import { INSPECTIONS_I18N } from '@/lib/inspections-i18n';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 import InspectionSimulationScene from '@/components/InspectionSimulationScene';
 
@@ -51,9 +56,10 @@ function CopyBtn({ value }: { value: string }) {
   );
 }
 
-function HealthGauge({ score, isArabic }: { score: number; isArabic: boolean }) {
+function HealthGauge({ score, language }: { score: number; language: NavLanguage }) {
+  const t = INSPECTIONS_I18N[language];
   const color = healthScoreColor(score);
-  const label = healthScoreLabel(score, isArabic);
+  const label = healthScoreLabel(score, language);
   const circumference = 2 * Math.PI * 54;
   const offset = circumference - (score / 100) * circumference;
 
@@ -83,7 +89,7 @@ function HealthGauge({ score, isArabic }: { score: number; isArabic: boolean }) 
       </div>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
         <span className="text-4xl font-bold" style={{ color }}>{score}</span>
-        <span className="text-[11px] text-muted-foreground mt-1">{isArabic ? 'مؤشر صحة العقار' : 'Health Score'}</span>
+        <span className="text-[11px] text-muted-foreground mt-1">{t.healthScore}</span>
         <span className="text-xs font-medium mt-0.5" style={{ color }}>{label}</span>
       </div>
     </div>
@@ -92,16 +98,12 @@ function HealthGauge({ score, isArabic }: { score: number; isArabic: boolean }) 
 
 function SubScoreRow({
   icon: Icon,
-  labelEn,
-  labelAr,
+  label,
   value,
-  isArabic,
 }: {
   icon: any;
-  labelEn: string;
-  labelAr: string;
+  label: string;
   value: number;
-  isArabic: boolean;
 }) {
   const color = healthScoreColor(value);
   return (
@@ -111,7 +113,7 @@ function SubScoreRow({
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between mb-1">
-          <span className="text-sm text-foreground">{isArabic ? labelAr : labelEn}</span>
+          <span className="text-sm text-foreground">{label}</span>
           <span className="text-sm font-semibold" style={{ color }}>{value}</span>
         </div>
         <div className="h-1.5 rounded-full bg-border overflow-hidden">
@@ -123,7 +125,9 @@ function SubScoreRow({
 }
 
 export default function InspectionsPage({ language, onBack, onNavigate }: InspectionsPageProps) {
+  const t = INSPECTIONS_I18N[language];
   const isArabic = language === 'ar';
+  const isRTL = language === 'ar' || language === 'ur';
   const demo = DEMO_INSPECTION;
 
   const [requestOpen, setRequestOpen] = useState(false);
@@ -134,14 +138,14 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
   const [verifyStatus, setVerifyStatus] = useState<'idle' | 'loading' | 'done'>('idle');
   const [verifyResult, setVerifyResult] = useState<StellarVerificationResult | null>(null);
 
-  const subScores: { key: keyof InspectionSubScore; icon: any; labelEn: string; labelAr: string }[] = useMemo(
+  const subScores: { key: keyof InspectionSubScore; icon: any; label: string }[] = useMemo(
     () => [
-      { key: 'structural', icon: HardHat, labelEn: 'Structural', labelAr: 'الإنشائي' },
-      { key: 'moisture', icon: Droplets, labelEn: 'Moisture', labelAr: 'الرطوبة' },
-      { key: 'thermal', icon: Thermometer, labelEn: 'Thermal', labelAr: 'الحراري' },
-      { key: 'safety', icon: ShieldCheck, labelEn: 'Safety', labelAr: 'السلامة' },
+      { key: 'structural', icon: HardHat, label: t.subScores.structural },
+      { key: 'moisture', icon: Droplets, label: t.subScores.moisture },
+      { key: 'thermal', icon: Thermometer, label: t.subScores.thermal },
+      { key: 'safety', icon: ShieldCheck, label: t.subScores.safety },
     ],
-    []
+    [t]
   );
 
   const handleVerify = async () => {
@@ -160,7 +164,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
   };
 
   return (
-    <main className="w-full min-h-screen bg-background pb-24" dir={isArabic ? 'rtl' : 'ltr'}>
+    <main className="w-full min-h-screen bg-background pb-24" dir={isRTL ? 'rtl' : 'ltr'}>
       {/* Header */}
       <div className="sticky top-0 z-20 bg-background/95 backdrop-blur border-b border-border">
         <div className="px-4 py-4 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto flex items-center gap-2">
@@ -170,7 +174,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
           <div>
             <h1 className="text-2xl font-bold text-accent">RE Inspect</h1>
             <p className="text-sm text-muted-foreground">
-              {isArabic ? 'فحص العقارات بالروبوت والدرون، بشهادة موثقة على البلوكتشين' : 'Robotic property inspection, certified on-chain'}
+              {t.inspectDesc}
             </p>
           </div>
         </div>
@@ -189,24 +193,22 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
           <div className="flex items-center justify-center gap-2 mb-1">
             <Bot className="w-4 h-4 text-accent" />
             <span className="text-xs uppercase tracking-wide text-muted-foreground">
-              {isArabic ? 'نموذج حي' : 'Live Demo'}
+              {t.liveDemo}
             </span>
           </div>
           <p className="text-center text-sm font-medium text-foreground mb-4">
-            {isArabic ? demo.propertyTitleAr : demo.propertyTitleEn}
+            {getDemoPropertyTitle(language)}
           </p>
 
-          <HealthGauge score={demo.overallHealthScore} isArabic={isArabic} />
+          <HealthGauge score={demo.overallHealthScore} language={language} />
 
           <div className="mt-6 space-y-4">
             {subScores.map((s) => (
               <SubScoreRow
                 key={s.key}
                 icon={s.icon}
-                labelEn={s.labelEn}
-                labelAr={s.labelAr}
+                label={s.label}
                 value={demo.scores[s.key]}
-                isArabic={isArabic}
               />
             ))}
           </div>
@@ -214,18 +216,16 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
           <div className="mt-5 bg-accent/5 border border-accent/20 rounded-xl p-3.5 flex gap-2.5">
             <Sparkles className="w-4 h-4 text-accent shrink-0 mt-0.5" />
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {isArabic ? demo.aiSummaryAr : demo.aiSummaryEn}
+              {getDemoAiSummary(language)}
               <span className="block mt-1 text-accent/80 font-medium">
-                {isArabic ? '— بواسطة علاء الدين (Aladdin AI)' : '— by Aladdin AI'}
+                {t.byAladdinAI}
               </span>
             </p>
           </div>
 
           <div className="mt-4 flex items-center justify-between gap-2 text-xs bg-muted/30 rounded-lg px-3 py-2.5">
             <span className="text-muted-foreground">
-              {isArabic
-                ? 'أي شهادة معتمدة قابلة للتحقق علنًا — بدون حساب أو تسجيل دخول'
-                : 'Every certified report is publicly verifiable — no account or login needed'}
+              {t.everyReportVerifiable}
             </span>
             <a
               href="/verify/demo-cert-hash"
@@ -233,8 +233,8 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
               rel="noreferrer"
               className="shrink-0 flex items-center gap-1 text-accent font-medium hover:underline"
             >
-              {isArabic ? 'مثال' : 'Example'}
-              <ChevronRight className={`w-3.5 h-3.5 ${isArabic ? 'rotate-180' : ''}`} />
+              {t.example}
+              <ChevronRight className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
             </a>
           </div>
         </section>
@@ -242,7 +242,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
         {/* How it works */}
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            {isArabic ? 'كيف يعمل الفحص' : 'How the inspection works'}
+            {t.howInspectionWorks}
           </h2>
           <div className="space-y-2">
             {INSPECTION_STEPS.map((step) => (
@@ -251,9 +251,9 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                   {step.id}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-sm font-medium text-foreground">{isArabic ? step.titleAr : step.titleEn}</p>
+                  <p className="text-sm font-medium text-foreground">{getStepTitle(step, language)}</p>
                   <p className="text-xs text-muted-foreground mt-0.5 leading-relaxed">
-                    {isArabic ? step.descAr : step.descEn}
+                    {getStepDesc(step, language)}
                   </p>
                 </div>
               </div>
@@ -266,39 +266,35 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
           <div className="flex items-center gap-2 mb-2">
             <Link2 className="w-4 h-4 text-accent" />
             <h2 className="text-base font-semibold text-foreground">
-              {isArabic ? 'من الفحص إلى القيمة' : 'Inspection-to-Value'}
+              {t.inspectionToValue}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
-            {isArabic
-              ? 'مؤشر صحة العقار لا يبقى في تقرير — هو يتغذى مباشرة في تسعير $RE Token الخاص بالعقار. تحسّن أو تراجع في الفحص الدوري يظهر كتنبيه فوري لحاملي التوكن عبر نظام التنبيهات الذكية.'
-              : "The Health Score doesn't stay in a report — it feeds directly into that property's $RE Token pricing. A change in a follow-up inspection triggers an instant alert to token holders through the smart alerts system."}
+            {t.inspectionToValueDesc}
           </p>
           <button
             onClick={() => onNavigate?.('re-token')}
             className="mt-3 flex items-center gap-1 text-xs font-medium text-accent hover:underline"
           >
-            {isArabic ? 'عرض RE Token' : 'View RE Token'}
-            <ChevronRight className={`w-3.5 h-3.5 ${isArabic ? 'rotate-180' : ''}`} />
+            {t.viewREToken}
+            <ChevronRight className={`w-3.5 h-3.5 ${isRTL ? 'rotate-180' : ''}`} />
           </button>
         </section>
 
         {/* On-chain certificate verification */}
         <section>
           <h2 className="text-lg font-semibold text-foreground mb-3">
-            {isArabic ? 'التحقق من الشهادة على البلوكتشين' : 'Verify an on-chain certificate'}
+            {t.verifyOnChainCert}
           </h2>
           <div className="bg-card border border-border rounded-lg p-4 space-y-3">
             <p className="text-xs text-muted-foreground leading-relaxed">
-              {isArabic
-                ? 'كل تقرير فحص معتمد يُسجَّل كمعاملة على Pi Testnet — أدخل رقم المعاملة (hash) لأي شهادة للتحقق منها مباشرة من الشبكة، بشكل مستقل تمامًا عن قاعدة بياناتنا.'
-                : "Every certified inspection is recorded as a transaction on Pi Testnet — enter a certificate's transaction hash to verify it directly from the network, independent of our database."}
+              {t.everyCertRecorded}
             </p>
             <div className="flex gap-2">
               <input
                 value={certInput}
                 onChange={(e) => setCertInput(e.target.value)}
-                placeholder={isArabic ? 'رقم معاملة الشهادة (txid)' : 'Certificate transaction hash (txid)'}
+                placeholder={t.certTxPlaceholder}
                 className="flex-1 bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent"
               />
               <button
@@ -306,7 +302,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                 disabled={verifyStatus === 'loading' || !certInput.trim()}
                 className="bg-accent text-accent-foreground text-sm font-medium px-4 py-2 rounded-md disabled:opacity-50 flex items-center gap-1.5"
               >
-                {verifyStatus === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : (isArabic ? 'تحقق' : 'Verify')}
+                {verifyStatus === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : t.verify}
               </button>
             </div>
 
@@ -325,10 +321,10 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                   {verifyResult.found ? (
                     <>
                       <p className="text-green-400 font-medium">
-                        {isArabic ? 'تم التحقق على الشبكة' : 'Verified on-chain'}
+                        {t.verifiedOnChain}
                       </p>
                       <p className="text-muted-foreground mt-0.5">
-                        {isArabic ? 'الليدجر' : 'Ledger'}: {verifyResult.ledger} · {verifyResult.createdAt}
+                        {t.ledger}: {verifyResult.ledger} · {verifyResult.createdAt}
                       </p>
                       <div className="flex items-center gap-1 mt-1">
                         <span className="text-muted-foreground truncate">{verifyResult.sourceAccount}</span>
@@ -336,7 +332,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                       </div>
                     </>
                   ) : (
-                    <p className="text-destructive">{verifyResult.error || (isArabic ? 'لم يتم العثور على المعاملة' : 'Transaction not found')}</p>
+                    <p className="text-destructive">{verifyResult.error || t.transactionNotFound}</p>
                   )}
                 </div>
               </div>
@@ -350,35 +346,35 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
             <div className="flex items-center justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold text-foreground">
-                  {isArabic ? 'اطلب فحصًا معتمدًا' : 'Request a certified inspection'}
+                  {t.requestCertifiedInspection}
                 </p>
                 <p className="text-xs text-muted-foreground mt-0.5">
-                  {isArabic ? 'متاح حاليًا في المدن التجريبية' : 'Currently available in pilot cities'}
+                  {t.availablePilotCities}
                 </p>
               </div>
               <button
                 onClick={() => setRequestOpen(true)}
                 className="bg-accent text-accent-foreground text-sm font-medium px-4 py-2.5 rounded-md shrink-0"
               >
-                {isArabic ? 'اطلب الآن' : 'Request'}
+                {t.requestNow}
               </button>
             </div>
           ) : requestSent ? (
             <div className="flex items-center gap-2.5 text-green-400">
               <Check className="w-5 h-5" />
               <p className="text-sm font-medium">
-                {isArabic ? 'تم استلام طلبك — سيتواصل معك فريق العمليات لتحديد الموعد.' : "Request received — our operations team will reach out to schedule it."}
+                {t.requestReceived}
               </p>
             </div>
           ) : (
             <div className="space-y-3">
               <p className="text-sm font-semibold text-foreground">
-                {isArabic ? 'تفاصيل الطلب' : 'Request details'}
+                {t.requestDetails}
               </p>
               <textarea
                 value={requestNote}
                 onChange={(e) => setRequestNote(e.target.value)}
-                placeholder={isArabic ? 'اسم العقار أو رابطه، والموعد المفضل...' : 'Property name or link, and preferred timing...'}
+                placeholder={t.propertyNamePlaceholder}
                 rows={3}
                 className="w-full bg-background border border-border rounded-md px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-accent resize-none"
               />
@@ -387,13 +383,13 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
                   onClick={handleSendRequest}
                   className="flex-1 bg-accent text-accent-foreground text-sm font-medium py-2.5 rounded-md"
                 >
-                  {isArabic ? 'إرسال الطلب' : 'Send request'}
+                  {t.sendRequest}
                 </button>
                 <button
                   onClick={() => setRequestOpen(false)}
                   className="px-4 text-sm font-medium text-muted-foreground border border-border rounded-md"
                 >
-                  {isArabic ? 'إلغاء' : 'Cancel'}
+                  {t.cancel}
                 </button>
               </div>
             </div>
