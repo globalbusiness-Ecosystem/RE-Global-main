@@ -4,12 +4,12 @@ import { useState, useEffect } from 'react';
 import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
-import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
+import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 
 interface SettingsPageProps {
   language: NavLanguage;
-  setLanguage: (lang: 'en' | 'ar') => void;
+  setLanguage: (lang: NavLanguage) => void;
   onWhitePaperClick?: () => void;
   onBack?: () => void;
 }
@@ -45,10 +45,8 @@ export default function SettingsPage({
     try {
       localStorage.setItem(NAV_LANG_KEY, code);
     } catch {}
-    // Only English/Arabic have full page-content translations today.
-    if (code === 'en' || code === 'ar') {
-      setLanguage(code);
-    }
+    // All 7 languages now have full page-content translations.
+    setLanguage(code);
   };
 
   const handleLogoTap = () => {
@@ -115,11 +113,6 @@ export default function SettingsPage({
             </button>
           ))}
         </div>
-        {navLanguage !== 'en' && navLanguage !== 'ar' && (
-          <p className="text-xs text-muted-foreground mt-3 leading-relaxed">
-            {NAV_DICTIONARY[navLanguage].translationNote}
-          </p>
-        )}
       </div>
 
       {/* 2. Dark Mode */}
