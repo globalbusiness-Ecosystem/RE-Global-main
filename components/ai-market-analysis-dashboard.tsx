@@ -4,6 +4,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { useMemo, useState, useEffect, memo, useCallback } from 'react';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Area, AreaChart } from 'recharts';
 import { TrendingUp, TrendingDown, Calendar, Download, RefreshCw, Brain } from 'lucide-react';
+import { ANALYTICS_I18N } from '@/lib/analytics-i18n';
 
 interface MarketAnalysisDashboardProps {
   language: NavLanguage;
@@ -61,24 +62,6 @@ const cityPriceTrends = [
   },
 ];
 
-// Weekly market report summary
-const weeklyReportTemplate = {
-  en: {
-    title: 'Weekly Market Report',
-    topGainers: 'Top Price Gainers',
-    topFallers: 'Price Declines',
-    avgTrend: 'Average Market Trend',
-    generatedAt: 'Generated on',
-  },
-  ar: {
-    title: 'تقرير السوق الأسبوعي',
-    topGainers: 'أكثر المدن ارتفاعاً',
-    topFallers: 'المدن الهابطة',
-    avgTrend: 'متوسط اتجاه السوق',
-    generatedAt: 'تم إنشاؤه في',
-  },
-};
-
 // City performance metrics
 const cityMetrics = [
   { city: 'Dubai', lastWeek: 90800, thisWeek: 92500, change: 1.9, flag: '🇦🇪' },
@@ -89,15 +72,14 @@ const cityMetrics = [
 ];
 
 export default memo(function AIMarketAnalysisDashboard({ language }: MarketAnalysisDashboardProps) {
+  const t = ANALYTICS_I18N[language];
   const [reportGenerated, setReportGenerated] = useState<boolean>(true);
   const [lastGenerated, setLastGenerated] = useState<string>('');
-
-  const labels = weeklyReportTemplate[language];
 
   useEffect(() => {
     // Set last generated date on mount only
     const now = new Date();
-    setLastGenerated(now.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US'));
+    setLastGenerated(now.toLocaleDateString(t.dateLocale));
   }, [language]);
 
   const topGainers = useMemo(() => {
@@ -116,10 +98,10 @@ export default memo(function AIMarketAnalysisDashboard({ language }: MarketAnaly
     setReportGenerated(false);
     setTimeout(() => {
       const now = new Date();
-      setLastGenerated(now.toLocaleDateString(language === 'ar' ? 'ar-EG' : 'en-US'));
+      setLastGenerated(now.toLocaleDateString(t.dateLocale));
       setReportGenerated(true);
     }, 1500);
-  }, [language]);
+  }, [t.dateLocale]);
 
   const handleExportReport = useCallback(() => {
     const report = `
@@ -151,8 +133,8 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
         <div className="flex items-center gap-3">
           <Brain className="w-6 h-6 text-accent" />
           <div>
-            <h2 className="text-xl font-bold text-foreground">{labels.title}</h2>
-            <p className="text-xs text-muted-foreground">{labels.generatedAt} {lastGenerated}</p>
+            <h2 className="text-xl font-bold text-foreground">{t.aiReportTitle}</h2>
+            <p className="text-xs text-muted-foreground">{t.generatedOn} {lastGenerated}</p>
           </div>
         </div>
         <div className="flex gap-2">
@@ -162,14 +144,14 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
             className="flex items-center gap-2 px-4 py-2 bg-accent hover:bg-accent/80 text-accent-foreground rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             <RefreshCw className={`w-4 h-4 ${!reportGenerated ? 'animate-spin' : ''}`} />
-            {language === 'en' ? 'Refresh' : 'تحديث'}
+            {t.refresh}
           </button>
           <button
             onClick={handleExportReport}
             className="flex items-center gap-2 px-4 py-2 bg-secondary hover:bg-secondary/80 text-secondary-foreground rounded-lg transition-colors text-sm"
           >
             <Download className="w-4 h-4" />
-            {language === 'en' ? 'Export' : 'تصدير'}
+            {t.exportLabel}
           </button>
         </div>
       </div>
@@ -179,7 +161,7 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
         {/* Price Trend Chart */}
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-sm font-semibold text-foreground mb-4">
-            {language === 'en' ? 'Price Trends (6 Months)' : 'اتجاهات الأسعار (6 أشهر)'}
+            {t.priceTrends6mo}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <AreaChart data={cityPriceTrends}>
@@ -209,7 +191,7 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
         {/* Weekly Performance */}
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-sm font-semibold text-foreground mb-4">
-            {language === 'en' ? 'Weekly City Performance' : 'أداء المدن الأسبوعية'}
+            {t.weeklyCityPerformance}
           </h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={cityMetrics}>
@@ -232,7 +214,7 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
             <TrendingUp className="w-4 h-4 text-green-500" />
-            {labels.topGainers}
+            {t.topGainersLabel}
           </h3>
           <div className="space-y-3">
             {topGainers.map((city) => (
@@ -255,21 +237,21 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
         {/* Market Overview */}
         <div className="bg-card border border-border rounded-lg p-4">
           <h3 className="text-sm font-semibold text-foreground mb-3">
-            {language === 'en' ? 'Market Overview' : 'نظرة عامة على السوق'}
+            {t.marketOverview}
           </h3>
           <div className="space-y-4">
             <div className="p-3 bg-background/50 rounded-lg">
-              <p className="text-xs text-muted-foreground mb-1">{labels.avgTrend}</p>
+              <p className="text-xs text-muted-foreground mb-1">{t.avgMarketTrend}</p>
               <p className="text-2xl font-bold text-accent">+{avgTrendChange}%</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
               <div className="p-3 bg-background/50 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">{language === 'en' ? 'Cities Tracked' : 'المدن المتابعة'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t.citiesTracked}</p>
                 <p className="text-lg font-semibold text-foreground">{cityMetrics.length}</p>
               </div>
               <div className="p-3 bg-background/50 rounded-lg">
-                <p className="text-xs text-muted-foreground mb-1">{language === 'en' ? 'Update Frequency' : 'تكرار التحديث'}</p>
-                <p className="text-lg font-semibold text-foreground">{language === 'en' ? 'Weekly' : 'أسبوعي'}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t.updateFrequency}</p>
+                <p className="text-lg font-semibold text-foreground">{t.weeklyFreq}</p>
               </div>
             </div>
           </div>
@@ -279,16 +261,16 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
       {/* All Cities Metrics */}
       <div className="px-4 bg-card border border-border rounded-lg p-4">
         <h3 className="text-sm font-semibold text-foreground mb-4">
-          {language === 'en' ? 'All Markets' : 'جميع الأسواق'}
+          {t.allMarkets}
         </h3>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead className="text-xs text-muted-foreground border-b border-border">
               <tr>
-                <th className="text-left py-2 px-2">{language === 'en' ? 'City' : 'المدينة'}</th>
-                <th className="text-right py-2 px-2">{language === 'en' ? 'Last Week' : 'الأسبوع الماضي'}</th>
-                <th className="text-right py-2 px-2">{language === 'en' ? 'This Week' : 'هذا الأسبوع'}</th>
-                <th className="text-right py-2 px-2">{language === 'en' ? 'Change' : 'التغيير'}</th>
+                <th className="text-left py-2 px-2">{t.cityCol}</th>
+                <th className="text-right py-2 px-2">{t.lastWeekCol}</th>
+                <th className="text-right py-2 px-2">{t.thisWeekCol}</th>
+                <th className="text-right py-2 px-2">{t.change}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -315,9 +297,7 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
       <div className="px-4 bg-gradient-to-r from-accent/10 to-secondary/10 border border-accent/20 rounded-lg p-4 text-sm text-muted-foreground">
         <p className="flex items-center gap-2">
           <Brain className="w-4 h-4 text-accent flex-shrink-0" />
-          {language === 'en' 
-            ? 'AI-generated market analysis updated weekly. Use for investment research only.' 
-            : 'تحليل السوق المولد بالذكاء الاصطناعي يتم تحديثه أسبوعياً. للاستخدام في البحث الاستثماري فقط.'}
+          {t.aiInsightNote}
         </p>
       </div>
     </div>
