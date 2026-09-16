@@ -1,7 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Lock, ExternalLink, Mail, MessageCircle, ChevronLeft, Check } from 'lucide-react';
+import {
+  Lock,
+  ChevronLeft,
+  ChevronRight,
+  Check,
+  Globe2,
+  Moon,
+  Bell,
+  Coins,
+  FileText,
+  Phone,
+  Mail,
+  Instagram,
+  Info,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
@@ -14,9 +28,15 @@ interface SettingsPageProps {
   onBack?: () => void;
 }
 
-// Same key the header drawer already reads on load — writing here keeps
-// them in sync without adding any new props between components.
 const NAV_LANG_KEY = 're_nav_language';
+
+function SectionLabel({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="flex items-center gap-2 mb-3 text-foreground font-semibold">
+      {children}
+    </div>
+  );
+}
 
 export default function SettingsPage({
   language,
@@ -45,14 +65,12 @@ export default function SettingsPage({
     try {
       localStorage.setItem(NAV_LANG_KEY, code);
     } catch {}
-    // All 7 languages now have full page-content translations.
     setLanguage(code);
   };
 
   const handleLogoTap = () => {
     const newTaps = logoTaps + 1;
     setLogoTaps(newTaps);
-
     if (newTaps === 7) {
       setShowAdminPanel(true);
       setLogoTaps(0);
@@ -60,7 +78,6 @@ export default function SettingsPage({
   };
 
   const handlePinSubmit = () => {
-    // Verify PIN (placeholder - in production would verify against Google Sheets)
     if (pinCode === '202500') {
       setPinError('');
       alert(t.adminAccessGranted);
@@ -84,19 +101,15 @@ export default function SettingsPage({
         <h2 className="text-2xl font-bold text-accent flex-1 text-center">
           {t.settings}
         </h2>
-        <button
-          onClick={() => {}}
-          className="p-1 hover:opacity-75 transition text-lg font-bold w-6"
-        >
-          {/* Placeholder for balance */}
-        </button>
+        <div className="w-6" />
       </div>
 
       {/* 1. Language */}
       <div className="bg-card border border-border rounded-lg p-4">
-        <h3 className="font-semibold text-foreground mb-3">
+        <SectionLabel>
+          <Globe2 className="w-4 h-4 text-accent" />
           {t.language}
-        </h3>
+        </SectionLabel>
         <div className="grid grid-cols-2 gap-2">
           {LANGUAGE_OPTIONS.map((opt) => (
             <button
@@ -104,27 +117,26 @@ export default function SettingsPage({
               onClick={() => handleLanguagePick(opt.code)}
               className={`flex items-center justify-between gap-2 py-2 px-3 rounded-lg font-medium transition ${
                 navLanguage === opt.code
-                  ? 'bg-accent text-accent-foreground'
+                  ? 'bg-accent/10 border border-accent text-foreground'
                   : 'border border-border text-foreground hover:border-accent'
               }`}
             >
               <span>{opt.native}</span>
-              {navLanguage === opt.code && <Check className="w-4 h-4" />}
+              {navLanguage === opt.code && <Check className="w-4 h-4 text-accent" />}
             </button>
           ))}
         </div>
       </div>
 
-      {/* 2. Dark Mode */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-foreground">
-              {t.darkMode}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t.luxuryDarkTheme}
-            </p>
+      {/* 2 + 3. Preferences (Dark Mode + Notifications) */}
+      <div className="bg-card border border-border rounded-lg divide-y divide-border">
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <Moon className="w-4 h-4 text-accent shrink-0" />
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">{t.darkMode}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.luxuryDarkTheme}</p>
+            </div>
           </div>
           <button
             onClick={() => {
@@ -132,7 +144,7 @@ export default function SettingsPage({
               setDarkMode(next);
               applyTheme(next ? 'dark' : 'light');
             }}
-            className={`w-12 h-7 rounded-full transition flex items-center ${
+            className={`w-12 h-7 rounded-full transition flex items-center shrink-0 ${
               darkMode ? 'bg-accent' : 'bg-muted'
             }`}
           >
@@ -143,22 +155,18 @@ export default function SettingsPage({
             />
           </button>
         </div>
-      </div>
 
-      {/* 3. Notifications */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center justify-between">
-          <div>
-            <h3 className="font-semibold text-foreground">
-              {t.notifications}
-            </h3>
-            <p className="text-xs text-muted-foreground mt-1">
-              {t.propertyMarketAlerts}
-            </p>
+        <div className="flex items-center justify-between p-4">
+          <div className="flex items-center gap-3">
+            <Bell className="w-4 h-4 text-accent shrink-0" />
+            <div>
+              <h3 className="font-semibold text-foreground text-sm">{t.notifications}</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">{t.propertyMarketAlerts}</p>
+            </div>
           </div>
           <button
             onClick={() => setNotifications(!notifications)}
-            className={`w-12 h-7 rounded-full transition flex items-center ${
+            className={`w-12 h-7 rounded-full transition flex items-center shrink-0 ${
               notifications ? 'bg-accent' : 'bg-muted'
             }`}
           >
@@ -173,32 +181,27 @@ export default function SettingsPage({
 
       {/* 4. RE Token */}
       <div className="bg-card border border-border rounded-lg p-4">
-        <h3 className="font-semibold text-foreground mb-4">
+        <SectionLabel>
+          <Coins className="w-4 h-4 text-accent" />
           {t.reToken}
-        </h3>
-        <div className="space-y-3 mb-4">
+        </SectionLabel>
+        <div className="grid grid-cols-2 gap-3 mb-3">
           <div className="bg-muted rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">
-              {t.tokenPrice}
-            </p>
-            <p className="text-lg font-bold text-accent">1 $RE = 0.01π</p>
+            <p className="text-xs text-muted-foreground mb-1">{t.tokenPrice}</p>
+            <p className="text-base font-bold text-accent">1 $RE = 0.01π</p>
           </div>
           <div className="bg-muted rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-1">
-              {t.totalSupply}
-            </p>
-            <p className="text-lg font-bold text-accent">100M $RE</p>
+            <p className="text-xs text-muted-foreground mb-1">{t.totalSupply}</p>
+            <p className="text-base font-bold text-accent">100M $RE</p>
           </div>
-          <div className="bg-muted rounded-lg p-3">
-            <p className="text-xs text-muted-foreground mb-2">
-              {t.howToEarn}
-            </p>
-            <ul className="text-xs text-foreground space-y-1">
-              <li>• {t.buyProperties}</li>
-              <li>• {t.investTokenizedAssets}</li>
-              <li>• {t.referFriends}</li>
-            </ul>
-          </div>
+        </div>
+        <div className="bg-muted rounded-lg p-3 mb-4">
+          <p className="text-xs text-muted-foreground mb-2">{t.howToEarn}</p>
+          <ul className="text-xs text-foreground space-y-1">
+            <li>• {t.buyProperties}</li>
+            <li>• {t.investTokenizedAssets}</li>
+            <li>• {t.referFriends}</li>
+          </ul>
         </div>
         <button className="w-full bg-accent text-accent-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
           {t.buyRE}
@@ -206,15 +209,16 @@ export default function SettingsPage({
       </div>
 
       {/* 5. White Paper */}
-      <div className="bg-card border border-border rounded-lg p-4">
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
         <button
           onClick={onWhitePaperClick}
-          className="w-full flex items-center justify-between p-2 hover:bg-muted/50 transition rounded-lg"
+          className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition"
         >
-          <h3 className="font-semibold text-foreground">
-            {t.whitePaper}
-          </h3>
-          <ExternalLink className="w-5 h-5 text-accent" />
+          <div className="flex items-center gap-3">
+            <FileText className="w-4 h-4 text-accent" />
+            <span className="font-semibold text-foreground text-sm">{t.whitePaper}</span>
+          </div>
+          <ChevronRight className="w-4 h-4 text-muted-foreground" />
         </button>
       </div>
 
@@ -223,13 +227,9 @@ export default function SettingsPage({
         <div className="bg-card border border-accent rounded-lg p-4">
           <div className="flex items-center gap-2 mb-4">
             <Lock className="w-5 h-5 text-accent" />
-            <h3 className="font-semibold text-accent">
-              {t.adminPanel}
-            </h3>
+            <h3 className="font-semibold text-accent">{t.adminPanel}</h3>
           </div>
-          <p className="text-xs text-muted-foreground mb-3">
-            {t.enterPinFromSheets}
-          </p>
+          <p className="text-xs text-muted-foreground mb-3">{t.enterPinFromSheets}</p>
           <input
             type="password"
             maxLength={6}
@@ -249,67 +249,63 @@ export default function SettingsPage({
       )}
 
       {/* 7. Contact Us */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <h3 className="font-semibold text-foreground mb-3">
-          {t.contactUs}
-        </h3>
-        <div className="space-y-3">
+      <div className="bg-card border border-border rounded-lg overflow-hidden">
+        <div className="px-4 pt-4">
+          <SectionLabel>{t.contactUs}</SectionLabel>
+        </div>
+        <div className="divide-y divide-border">
           <a
             href="mailto:globalbusiness435@gmail.com"
-            className="flex items-center gap-3 p-3 rounded-lg border border-transparent hover:border-accent/50 hover:bg-accent/5 transition cursor-pointer group"
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
           >
-            <Mail className="w-5 h-5 text-accent group-hover:scale-110 transition-transform" />
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground">
-                {t.email}
-              </p>
-              <p className="text-sm font-medium text-foreground group-hover:text-accent transition">globalbusiness435@gmail.com</p>
+            <Mail className="w-4 h-4 text-accent shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t.email}</p>
+              <p className="text-sm font-medium text-foreground truncate">globalbusiness435@gmail.com</p>
             </div>
-            <ExternalLink className="w-4 h-4 text-accent opacity-0 group-hover:opacity-100 transition" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </a>
+
           <a
             href="https://wa.me/201010810558"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ display: 'block', textDecoration: 'none' }}
-            className="flex items-center gap-3 p-3 rounded-lg border-2 border-green-500 bg-green-500/10 hover:bg-green-500/20 hover:shadow-lg hover:shadow-green-500/20 transition cursor-pointer group w-full"
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
           >
-            <MessageCircle className="w-5 h-5 text-green-500 group-hover:scale-110 transition-transform" />
-            <div className="flex-1 text-left">
-              <p className="text-xs text-muted-foreground">
-                {t.whatsapp}
-              </p>
-              <p className="text-sm font-semibold text-green-500">+201010810558</p>
+            <Phone className="w-4 h-4 text-green-500 shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t.whatsapp}</p>
+              <p className="text-sm font-medium text-foreground">+20 10 1081 0558</p>
             </div>
-            <MessageCircle className="w-5 h-5 text-green-500 opacity-70 group-hover:opacity-100 transition" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </a>
+
           <a
             href="https://instagram.com/alshaibgroup.pi"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-3 p-3 rounded-lg border border-transparent hover:border-accent/50 hover:bg-accent/5 transition cursor-pointer group"
+            className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
           >
-            <ExternalLink className="w-5 h-5 text-accent group-hover:scale-110 transition-transform" />
-            <div className="flex-1">
-              <p className="text-xs text-muted-foreground">
-                {t.instagram}
-              </p>
-              <p className="text-sm font-medium text-foreground group-hover:text-accent transition">@alshaibgroup.pi</p>
+            <Instagram className="w-4 h-4 text-accent shrink-0" />
+            <div className="flex-1 min-w-0">
+              <p className="text-xs text-muted-foreground">{t.instagram}</p>
+              <p className="text-sm font-medium text-foreground">@alshaibgroup.pi</p>
             </div>
-            <ExternalLink className="w-4 h-4 text-accent opacity-0 group-hover:opacity-100 transition" />
+            <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
           </a>
         </div>
       </div>
 
       {/* 8. About */}
       <div className="bg-card border border-border rounded-lg p-4">
-        <h3 className="font-semibold text-foreground mb-3">
+        <SectionLabel>
+          <Info className="w-4 h-4 text-accent" />
           {t.aboutRePlatform}
-        </h3>
-        <div className="space-y-2 text-xs text-muted-foreground">
-          <p>RE Platform v1.0.0</p>
-          <p>{t.poweredByPiNetwork}</p>
-          <p>© GlobalBusiness</p>
+        </SectionLabel>
+        <div className="space-y-1.5 text-xs">
+          <p className="text-accent font-medium">RE Platform v1.0.0</p>
+          <p className="text-muted-foreground">{t.poweredByPiNetwork}</p>
+          <p className="text-muted-foreground">© GlobalBusiness</p>
         </div>
       </div>
     </main>
