@@ -64,3 +64,17 @@ export function useProperties() {
 
   return { properties, loading, error };
 }
+export function getLocalizedTitle(property: Property, language: string): string {
+  if (language === 'ar' && property.titleAr) return property.titleAr;
+  return property.title;
+}
+
+export function getLocalizedLocation(property: Property, language: string): string {
+  if (language === 'ar' && property.locationAr) return property.locationAr;
+  return property.location;
+}
+
+export function getLocalizedDescription(property: Property, language: string): string {
+  if (language === 'ar' && property.descriptionAr) return property.descriptionAr;
+  return property.description || '';
+}

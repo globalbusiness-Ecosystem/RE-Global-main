@@ -228,7 +228,7 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
               {t.everyReportVerifiable}
             </span>
             <a
-              href="/verify/demo-cert-hash"
+              href="/verify/cert/demo-cert-hash"
               target="_blank"
               rel="noreferrer"
               className="shrink-0 flex items-center gap-1 text-accent font-medium hover:underline"

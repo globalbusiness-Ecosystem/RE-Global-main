@@ -13,7 +13,7 @@ import {
   FileText,
   Phone,
   Mail,
-  Instagram,
+  AtSign,
   Info,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -286,7 +286,7 @@ export default function SettingsPage({
             rel="noopener noreferrer"
             className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
           >
-            <Instagram className="w-4 h-4 text-accent shrink-0" />
+            <AtSign className="w-4 h-4 text-accent shrink-0" />
             <div className="flex-1 min-w-0">
               <p className="text-xs text-muted-foreground">{t.instagram}</p>
               <p className="text-sm font-medium text-foreground">@alshaibgroup.pi</p>
