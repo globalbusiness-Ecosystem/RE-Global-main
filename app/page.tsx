@@ -269,6 +269,7 @@ export default function App() {
             language={language}
             setLanguage={setLanguage}
             onWhitePaperClick={() => handlePageChange('whitepaper')}
+              onNavigate={handlePageChange}
             onBack={() => handlePageChange('home')}
           />
         );
@@ -398,6 +399,38 @@ export default function App() {
             <p className="text-gray-300">
               {language === 'en' ? 'Get help with your account and properties' : 'احصل على المساعدة في حسابك والعقارات'}
             </p>
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <div className="divide-y divide-border">
+                <a
+                  href="mailto:globalbusiness435@gmail.com"
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
+                >
+                  <span className="text-accent text-lg shrink-0">✉️</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      {language === 'en' ? 'Email' : 'البريد الإلكتروني'}
+                    </p>
+                    <p className="text-sm font-medium text-foreground truncate">globalbusiness435@gmail.com</p>
+                  </div>
+                  <span className="text-muted-foreground shrink-0">›</span>
+                </a>
+                <a
+                  href="https://wa.me/201010810558"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
+                >
+                  <span className="text-green-500 text-lg shrink-0">📱</span>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs text-muted-foreground">
+                      {language === 'en' ? 'WhatsApp' : 'واتساب'}
+                    </p>
+                    <p className="text-sm font-medium text-foreground">+20 10 1081 0558</p>
+                  </div>
+                  <span className="text-muted-foreground shrink-0">›</span>
+                </a>
+              </div>
+            </div>
           </div>
         );
       default:
