@@ -81,8 +81,6 @@ export default function SettingsPage({
   });
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
-  const [pinCode, setPinCode] = useState('');
-  const [pinError, setPinError] = useState('');
   const [navLanguage, setNavLanguage] = useState<NavLanguage>(language);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [referralCode, setReferralCode] = useState<string | null>(null);
@@ -142,16 +140,6 @@ export default function SettingsPage({
     if (newTaps === 7) {
       setShowAdminPanel(true);
       setLogoTaps(0);
-    }
-  };
-
-  const handlePinSubmit = () => {
-    if (pinCode === '202500') {
-      setPinError('');
-      alert(t.adminAccessGranted);
-      setShowAdminPanel(false);
-    } else {
-      setPinError(t.invalidPin);
     }
   };
 
@@ -294,10 +282,20 @@ export default function SettingsPage({
                 <span className="text-sm text-muted-foreground">
                   {language === 'ar' ? 'حالة التحقق' : 'Verification'}
                 </span>
-                <span className={`text-sm font-medium ${isAuthenticated ? 'text-emerald-500' : 'text-muted-foreground'}`}>
-                  {isAuthenticated
-                    ? (language === 'ar' ? 'موثّق عبر Pi' : 'Verified via Pi')
-                    : (language === 'ar' ? 'غير موثّق' : 'Unverified')}
+                <span
+                  className={`text-sm font-medium ${
+                    !isAuthenticated
+                      ? 'text-muted-foreground'
+                      : profileVerified
+                        ? 'text-emerald-500'
+                        : 'text-blue-400'
+                  }`}
+                >
+                  {!isAuthenticated
+                    ? (language === 'ar' ? 'غير موثّق' : 'Unverified')
+                    : profileVerified
+                      ? (language === 'ar' ? 'موثّق بالكامل' : 'Fully verified')
+                      : (language === 'ar' ? 'موثّق عبر Pi' : 'Verified via Pi')}
                 </span>
               </div>
               <button
@@ -503,21 +501,12 @@ export default function SettingsPage({
                 <h3 className="font-semibold text-accent">{t.adminPanel}</h3>
               </div>
               <p className="text-xs text-muted-foreground mb-3">{t.enterPinFromSheets}</p>
-              <input
-                type="password"
-                maxLength={6}
-                value={pinCode}
-                onChange={(e) => setPinCode(e.target.value)}
-                placeholder="••••••"
-                className="w-full bg-muted border border-border rounded-lg px-3 py-2 text-center text-lg tracking-widest text-foreground placeholder-muted-foreground mb-3"
-              />
-              {pinError && <p className="text-xs text-red-500 mb-3">{pinError}</p>}
-              <button
-                onClick={handlePinSubmit}
-                className="w-full bg-accent text-accent-foreground py-2 rounded-lg font-medium hover:opacity-90 transition text-sm"
+              <a
+                href="/admin"
+                className="block w-full bg-accent text-accent-foreground py-2 rounded-lg font-medium hover:opacity-90 transition text-sm text-center"
               >
                 {t.unlockAdmin}
-              </button>
+              </a>
             </div>
           )}
         </div>
