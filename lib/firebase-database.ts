@@ -74,6 +74,12 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
+export interface UserPreferences {
+  username: string;
+  notificationsEnabled: boolean;
+  updatedAt: Date;
+}
+
 export interface SmartContract {
   id: string;
   propertyId: string;
@@ -439,6 +445,37 @@ class FirebaseDatabase {
     }
   }
 
+  // User Preferences (notifications, etc.)
+  async getPreferences(username: string): Promise<UserPreferences | null> {
+    try {
+      const docRef = doc(db, 'preferences', username);
+      const docSnap = await getDoc(docRef);
+      if (!docSnap.exists()) return null;
+      return {
+        ...docSnap.data(),
+        updatedAt: docSnap.data().updatedAt?.toDate() || new Date(),
+      } as UserPreferences;
+    } catch (error) {
+      console.error('[DB] Get preferences error:', error);
+      return null;
+    }
+  }
+
+  async savePreferences(username: string, updates: Partial<Omit<UserPreferences, 'username' | 'updatedAt'>>): Promise<boolean> {
+    try {
+      const docRef = doc(db, 'preferences', username);
+      await setDoc(docRef, {
+        username,
+        ...updates,
+        updatedAt: Timestamp.now(),
+      }, { merge: true });
+      return true;
+    } catch (error) {
+      console.error('[DB] Save preferences error:', error);
+      return false;
+    }
+  }
+
   // Favorites
   async getFavoritesForUser(username: string): Promise<Favorite[]> {
     try {
@@ -554,6 +591,11 @@ export function useFirebaseDatabase() {
     getProfile: (username: string) => firebaseDB.getProfile(username),
     saveProfile: (username: string, profile: Omit<UserProfile, 'username' | 'updatedAt'>) =>
       firebaseDB.saveProfile(username, profile),
+
+    // User Preferences
+    getPreferences: (username: string) => firebaseDB.getPreferences(username),
+    savePreferences: (username: string, updates: Partial<Omit<UserPreferences, 'username' | 'updatedAt'>>) =>
+      firebaseDB.savePreferences(username, updates),
 
     // Cache
     clearCache: () => firebaseDB.clearCache(),

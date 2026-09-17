@@ -26,6 +26,7 @@ import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { getOrCreateReferralCode, getReferralCount } from '@/lib/referrals';
+import { useFirebaseDatabase } from '@/lib/firebase-database';
 
 interface SettingsPageProps {
   language: NavLanguage;
@@ -36,6 +37,7 @@ interface SettingsPageProps {
 }
 
 const NAV_LANG_KEY = 're_nav_language';
+const NOTIF_KEY = 're_notifications_preference';
 
 type SettingsTab = 'profile' | 'security' | 'notifications';
 
@@ -66,8 +68,17 @@ export default function SettingsPage({
 }: SettingsPageProps) {
   const t = SETTINGS_I18N[language];
   const { username, isAuthenticated } = usePiAuth();
+  const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
+  const [profileVerified, setProfileVerified] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
-  const [notifications, setNotifications] = useState(true);
+  const [notifications, setNotifications] = useState(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const stored = localStorage.getItem(NOTIF_KEY);
+      if (stored !== null) return stored === 'true';
+    } catch {}
+    return true;
+  });
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [pinCode, setPinCode] = useState('');
@@ -89,6 +100,32 @@ export default function SettingsPage({
     if (!username) return;
     getOrCreateReferralCode(username).then(setReferralCode).catch(() => setReferralCode(null));
     getReferralCount(username).then(setReferralCount).catch(() => setReferralCount(0));
+  }, [username]);
+
+  useEffect(() => {
+    if (!username) return;
+    getPreferences(username)
+      .then((prefs) => {
+        if (prefs && typeof prefs.notificationsEnabled === 'boolean') {
+          setNotifications(prefs.notificationsEnabled);
+          try {
+            localStorage.setItem(NOTIF_KEY, String(prefs.notificationsEnabled));
+          } catch {}
+        }
+      })
+      .catch(() => {});
+  }, [username]);
+
+  useEffect(() => {
+    if (!username) {
+      setProfileVerified(false);
+      return;
+    }
+    getProfile(username)
+      .then((profile) => {
+        setProfileVerified(Boolean(profile && (profile.email || profile.phone)));
+      })
+      .catch(() => setProfileVerified(false));
   }, [username]);
 
   const handleLanguagePick = (code: NavLanguage) => {
@@ -118,6 +155,17 @@ export default function SettingsPage({
     }
   };
 
+  const handleNotificationsToggle = () => {
+    const next = !notifications;
+    setNotifications(next);
+    try {
+      localStorage.setItem(NOTIF_KEY, String(next));
+    } catch {}
+    if (username) {
+      savePreferences(username, { notificationsEnabled: next }).catch(() => {});
+    }
+  };
+
   const handleCopyReferral = () => {
     if (!referralCode) return;
     navigator.clipboard?.writeText(referralCode).then(() => {
@@ -126,12 +174,13 @@ export default function SettingsPage({
     });
   };
 
-  const securityScore = isAuthenticated ? 70 : 30;
-  const securityLabel =
-    securityScore >= 70
-      ? (language === 'ar' ? 'جيد' : 'Good')
-      : (language === 'ar' ? 'أساسي' : 'Basic');
-  const securityColor = securityScore >= 70 ? '#22c55e' : '#f59e0b';
+  const securityScore = !isAuthenticated ? 30 : profileVerified ? 95 : 65;
+  const securityLabel = !isAuthenticated
+    ? (language === 'ar' ? 'أساسي' : 'Basic')
+    : profileVerified
+      ? (language === 'ar' ? 'ممتاز' : 'Excellent')
+      : (language === 'ar' ? 'جيد' : 'Good');
+  const securityColor = !isAuthenticated ? '#f59e0b' : profileVerified ? '#22c55e' : '#3b82f6';
 
   return (
     <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto pb-24 space-y-4">
@@ -350,6 +399,50 @@ export default function SettingsPage({
 
           <div className="bg-card border border-border rounded-lg p-4">
             <SectionLabel>
+              <ShieldCheck className="w-4 h-4 text-accent" />
+              {language === 'ar' ? 'البيانات والخصوصية' : 'Data & Privacy'}
+            </SectionLabel>
+            <div className="space-y-2">
+              <a
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
+              >
+                <span>{language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}</span>
+                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+              </a>
+              <a
+                href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
+                  language === 'ar' ? 'طلب بيانات الحساب' : 'Account Data Request'
+                )}&body=${encodeURIComponent(
+                  (language === 'ar'
+                    ? 'اسم المستخدم: '
+                    : 'Username: ') + (username || (language === 'ar' ? 'غير مسجل دخول' : 'not signed in'))
+                )}`}
+                className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
+              >
+                <span>{language === 'ar' ? 'طلب نسخة من بياناتي' : 'Request a copy of my data'}</span>
+                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+              </a>
+              <a
+                href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
+                  language === 'ar' ? 'طلب حذف الحساب' : 'Account Deletion Request'
+                )}&body=${encodeURIComponent(
+                  (language === 'ar'
+                    ? 'اسم المستخدم: '
+                    : 'Username: ') + (username || (language === 'ar' ? 'غير مسجل دخول' : 'not signed in'))
+                )}`}
+                className="flex items-center justify-between py-2 text-sm text-red-400 hover:text-red-300 transition"
+              >
+                <span>{language === 'ar' ? 'طلب حذف الحساب' : 'Request account deletion'}</span>
+                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+              </a>
+            </div>
+          </div>
+
+          <div className="bg-card border border-border rounded-lg p-4">
+            <SectionLabel>
               <Info className="w-4 h-4 text-accent" />
               {t.aboutRePlatform}
             </SectionLabel>
@@ -380,7 +473,27 @@ export default function SettingsPage({
                     : (language === 'ar' ? 'غير مفعّل' : 'Not connected')}
                 </span>
               </div>
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-muted-foreground">
+                  {language === 'ar' ? 'بيانات تواصل للتحقق' : 'Contact verification'}
+                </span>
+                <span className={profileVerified ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
+                  {profileVerified
+                    ? (language === 'ar' ? 'مضافة' : 'On file')
+                    : (language === 'ar' ? 'غير مضافة' : 'Not added')}
+                </span>
+              </div>
             </div>
+            {isAuthenticated && !profileVerified && (
+              <button
+                onClick={() => onNavigate?.('profile')}
+                className="w-full mt-3 text-xs font-medium text-accent hover:opacity-80 transition text-left rtl:text-right"
+              >
+                {language === 'ar'
+                  ? '+ أضف بريدك أو رقمك في الملف الشخصي لرفع مستوى الأمان'
+                  : '+ Add your email or phone in your profile to raise your security level'}
+              </button>
+            )}
           </div>
 
           {showAdminPanel && (
@@ -447,7 +560,7 @@ export default function SettingsPage({
               </div>
             </div>
             <button
-              onClick={() => setNotifications(!notifications)}
+              onClick={handleNotificationsToggle}
               className={`w-12 h-7 rounded-full transition flex items-center shrink-0 ${
                 notifications ? 'bg-accent' : 'bg-muted'
               }`}
