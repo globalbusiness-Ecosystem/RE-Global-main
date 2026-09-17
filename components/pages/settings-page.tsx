@@ -19,6 +19,9 @@ import {
   ShieldCheck,
   Copy,
   Users,
+  TrendingUp,
+  Home,
+  FileCheck2,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
@@ -38,6 +41,18 @@ interface SettingsPageProps {
 
 const NAV_LANG_KEY = 're_nav_language';
 const NOTIF_KEY = 're_notifications_preference';
+const PRICE_ALERTS_KEY = 're_notif_price_alerts';
+const NEW_LISTINGS_KEY = 're_notif_new_listings';
+const CONTRACT_UPDATES_KEY = 're_notif_contract_updates';
+
+function readStoredBool(key: string, fallback: boolean): boolean {
+  if (typeof window === 'undefined') return fallback;
+  try {
+    const stored = localStorage.getItem(key);
+    if (stored !== null) return stored === 'true';
+  } catch {}
+  return fallback;
+}
 
 type SettingsTab = 'profile' | 'security' | 'notifications';
 
@@ -59,6 +74,23 @@ function SectionLabel({ children }: { children: React.ReactNode }) {
   );
 }
 
+function ToggleSwitch({ checked, onClick, small }: { checked: boolean; onClick: () => void; small?: boolean }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`${small ? 'w-9 h-5' : 'w-12 h-7'} rounded-full transition flex items-center shrink-0 ${
+        checked ? 'bg-accent' : 'bg-muted'
+      }`}
+    >
+      <div
+        className={`${small ? 'w-4 h-4' : 'w-6 h-6'} rounded-full bg-white transition transform ${
+          checked ? (small ? 'translate-x-4' : 'translate-x-5') : 'translate-x-0.5'
+        }`}
+      />
+    </button>
+  );
+}
+
 export default function SettingsPage({
   language,
   setLanguage,
@@ -71,14 +103,10 @@ export default function SettingsPage({
   const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
   const [profileVerified, setProfileVerified] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
-  const [notifications, setNotifications] = useState(() => {
-    if (typeof window === 'undefined') return true;
-    try {
-      const stored = localStorage.getItem(NOTIF_KEY);
-      if (stored !== null) return stored === 'true';
-    } catch {}
-    return true;
-  });
+  const [notifications, setNotifications] = useState(() => readStoredBool(NOTIF_KEY, true));
+  const [priceAlerts, setPriceAlerts] = useState(() => readStoredBool(PRICE_ALERTS_KEY, true));
+  const [newListings, setNewListings] = useState(() => readStoredBool(NEW_LISTINGS_KEY, true));
+  const [contractUpdates, setContractUpdates] = useState(() => readStoredBool(CONTRACT_UPDATES_KEY, true));
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPanel, setShowAdminPanel] = useState(false);
   const [navLanguage, setNavLanguage] = useState<NavLanguage>(language);
@@ -104,11 +132,22 @@ export default function SettingsPage({
     if (!username) return;
     getPreferences(username)
       .then((prefs) => {
-        if (prefs && typeof prefs.notificationsEnabled === 'boolean') {
+        if (!prefs) return;
+        if (typeof prefs.notificationsEnabled === 'boolean') {
           setNotifications(prefs.notificationsEnabled);
-          try {
-            localStorage.setItem(NOTIF_KEY, String(prefs.notificationsEnabled));
-          } catch {}
+          try { localStorage.setItem(NOTIF_KEY, String(prefs.notificationsEnabled)); } catch {}
+        }
+        if (typeof prefs.priceAlertsEnabled === 'boolean') {
+          setPriceAlerts(prefs.priceAlertsEnabled);
+          try { localStorage.setItem(PRICE_ALERTS_KEY, String(prefs.priceAlertsEnabled)); } catch {}
+        }
+        if (typeof prefs.newListingsEnabled === 'boolean') {
+          setNewListings(prefs.newListingsEnabled);
+          try { localStorage.setItem(NEW_LISTINGS_KEY, String(prefs.newListingsEnabled)); } catch {}
+        }
+        if (typeof prefs.contractUpdatesEnabled === 'boolean') {
+          setContractUpdates(prefs.contractUpdatesEnabled);
+          try { localStorage.setItem(CONTRACT_UPDATES_KEY, String(prefs.contractUpdatesEnabled)); } catch {}
         }
       })
       .catch(() => {});
@@ -143,16 +182,30 @@ export default function SettingsPage({
     }
   };
 
-  const handleNotificationsToggle = () => {
-    const next = !notifications;
-    setNotifications(next);
+  const toggleNotificationPref = (
+    field: 'notificationsEnabled' | 'priceAlertsEnabled' | 'newListingsEnabled' | 'contractUpdatesEnabled',
+    localKey: string,
+    current: boolean,
+    setter: (v: boolean) => void
+  ) => {
+    const next = !current;
+    setter(next);
     try {
-      localStorage.setItem(NOTIF_KEY, String(next));
+      localStorage.setItem(localKey, String(next));
     } catch {}
     if (username) {
-      savePreferences(username, { notificationsEnabled: next }).catch(() => {});
+      savePreferences(username, { [field]: next }).catch(() => {});
     }
   };
+
+  const handleNotificationsToggle = () =>
+    toggleNotificationPref('notificationsEnabled', NOTIF_KEY, notifications, setNotifications);
+  const handlePriceAlertsToggle = () =>
+    toggleNotificationPref('priceAlertsEnabled', PRICE_ALERTS_KEY, priceAlerts, setPriceAlerts);
+  const handleNewListingsToggle = () =>
+    toggleNotificationPref('newListingsEnabled', NEW_LISTINGS_KEY, newListings, setNewListings);
+  const handleContractUpdatesToggle = () =>
+    toggleNotificationPref('contractUpdatesEnabled', CONTRACT_UPDATES_KEY, contractUpdates, setContractUpdates);
 
   const handleCopyReferral = () => {
     if (!referralCode) return;
@@ -522,22 +575,14 @@ export default function SettingsPage({
                 <p className="text-xs text-muted-foreground mt-0.5">{t.luxuryDarkTheme}</p>
               </div>
             </div>
-            <button
+            <ToggleSwitch
+              checked={darkMode}
               onClick={() => {
                 const next = !darkMode;
                 setDarkMode(next);
                 applyTheme(next ? 'dark' : 'light');
               }}
-              className={`w-12 h-7 rounded-full transition flex items-center shrink-0 ${
-                darkMode ? 'bg-accent' : 'bg-muted'
-              }`}
-            >
-              <div
-                className={`w-6 h-6 rounded-full bg-white transition transform ${
-                  darkMode ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
-              />
-            </button>
+            />
           </div>
 
           <div className="flex items-center justify-between p-4">
@@ -548,19 +593,40 @@ export default function SettingsPage({
                 <p className="text-xs text-muted-foreground mt-0.5">{t.propertyMarketAlerts}</p>
               </div>
             </div>
-            <button
-              onClick={handleNotificationsToggle}
-              className={`w-12 h-7 rounded-full transition flex items-center shrink-0 ${
-                notifications ? 'bg-accent' : 'bg-muted'
-              }`}
-            >
-              <div
-                className={`w-6 h-6 rounded-full bg-white transition transform ${
-                  notifications ? 'translate-x-5' : 'translate-x-0.5'
-                }`}
-              />
-            </button>
+            <ToggleSwitch checked={notifications} onClick={handleNotificationsToggle} />
           </div>
+
+          {notifications && (
+            <>
+              <div className="flex items-center justify-between px-4 py-3 pl-11">
+                <div className="flex items-center gap-3">
+                  <TrendingUp className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <p className="text-sm text-foreground">
+                    {language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'}
+                  </p>
+                </div>
+                <ToggleSwitch checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
+              </div>
+              <div className="flex items-center justify-between px-4 py-3 pl-11">
+                <div className="flex items-center gap-3">
+                  <Home className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <p className="text-sm text-foreground">
+                    {language === 'ar' ? 'عقارات جديدة' : 'New listings'}
+                  </p>
+                </div>
+                <ToggleSwitch checked={newListings} onClick={handleNewListingsToggle} small />
+              </div>
+              <div className="flex items-center justify-between px-4 py-3 pl-11">
+                <div className="flex items-center gap-3">
+                  <FileCheck2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <p className="text-sm text-foreground">
+                    {language === 'ar' ? 'تحديثات العقود' : 'Contract updates'}
+                  </p>
+                </div>
+                <ToggleSwitch checked={contractUpdates} onClick={handleContractUpdatesToggle} small />
+              </div>
+            </>
+          )}
         </div>
       )}
     </main>
