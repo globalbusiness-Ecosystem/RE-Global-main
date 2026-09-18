@@ -71,6 +71,8 @@ export interface UserProfile {
   bio: string;
   companyName: string;
   websiteUrl: string;
+  emailVerified?: boolean;
+  verifiedEmail?: string;
   updatedAt: Date;
 }
 

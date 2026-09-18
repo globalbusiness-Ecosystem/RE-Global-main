@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, LogOut, Phone, Mail, MapPin, FileText, ScrollText, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
@@ -67,6 +67,13 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
   const [saving, setSaving] = useState(false);
   const [profile, setProfile] = useState(EMPTY_PROFILE);
   const [contractsCount, setContractsCount] = useState(0);
+  const [emailVerified, setEmailVerified] = useState(false);
+  const [verifiedEmail, setVerifiedEmail] = useState('');
+  const [otpStage, setOtpStage] = useState<'idle' | 'sent'>('idle');
+  const [otpCode, setOtpCode] = useState('');
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpVerifying, setOtpVerifying] = useState(false);
+  const [otpNote, setOtpNote] = useState('');
 
   useEffect(() => {
     if (!username) {
@@ -87,6 +94,8 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
           twitterUrl: p.twitterUrl || '',
           instagramUrl: p.instagramUrl || '',
         });
+        setEmailVerified(Boolean(p.emailVerified));
+        setVerifiedEmail(p.verifiedEmail || '');
       }
       setContractsCount(contracts.length);
       setLoading(false);
@@ -100,8 +109,15 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
     }
     setSaving(true);
     try {
-      const ok = await saveProfile(username, profile);
+      const stillVerified = emailVerified && profile.email === verifiedEmail;
+      const ok = await saveProfile(username, {
+        ...profile,
+        emailVerified: stillVerified,
+        verifiedEmail: stillVerified ? verifiedEmail : '',
+      } as any);
       if (ok) {
+        setEmailVerified(stillVerified);
+        if (!stillVerified) setVerifiedEmail('');
         toast.success(t.profileSaved);
       } else {
         toast.error(t.errorSaving);
@@ -110,6 +126,57 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       toast.error(t.errorSaving);
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!username || !profile.email) return;
+    setOtpSending(true);
+    setOtpNote('');
+    try {
+      const res = await fetch('/api/otp/send', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, email: profile.email }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setOtpStage('sent');
+        toast.success(language === 'ar' ? 'تم إرسال كود التحقق لبريدك' : 'Verification code sent to your email');
+      } else {
+        setOtpNote(data.error || (language === 'ar' ? 'فشل إرسال الكود' : 'Failed to send code'));
+      }
+    } catch {
+      setOtpNote(language === 'ar' ? 'خطأ في الاتصال' : 'Connection error');
+    } finally {
+      setOtpSending(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!username || !otpCode) return;
+    setOtpVerifying(true);
+    setOtpNote('');
+    try {
+      const res = await fetch('/api/otp/verify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, code: otpCode }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        setEmailVerified(true);
+        setVerifiedEmail(profile.email);
+        setOtpStage('idle');
+        setOtpCode('');
+        toast.success(language === 'ar' ? 'تم توثيق بريدك الإلكتروني' : 'Email verified');
+      } else {
+        setOtpNote(data.error || (language === 'ar' ? 'كود غير صحيح' : 'Incorrect code'));
+      }
+    } catch {
+      setOtpNote(language === 'ar' ? 'خطأ في الاتصال' : 'Connection error');
+    } finally {
+      setOtpVerifying(false);
     }
   };
 
@@ -192,6 +259,55 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                 className="bg-background border-border text-foreground"
                 placeholder="example@email.com"
               />
+              {profile.email && (
+                emailVerified && profile.email === verifiedEmail ? (
+                  <p className="mt-1.5 text-xs text-emerald-500 flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5" />
+                    {language === 'ar' ? 'موثّق' : 'Verified'}
+                  </p>
+                ) : otpStage === 'idle' ? (
+                  <button
+                    type="button"
+                    onClick={handleSendOtp}
+                    disabled={otpSending || !username}
+                    className="mt-1.5 text-xs font-medium text-accent hover:opacity-80 transition disabled:opacity-50 flex items-center gap-1"
+                  >
+                    <ShieldCheck className="w-3.5 h-3.5" />
+                    {otpSending
+                      ? (language === 'ar' ? 'جاري الإرسال...' : 'Sending...')
+                      : (language === 'ar' ? 'إرسال كود التحقق' : 'Send verification code')}
+                  </button>
+                ) : (
+                  <div className="mt-2 flex items-center gap-2">
+                    <Input
+                      value={otpCode}
+                      onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder={language === 'ar' ? 'الكود المكوّن من 6 أرقام' : '6-digit code'}
+                      className="bg-background border-border text-foreground text-sm h-9"
+                      inputMode="numeric"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleVerifyOtp}
+                      disabled={otpVerifying || otpCode.length !== 6}
+                      className="shrink-0 text-xs font-medium bg-accent text-accent-foreground px-3 h-9 rounded-lg disabled:opacity-50"
+                    >
+                      {otpVerifying
+                        ? (language === 'ar' ? '...' : '...')
+                        : (language === 'ar' ? 'تأكيد' : 'Verify')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleSendOtp}
+                      disabled={otpSending}
+                      className="shrink-0 text-xs text-muted-foreground hover:text-foreground"
+                    >
+                      {language === 'ar' ? 'إعادة إرسال' : 'Resend'}
+                    </button>
+                  </div>
+                )
+              )}
+              {otpNote && <p className="mt-1 text-xs text-red-400">{otpNote}</p>}
             </div>
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">

@@ -160,7 +160,7 @@ export default function SettingsPage({
     }
     getProfile(username)
       .then((profile) => {
-        setProfileVerified(Boolean(profile && (profile.email || profile.phone)));
+        setProfileVerified(Boolean(profile && profile.emailVerified));
       })
       .catch(() => setProfileVerified(false));
   }, [username]);
@@ -526,12 +526,12 @@ export default function SettingsPage({
               </div>
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-muted-foreground">
-                  {language === 'ar' ? 'بيانات تواصل للتحقق' : 'Contact verification'}
+                  {language === 'ar' ? 'توثيق البريد الإلكتروني' : 'Email verification'}
                 </span>
                 <span className={profileVerified ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
                   {profileVerified
-                    ? (language === 'ar' ? 'مضافة' : 'On file')
-                    : (language === 'ar' ? 'غير مضافة' : 'Not added')}
+                    ? (language === 'ar' ? 'موثّق' : 'Verified')
+                    : (language === 'ar' ? 'غير موثّق' : 'Not verified')}
                 </span>
               </div>
             </div>
@@ -541,8 +541,8 @@ export default function SettingsPage({
                 className="w-full mt-3 text-xs font-medium text-accent hover:opacity-80 transition text-left rtl:text-right"
               >
                 {language === 'ar'
-                  ? '+ أضف بريدك أو رقمك في الملف الشخصي لرفع مستوى الأمان'
-                  : '+ Add your email or phone in your profile to raise your security level'}
+                  ? '+ وثّق بريدك الإلكتروني في الملف الشخصي لرفع مستوى الأمان'
+                  : '+ Verify your email in your profile to raise your security level'}
               </button>
             )}
           </div>
