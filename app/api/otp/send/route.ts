@@ -51,15 +51,9 @@ export async function POST(req: NextRequest) {
     const code = Math.floor(100000 + Math.random() * 900000).toString();
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60000);
 
-    await docRef.set({
-      username,
-      email,
-      codeHash: hashCode(code),
-      attempts: 0,
-      expiresAt: Timestamp.fromDate(expiresAt),
-      lastSentAt: Timestamp.now(),
-    });
-
+    // Send first — only persist (and start the resend cooldown) once the
+    // email genuinely went out. A failed send must never lock the user
+    // into a cooldown with no code actually delivered.
     const resend = new Resend(process.env.RESEND_API_KEY);
     const { error } = await resend.emails.send({
       from: 'RE Platform <onboarding@resend.dev>',
@@ -72,6 +66,15 @@ export async function POST(req: NextRequest) {
       console.error('[OTP] Resend send error:', error);
       return NextResponse.json({ ok: false, error: 'Failed to send email' }, { status: 502 });
     }
+
+    await docRef.set({
+      username,
+      email,
+      codeHash: hashCode(code),
+      attempts: 0,
+      expiresAt: Timestamp.fromDate(expiresAt),
+      lastSentAt: Timestamp.now(),
+    });
 
     return NextResponse.json({ ok: true });
   } catch (err) {
