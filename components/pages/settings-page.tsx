@@ -99,7 +99,7 @@ export default function SettingsPage({
   onNavigate,
 }: SettingsPageProps) {
   const t = SETTINGS_I18N[language];
-  const { username, isAuthenticated } = usePiAuth();
+  const { username, isPiVerified } = usePiAuth();
   const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
   const [profileVerified, setProfileVerified] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
@@ -215,13 +215,13 @@ export default function SettingsPage({
     });
   };
 
-  const securityScore = !isAuthenticated ? 30 : profileVerified ? 95 : 65;
-  const securityLabel = !isAuthenticated
+  const securityScore = !isPiVerified ? 30 : profileVerified ? 95 : 65;
+  const securityLabel = !isPiVerified
     ? (language === 'ar' ? 'أساسي' : 'Basic')
     : profileVerified
       ? (language === 'ar' ? 'ممتاز' : 'Excellent')
       : (language === 'ar' ? 'جيد' : 'Good');
-  const securityColor = !isAuthenticated ? '#f59e0b' : profileVerified ? '#22c55e' : '#3b82f6';
+  const securityColor = !isPiVerified ? '#f59e0b' : profileVerified ? '#22c55e' : '#3b82f6';
 
   return (
     <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto pb-24 space-y-4">
@@ -251,7 +251,7 @@ export default function SettingsPage({
             {username ? `@${username}` : (language === 'ar' ? 'زائر' : 'Guest')}
           </p>
           <p className="text-xs text-muted-foreground">
-            {isAuthenticated
+            {isPiVerified
               ? (language === 'ar' ? 'متصل عبر Pi Network' : 'Connected via Pi Network')
               : (language === 'ar' ? 'غير متصل' : 'Not connected')}
           </p>
@@ -337,14 +337,14 @@ export default function SettingsPage({
                 </span>
                 <span
                   className={`text-sm font-medium ${
-                    !isAuthenticated
+                    !isPiVerified
                       ? 'text-muted-foreground'
                       : profileVerified
                         ? 'text-emerald-500'
                         : 'text-blue-400'
                   }`}
                 >
-                  {!isAuthenticated
+                  {!isPiVerified
                     ? (language === 'ar' ? 'غير موثّق' : 'Unverified')
                     : profileVerified
                       ? (language === 'ar' ? 'موثّق بالكامل' : 'Fully verified')
@@ -518,8 +518,8 @@ export default function SettingsPage({
                 <span className="text-muted-foreground">
                   {language === 'ar' ? 'التحقق عبر Pi Network' : 'Pi Network Verification'}
                 </span>
-                <span className={isAuthenticated ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
-                  {isAuthenticated
+                <span className={isPiVerified ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
+                  {isPiVerified
                     ? (language === 'ar' ? 'مفعّل' : 'Active')
                     : (language === 'ar' ? 'غير مفعّل' : 'Not connected')}
                 </span>
@@ -535,7 +535,7 @@ export default function SettingsPage({
                 </span>
               </div>
             </div>
-            {isAuthenticated && !profileVerified && (
+            {isPiVerified && !profileVerified && (
               <button
                 onClick={() => onNavigate?.('profile')}
                 className="w-full mt-3 text-xs font-medium text-accent hover:opacity-80 transition text-left rtl:text-right"

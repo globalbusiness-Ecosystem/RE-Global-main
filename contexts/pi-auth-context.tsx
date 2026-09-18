@@ -28,6 +28,7 @@ export interface UserLocation {
 
 interface PiAuthContextType {
   isAuthenticated: boolean;
+  isPiVerified: boolean;
   isInitialized: boolean;
   authMessage: string;
   hasError: boolean;
@@ -127,6 +128,11 @@ async function reverseGeocode(lat: number, lng: number): Promise<string | undefi
 
 export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  // True as soon as Pi Network identity auth (window.Pi.authenticate) succeeds —
+  // independent of the separate SDKLite/payments login below, which can fail
+  // for unrelated reasons and used to silently block "Basic" security / "Not
+  // connected" verification even for a genuinely Pi-verified user.
+  const [isPiVerified, setIsPiVerified] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [authMessage, setAuthMessage] = useState("Initializing Pi Network...");
   const [hasError, setHasError] = useState(false);
@@ -222,6 +228,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       console.log('[PiAuth] Authenticated:', authResult.user.username);
       setUsername(authResult.user.username);
       setAccessToken(authResult.accessToken);
+      setIsPiVerified(true);
 
       // Persist the authenticated user so the rest of the app (dashboard, etc.) can read it
       setUser({
@@ -275,6 +282,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
 
   const value: PiAuthContextType = {
     isAuthenticated,
+    isPiVerified,
     isInitialized,
     authMessage,
     hasError,
