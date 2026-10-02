@@ -112,8 +112,20 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
     setLoading(true);
     try {
       if (asAdmin) {
-        const all = await getAllContracts();
-        setContracts(all);
+        const res = await fetch('/api/admin/contracts', { cache: 'no-store' });
+        if (!res.ok) {
+          setAdminMode(false);
+          setContracts(username ? await getContractsForUser(username) : []);
+          return;
+        }
+        const json = await res.json();
+        setContracts(
+          (json.contracts || []).map((c: any) => ({
+            ...c,
+            createdAt: new Date(c.createdAt),
+            updatedAt: new Date(c.updatedAt),
+          }))
+        );
       } else if (username) {
         const mine = await getContractsForUser(username);
         setContracts(mine);
@@ -139,17 +151,26 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
     setShowPinPrompt(true);
   };
 
-  const submitPin = () => {
-    if (pin === '202500') {
-      setAdminMode(true);
-      setShowPinPrompt(false);
-      setPin('');
-      setPinError(false);
-      load(true);
-    } else {
-      setPinError(true);
-      setPin('');
+  const submitPin = async () => {
+    try {
+      const res = await fetch('/api/admin-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin }),
+      });
+      if (res.ok) {
+        setAdminMode(true);
+        setShowPinPrompt(false);
+        setPin('');
+        setPinError(false);
+        load(true);
+        return;
+      }
+    } catch {
+      /* fall through */
     }
+    setPinError(true);
+    setPin('');
   };
 
   const filteredContracts = contracts.filter((c) => {

@@ -94,7 +94,7 @@ function splitPhone(stored: string): { dialCode: string; local: string } {
 export default function ProfilePage({ language = 'en', favorites = [], onBack }: ProfilePageProps) {
   const t = PROFILE_I18N[language];
   const isRTL = language === 'ar' || language === 'ur';
-  const { username, location: deviceLocation, locationError, requestLocation } = usePiAuth();
+  const { username, accessToken, location: deviceLocation, locationError, requestLocation } = usePiAuth();
   const { getProfile, saveProfile, getContractsForUser } = useFirebaseDatabase();
 
   const [loading, setLoading] = useState(true);
@@ -176,7 +176,10 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
     try {
       const res = await fetch('/api/otp/send', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken ?? ''}`,
+        },
         body: JSON.stringify({ username, email: profile.email }),
       });
       const data = await res.json();
@@ -200,7 +203,10 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
     try {
       const res = await fetch('/api/otp/verify', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken ?? ''}`,
+        },
         body: JSON.stringify({ username, code: otpCode }),
       });
       const data = await res.json();

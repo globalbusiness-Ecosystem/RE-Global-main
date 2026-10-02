@@ -482,17 +482,32 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
   const [pinError, setPinError] = useState('');
   const [showSuccess, setShowSuccess] = useState(false);
 
-  const handlePinSubmit = () => {
-    if (pinInput === '202500') {
-      setPinError('');
-      setShowSuccess(true);
-      setTimeout(() => {
-        onClose();
-      }, 2000);
-    } else {
-      setPinError(language === 'en' ? 'Invalid PIN' : 'رمز PIN غير صحيح');
-      setPinInput('');
+  const handlePinSubmit = async () => {
+    try {
+      const res = await fetch('/api/admin-auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ pin: pinInput }),
+      });
+      if (res.ok) {
+        setPinError('');
+        setShowSuccess(true);
+        setTimeout(() => {
+          window.location.assign('/admin');
+        }, 800);
+        return;
+      }
+      if (res.status === 429) {
+        setPinError(language === 'en' ? 'Too many attempts. Try again later.' : 'محاولات كثيرة. حاول لاحقاً.');
+      } else if (res.status === 500) {
+        setPinError(language === 'en' ? 'Admin access is not configured' : 'الوصول الإداري غير مفعّل');
+      } else {
+        setPinError(language === 'en' ? 'Invalid PIN' : 'رمز PIN غير صحيح');
+      }
+    } catch {
+      setPinError(language === 'en' ? 'Connection error' : 'خطأ في الاتصال');
     }
+    setPinInput('');
   };
 
   const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {

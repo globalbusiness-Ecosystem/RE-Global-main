@@ -1,0 +1,1 @@
+const x = `hello\nworld`;\nconst y = \`inner backtick\`;\n
