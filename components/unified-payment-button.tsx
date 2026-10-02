@@ -34,7 +34,7 @@ export function UnifiedPaymentButton({
   onSuccess,
   onError,
 }: UnifiedPaymentButtonProps) {
-  const { sdk, isAuthenticated, username } = usePiAuth();
+  const { sdk, isAuthenticated, username, accessToken } = usePiAuth();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPiAvailable = true; // Check at payment time, not load time
@@ -117,7 +117,10 @@ export function UnifiedPaymentButton({
                   try {
                     const signRes = await fetch('/api/contracts/sign', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: {
+                        'Content-Type': 'application/json',
+                        Authorization: `Bearer ${accessToken ?? ''}`,
+                      },
                       body: JSON.stringify({
                         contractId,
                         propertyId,
@@ -143,8 +146,8 @@ export function UnifiedPaymentButton({
                     buyerUsername: username || 'guest',
                     sellerUsername: 'RE-Global-Platform',
                     type: transactionType === 'hotel' ? 'buy' : transactionType,
-                    amount: price,
-                    currency,
+                    amount: signingData.amount ?? price,
+                    currency: signingData.currency ?? currency,
                     status: 'completed',
                     paymentId,
                     txid,
