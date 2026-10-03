@@ -3,7 +3,6 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
-import { firebaseDB } from '@/lib/firebase-database';
 import { ShoppingCart, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface UnifiedPaymentButtonProps {
@@ -111,9 +110,9 @@ export function UnifiedPaymentButton({
                 });
                 console.log('[RE] Completed ✅');
 
-                try {
-                  const contractId = `${paymentId}-${Date.now().toString(36)}`;
-                  let signingData: any = {};
+                // The server verifies the payment with Pi, signs the contract and records it.
+                // Retry on transient failures; stop on definite rejections (4xx).
+                for (let attempt = 1; attempt <= 3; attempt++) {
                   try {
                     const signRes = await fetch('/api/contracts/sign', {
                       method: 'POST',
@@ -121,47 +120,18 @@ export function UnifiedPaymentButton({
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${accessToken ?? ''}`,
                       },
-                      body: JSON.stringify({
-                        contractId,
-                        propertyId,
-                        propertyTitle,
-                        buyerUsername: username || 'guest',
-                        sellerUsername: 'RE-Global-Platform',
-                        type: transactionType === 'hotel' ? 'buy' : transactionType,
-                        amount: price,
-                        currency,
-                        paymentId,
-                        txid,
-                      }),
+                      body: JSON.stringify({ propertyId, propertyTitle, paymentId, txid }),
                     });
-                    if (signRes.ok) signingData = await signRes.json();
-                    else console.error('[RE] Contract signing request failed:', signRes.status);
+                    if (signRes.ok) {
+                      console.log('[RE] Contract signed and recorded ✅');
+                      break;
+                    }
+                    console.error('[RE] Contract signing request failed:', signRes.status);
+                    if (signRes.status < 500 && signRes.status !== 409) break;
                   } catch (signError) {
                     console.error('[RE] Contract signing error:', signError);
                   }
-
-                  await firebaseDB.addContract({
-                    propertyId,
-                    propertyTitle,
-                    buyerUsername: username || 'guest',
-                    sellerUsername: 'RE-Global-Platform',
-                    type: transactionType === 'hotel' ? 'buy' : transactionType,
-                    amount: signingData.amount ?? price,
-                    currency: signingData.currency ?? currency,
-                    status: 'completed',
-                    paymentId,
-                    txid,
-                    ...(signingData.contractText ? {
-                      contractText: signingData.contractText,
-                      contractHash: signingData.contractHash,
-                      platformSignature: signingData.platformSignature,
-                      platformPublicKey: signingData.platformPublicKey,
-                      signedAt: signingData.signedAt,
-                    } : {}),
-                  });
-                  console.log('[RE] Contract recorded ✅');
-                } catch (contractError) {
-                  console.error('[RE] Failed to record contract:', contractError);
+                  await new Promise((r) => setTimeout(r, 1500 * attempt));
                 }
 
                 resolve({ paymentId, txid, status: 'completed' });

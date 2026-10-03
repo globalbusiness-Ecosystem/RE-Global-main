@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
@@ -77,12 +78,37 @@ export async function POST(req: NextRequest) {
 
   // 4) One payment -> one signed contract. Repeat calls return the stored one.
   const ref = adminDb.collection('signed_contracts').doc(paymentId);
+  // Public, verifiable copy (read by /verify/[id] and the user's Contracts page).
+  // Same id as the payment, so this is idempotent too.
+  const publicRef = adminDb.collection('contracts').doc(paymentId);
+  const toPublicDoc = (r: Record<string, any>) => ({
+    propertyId: r.propertyId,
+    propertyTitle: r.propertyTitle,
+    buyerUsername: r.buyerUsername,
+    sellerUsername: 'RE-Global-Platform',
+    type: r.type,
+    amount: r.amount,
+    currency: r.currency,
+    status: 'completed',
+    paymentId,
+    txid: r.txid ?? txid,
+    contractText: r.contractText,
+    contractHash: r.contractHash,
+    platformSignature: r.platformSignature,
+    platformPublicKey: r.platformPublicKey,
+    signedAt: r.signedAt,
+    createdAt: Timestamp.now(),
+    updatedAt: Timestamp.now(),
+  });
   try {
     const result = await adminDb.runTransaction(async (tx) => {
       const snap = await tx.get(ref);
+      const publicSnap = await tx.get(publicRef);
       if (snap.exists) {
         const d = snap.data()!;
-        return d.uid === user.uid ? { record: d } : { conflict: true as const };
+        if (d.uid !== user.uid) return { conflict: true as const };
+        if (!publicSnap.exists) tx.set(publicRef, toPublicDoc(d));
+        return { record: d };
       }
       const contractId = `${paymentId}-${Date.now().toString(36)}`;
       const contractText = generateContractText({
@@ -112,8 +138,10 @@ export async function POST(req: NextRequest) {
         type: paidType,
         propertyId,
         propertyTitle,
+        txid,
       };
       tx.set(ref, record);
+      tx.set(publicRef, toPublicDoc(record));
       return { record };
     });
 
@@ -121,7 +149,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment already used' }, { status: 409 });
     }
     const { uid: _uid, ...publicRecord } = result.record as Record<string, unknown>;
-    return NextResponse.json(publicRecord);
+    return NextResponse.json({ ...publicRecord, contractDocId: paymentId });
   } catch (e) {
     console.error('[contracts/sign] error:', e);
     return NextResponse.json({ error: 'Signing failed' }, { status: 500 });

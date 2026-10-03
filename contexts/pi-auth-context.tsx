@@ -9,6 +9,8 @@ import React, {
 } from "react";
 import { flushSync } from "react-dom";
 import { PI_NETWORK_CONFIG } from "@/lib/system-config";
+import { auth as firebaseAuth } from "@/lib/firebase";
+import { signInWithCustomToken } from "firebase/auth";
 import type {
   Product,
   SDKLiteInstance,
@@ -229,6 +231,19 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       setUsername(authResult.user.username);
       setAccessToken(authResult.accessToken);
       setIsPiVerified(true);
+
+      // Give Firestore a verified identity (custom token minted server-side from the
+      // Pi access token). Non-blocking: the app keeps working if this fails.
+      fetch('/api/auth/firebase-token', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${authResult.accessToken}` },
+      })
+        .then(async (r) => {
+          if (!r.ok) throw new Error(`firebase-token ${r.status}`);
+          const { token } = await r.json();
+          await signInWithCustomToken(firebaseAuth, token);
+        })
+        .catch((e) => console.warn('[PiAuth] Firebase sign-in skipped:', e));
 
       // Persist the authenticated user so the rest of the app (dashboard, etc.) can read it
       setUser({
