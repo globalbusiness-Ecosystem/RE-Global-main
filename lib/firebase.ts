@@ -16,3 +16,16 @@ const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 export const storage = getStorage(app);
+
+// The Pi login -> Firebase sign-in exchange runs in the background. User-scoped
+// Firestore calls wait for it, otherwise the very first request after login would
+// reach Firestore before the identity exists and be rejected by the rules.
+let signInPending: Promise<void> | null = null;
+
+export function trackFirebaseSignIn(p: Promise<void>): void {
+  signInPending = p;
+}
+
+export function waitForFirebaseAuth(): Promise<void> {
+  return signInPending ?? Promise.resolve();
+}

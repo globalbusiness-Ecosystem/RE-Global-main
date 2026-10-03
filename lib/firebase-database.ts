@@ -14,7 +14,7 @@ import {
   addDoc,
   Timestamp,
 } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, waitForFirebaseAuth } from './firebase';
 import { toast } from 'sonner';
 
 export interface Property {
@@ -541,6 +541,25 @@ class FirebaseDatabase {
 }
 
 export const firebaseDB = new FirebaseDatabase();
+
+// User-scoped reads/writes need the Firebase identity (see /api/auth/firebase-token).
+// Wait for the in-flight sign-in so the first request after login isn't rejected by the rules.
+for (const name of [
+  'getContractsForUser',
+  'getProfile',
+  'saveProfile',
+  'getPreferences',
+  'savePreferences',
+  'getFavoritesForUser',
+  'addFavorite',
+  'removeFavorite',
+] as const) {
+  const original = (firebaseDB as any)[name].bind(firebaseDB);
+  (firebaseDB as any)[name] = async (...args: unknown[]) => {
+    await waitForFirebaseAuth();
+    return original(...args);
+  };
+}
 
 // Hook for React
 export function useFirebaseDatabase() {

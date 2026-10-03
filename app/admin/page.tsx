@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
-import { collection, addDoc, getDocs, deleteDoc, doc } from 'firebase/firestore';
+import { collection, getDocs } from 'firebase/firestore';
 
 export default function AdminDashboard() {
   const [pin, setPin] = useState('');
@@ -47,14 +47,23 @@ export default function AdminDashboard() {
   useEffect(() => { if (authenticated) loadProperties(); }, [authenticated]);
 
   const handleAdd = async () => {
-    await addDoc(collection(db, 'properties'), {
-      ...form,
-      price: Number(form.price) || 0,
-      bedrooms: Number(form.bedrooms) || 0,
-      bathrooms: Number(form.bathrooms) || 0,
-      area: Number(form.area) || 0,
-      images: form.images.split(',').map(s => s.trim()).filter(Boolean)
+    const res = await fetch('/api/admin/properties', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ...form,
+        price: Number(form.price) || 0,
+        bedrooms: Number(form.bedrooms) || 0,
+        bathrooms: Number(form.bathrooms) || 0,
+        area: Number(form.area) || 0,
+        images: form.images.split(',').map(s => s.trim()).filter(Boolean),
+      }),
     });
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert('❌ ' + (data.error || 'فشل إضافة العقار'));
+      return;
+    }
     alert('✅ تم إضافة العقار!');
     setForm({
       title: '', price: '', currency: 'Pi', location: '', type: 'buy',
@@ -66,7 +75,12 @@ export default function AdminDashboard() {
   };
 
   const handleDelete = async (id: string) => {
-    await deleteDoc(doc(db, 'properties', id));
+    if (!confirm('تأكيد حذف العقار؟')) return;
+    const res = await fetch('/api/admin/properties?id=' + encodeURIComponent(id), { method: 'DELETE' });
+    if (!res.ok) {
+      alert('❌ فشل الحذف');
+      return;
+    }
     loadProperties();
   };
 
@@ -115,7 +129,7 @@ export default function AdminDashboard() {
         {inp('الموقع', 'location')}
 
         <label style={{ color: '#d4af37', fontSize: '13px' }}>نوع الإعلان:</label>
-        {sel('type', [{v:'buy',l:'شراء'},{v:'rent',l:'إيجار'},{v:'hotel',l:'فندق'},{v:'tokenized',l:'Tokenized'},{v:'abroad',l:'خارج البلاد'},{v:'offplan',l:'أوف بلان'}])}
+        {sel('type', [{v:'buy',l:'شراء'},{v:'rent',l:'إيجار'},{v:'hotel',l:'فندق'},{v:'tokenized',l:'Tokenized'},{v:'abroad',l:'خارج البلاد'},{v:'offplan',l:'أوف بلان'},{v:'invest',l:'استثمار'}])}
 
         <label style={{ color: '#d4af37', fontSize: '13px' }}>نوع العقار:</label>
         {sel('propertyType', [{v:'apartment',l:'شقة'},{v:'villa',l:'فيلا'},{v:'penthouse',l:'بنتهاوس'},{v:'commercial',l:'تجاري'}])}

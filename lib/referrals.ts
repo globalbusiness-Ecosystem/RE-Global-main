@@ -1,5 +1,5 @@
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db } from './firebase';
+import { db, waitForFirebaseAuth } from './firebase';
 
 function generateReferralCode(username: string): string {
   let hash = 0;
@@ -11,6 +11,7 @@ function generateReferralCode(username: string): string {
 }
 
 export async function getOrCreateReferralCode(username: string): Promise<string> {
+  await waitForFirebaseAuth();
   const ref = doc(db, 'referrals', username);
   const snap = await getDoc(ref);
   if (snap.exists() && (snap.data() as any).code) {
@@ -22,6 +23,7 @@ export async function getOrCreateReferralCode(username: string): Promise<string>
 }
 
 export async function getReferralCount(username: string): Promise<number> {
+  await waitForFirebaseAuth();
   const q = query(collection(db, 'referrals'), where('referredBy', '==', username));
   const snap = await getDocs(q);
   return snap.size;

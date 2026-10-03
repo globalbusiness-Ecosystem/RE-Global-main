@@ -1,0 +1,86 @@
+rules_version = '2';
+
+// RE Global — Firestore security rules.
+// Identity: the app signs users in with a Firebase custom token minted by
+// /api/auth/firebase-token from a verified Pi access token. The token carries
+// the Pi username as request.auth.token.username.
+//
+// Collections NOT listed here are denied to clients on purpose. They are used
+// only by server code (Admin SDK bypasses these rules):
+//   email_otps, signed_contracts, admin_login_attempts,
+//   walletBalances, liquidityPools, trades, users, transactions
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function me() {
+      return request.auth.token.username;
+    }
+
+    function isMe(username) {
+      return signedIn() && request.auth.token.username == username;
+    }
+
+    // Public catalogue. Written only by the server (/api/admin/properties).
+    match /properties/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Public inspection certificates (verified by hash on /verify/cert).
+    match /inspections/{id} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // Contracts are created only by /api/contracts/sign.
+    match /contracts/{id} {
+      allow get: if true; // /verify/[id] is public by design
+      allow list: if signedIn() && resource.data.buyerUsername == me();
+      allow list: if signedIn() && resource.data.sellerUsername == me();
+      allow write: if false;
+    }
+
+    // Personal data: owner only. The email-verification flags can be cleared
+    // by the owner but only the server (OTP flow) can set them.
+    match /profiles/{username} {
+      allow read: if isMe(username);
+      allow create: if isMe(username)
+        && request.resource.data.get('emailVerified', false) == false;
+      allow update: if isMe(username)
+        && (request.resource.data.get('emailVerified', false) == false
+            || (request.resource.data.get('emailVerified', false) == resource.data.get('emailVerified', false)
+                && request.resource.data.get('verifiedEmail', '') == resource.data.get('verifiedEmail', '')));
+      allow delete: if false;
+    }
+
+    match /preferences/{username} {
+      allow read, write: if isMe(username);
+    }
+
+    match /favorites/{id} {
+      allow get: if signedIn() && resource.data.username == me();
+      allow list: if signedIn() && resource.data.username == me();
+      allow create: if signedIn() && request.resource.data.username == me();
+      allow delete: if signedIn() && resource.data.username == me();
+      allow update: if false;
+    }
+
+    // Each user owns their own code. `referredBy` is never client-writable
+    // (otherwise anyone could credit themselves referrals).
+    match /referrals/{username} {
+      allow get: if isMe(username);
+      allow list: if signedIn() && resource.data.referredBy == me();
+      allow create: if isMe(username)
+        && !('referredBy' in request.resource.data);
+      allow update: if isMe(username)
+        && request.resource.data.get('referredBy', null) == resource.data.get('referredBy', null)
+        && (!('code' in resource.data) || request.resource.data.code == resource.data.code);
+      allow delete: if false;
+    }
+  }
+}
