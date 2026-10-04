@@ -1,18 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const { paymentId } = await req.json();
-  
-  const response = await fetch(
-    `https://api.minepi.com/v2/payments/${paymentId}/approve`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${process.env.PI_API_KEY}`,
-      },
-    }
-  );
-  
-  const data = await response.json();
-  return NextResponse.json(data);
+  const body = await req.json().catch(() => ({}));
+  const ctx = await authorizePayment(req, body?.paymentId);
+  if (ctx instanceof NextResponse) return ctx;
+  return piPaymentAction(ctx.paymentId, 'approve');
 }

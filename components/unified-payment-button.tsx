@@ -90,7 +90,7 @@ export function UnifiedPaymentButton({
               try {
                 await fetch('/api/payments/approve', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                   body: JSON.stringify({ paymentId }),
                 });
                 console.log('[RE] Approved ✅');
@@ -105,7 +105,7 @@ export function UnifiedPaymentButton({
               try {
                 await fetch('/api/payments/complete', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                   body: JSON.stringify({ paymentId, txid }),
                 });
                 console.log('[RE] Completed ✅');
@@ -146,7 +146,7 @@ export function UnifiedPaymentButton({
                 if (paymentId) {
                   await fetch('/api/payments/cancel', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                     body: JSON.stringify({ paymentId }),
                   });
                   console.log('[RE] Cancelled on Pi servers ✅');
@@ -163,7 +163,7 @@ export function UnifiedPaymentButton({
                 if (paymentId) {
                   await fetch('/api/payments/cancel', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                     body: JSON.stringify({ paymentId }),
                   });
                   console.log('[RE] Cancelled on Pi servers after error ✅');

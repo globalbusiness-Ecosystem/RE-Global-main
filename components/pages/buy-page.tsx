@@ -9,6 +9,7 @@ import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
+import { usePiAuth } from '@/contexts/pi-auth-context';
 
 interface BuyPageProps {
   language: NavLanguage;
@@ -244,6 +245,7 @@ function FirebasePropertyModal({
   language: NavLanguage;
   onClose: () => void;
 }) {
+  const { accessToken } = usePiAuth();
   const title = language === 'ar' && prop.titleAr ? prop.titleAr : prop.title;
   const location = language === 'ar' && prop.locationAr ? prop.locationAr : prop.location;
 
@@ -364,14 +366,14 @@ function FirebasePropertyModal({
                   onReadyForServerApproval: async (paymentId: string) => {
                     await fetch('/api/payments/approve', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                       body: JSON.stringify({ paymentId }),
                     });
                   },
                   onReadyForServerCompletion: async (paymentId: string, txid: string) => {
                     await fetch('/api/payments/complete', {
                       method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
+                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                       body: JSON.stringify({ paymentId, txid }),
                     });
                   },

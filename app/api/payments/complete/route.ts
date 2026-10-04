@@ -1,20 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
+import { isValidTxid } from '@/lib/contract-guard';
+
+export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
-  const { paymentId, txid } = await req.json();
-  
-  const response = await fetch(
-    `https://api.minepi.com/v2/payments/${paymentId}/complete`,
-    {
-      method: 'POST',
-      headers: {
-        'Authorization': `Key ${process.env.PI_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ txid }),
-    }
-  );
-  
-  const data = await response.json();
-  return NextResponse.json(data);
+  const body = await req.json().catch(() => ({}));
+  if (!isValidTxid(body?.txid)) {
+    return NextResponse.json({ error: 'Invalid txid' }, { status: 400 });
+  }
+  const ctx = await authorizePayment(req, body?.paymentId);
+  if (ctx instanceof NextResponse) return ctx;
+  return piPaymentAction(ctx.paymentId, 'complete', { txid: body.txid });
 }
