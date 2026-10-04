@@ -249,6 +249,14 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
             await signInWithCustomToken(firebaseAuth, token);
           } catch (e) {
             console.warn('[PiAuth] Firebase sign-in skipped:', e);
+            try {
+              const er: any = e;
+              fetch('/api/auth/firebase-report', {
+                method: 'POST',
+                headers: { Authorization: `Bearer ${authResult.accessToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message: `${er?.code ?? ''} ${er?.message ?? String(e)}` }),
+              }).catch(() => {});
+            } catch {}
           } finally {
             clearTimeout(timer);
           }
