@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/api-token';
 /**
  * Aladdin Market Research Service
  * Real-time market data integration with Pi Network conversion
@@ -37,7 +38,7 @@ export async function fetchMarketData(location: string): Promise<MarketData> {
   try {
     const response = await fetch(`/api/market-research`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: authHeaders({ 'Content-Type': 'application/json' }),
       body: JSON.stringify({ location, language: 'en' }),
     });
 

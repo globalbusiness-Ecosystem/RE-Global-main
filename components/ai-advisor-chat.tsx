@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import PropertyPhotoAnalysisCard from '@/components/property-photo-analysis-card';
+import { authHeaders } from '@/lib/api-token';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -1873,7 +1874,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         try {
           const apiResponse = await fetch('/api/claude-advisor', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               message: text,
               language: language,
@@ -1959,7 +1960,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         try {
           const response = await fetch('/api/analyze-property-photo', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               imageData,
               city: selectedCity,

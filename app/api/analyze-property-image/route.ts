@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -6,6 +7,8 @@ import { NextRequest, NextResponse } from 'next/server';
  * Extracts: location, property type, condition, estimated value, etc.
  */
 export async function POST(request: NextRequest) {
+  const guard = await guardApi(request, { scope: 'analyze-image', limit: 10 });
+  if (guard instanceof Response) return guard;
   try {
     const { imageUrl } = await request.json();
 

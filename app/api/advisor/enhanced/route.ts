@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { enhancedAladdin } from '@/lib/aladdin-enhanced';
 import { aladdinKnowledgeBase } from '@/lib/aladdin-knowledge-base';
@@ -8,6 +9,8 @@ import { aladdinKnowledgeBase } from '@/lib/aladdin-knowledge-base';
  */
 
 export async function POST(request: NextRequest) {
+  const guard = await guardApi(request, { scope: 'advisor-enh', limit: 30 });
+  if (guard instanceof Response) return guard;
   try {
     const body = await request.json();
     const { action, market, budget, riskTolerance, timeline, language = 'en' } = body;

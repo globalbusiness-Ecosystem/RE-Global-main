@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface AnalysisResponse {
@@ -24,6 +25,8 @@ interface AnalysisResponse {
 }
 
 export async function POST(req: Request) {
+  const guard = await guardApi(req, { scope: 'analyze-photo', limit: 10 });
+  if (guard instanceof Response) return guard;
   try {
     const { imageData, city, country, language = 'en' } = await req.json();
 

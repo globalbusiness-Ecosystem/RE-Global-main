@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { streamText, convertToModelMessages } from 'ai';
 
 interface UserContext {
@@ -12,6 +13,8 @@ interface RequestBody {
 }
 
 export async function POST(req: Request) {
+  const guard = await guardApi(req, { scope: 'advisor', limit: 30 });
+  if (guard instanceof Response) return guard;
   try {
     const { messages, userContext } = await req.json() as RequestBody;
 

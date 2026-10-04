@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, TrendingUp, PieChart, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
+import { authHeaders } from '@/lib/api-token';
 
 interface AdvancedAnalysisProps {
   language?: NavLanguage;
@@ -34,7 +35,7 @@ export function AdvancedAnalysisComponent({ language = 'en', userId }: AdvancedA
     try {
       const response = await fetch('/api/advisor/advanced', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           action: 'analyze-portfolio',
           data: {
@@ -64,7 +65,7 @@ export function AdvancedAnalysisComponent({ language = 'en', userId }: AdvancedA
     try {
       const response = await fetch('/api/advisor/advanced', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           action: 'forecast-market',
           data: { market: 'Dubai', price: 100 },
@@ -89,7 +90,7 @@ export function AdvancedAnalysisComponent({ language = 'en', userId }: AdvancedA
     try {
       const response = await fetch('/api/advisor/advanced', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           action: 'best-entry-points',
           data: { budget: 100 },

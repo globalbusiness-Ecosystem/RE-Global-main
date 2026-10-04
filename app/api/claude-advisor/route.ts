@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { 
   aladdinConfig, 
@@ -167,6 +168,8 @@ Be friendly, authoritative, and thorough. Never apologize for knowledge gaps - p
 }
 
 export async function POST(req: Request) {
+  const guard = await guardApi(req, { scope: 'claude-advisor', limit: 30 });
+  if (guard instanceof Response) return guard;
   try {
     const { message, language: providedLanguage } = await req.json() as RequestBody;
 

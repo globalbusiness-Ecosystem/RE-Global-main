@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
@@ -19,6 +20,8 @@ const MAX_FILE_SIZE = 15 * 1024 * 1024; // 15MB
  * Handles image upload from camera or gallery
  */
 export async function POST(request: NextRequest) {
+  const guard = await guardApi(request, { scope: 'upload', limit: 10 });
+  if (guard instanceof Response) return guard;
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File;

@@ -1,3 +1,4 @@
+import { authHeaders } from '@/lib/api-token';
 /**
  * Device Media Service for Aladdin AI
  * Handles camera, microphone, and image processing
@@ -216,6 +217,7 @@ class DeviceMediaService {
 
       const response = await fetch(endpoint, {
         method: 'POST',
+        headers: authHeaders(),
         body: formData,
       });
 
@@ -243,7 +245,7 @@ class DeviceMediaService {
     try {
       const response = await fetch('/api/analyze-property-image', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({ imageUrl }),
       });
 

@@ -6,6 +6,7 @@ import { X, Send, Bot, Loader, Volume2, VolumeX, Mic, MicOff, Phone, Settings, I
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import voiceService from '@/lib/voice-service';
 import { MediaCapture, type CapturedMedia } from '@/components/media-capture';
+import { authHeaders } from '@/lib/api-token';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -139,7 +140,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
           detectedLang === 'ar' ? '/api/claude-advisor' : '/api/claude-advisor',
           {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: authHeaders({ 'Content-Type': 'application/json' }),
             body: JSON.stringify({
               message: text,
               language: detectedLang,

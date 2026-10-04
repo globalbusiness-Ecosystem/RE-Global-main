@@ -1,9 +1,12 @@
+import { guardApi } from '@/lib/api-guard';
 import { NextRequest, NextResponse } from 'next/server';
 import { aladdinAdvanced, InvestmentProfile } from '@/lib/aladdin-advanced';
 import { portfolioAnalyzer, Portfolio } from '@/lib/aladdin-portfolio-analysis';
 import { predictiveAnalytics } from '@/lib/aladdin-predictive';
 
 export async function POST(request: NextRequest) {
+  const guard = await guardApi(request, { scope: 'advisor-adv', limit: 30 });
+  if (guard instanceof Response) return guard;
   try {
     const body = await request.json();
     const { action, data } = body;

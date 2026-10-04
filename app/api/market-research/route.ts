@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -88,6 +89,8 @@ async function fetchRealTimeMarketData(location: string): Promise<any> {
 }
 
 export async function POST(request: NextRequest) {
+  const guard = await guardApi(request, { scope: 'market-research', limit: 10 });
+  if (guard instanceof Response) return guard;
   try {
     const body: MarketResearchRequest = await request.json();
     const { location, language = 'en' } = body;

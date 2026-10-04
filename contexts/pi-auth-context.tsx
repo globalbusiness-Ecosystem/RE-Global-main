@@ -11,6 +11,7 @@ import { flushSync } from "react-dom";
 import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { auth as firebaseAuth, trackFirebaseSignIn } from "@/lib/firebase";
 import { signInWithCustomToken } from "firebase/auth";
+import { setApiToken } from "@/lib/api-token";
 import type {
   Product,
   SDKLiteInstance,
@@ -230,6 +231,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       console.log('[PiAuth] Authenticated:', authResult.user.username);
       setUsername(authResult.user.username);
       setAccessToken(authResult.accessToken);
+      setApiToken(authResult.accessToken);
       setIsPiVerified(true);
 
       // Give Firestore a verified identity (custom token minted server-side from the

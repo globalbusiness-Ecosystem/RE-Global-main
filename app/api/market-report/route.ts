@@ -1,3 +1,4 @@
+import { guardApi } from '@/lib/api-guard';
 export const dynamic = 'force-dynamic';
 import { generateText } from 'ai';
 
@@ -22,6 +23,8 @@ const CACHE_TTL = 3600000; // 1 hour in ms
 export const revalidate = 3600; // ISR revalidation every 1 hour
 
 export async function GET(req: Request) {
+  const guard = await guardApi(req, { scope: 'market-report', limit: 10 });
+  if (guard instanceof Response) return guard;
   try {
     const url = new URL(req.url);
     const language = (url.searchParams.get('language') || 'en') as 'en' | 'ar';
