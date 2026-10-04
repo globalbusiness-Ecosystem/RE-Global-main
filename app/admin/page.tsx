@@ -3,12 +3,23 @@ import { useState, useEffect } from 'react';
 import { db } from '@/lib/firebase';
 import { collection, getDocs } from 'firebase/firestore';
 
+const TR_LANGS: { code: string; label: string }[] = [
+  { code: 'ar', label: 'العربية' },
+  { code: 'fr', label: 'Français' },
+  { code: 'es', label: 'Español' },
+  { code: 'pt', label: 'Português' },
+  { code: 'ur', label: 'اردو' },
+  { code: 'zh', label: '中文' },
+];
+
 export default function AdminDashboard() {
   const [pin, setPin] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
   const [properties, setProperties] = useState<any[]>([]);
+  const [tr, setTr] = useState<Record<string, Record<string, string>>>({});
+  const [trLoading, setTrLoading] = useState(false);
   const [form, setForm] = useState({
     title: '', price: '', currency: 'Pi', location: '', type: 'buy',
     propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
@@ -46,12 +57,38 @@ export default function AdminDashboard() {
 
   useEffect(() => { if (authenticated) loadProperties(); }, [authenticated]);
 
+  const setTrField = (lang: string, key: string, value: string) =>
+    setTr(prev => ({ ...prev, [lang]: { ...(prev[lang] || {}), [key]: value } }));
+
+  const autoTranslate = async () => {
+    if (!form.title.trim()) { alert('اكتب عنوان العقار الأول'); return; }
+    setTrLoading(true);
+    try {
+      const res = await fetch('/api/admin/translate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title: form.title, location: form.location, description: form.description }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error || 'فشلت الترجمة');
+      setTr(data.translations || {});
+    } catch (e: any) {
+      alert('❌ ' + (e?.message || 'فشلت الترجمة'));
+    } finally {
+      setTrLoading(false);
+    }
+  };
+
   const handleAdd = async () => {
     const res = await fetch('/api/admin/properties', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         ...form,
+        translations: tr,
+        titleAr: tr.ar?.title || '',
+        locationAr: tr.ar?.location || '',
+        descriptionAr: tr.ar?.description || '',
         price: Number(form.price) || 0,
         bedrooms: Number(form.bedrooms) || 0,
         bathrooms: Number(form.bathrooms) || 0,
@@ -71,6 +108,7 @@ export default function AdminDashboard() {
       area: '', description: '', image: '', images: '', vrUrl: '',
       tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
     });
+    setTr({});
     loadProperties();
   };
 
@@ -145,6 +183,32 @@ export default function AdminDashboard() {
           onChange={e => setForm({ ...form, description: e.target.value })}
           rows={4}
           style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '10px', width: '100%', display: 'block', resize: 'vertical' }} />
+
+        <div style={{ border: '1px solid #d4af37', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
+          <p style={{ color: '#d4af37', marginBottom: '6px' }}>🌍 الترجمات (الحقول فوق = English)</p>
+          <button type="button" onClick={autoTranslate} disabled={trLoading}
+            style={{ background: '#d4af37', color: 'black', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', marginBottom: '12px' }}>
+            {trLoading ? '...جاري الترجمة' : '✨ ترجمة تلقائية لـ 6 لغات'}
+          </button>
+          {TR_LANGS.map(l => (
+            <details key={l.code} style={{ marginBottom: '8px' }}>
+              <summary style={{ color: '#d4af37', cursor: 'pointer' }}>{l.label} {tr[l.code]?.title ? '✅' : ''}</summary>
+              <div dir={l.code === 'ar' || l.code === 'ur' ? 'rtl' : 'ltr'} style={{ marginTop: '8px' }}>
+                {(['title', 'location', 'description'] as const).map(k => (
+                  k === 'description' ? (
+                    <textarea key={k} placeholder={'description (' + l.code + ')'} rows={3} value={tr[l.code]?.[k] || ''}
+                      onChange={e => setTrField(l.code, k, e.target.value)}
+                      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '8px', width: '100%', display: 'block', resize: 'vertical' }} />
+                  ) : (
+                    <input key={k} placeholder={k + ' (' + l.code + ')'} value={tr[l.code]?.[k] || ''}
+                      onChange={e => setTrField(l.code, k, e.target.value)}
+                      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '8px', width: '100%', display: 'block' }} />
+                  )
+                ))}
+              </div>
+            </details>
+          ))}
+        </div>
 
         {inp('رابط الصورة الرئيسية', 'image')}
         {inp('روابط صور إضافية (مفصولة بفاصلة)', 'images')}

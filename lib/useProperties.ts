@@ -22,6 +22,7 @@ export interface Property {
   lat?: number;
   lng?: number;
   vrUrl?: string;
+  translations?: Record<string, { title?: string; location?: string; description?: string }>;
   createdAt?: any;
 }
 
@@ -77,4 +78,21 @@ export function getLocalizedLocation(property: Property, language: string): stri
 export function getLocalizedDescription(property: Property, language: string): string {
   if (language === 'ar' && property.descriptionAr) return property.descriptionAr;
   return property.description || '';
+}
+
+type PropText = { title?: string; location?: string; description?: string };
+function pick(p: Property, lang: string, key: keyof PropText, base?: string, ar?: string): string {
+  const t = (p.translations?.[lang] as PropText | undefined)?.[key];
+  if (t) return t;
+  if (lang === 'ar' && ar) return ar;
+  return base ?? '';
+}
+export function pTitle(p: Property, lang: string): string {
+  return pick(p, lang, 'title', p.title, p.titleAr);
+}
+export function pLocation(p: Property, lang: string): string {
+  return pick(p, lang, 'location', p.location, p.locationAr);
+}
+export function pDesc(p: Property, lang: string): string {
+  return pick(p, lang, 'description', p.description, p.descriptionAr);
 }

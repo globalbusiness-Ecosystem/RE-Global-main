@@ -10,6 +10,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { pTitle, pLocation, pDesc } from '@/lib/useProperties';
 
 interface BuyPageProps {
   language: NavLanguage;
@@ -246,8 +247,8 @@ function FirebasePropertyModal({
   onClose: () => void;
 }) {
   const { accessToken } = usePiAuth();
-  const title = language === 'ar' && prop.titleAr ? prop.titleAr : prop.title;
-  const location = language === 'ar' && prop.locationAr ? prop.locationAr : prop.location;
+  const title = pTitle(prop, language);
+  const location = pLocation(prop, language);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4">
@@ -310,7 +311,7 @@ function FirebasePropertyModal({
           {/* Description */}
           {prop.description && (
             <p className="text-gray-400 text-sm leading-relaxed">
-              {language === 'ar' && prop.descriptionAr ? prop.descriptionAr : prop.description}
+              {pDesc(prop, language)}
             </p>
           )}
 
@@ -452,7 +453,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
               <div className="p-4">
                 <div className="flex justify-between items-start mb-1">
                   <h4 className="text-white font-semibold text-base">
-                    {language === 'ar' && prop.titleAr ? prop.titleAr : prop.title}
+                    {pTitle(prop, language)}
                   </h4>
                   {prop.featured && (
                     <span className="text-xs bg-accent text-black px-2 py-0.5 rounded font-bold">
@@ -461,7 +462,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
                   )}
                 </div>
                 <p className="text-gray-400 text-sm mb-2">
-                  {language === 'ar' && prop.locationAr ? prop.locationAr : prop.location}
+                  {pLocation(prop, language)}
                 </p>
                 <div className="flex justify-between items-center">
                   <p className="text-accent font-bold text-lg">{prop.price} π</p>

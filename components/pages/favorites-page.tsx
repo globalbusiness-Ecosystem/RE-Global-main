@@ -9,6 +9,7 @@ import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { useProperties } from '@/lib/useProperties';
+import { pTitle, pLocation } from '@/lib/useProperties';
 
 interface FavoritesPageProps {
   language: NavLanguage;
@@ -67,7 +68,7 @@ export default function FavoritesPage({
                 {prop.image ? (
                   <img
                     src={prop.image}
-                    alt={language === 'en' ? prop.title : prop.titleAr || prop.title}
+                    alt={pTitle(prop, language)}
                     className="w-full h-full object-cover hover:scale-105 transition"
                   />
                 ) : (
@@ -85,13 +86,13 @@ export default function FavoritesPage({
 
               <div className="p-4">
                 <h3 className="font-semibold text-foreground mb-2 line-clamp-2">
-                  {language === 'en' ? prop.title : prop.titleAr || prop.title}
+                  {pTitle(prop, language)}
                 </h3>
 
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center gap-2 text-muted-foreground text-sm">
                     <MapPin className="w-4 h-4" />
-                    <span>{language === 'en' ? prop.location : prop.locationAr || prop.location}</span>
+                    <span>{pLocation(prop, language)}</span>
                   </div>
                   <PropertyQRCode propertyId={prop.id} size={44} className="rounded" />
                 </div>
@@ -116,7 +117,7 @@ export default function FavoritesPage({
                 <div className="grid grid-cols-2 gap-2">
                   <UnifiedPaymentButton
                     propertyId={prop.id}
-                    propertyTitle={language === 'ar' ? prop.titleAr || prop.title : prop.title}
+                    propertyTitle={pTitle(prop, language)}
                     price={prop.price}
                     transactionType="buy"
                     language={language}

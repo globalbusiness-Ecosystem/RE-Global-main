@@ -1,7 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { Resend } from 'resend';
+import { sendEmail, emailConfigured } from '@/lib/send-email';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
@@ -19,7 +19,7 @@ function hashCode(code: string): string {
 }
 
 export async function POST(req: NextRequest) {
-  if (!process.env.RESEND_API_KEY) {
+  if (!emailConfigured()) {
     return NextResponse.json({ ok: false, error: 'Email service not configured' }, { status: 500 });
   }
   let user;
@@ -55,15 +55,14 @@ export async function POST(req: NextRequest) {
     const code = crypto.randomInt(100000, 1000000).toString();
     const expiresAt = new Date(Date.now() + OTP_EXPIRY_MINUTES * 60000);
 
-    const resend = new Resend(process.env.RESEND_API_KEY);
-    const { error } = await resend.emails.send({
-      from: 'RE Platform <onboarding@resend.dev>',
-      to: email,
-      subject: 'Your RE Platform verification code',
-      html: `<p>Your verification code is:</p><h2 style="letter-spacing:4px">${code}</h2><p>This code expires in ${OTP_EXPIRY_MINUTES} minutes. If you didn't request this, you can ignore this email.</p>`,
-    });
-    if (error) {
-      console.error('[OTP] Resend send error:', error);
+    try {
+      await sendEmail({
+        to: email,
+        subject: 'Your RE Platform verification code',
+        html: `<p>Your verification code is:</p><h2 style="letter-spacing:4px">${code}</h2><p>This code expires in ${OTP_EXPIRY_MINUTES} minutes. If you didn't request this, you can ignore this email.</p>`,
+      });
+    } catch (mailErr) {
+      console.error('[OTP] send error:', mailErr);
       return NextResponse.json({ ok: false, error: 'Failed to send email' }, { status: 502 });
     }
     await docRef.set({

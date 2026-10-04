@@ -184,7 +184,7 @@ export async function POST(req: Request) {
     const enhancedMessage = `Context: ${isArabic ? 'الأسواق المرجعية' : 'Reference Markets'}: ${JSON.stringify(KNOWLEDGE_BASE.markets, null, 2)}\n\nUser Question: ${message}`;
 
     const response = await client.messages.create({
-      model: 'claude-3-5-sonnet-20241022',
+      model: 'claude-sonnet-5-5',
       max_tokens: 1500,
       system: systemPrompt,
       messages: [
