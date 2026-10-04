@@ -246,7 +246,21 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
             });
             if (!r.ok) throw new Error(`firebase-token ${r.status}`);
             const { token } = await r.json();
-            await signInWithCustomToken(firebaseAuth, token);
+            const rep = (m: string) => {
+              try {
+                fetch('/api/auth/firebase-report', {
+                  method: 'POST',
+                  headers: { Authorization: `Bearer ${authResult.accessToken}`, 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ message: m }),
+                }).catch(() => {});
+              } catch {}
+            };
+            rep('step1 token received, signing in');
+            await Promise.race([
+              signInWithCustomToken(firebaseAuth, token),
+              new Promise((_, rej) => setTimeout(() => rej(new Error('signIn timeout 15s')), 15000)),
+            ]);
+            rep('step2 signIn OK uid=' + (firebaseAuth.currentUser?.uid ?? 'none'));
           } catch (e) {
             console.warn('[PiAuth] Firebase sign-in skipped:', e);
             try {
