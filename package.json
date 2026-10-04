@@ -52,7 +52,7 @@
     "date-fns": "4.1.0",
     "embla-carousel-react": "8.5.1",
     "firebase": "^12.13.0",
-    "firebase-admin": "^14.2.0",
+    "firebase-admin": "^13.8.0",
     "framer-motion": "^12.38.0",
     "geist": "latest",
     "immer": "latest",
@@ -96,10 +96,5 @@
   },
   "engines": {
     "node": "22.x"
-  },
-  "pnpm": {
-    "overrides": {
-      "jose": "^5.10.0"
-    }
   }
 }
