@@ -96,5 +96,10 @@
   },
   "engines": {
     "node": "22.x"
+  },
+  "pnpm": {
+    "overrides": {
+      "jose": "^5.10.0"
+    }
   }
 }
