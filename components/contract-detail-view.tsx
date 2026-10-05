@@ -5,6 +5,8 @@ import type { SmartContract } from '@/lib/firebase-database';
 import { Download } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
+import type { NavLanguage } from '@/lib/nav-i18n';
+import { translateContract, contractDir, CONTRACT_LANGS } from '@/lib/contract-translations';
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -54,8 +56,9 @@ function VerifyQR({ contractId, size = 84 }: { contractId: string; size?: number
   return <canvas ref={canvasRef} width={size} height={size} className="rounded-[2px]" />;
 }
 
-export function ContractDetailView({ contract, onClose }: { contract: SmartContract; onClose?: () => void }) {
+export function ContractDetailView({ contract, onClose, language = 'en' }: { contract: SmartContract; onClose?: () => void; language?: NavLanguage }) {
   const [showFullText, setShowFullText] = useState(false);
+  const [textLang, setTextLang] = useState<NavLanguage>(language);
   const isSigned = Boolean(contract.contractHash && contract.platformSignature);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
@@ -323,9 +326,22 @@ export function ContractDetailView({ contract, onClose }: { contract: SmartContr
               <ChevronDown size={14} className={`text-stone-500 transition-transform ${showFullText ? 'rotate-180' : ''}`} />
             </button>
             {showFullText && (
-              <pre className="mt-2.5 rounded-[4px] bg-black/40 border border-white/[0.05] p-3.5 text-[11.5px] leading-relaxed text-stone-400 whitespace-pre-wrap max-h-64 overflow-y-auto">
-                {contract.contractText}
-              </pre>
+              <div className="mt-2.5">
+                <div className="flex flex-wrap gap-1.5 mb-2">
+                  {CONTRACT_LANGS.map(l => (
+                    <button
+                      key={l.code}
+                      onClick={() => setTextLang(l.code)}
+                      className={`px-2.5 py-1 rounded-[3px] text-[11px] border transition-colors ${textLang === l.code ? 'border-amber-400/60 text-amber-300 bg-amber-500/10' : 'border-white/[0.08] text-stone-400 hover:text-stone-200'}`}
+                    >
+                      {l.label}
+                    </button>
+                  ))}
+                </div>
+                <pre dir={contractDir(textLang)} className="rounded-[4px] bg-black/40 border border-white/[0.05] p-3.5 text-[11.5px] leading-relaxed text-stone-400 whitespace-pre-wrap max-h-64 overflow-y-auto">
+                  {translateContract(textLang, contract)}
+                </pre>
+              </div>
             )}
           </div>
         )}

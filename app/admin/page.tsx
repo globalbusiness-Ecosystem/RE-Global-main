@@ -21,6 +21,8 @@ export default function AdminDashboard() {
   const [tr, setTr] = useState<Record<string, Record<string, string>>>({});
   const [trLoading, setTrLoading] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [contracts, setContracts] = useState<any[]>([]);
+  const [contractQuery, setContractQuery] = useState('');
   const [form, setForm] = useState({
     title: '', price: '', currency: 'Pi', location: '', type: 'buy',
     propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
@@ -57,6 +59,16 @@ export default function AdminDashboard() {
   };
 
   useEffect(() => { if (authenticated) loadProperties(); }, [authenticated]);
+
+  const loadContracts = async () => {
+    try {
+      const res = await fetch('/api/admin/contracts');
+      const data = await res.json();
+      if (data.ok) setContracts(data.contracts || []);
+    } catch { /* ignore */ }
+  };
+
+  useEffect(() => { if (authenticated) loadContracts(); }, [authenticated]);
 
   const setTrField = (lang: string, key: string, value: string) =>
     setTr(prev => ({ ...prev, [lang]: { ...(prev[lang] || {}), [key]: value } }));
@@ -315,6 +327,30 @@ export default function AdminDashboard() {
           style={{ background: '#d4af37', color: 'black', padding: '14px 40px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
           إضافة العقار
         </button>
+      </div>
+
+      <div style={{ background: '#1a1a1a', padding: '24px', borderRadius: '16px', border: '1px solid #d4af37', marginBottom: '30px' }}>
+        <h2 style={{ color: '#d4af37', marginBottom: '8px' }}>📜 كل العقود ({contracts.length})</h2>
+        <p style={{ color: '#999', fontSize: '13px', marginBottom: '12px' }}>
+          الإجمالي: {contracts.reduce((n, c) => n + (Number(c.amount) || 0), 0)} Pi
+        </p>
+        <input placeholder="بحث بالعقار أو المشتري أو رقم العقد" value={contractQuery}
+          onChange={e => setContractQuery(e.target.value)}
+          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '12px', width: '100%', display: 'block' }} />
+        {contracts
+          .filter(c => {
+            const q = contractQuery.trim().toLowerCase();
+            return !q || [c.propertyTitle, c.buyerUsername, c.id].some((v: any) => String(v || '').toLowerCase().includes(q));
+          })
+          .map(c => (
+            <div key={c.id} style={{ background: '#111', padding: '12px', borderRadius: '10px', border: '1px solid #333', marginBottom: '10px' }}>
+              <p style={{ color: '#d4af37', fontWeight: 'bold' }}>{c.propertyTitle}</p>
+              <p style={{ color: '#ccc', fontSize: '13px' }}>@{c.buyerUsername} — {c.amount} {c.currency} — {c.type}</p>
+              <p style={{ color: '#777', fontSize: '12px' }}>{c.status} | {new Date(c.createdAt).toLocaleString('ar-EG')}</p>
+              <a href={'/verify/' + c.id} target="_blank" rel="noreferrer" style={{ color: '#4488ff', fontSize: '13px' }}>فتح العقد ↗</a>
+            </div>
+          ))}
+        {contracts.length === 0 && <p style={{ color: '#777' }}>مفيش عقود لسه.</p>}
       </div>
 
       <h2 style={{ color: '#d4af37', marginBottom: '16px' }}>العقارات ({properties.length})</h2>

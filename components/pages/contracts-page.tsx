@@ -470,7 +470,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
       {selectedContract && (
         <div className="fixed inset-0 bg-black/70 z-50 flex items-start justify-center overflow-y-auto p-4">
           <div className="mt-6 mb-6">
-            <ContractDetailView contract={selectedContract} onClose={() => setSelectedContract(null)} />
+            <ContractDetailView contract={selectedContract} language={language} onClose={() => setSelectedContract(null)} />
           </div>
         </div>
       )}
