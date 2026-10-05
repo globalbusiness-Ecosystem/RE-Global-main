@@ -56,8 +56,11 @@ const nextConfig = {
             value: 'nosniff',
           },
           {
-            key: 'X-Frame-Options',
-            value: 'SAMEORIGIN',
+            // Single source of truth for framing (vercel.json no longer sets it).
+            // Allows Pi's sandbox/browser to embed the app; blocks everyone else.
+            key: 'Content-Security-Policy',
+            value:
+              "frame-ancestors 'self' https://sandbox.minepi.com https://*.minepi.com https://*.pinet.com",
           },
           {
             key: 'X-XSS-Protection',

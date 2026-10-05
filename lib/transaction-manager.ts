@@ -1,5 +1,7 @@
 'use client';
 
+import { authHeaders } from '@/lib/api-token';
+
 export interface Transaction {
   transactionId: string;
   paymentId: string;
@@ -40,7 +42,7 @@ export class TransactionManager {
     try {
       const response = await fetch(this.apiUrl, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: authHeaders({ 'Content-Type': 'application/json' }),
         body: JSON.stringify({
           userId,
           amount,
