@@ -20,7 +20,8 @@ async function getContract(id: string): Promise<SmartContract | null> {
   }
 }
 
-export default async function VerifyContractPage({ params }: { params: { id: string } }) {
+export default async function VerifyContractPage(props: { params: Promise<{ id: string }> }) {
+  const params = await props.params;
   const contract = await getContract(params.id);
 
   if (!contract) {
