@@ -71,6 +71,9 @@ export interface UserProfile {
   bio: string;
   companyName: string;
   websiteUrl: string;
+  facebookUrl?: string;
+  twitterUrl?: string;
+  instagramUrl?: string;
   emailVerified?: boolean;
   verifiedEmail?: string;
   updatedAt: Date;
@@ -79,6 +82,9 @@ export interface UserProfile {
 export interface UserPreferences {
   username: string;
   notificationsEnabled: boolean;
+  priceAlertsEnabled?: boolean;
+  newListingsEnabled?: boolean;
+  contractUpdatesEnabled?: boolean;
   updatedAt: Date;
 }
 

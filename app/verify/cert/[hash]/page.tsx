@@ -159,7 +159,7 @@ export default function VerifyCertificatePage() {
                       backgroundColor: `${healthScoreColor(report.overallHealthScore)}20`,
                     }}
                   >
-                    {healthScoreLabel(report.overallHealthScore, false)}
+                    {healthScoreLabel(report.overallHealthScore, 'en')}
                   </span>
                 </div>
               </div>

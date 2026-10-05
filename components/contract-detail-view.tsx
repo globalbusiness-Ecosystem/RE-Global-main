@@ -92,7 +92,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
     };
 
     const drawFooter = () => {
-      const pageNum = doc.internal.getNumberOfPages();
+      const pageNum = doc.getNumberOfPages();
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(7);
       doc.setTextColor(140, 140, 140);
