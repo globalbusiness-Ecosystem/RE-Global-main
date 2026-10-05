@@ -20,6 +20,7 @@ export default function AdminDashboard() {
   const [properties, setProperties] = useState<any[]>([]);
   const [tr, setTr] = useState<Record<string, Record<string, string>>>({});
   const [trLoading, setTrLoading] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({
     title: '', price: '', currency: 'Pi', location: '', type: 'buy',
     propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
@@ -76,6 +77,43 @@ export default function AdminDashboard() {
       alert('❌ ' + (e?.message || 'فشلت الترجمة'));
     } finally {
       setTrLoading(false);
+    }
+  };
+
+  // Shrinks the photo in the browser (max 1600px, JPEG) so it uploads fast on mobile data.
+  const shrink = (file: File): Promise<Blob> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const src = URL.createObjectURL(file);
+      img.onload = () => {
+        const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width = Math.round(img.width * scale);
+        c.height = Math.round(img.height * scale);
+        c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(src);
+        c.toBlob(b => (b ? resolve(b) : reject(new Error('تعذر قراءة الصورة'))), 'image/jpeg', 0.85);
+      };
+      img.onerror = () => reject(new Error('تعذر قراءة الصورة'));
+      img.src = src;
+    });
+
+  const uploadImage = async (file: File, target: 'main' | 'extra') => {
+    setUploading(true);
+    try {
+      const blob = await shrink(file);
+      const fd = new FormData();
+      fd.append('file', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
+      const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.error || 'فشل رفع الصورة');
+      setForm(prev => target === 'main'
+        ? { ...prev, image: data.url }
+        : { ...prev, images: prev.images ? prev.images + ', ' + data.url : data.url });
+    } catch (e: any) {
+      alert('❌ ' + (e?.message || 'فشل رفع الصورة'));
+    } finally {
+      setUploading(false);
     }
   };
 
@@ -209,6 +247,17 @@ export default function AdminDashboard() {
             </details>
           ))}
         </div>
+
+        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
+          {([['main', '📷 رفع الصورة الرئيسية'], ['extra', '➕ رفع صورة إضافية']] as const).map(([t, label]) => (
+            <label key={t} style={{ background: '#d4af37', color: 'black', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}>
+              {uploading ? '...جاري الرفع' : label}
+              <input type="file" accept="image/*" disabled={uploading} style={{ display: 'none' }}
+                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadImage(f, t); }} />
+            </label>
+          ))}
+        </div>
+        {form.image && <img src={form.image} alt="" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }} />}
 
         {inp('رابط الصورة الرئيسية', 'image')}
         {inp('روابط صور إضافية (مفصولة بفاصلة)', 'images')}
