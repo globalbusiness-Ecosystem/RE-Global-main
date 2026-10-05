@@ -81,12 +81,12 @@ export default function AdminDashboard() {
   };
 
   // Shrinks the photo in the browser (max 1600px, JPEG) so it uploads fast on mobile data.
-  const shrink = (file: File): Promise<Blob> =>
+  const shrink = (file: File, maxDim = 1600): Promise<Blob> =>
     new Promise((resolve, reject) => {
       const img = new Image();
       const src = URL.createObjectURL(file);
       img.onload = () => {
-        const scale = Math.min(1, 1600 / Math.max(img.width, img.height));
+        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
         const c = document.createElement('canvas');
         c.width = Math.round(img.width * scale);
         c.height = Math.round(img.height * scale);
@@ -98,17 +98,19 @@ export default function AdminDashboard() {
       img.src = src;
     });
 
-  const uploadImage = async (file: File, target: 'main' | 'extra') => {
+  const uploadImage = async (file: File, target: 'main' | 'extra' | 'pano') => {
     setUploading(true);
     try {
-      const blob = await shrink(file);
+      let blob = await shrink(file, target === 'pano' ? 4096 : 1600);
+      if (blob.size > 3.8 * 1024 * 1024) blob = await shrink(file, 2800);
       const fd = new FormData();
       fd.append('file', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
       const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
       const data = await res.json().catch(() => ({}));
       if (!res.ok || !data.url) throw new Error(data.error || 'فشل رفع الصورة');
-      setForm(prev => target === 'main'
-        ? { ...prev, image: data.url }
+      setForm(prev =>
+        target === 'main' ? { ...prev, image: data.url }
+        : target === 'pano' ? { ...prev, vrUrl: data.url }
         : { ...prev, images: prev.images ? prev.images + ', ' + data.url : data.url });
     } catch (e: any) {
       alert('❌ ' + (e?.message || 'فشل رفع الصورة'));
@@ -249,7 +251,7 @@ export default function AdminDashboard() {
         </div>
 
         <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
-          {([['main', '📷 رفع الصورة الرئيسية'], ['extra', '➕ رفع صورة إضافية']] as const).map(([t, label]) => (
+          {([['main', '📷 رفع الصورة الرئيسية'], ['extra', '➕ رفع صورة إضافية'], ['pano', '🥽 رفع بانوراما 360°']] as const).map(([t, label]) => (
             <label key={t} style={{ background: '#d4af37', color: 'black', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}>
               {uploading ? '...جاري الرفع' : label}
               <input type="file" accept="image/*" disabled={uploading} style={{ display: 'none' }}
@@ -257,6 +259,7 @@ export default function AdminDashboard() {
             </label>
           ))}
         </div>
+        {form.vrUrl && <p style={{ color: '#00ff88', fontSize: '13px', marginBottom: '10px' }}>✅ تم رفع البانوراما</p>}
         {form.image && <img src={form.image} alt="" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }} />}
 
         {inp('رابط الصورة الرئيسية', 'image')}
