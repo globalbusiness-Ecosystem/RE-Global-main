@@ -9,6 +9,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { useProperties, Property } from '@/lib/useProperties';
 import { pTitle, pLocation, pDesc } from '@/lib/useProperties';
+import { contractDocLabel } from '@/lib/useProperties';
 
 interface AbroadPageProps {
   language: NavLanguage;
@@ -325,6 +326,16 @@ function FirebaseAbroadModal({
                 </div>
               )}
             </div>
+          )}
+          {prop.contractUrl && (
+            <a
+              href={prop.contractUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-accent underline"
+            >
+              📄 {contractDocLabel(language)}
+            </a>
           )}
           {prop.description && (
             <p className="text-gray-400 text-sm leading-relaxed">

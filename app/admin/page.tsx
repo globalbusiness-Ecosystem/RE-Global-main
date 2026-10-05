@@ -24,7 +24,7 @@ export default function AdminDashboard() {
   const [form, setForm] = useState({
     title: '', price: '', currency: 'Pi', location: '', type: 'buy',
     propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
-    area: '', description: '', image: '', images: '', vrUrl: '',
+    area: '', description: '', image: '', images: '', vrUrl: '', contractUrl: '',
     tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
   });
 
@@ -119,6 +119,22 @@ export default function AdminDashboard() {
     }
   };
 
+  const uploadContract = async (file: File) => {
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/admin/upload-contract', { method: 'POST', body: fd });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.url) throw new Error(data.error || 'فشل رفع العقد');
+      setForm(prev => ({ ...prev, contractUrl: data.url }));
+    } catch (e: any) {
+      alert('❌ ' + (e?.message || 'فشل رفع العقد'));
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleAdd = async () => {
     const res = await fetch('/api/admin/properties', {
       method: 'POST',
@@ -145,7 +161,7 @@ export default function AdminDashboard() {
     setForm({
       title: '', price: '', currency: 'Pi', location: '', type: 'buy',
       propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
-      area: '', description: '', image: '', images: '', vrUrl: '',
+      area: '', description: '', image: '', images: '', vrUrl: '', contractUrl: '',
       tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
     });
     setTr({});
@@ -259,6 +275,15 @@ export default function AdminDashboard() {
             </label>
           ))}
         </div>
+        <div style={{ marginBottom: '10px' }}>
+          <label style={{ display: 'inline-block', background: '#d4af37', color: 'black', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}>
+            {uploading ? '...جاري الرفع' : '📄 رفع عقد PDF'}
+            <input type="file" accept="application/pdf" disabled={uploading} style={{ display: 'none' }}
+              onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadContract(f); }} />
+          </label>
+          {form.contractUrl && <span style={{ color: '#00ff88', fontSize: '13px', marginRight: '10px', marginLeft: '10px' }}>✅ تم رفع العقد</span>}
+        </div>
+
         {form.vrUrl && <p style={{ color: '#00ff88', fontSize: '13px', marginBottom: '10px' }}>✅ تم رفع البانوراما</p>}
         {form.image && <img src={form.image} alt="" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }} />}
 
@@ -301,6 +326,7 @@ export default function AdminDashboard() {
             <p style={{ color: '#777', fontSize: '12px' }}>{p.propertyType} | {p.status}</p>
             {p.tokenized && <span style={{ color: '#00ff88', fontSize: '12px' }}>✅ Tokenized </span>}
             {p.vrUrl && <span style={{ color: '#4488ff', fontSize: '12px' }}>🥽 VR </span>}
+            {p.contractUrl && <span style={{ color: '#d4af37', fontSize: '12px' }}>📄 عقد </span>}
           </div>
           <button onClick={() => handleDelete(p.id)}
             style={{ background: '#ff4444', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>

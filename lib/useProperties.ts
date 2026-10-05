@@ -22,6 +22,7 @@ export interface Property {
   lat?: number;
   lng?: number;
   vrUrl?: string;
+  contractUrl?: string;
   translations?: Record<string, { title?: string; location?: string; description?: string }>;
   createdAt?: any;
 }
@@ -95,4 +96,17 @@ export function pLocation(p: Property, lang: string): string {
 }
 export function pDesc(p: Property, lang: string): string {
   return pick(p, lang, 'description', p.description, p.descriptionAr);
+}
+
+const CONTRACT_DOC_LABEL: Record<string, string> = {
+  en: 'Download contract (PDF)',
+  ar: 'تحميل العقد (PDF)',
+  fr: 'Télécharger le contrat (PDF)',
+  es: 'Descargar contrato (PDF)',
+  pt: 'Baixar contrato (PDF)',
+  ur: 'معاہدہ ڈاؤن لوڈ کریں (PDF)',
+  zh: '下载合同 (PDF)',
+};
+export function contractDocLabel(lang: string): string {
+  return CONTRACT_DOC_LABEL[lang] ?? CONTRACT_DOC_LABEL.en;
 }

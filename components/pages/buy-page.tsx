@@ -11,6 +11,7 @@ import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { pTitle, pLocation, pDesc } from '@/lib/useProperties';
+import { contractDocLabel } from '@/lib/useProperties';
 
 interface BuyPageProps {
   language: NavLanguage;
@@ -309,6 +310,16 @@ function FirebasePropertyModal({
           )}
 
           {/* Description */}
+          {prop.contractUrl && (
+            <a
+              href={prop.contractUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 text-xs font-semibold text-accent underline"
+            >
+              📄 {contractDocLabel(language)}
+            </a>
+          )}
           {prop.description && (
             <p className="text-gray-400 text-sm leading-relaxed">
               {pDesc(prop, language)}

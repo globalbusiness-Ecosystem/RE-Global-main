@@ -67,7 +67,8 @@ export async function POST(req: NextRequest) {
 
   const image = url(b.image);
   const vrUrl = url(b.vrUrl);
-  if (image === null || vrUrl === null) return bad('Invalid URL');
+  const contractUrl = url(b.contractUrl);
+  if (image === null || vrUrl === null || contractUrl === null) return bad('Invalid URL');
   const imagesIn: unknown[] = Array.isArray(b.images) ? b.images : [];
   if (imagesIn.length > 30) return bad('Too many images');
   const images: string[] = [];
@@ -100,6 +101,7 @@ export async function POST(req: NextRequest) {
     image,
     images,
     vrUrl,
+    contractUrl,
     tokenized: b.tokenized === true,
     amenities,
     // useProperties() orders by createdAt, so a listing without it never shows up.

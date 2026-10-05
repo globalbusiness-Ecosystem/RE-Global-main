@@ -1,0 +1,54 @@
+import 'server-only';
+import { NextRequest, NextResponse } from 'next/server';
+import { randomUUID } from 'crypto';
+import { getStorage } from 'firebase-admin/storage';
+import { adminDb } from '@/lib/firebase-admin';
+import { isAdminRequest } from '@/lib/admin-session';
+
+export const dynamic = 'force-dynamic';
+
+const MAX_BYTES = 4 * 1024 * 1024;
+
+export async function POST(req: NextRequest) {
+  if (!(await isAdminRequest(req))) {
+    return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+  }
+  const bucketName = process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET;
+  if (!bucketName) return NextResponse.json({ ok: false, error: 'Storage bucket not configured' }, { status: 500 });
+
+  let file: File | null = null;
+  try {
+    const form = await req.formData();
+    const f = form.get('file');
+    if (f instanceof File) file = f;
+  } catch {
+    return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
+  }
+  if (!file) return NextResponse.json({ ok: false, error: 'No file' }, { status: 400 });
+  if (file.size > MAX_BYTES) return NextResponse.json({ ok: false, error: 'File too large (max 4MB)' }, { status: 400 });
+
+  const bytes = Buffer.from(await file.arrayBuffer());
+  if (bytes.subarray(0, 5).toString('latin1') !== '%PDF-') {
+    return NextResponse.json({ ok: false, error: 'Only PDF files are allowed' }, { status: 400 });
+  }
+
+  try {
+    void adminDb; // ensures the admin app is initialised
+    const bucket = getStorage().bucket(bucketName);
+    const path = `contract-docs/${Date.now()}-${randomUUID()}.pdf`;
+    const token = randomUUID();
+    await bucket.file(path).save(bytes, {
+      resumable: false,
+      metadata: {
+        contentType: 'application/pdf',
+        cacheControl: 'public, max-age=31536000',
+        metadata: { firebaseStorageDownloadTokens: token },
+      },
+    });
+    const url = `https://firebasestorage.googleapis.com/v0/b/${bucketName}/o/${encodeURIComponent(path)}?alt=media&token=${token}`;
+    return NextResponse.json({ ok: true, url });
+  } catch (err) {
+    console.error('[admin/upload-contract] error:', err);
+    return NextResponse.json({ ok: false, error: 'Upload failed (is Storage enabled?)' }, { status: 502 });
+  }
+}
