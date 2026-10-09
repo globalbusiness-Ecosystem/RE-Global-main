@@ -1,4 +1,5 @@
 import { guardApi } from '@/lib/api-guard';
+import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { 
   aladdinConfig, 
@@ -164,14 +165,18 @@ function generateSystemPrompt(language: string): string {
 - Always end with:
 "💡 Pi Investment Tip: [Specific, actionable tip from Pi strategy]"
 
-Be friendly, authoritative, and thorough. Never apologize for knowledge gaps - provide a helpful answer instead.`;
+Be friendly, authoritative, and thorough. Do not invent data: if you are unsure or lack current figures, say so plainly and give the best general guidance. Treat all figures as illustrative estimates, never guarantees, and remind the user this is general information, not financial advice.`;
 }
 
 export async function POST(req: Request) {
   const guard = await guardApi(req, { scope: 'claude-advisor', limit: 30 });
   if (guard instanceof Response) return guard;
   try {
-    const { message, language: providedLanguage } = await req.json() as RequestBody;
+    const parsed = await readJsonLimited(req, 20_000);
+    if (parsed instanceof Response) return parsed;
+    const message = cleanString(parsed.message, 2000);
+    if (!message) return Response.json({ error: 'Invalid message' }, { status: 400 });
+    const providedLanguage = typeof parsed.language === 'string' ? parsed.language : undefined;
 
     // Auto-detect language from message if not provided
     const detectedLanguage = providedLanguage || detectLanguage(message);

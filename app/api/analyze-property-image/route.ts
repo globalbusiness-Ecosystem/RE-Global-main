@@ -1,4 +1,5 @@
 import { guardApi } from '@/lib/api-guard';
+import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -10,11 +11,14 @@ export async function POST(request: NextRequest) {
   const guard = await guardApi(request, { scope: 'analyze-image', limit: 10 });
   if (guard instanceof Response) return guard;
   try {
-    const { imageUrl } = await request.json();
-
-    if (!imageUrl) {
+    const parsedBody = await readJsonLimited(request, 10_000);
+    if (parsedBody instanceof Response) return parsedBody;
+    const imageUrl = cleanString(parsedBody.imageUrl, 2000);
+    let httpsUrl = false;
+    try { httpsUrl = new URL(imageUrl ?? '').protocol === 'https:'; } catch { /* invalid */ }
+    if (!imageUrl || !httpsUrl) {
       return NextResponse.json(
-        { error: 'Image URL is required' },
+        { error: 'A valid https image URL is required' },
         { status: 400 }
       );
     }
@@ -28,7 +32,7 @@ export async function POST(request: NextRequest) {
         'content-type': 'application/json',
       },
       body: JSON.stringify({
-        model: 'claude-3-5-sonnet-20241022',
+        model: 'claude-sonnet-5-5',
         max_tokens: 1024,
         messages: [
           {

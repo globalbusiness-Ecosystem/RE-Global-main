@@ -1,40 +1,36 @@
-import { NextRequest, NextResponse } from 'next/server';
+import 'server-only';
+import { NextResponse } from 'next/server';
+import { adminDb } from '@/lib/firebase-admin';
 
-export async function GET(request: NextRequest) {
-  try {
-    const checks = {
-      api: true,
-      database: await checkDatabase(),
-      services: await checkServices(),
-      timestamp: new Date().toISOString(),
-    };
+export const dynamic = 'force-dynamic';
 
-    return NextResponse.json({
-      status: 'healthy',
-      checks,
-    });
-  } catch (error) {
-    return NextResponse.json({
-      status: 'unhealthy',
-      error: error instanceof Error ? error.message : 'Unknown error',
-    }, { status: 500 });
-  }
+// Real health check: returns 200 only if Firestore answers and the Pi API key is
+// configured, otherwise 503. Deliberately exposes booleans only (no env values,
+// no error text), since this endpoint is public.
+function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
+  return Promise.race([
+    p,
+    new Promise<never>((_, reject) => setTimeout(() => reject(new Error('timeout')), ms)),
+  ]);
 }
 
-async function checkDatabase(): Promise<boolean> {
+export async function GET() {
+  let database = false;
   try {
-    // Validate Firebase connection
-    return true;
+    await withTimeout(adminDb.collection('settings').doc('global').get(), 3000);
+    database = true;
   } catch {
-    return false;
+    database = false;
   }
-}
+  const payments = Boolean(process.env.PI_API_KEY);
+  const healthy = database && payments;
 
-async function checkServices(): Promise<Record<string, boolean>> {
-  return {
-    network: true,
-    auth: true,
-    payments: true,
-    whatsapp: true,
-  };
+  return NextResponse.json(
+    {
+      status: healthy ? 'healthy' : 'degraded',
+      checks: { api: true, database, payments },
+      timestamp: new Date().toISOString(),
+    },
+    { status: healthy ? 200 : 503, headers: { 'Cache-Control': 'no-store' } }
+  );
 }

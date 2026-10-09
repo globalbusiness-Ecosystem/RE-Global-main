@@ -1,4 +1,5 @@
 import { guardApi } from '@/lib/api-guard';
+import { readJsonLimited, validateMessages } from '@/lib/ai-input';
 import { streamText, convertToModelMessages } from 'ai';
 
 interface UserContext {
@@ -16,7 +17,16 @@ export async function POST(req: Request) {
   const guard = await guardApi(req, { scope: 'advisor', limit: 30 });
   if (guard instanceof Response) return guard;
   try {
-    const { messages, userContext } = await req.json() as RequestBody;
+    const parsed = await readJsonLimited(req, 100_000);
+    if (parsed instanceof Response) return parsed;
+    const { messages, userContext } = parsed as unknown as RequestBody;
+    const invalid = validateMessages(messages);
+    if (invalid) return invalid;
+    // Identity comes from the verified token; the balance must be a finite number.
+    if (userContext && typeof userContext === 'object') {
+      userContext.username = guard.username;
+      if (typeof userContext.balance !== 'number' || !Number.isFinite(userContext.balance)) userContext.balance = 0;
+    }
 
     // Property database indexed by user balance for recommendations
     const propertyRecommendations = {
@@ -42,7 +52,7 @@ export async function POST(req: Request) {
     // Market trends data
     const marketTrends = {
       en: `
-📊 CURRENT MARKET TRENDS (Q1 2026):
+📊 ILLUSTRATIVE MARKET OVERVIEW (static estimates, Q1 2026 — not live data):
 
 🌍 GLOBAL MARKETS:
 • Dubai: +15% YoY appreciation, strong demand for off-plan
@@ -65,7 +75,7 @@ export async function POST(req: Request) {
 • Premium (75+π): Portfolio diversification and wealth preservation
       `,
       ar: `
-📊 اتجاهات السوق الحالية (Q1 2026):
+📊 نظرة عامة توضيحية على السوق (تقديرات ثابتة، الربع الأول 2026 — ليست بيانات حية):
 
 🌍 الأسواق العالمية:
 • دبي: +15% سنويًا، طلب قوي على المشاريع قيد الإنشاء
@@ -132,7 +142,9 @@ ${trends}
 TOP PROPERTIES FOR ${userContext?.username || 'THIS USER'} (${budgetTier.toUpperCase()} TIER):
 ${recommendations.map((p: any, i: number) => `   ${i + 1}. ${p.name} (${p.country}) - ${p.price}π - ${p.type} - ROI: ${p.roi}`).join('\n')}
 
-TONE: Friendly, professional, enthusiastic about real estate and Pi Network. Always encourage action and exploration.
+TONE: Friendly, professional, enthusiastic about real estate and Pi Network. Encourage exploration.
+
+IMPORTANT: Every ROI, price and market figure above is an illustrative estimate, not live data and not a guarantee. When you mention returns or suggest investing, say so briefly and remind the user this is general information, not financial advice.
 
 REMEMBER: Answer in the same language the user is using. Always respond with specific property or market advice.`;
 

@@ -1375,7 +1375,7 @@ const PROPERTY_DATABASE = {
 };
 
 const MARKET_TRENDS = {
-  en: `📊 CURRENT MARKET TRENDS (Q1 2026):
+  en: `📊 ILLUSTRATIVE MARKET OVERVIEW (static estimates, Q1 2026 — not live data):
 
 🌍 TOP PERFORMING MARKETS:
 • Dubai: +15% YoY appreciation, strong off-plan demand
@@ -1396,7 +1396,7 @@ const MARKET_TRENDS = {
 • Budget investors (under 15π): Diversify across 3-5 properties
 • Moderate (15-75π): Balance growth and income streams
 • Premium (75+π): Portfolio diversification across continents`,
-  ar: `📊 اتجاهات السوق الحالية (Q1 2026):
+  ar: `📊 نظرة عامة توضيحية على السوق (تقديرات ثابتة، الربع الأول 2026 — ليست بيانات حية):
 
 🌍 أفضل الأسواق الأداء:
 • دبي: +15% سنويًا، طلب قوي على المشاريع
@@ -2237,6 +2237,11 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               <Send className="w-4 h-4" />
             </button>
           </form>
+          <p className="mt-2 text-[10px] leading-snug text-gray-500 text-center">
+            {language !== 'ar'
+              ? 'General information only, not financial or legal advice. Figures are illustrative estimates, not live data.'
+              : 'معلومات عامة فقط وليست نصيحة مالية أو قانونية. الأرقام تقديرية توضيحية وليست بيانات حية.'}
+          </p>
         </div>
       </div>
     </div>

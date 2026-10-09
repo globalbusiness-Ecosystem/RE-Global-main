@@ -1,4 +1,5 @@
 import { guardApi } from '@/lib/api-guard';
+import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { NextRequest, NextResponse } from 'next/server';
 
 /**
@@ -92,8 +93,10 @@ export async function POST(request: NextRequest) {
   const guard = await guardApi(request, { scope: 'market-research', limit: 10 });
   if (guard instanceof Response) return guard;
   try {
-    const body: MarketResearchRequest = await request.json();
-    const { location, language = 'en' } = body;
+    const parsedBody = await readJsonLimited(request, 5_000);
+    if (parsedBody instanceof Response) return parsedBody;
+    const location = cleanString(parsedBody.location, 100) ?? '';
+    const language: 'ar' | 'en' = parsedBody.language === 'ar' ? 'ar' : 'en';
 
     if (!location) {
       return NextResponse.json(

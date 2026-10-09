@@ -31,7 +31,7 @@ export function generatePropertyQRUrl(
   baseUrl?: string
 ): string {
   const url = baseUrl || (typeof window !== 'undefined' ? window.location.origin : 'https://re.pi');
-  const propertyLink = `${url}?property=${propertyId}`;
+  const propertyLink = `${url}?property=${encodeURIComponent(propertyId)}`;
   const encodedUrl = encodeURIComponent(propertyLink);
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&data=${encodedUrl}`;
 }

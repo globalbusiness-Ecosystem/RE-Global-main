@@ -1,4 +1,5 @@
 import { guardApi } from '@/lib/api-guard';
+import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
 interface AnalysisResponse {
@@ -28,9 +29,13 @@ export async function POST(req: Request) {
   const guard = await guardApi(req, { scope: 'analyze-photo', limit: 10 });
   if (guard instanceof Response) return guard;
   try {
-    const { imageData, city, country, language = 'en' } = await req.json();
+    const parsedBody = await readJsonLimited(req, 8_000_000);
+    if (parsedBody instanceof Response) return parsedBody;
+    const { imageData, language = 'en' } = parsedBody as any;
+    const city = cleanString(parsedBody.city, 80) ?? '';
+    const country = cleanString(parsedBody.country, 80) ?? '';
 
-    if (!imageData) {
+    if (!imageData || typeof imageData !== 'string') {
       return Response.json(
         { success: false, error: 'No image provided' },
         { status: 400 }
