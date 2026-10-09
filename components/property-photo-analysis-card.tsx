@@ -87,7 +87,7 @@ export default memo(function PropertyPhotoAnalysisCard({
   language = 'en',
   onInvest,
 }: PropertyPhotoAnalysisCardProps) {
-  const currentLabels = labels[language];
+  const currentLabels = labels[language === 'ar' ? 'ar' : 'en'];
   const conditionStyle = conditionColors[analysis.condition];
 
   return (

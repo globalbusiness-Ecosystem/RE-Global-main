@@ -1,1 +1,64 @@
-const CACHE_NAME='re-platform-v2';const TILE_CACHE='re-tiles-v1';const DATA_CACHE='re-data-v1';const URLS_TO_CACHE=['/','/offline.html'];const TILE_PATTERNS=[/leaflet.*tile.*openstreetmap/,/^https:\/\/.*.tile.openstreetmap.org\//];const DATA_PATTERNS=[/\/api\//,/property|properties/];self.addEventListener('install',event=>{self.skipWaiting();event.waitUntil((async()=>{try{const cache=await caches.open(CACHE_NAME);await cache.addAll(URLS_TO_CACHE);}catch(e){console.error('Cache install error:',e);}})());});self.addEventListener('fetch',event=>{const{request}=event;if(request.method!=='GET'){return;}const url=new URL(request.url);const isTile=TILE_PATTERNS.some(p=>p.test(url.href));const isData=DATA_PATTERNS.some(p=>p.test(url.href));if(isTile){event.respondWith((async()=>{try{const cache=await caches.open(TILE_CACHE);const response=await cache.match(request);if(response)return response;const fetchResp=await fetch(request);if(!fetchResp||fetchResp.status!==200||fetchResp.type!=='basic'){return fetchResp;}const respToCache=fetchResp.clone();cache.put(request,respToCache);return fetchResp;}catch(e){return caches.match(request)||new Response('Tile unavailable',{status:404});}})());}else if(isData){event.respondWith((async()=>{try{const fetchResp=await fetch(request);if(fetchResp&&fetchResp.status===200){const cache=await caches.open(DATA_CACHE);const respToCache=fetchResp.clone();cache.put(request,respToCache);}return fetchResp;}catch(e){const cache=await caches.open(DATA_CACHE);return cache.match(request)||new Response(JSON.stringify({error:'Offline'}),{status:503,headers:{'Content-Type':'application/json'}});}})());}else{event.respondWith((async()=>{try{return await fetch(request);}catch(e){const cache=await caches.open(CACHE_NAME);return cache.match(request)||new Response('Resource unavailable',{status:404});}})());}});self.addEventListener('activate',event=>{const cacheWhitelist=[CACHE_NAME,TILE_CACHE,DATA_CACHE];event.waitUntil((async()=>{const cacheNames=await caches.keys();await Promise.all(cacheNames.map(cacheName=>{if(!cacheWhitelist.includes(cacheName)){return caches.delete(cacheName);}}));await self.clients.claim();})());});
+// RE Platform service worker.
+// - Caches the offline fallback page and map tiles only.
+// - Never caches /api/* or Firestore traffic: those responses are per-user
+//   (authenticated) and must not be replayed stale or to another user.
+const CACHE_NAME = 're-platform-v3';
+const TILE_CACHE = 're-tiles-v1';
+const OFFLINE_URL = '/offline.html';
+const TILE_PATTERN = /^https:\/\/[a-z0-9.-]*tile\.openstreetmap\.(org|de)\//;
+
+self.addEventListener('install', (event) => {
+  self.skipWaiting();
+  event.waitUntil(
+    caches
+      .open(CACHE_NAME)
+      .then((cache) => cache.addAll([OFFLINE_URL]))
+      .catch((e) => console.error('Cache install error:', e))
+  );
+});
+
+self.addEventListener('activate', (event) => {
+  const keep = [CACHE_NAME, TILE_CACHE];
+  event.waitUntil(
+    (async () => {
+      const names = await caches.keys();
+      await Promise.all(names.filter((n) => !keep.includes(n)).map((n) => caches.delete(n)));
+      await self.clients.claim();
+    })()
+  );
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+
+  // Map tiles: cache-first.
+  if (TILE_PATTERN.test(request.url)) {
+    event.respondWith(
+      (async () => {
+        const cache = await caches.open(TILE_CACHE);
+        const hit = await cache.match(request);
+        if (hit) return hit;
+        try {
+          const res = await fetch(request);
+          if (res && res.status === 200) cache.put(request, res.clone());
+          return res;
+        } catch {
+          return new Response('Tile unavailable', { status: 404 });
+        }
+      })()
+    );
+    return;
+  }
+
+  // Page navigations: network first, offline page when the network is down.
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request).catch(async () => {
+        const cache = await caches.open(CACHE_NAME);
+        return (await cache.match(OFFLINE_URL)) || new Response('Offline', { status: 503 });
+      })
+    );
+  }
+  // Everything else (including /api/*): default browser handling, no caching.
+});

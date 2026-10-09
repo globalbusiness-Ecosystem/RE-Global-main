@@ -12,7 +12,6 @@ const nextConfig = {
   // Aggressive Performance optimizations
   compress: true,
   productionBrowserSourceMaps: false,
-  swcMinify: true,
   // Enable React strict mode for development to catch issues
   reactStrictMode: true,
   // Optimize CSS-in-JS
@@ -35,8 +34,6 @@ const nextConfig = {
       'recharts',
       'leaflet',
     ],
-    // Enable React Server Components optimizations
-    reactRoot: true,
   },
   // HTTP headers for caching and performance
   headers: async () => {

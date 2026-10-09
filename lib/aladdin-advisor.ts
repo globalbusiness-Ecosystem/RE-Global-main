@@ -73,7 +73,7 @@ export class AladdinAdvisor {
     const tokenizedShares = Math.floor(piEquivalent / 10);
 
     const response: AladdinResponse = {
-      message: `${this.strings[language].marketAnalysis} ${market.city}, ${market.country}`,
+      message: `${this.strings[language === 'ar' ? 'ar' : 'en'].marketAnalysis} ${market.city}, ${market.country}`,
       language,
       marketData: {
         city: market.city,
@@ -91,9 +91,9 @@ export class AladdinAdvisor {
         minimumInvestment: Math.floor(piEquivalent * 0.1),
       },
       cta: [
-        this.strings[language].investNow,
-        this.strings[language].whatsappSupport,
-        this.strings[language].viewListings,
+        this.strings[language === 'ar' ? 'ar' : 'en'].investNow,
+        this.strings[language === 'ar' ? 'ar' : 'en'].whatsappSupport,
+        this.strings[language === 'ar' ? 'ar' : 'en'].viewListings,
       ]
     };
 
@@ -125,8 +125,8 @@ export class AladdinAdvisor {
       language,
       recommendations: suitable,
       cta: [
-        this.strings[language].investNow,
-        this.strings[language].whatsappSupport,
+        this.strings[language === 'ar' ? 'ar' : 'en'].investNow,
+        this.strings[language === 'ar' ? 'ar' : 'en'].whatsappSupport,
       ]
     };
   }
@@ -170,8 +170,8 @@ export class AladdinAdvisor {
         comparison,
       },
       cta: [
-        this.strings[language].investNow,
-        this.strings[language].whatsappSupport,
+        this.strings[language === 'ar' ? 'ar' : 'en'].investNow,
+        this.strings[language === 'ar' ? 'ar' : 'en'].whatsappSupport,
       ]
     };
   }
@@ -181,9 +181,9 @@ export class AladdinAdvisor {
    */
   generateCTA(language: 'en' | 'ar' = 'en'): string[] {
     return [
-      this.strings[language].investNow,
-      this.strings[language].whatsappSupport,
-      this.strings[language].viewListings,
+      this.strings[language === 'ar' ? 'ar' : 'en'].investNow,
+      this.strings[language === 'ar' ? 'ar' : 'en'].whatsappSupport,
+      this.strings[language === 'ar' ? 'ar' : 'en'].viewListings,
     ];
   }
 }

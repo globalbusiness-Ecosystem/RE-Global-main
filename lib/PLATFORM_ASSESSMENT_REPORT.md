@@ -86,7 +86,7 @@ listings - القوائم النشطة
 **الحالة**: ⚠️ محسّن لكن ناقص
 
 #### الموجود:
-- ✅ Admin PIN (202500)
+- ✅ Admin PIN (configured via the ADMIN_PIN env var)
 - ✅ 2FA Logic في auth-manager
 - ✅ Input Validation
 

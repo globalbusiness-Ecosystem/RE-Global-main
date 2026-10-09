@@ -63,7 +63,7 @@ export function AdvancedPaymentButton({
         tokenized: 'رمز'
       }
     };
-    return texts[language][transactionType];
+    return texts[language === 'ar' ? 'ar' : 'en'][transactionType];
   };
 
   const handlePayment = async () => {

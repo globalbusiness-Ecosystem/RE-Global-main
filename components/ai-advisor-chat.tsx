@@ -1556,10 +1556,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
   // Initialize with greeting message
   useEffect(() => {
     const greeting = userContext?.username 
-      ? (language === 'en' 
+      ? (language !== 'ar' 
         ? `Hi ${userContext.username}! I'm Aladdin, your world-class real estate advisor on Pi Network. With your Pi balance of ${userContext.balance || 0} π, I can guide you through global property markets in UAE, Egypt, Saudi Arabia, USA, UK, Europe, and Asia. I specialize in investment strategies, ROI analysis, Golden Visa programs, off-plan risks, Pi payments, mortgages, market trends, and legal advice by country. What property insights do you need today?`
         : `مرحبا ${userContext.username}! أنا علاء الدين، مستشارك العقاري العالمي على شبكة Pi. برصيدك من ${userContext.balance || 0} π، يمكنني إرشادك عبر الأسواق العقارية العالمية في الإمارات ومصر والسعودية وأمريكا والمملكة المتحدة وأوروبا وآسيا. أتخصص في استراتيجيات الاستثمار وتحليل العوائد والتأشيرات الذهبية والمخاطر والدفع بـ Pi والرهن العقاري والاتجاهات والقوانين. ما البصائر العقارية التي تحتاجها؟`)
-      : (language === 'en'
+      : (language !== 'ar'
         ? 'Hi! I\'m Aladdin, your world-class real estate advisor. I answer ANY question about global property markets, investments, ROI, legal advice, Pi payments, mortgages, and market trends. What can I help with?'
         : 'مرحبا! أنا علاء الدين، مستشارك العقاري العالمي. أجيب على ANY سؤال عن الأسواق العقارية والاستثمارات والعوائد والقانون والدفع بـ Pi والرهن والاتجاهات. كيف يمكنني مساعدتك؟');
 
@@ -1720,16 +1720,16 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
     // Helper: build contextual follow-up suggestions based on intent
     const buildFollowUp = (intent: string, country: string): string => {
       const followUps: Record<string, string> = {
-        legal: language === 'en'
+        legal: language !== 'ar'
           ? "\n\n💬 You might also want to ask:\n• \"What are the tax implications in ${country}?\"\n• \"How do I verify a property title in ${country}?\"\n• \"What documents do I need for ${country} property purchase?\""
           : "\n\n💬 قد توسّع سؤالك:\n• \"ما الآثار الضريبية في ${country}؟\"\n• \"كيف أتحقّق من سند ملكية في ${country}؟\"\n• \"ما المستندات المطلوبة لشراء عقار في ${country}؟\"",
-        property: language === 'en'
+        property: language !== 'ar'
           ? "\n\n💬 Consider exploring:\n• \"Show me ${country} properties in my budget tier\"\n• \"What is the ROI trend for ${country} real estate?\"\n• \"How does Pi payment work for ${country} properties?\""
           : "\n\n💬 قد تفضّل استكشاف:\n• \"أرني عقارات ${country} ضمن مثالي المالي\"\n• \"ما اتجاه عائد الاستثمار لعقارات ${country}؟\"\n• \"كيف يعمل دفع Pi لعقارات ${country}؟\"",
-        market: language === 'en'
+        market: language !== 'ar'
           ? "\n\n💬 You might also ask:\n• \"Which property type performs best in ${country}?\"\n• \"What is the entry price for ${country} real estate?\"\n• \"How do I get started investing in ${country}?\""
           : "\n\n💬 قد توسّع سؤالك:\n• \"أي نوع عقار الأداء الأفضل في ${country}؟\"\n• \"ما سعر الدخول للعقارات في ${country}؟\"\n• \"كيف أبدأ الاستثمار في ${country}؟\"",
-        default: language === 'en'
+        default: language !== 'ar'
           ? "\n\n💬 You can also ask about:\n• Specific country laws and regulations\n• Pi Network payment advantages\n• Golden Visa programs\n• Mortgage and financing options\n• Market comparisons between cities"
           : "\n\n💬 يمكنك أيضًا السؤال عن:\n• القوانين واللوائح حسب الدول\n• مميزات دفع Pi Network\n• برامج التأشيرات الذهبية\n• خيارات الرهن العقاري والتمويل\n• مقارنات السوق بين المدن",
       };
@@ -1740,9 +1740,9 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
       const country = detectCountry();
       // Route to Claude if country is not supported (default UAE or unsupported)
       if (!isSupportedCountry(country) || isDefaultFallbackUae()) return null;
-      const legalLang = (language === 'en' ? 'en' : 'ar') as 'en' | 'ar';
+      const legalLang = (language !== 'ar' ? 'en' : 'ar') as 'en' | 'ar';
       const legalInfo = LEGAL_FRAMEWORK[legalLang][country as keyof typeof LEGAL_FRAMEWORK[typeof legalLang]];
-      const disclaimer = language === 'en'
+      const disclaimer = language !== 'ar'
         ? '\n\n⚠️ LEGAL DISCLAIMER: This is general legal guidance only. It is not a substitute for professional legal advice. Always consult a licensed lawyer in your jurisdiction before making any real estate decisions or signing contracts.'
         : '\n\n⚠️ تنويه قانوني: هذا إرشاد قانوني عام فقط. إنه ليس بديلاً عن المشورة القانونية المتخصصة. استشر دائماً محامياً مرخصاً في نطاقك القضائي قبل اتخاذ أي قرار عقاري أو توقيع عقود.';
       return legalInfo + disclaimer + buildFollowUp('legal', country);
@@ -1753,7 +1753,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
       // Pi payment keywords (broadened detection)
       if (lowerMessage.includes('pi') && (lowerMessage.includes('pay') || lowerMessage.includes('transaction') || lowerMessage.includes('wallet') || lowerMessage.includes('invest') || lowerMessage.includes('payment') || lowerMessage.includes('transfer') || lowerMessage.includes('how') || lowerMessage.includes('work') || lowerMessage.includes('use') || lowerMessage.includes('advantage') || lowerMessage.includes('benefit') || lowerMessage.includes('start') || lowerMessage.includes('minimum') || lowerMessage.includes('دفع') || lowerMessage.includes('شراء') || lowerMessage.includes('معاملة') || lowerMessage.includes('محفظة') || lowerMessage.includes('استثمر') || lowerMessage.includes('استثمار') || lowerMessage.includes('تحويل') || lowerMessage.includes('كيف') || lowerMessage.includes('يعمل') || lowerMessage.includes('مميزات') || lowerMessage.includes('فائدة') || lowerMessage.includes('ابدأ') || lowerMessage.includes('أدنى') || lowerMessage.includes('الحد'))) {
 
-        return PI_PAYMENTS_GUIDE[language] + (language === 'en' ? "\n\n💬 Want to know more? Ask about specific Pi payment scenarios." : "\n\n💬 تريد معرفة المزيد؟ اسأل عن سيناريوهات دفع Pi المحددة.");
+        return PI_PAYMENTS_GUIDE[language === 'ar' ? 'ar' : 'en'] + (language !== 'ar' ? "\n\n💬 Want to know more? Ask about specific Pi payment scenarios." : "\n\n💬 تريد معرفة المزيد؟ اسأل عن سيناريوهات دفع Pi المحددة.");
       }
 
       // City comparison (Dubai vs Cairo, etc) — enhanced with strategic advice
@@ -1768,7 +1768,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
       const cityCount = [hasDubai, hasCairo, hasLondon, hasSingapore, hasTokyo].filter(Boolean).length;
       const isComparison = hasComparisonWord || cityCount >= 2;
       if (isComparison) {
-        const comparison = language === 'en'
+        const comparison = language !== 'ar'
           ? `🏙️ DUBAI VS CAIRO COMPARISON:\n\nDUBAI:\n• Price Range: 10-250π\n• Expected ROI: 10-15% annually\n• Property Types: Luxury, Off-Plan, Hotels\n• Market Growth: +15% YoY\n• Best For: Premium investors seeking high returns\n\nCAIRO:\n• Price Range: 3-20π\n• Expected ROI: 6-12% annually\n• Property Types: Residential, Apartments, Studios\n• Market Growth: +12% YoY\n• Best For: New investors starting their portfolio\n\n💡 RECOMMENDATION:\n• Start in Cairo if new (lower entry point)\n• Diversify between both cities for balanced growth\n• Dubai for premium properties, Cairo for value`
           : `🏙️ مقارنة دبي والقاهرة:\n\nدبي:\n• نطاق الأسعار: 10-250π\n• العائد المتوقع: 10-15% سنويًا\n• أنواع العقارات: فاخرة، مشاريع، فنادق\n• نمو السوق: +15% سنويًا\n• الأفضل للـ: المستثمرين المتقدمين\n\nالقاهرة:\n• نطاق الأسعار: 3-20π\n• العائد المتوقع: 6-12% سنويًا\n• أنواع العقارات: سكنية، شقق، استوديوهات\n• نمو السوق: +12% سنويًا\n• الأفضل للـ: المستثمرين الجدد\n\n💡 التوصية:\n• ابدأ بالقاهرة إذا كنت جديدًا\n• تنوع بين كلا المدينتين\n• دبي للعقارات الفاخرة`;
         return comparison;
@@ -1778,10 +1778,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         const country = detectCountry();
         // Only serve market insights for supported countries; otherwise route to Claude
         if (!isSupportedCountry(country) || isDefaultFallbackUae()) return null;
-        const marketIntro = language === 'en'
+        const marketIntro = language !== 'ar'
           ? `📊 MARKET INSIGHTS — Focus: ${country}\n\n`
           : `📊 رؤى السوق — التركيز: ${country}\n\n`;
-        return marketIntro + MARKET_TRENDS[language] + buildFollowUp('market', country);
+        return marketIntro + MARKET_TRENDS[language === 'ar' ? 'ar' : 'en'] + buildFollowUp('market', country);
       }
 
       // Property recommendation: explicit intent to get property suggestions
@@ -1809,7 +1809,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         // Only serve property recommendations for supported countries; otherwise route to Claude
         if (!isSupportedCountry(country) || isDefaultFallbackUae()) return null;
 
-        const response = language === 'en'
+        const response = language !== 'ar'
           ? `🏆 TOP RECOMMENDED PROPERTIES FOR YOUR PORTFOLIO:\n\n${topThree.map((p, i) => `${i + 1}. ${p.name}\n   📍 ${p.country} | 💰 ${p.price}π | 🏠 ${p.type} | 📈 ROI: ${p.roi}`).join('\n\n')}\n\nThese properties are matched to your Pi balance of ${balance}π. ${balance < 10 ? 'I recommend starting with the most accessible option and building your portfolio gradually.' : balance >= 50 ? 'With your balance level, you can diversify across multiple properties for optimal returns.' : 'Start with one property and expand your portfolio over time.'}\n${buildFollowUp('property', country)}`
           : `🏆 أفضل العقارات الموصى بها لمحفظتك:\n\n${topThree.map((p, i) => `${i + 1}. ${p.name}\n   📍 ${p.country} | 💰 ${p.price}π | 🏠 ${p.type} | 📈 العائد: ${p.roi}`).join('\n\n')}\n\n${balance < 10 ? 'أنصحك بالبدء بالخيار الأبسط وبناء محفظتك تدريجيًا.' : balance >= 50 ? 'برصيدك، يمكنك التنويع عبر عقارات متعددة لتحقيق أفضل عائد.' : 'ابدأ بعقار واحد وطور محفظتك مع الوقت.'}\n${buildFollowUp('property', country)}`;
         return response;
@@ -1824,7 +1824,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
     if (hasGeneralKeywords(userMessage)) {
       // Only serve general advice for supported countries; otherwise route to Claude
       if (!countryIsSupported || isDefaultFallbackUae()) return null;
-      return GENERAL_ADVICE[language] + buildFollowUp('default', 'Global');
+      return GENERAL_ADVICE[language === 'ar' ? 'ar' : 'en'] + buildFollowUp('default', 'Global');
     }
 
     // LOGIC 3: Any other question - Send to Claude API
@@ -1895,7 +1895,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             // If Claude fails, still show an error message but not a refusal
             const errorMessage: Message = {
               role: 'assistant',
-              content: language === 'en'
+              content: language !== 'ar'
                 ? 'I encountered an issue processing your question. Please try again.'
                 : 'واجهت مشكلة في معالجة سؤالك. يرجى المحاولة مرة أخرى.',
               id: 'assistant-' + Date.now(),
@@ -1907,7 +1907,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           // Still show a helpful message, not a refusal
           const errorMessage: Message = {
             role: 'assistant',
-            content: language === 'en'
+            content: language !== 'ar'
               ? 'I encountered an issue processing your question. Please try again.'
               : 'واجهت مشكلة في معالجة سؤالك. يرجى المحاولة مرة أخرى.',
             id: 'assistant-' + Date.now(),
@@ -1949,7 +1949,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         // Add user message with photo
         const userMessage: Message = {
           role: 'user',
-          content: language === 'en' ? '📸 Analyzing property photo...' : '📸 جاري تحليل صورة العقار...',
+          content: language !== 'ar' ? '📸 Analyzing property photo...' : '📸 جاري تحليل صورة العقار...',
           id: 'user-photo-' + Date.now(),
           photoUrl: imageData,
         };
@@ -1974,7 +1974,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             // Add analysis message
             const analysisMessage: Message = {
               role: 'assistant',
-              content: language === 'en' 
+              content: language !== 'ar' 
                 ? `✅ Property analysis complete! I've detected a ${data.analysis.roomType} in ${selectedCity}. The property appears to be in ${data.analysis.condition.toLowerCase()} condition with excellent investment potential.`
                 : `✅ اكتمل تحليل العقار! اكتشفت ${data.analysis.roomType} في ${selectedCity}. يبدو أن العقار في حالة ${data.analysis.condition} مع إمكانات استثمار ممتازة.`,
               id: 'assistant-analysis-' + Date.now(),
@@ -1989,7 +1989,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           console.error('[v0] Photo analysis error:', error);
           const errorMessage: Message = {
             role: 'assistant',
-            content: language === 'en' 
+            content: language !== 'ar' 
               ? 'I encountered an issue analyzing the photo. Please ensure it shows a clear property view and try again.'
               : 'واجهت مشكلة في تحليل الصورة. يرجى التأكد من أن الصورة تعرض منظر عقار واضح والمحاولة مرة أخرى.',
             id: 'assistant-error-' + Date.now(),
@@ -2023,12 +2023,12 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">
-                {language === 'en'
+                {language !== 'ar'
                   ? 'Aladdin AI'
                   : 'علاء الدين'}
               </h2>
               <p className="text-xs text-gray-400">
-                {language === 'en' ? 'World-Class Real Estate Advisor' : 'مستشار عقاري عالمي'}
+                {language !== 'ar' ? 'World-Class Real Estate Advisor' : 'مستشار عقاري عالمي'}
               </p>
             </div>
           </div>
@@ -2068,7 +2068,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                       analysis={message.photoAnalysis}
                       language={language as 'en' | 'ar'}
                       onInvest={() => {
-                        const cityInvest = language === 'en'
+                        const cityInvest = language !== 'ar'
                           ? `I want to invest in the ${message.photoAnalysis.roomType} in ${selectedCity}. Can you guide me through the process?`
                           : `أريد الاستثمار في ${message.photoAnalysis.roomType} في ${selectedCity}. هل يمكنك إرشادي من خلال العملية؟`;
                         handleSendMessage(cityInvest);
@@ -2097,17 +2097,17 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                     <button
                       onClick={() => handlePlayVoice(message.id, message.content)}
                       className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded bg-[#F59E0B]/20 hover:bg-[#F59E0B]/30 text-[#F59E0B] transition-colors"
-                      title={language === 'en' ? 'Listen to response' : 'استمع للإجابة'}
+                      title={language !== 'ar' ? 'Listen to response' : 'استمع للإجابة'}
                     >
                       {playingMessageId === message.id ? (
                         <>
                           <VolumeX className="w-3 h-3" />
-                          <span>{language === 'en' ? 'Stop' : 'إيقاف'}</span>
+                          <span>{language !== 'ar' ? 'Stop' : 'إيقاف'}</span>
                         </>
                       ) : (
                         <>
                           <Volume2 className="w-3 h-3" />
-                          <span>{language === 'en' ? 'Listen' : 'استمع'}</span>
+                          <span>{language !== 'ar' ? 'Listen' : 'استمع'}</span>
                         </>
                       )}
                     </button>
@@ -2141,12 +2141,12 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {messages.length === 1 && !isLoading && (
             <div className="mt-8 space-y-2">
               <p className="text-xs text-gray-400 px-2">
-                {language === 'en'
+                {language !== 'ar'
                   ? 'Suggested questions:'
                   : 'الأسئلة المقترحة:'}
               </p>
               <div className="space-y-2">
-                {SUGGESTED_QUESTIONS[language].map((question, idx) => (
+                {SUGGESTED_QUESTIONS[language === 'ar' ? 'ar' : 'en'].map((question, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSuggestedQuestion(question)}
@@ -2168,7 +2168,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {/* City Selector for Photo Analysis */}
           <div className="flex items-center gap-2 px-2">
             <span className="text-xs text-gray-400">
-              {language === 'en' ? 'Analyze for:' : 'تحليل ل:'}
+              {language !== 'ar' ? 'Analyze for:' : 'تحليل ل:'}
             </span>
             <select 
               value={selectedCity}
@@ -2196,7 +2196,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
-                language === 'en'
+                language !== 'ar'
                   ? 'Ask about properties, trends, or Pi payments...'
                   : 'اسأل عن العقارات والاتجاهات أو دفعات Pi...'
               }
@@ -2209,7 +2209,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading || uploadingPhoto}
-              title={language === 'en' ? 'Upload property photo for AI analysis' : 'تحميل صورة عقار للتحليل'}
+              title={language !== 'ar' ? 'Upload property photo for AI analysis' : 'تحميل صورة عقار للتحليل'}
               className="px-3 py-3 bg-[#2a1f15] border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 text-[#F59E0B] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-[#3a2f25]"
             >
               {uploadingPhoto ? (

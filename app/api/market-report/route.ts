@@ -27,7 +27,8 @@ export async function GET(req: Request) {
   if (guard instanceof Response) return guard;
   try {
     const url = new URL(req.url);
-    const language = (url.searchParams.get('language') || 'en') as 'en' | 'ar';
+    // Only en/ar reports exist; anything else falls back to en instead of indexing undefined.
+    const language: 'en' | 'ar' = url.searchParams.get('language') === 'ar' ? 'ar' : 'en';
 
     // Return cached response if valid
     const now = Date.now();

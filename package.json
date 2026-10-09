@@ -11,7 +11,7 @@
   "dependencies": {
     "@ai-sdk/react": "3.0.144",
     "@anthropic-ai/sdk": "0.110.0",
-    "@emotion/is-prop-valid": "latest",
+    "@emotion/is-prop-valid": "1.4.0",
     "@google/generative-ai": "0.24.1",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-accordion": "1.2.2",
@@ -54,8 +54,8 @@
     "firebase": "^12.13.0",
     "firebase-admin": "^13.8.0",
     "framer-motion": "^12.38.0",
-    "geist": "latest",
-    "immer": "latest",
+    "geist": "1.7.2",
+    "immer": "11.1.21",
     "input-otp": "1.4.1",
     "jspdf": "^4.2.1",
     "jsqr": "^1.4.0",
@@ -79,7 +79,7 @@
     "sonner": "^2.0.7",
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
-    "use-sync-external-store": "latest",
+    "use-sync-external-store": "1.7.0",
     "vaul": "^0.9.9",
     "zod": "3.25.67",
     "zustand": "^5.0.12"

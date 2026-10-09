@@ -102,7 +102,7 @@ export default memo(function AIPriceEstimate({
     },
   };
 
-  const currentLabels = labels[language];
+  const currentLabels = labels[language === 'ar' ? 'ar' : 'en'];
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -118,7 +118,7 @@ export default memo(function AIPriceEstimate({
         <div className="space-y-4">
           {/* Property Info */}
           <div className="bg-background/50 rounded-lg p-3 border border-border/50">
-            <p className="text-xs text-muted-foreground mb-1">{language === 'en' ? 'Property' : 'العقار'}</p>
+            <p className="text-xs text-muted-foreground mb-1">{language !== 'ar' ? 'Property' : 'العقار'}</p>
             <p className="font-semibold text-foreground line-clamp-2">{propertyTitle}</p>
             <p className="text-xs text-muted-foreground mt-1">{city}</p>
           </div>
@@ -139,7 +139,7 @@ export default memo(function AIPriceEstimate({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
                   <p className="text-sm text-muted-foreground">
-                    {language === 'en' ? 'Calculating...' : 'جاري الحساب...'}
+                    {language !== 'ar' ? 'Calculating...' : 'جاري الحساب...'}
                   </p>
                 </div>
               ) : (
@@ -207,8 +207,8 @@ export default memo(function AIPriceEstimate({
             className="w-full py-2 bg-accent hover:bg-accent/80 text-accent-foreground rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {isCalculating 
-              ? (language === 'en' ? 'Calculating...' : 'جاري الحساب...')
-              : (language === 'en' ? 'Refresh Estimate' : 'تحديث التقدير')}
+              ? (language !== 'ar' ? 'Calculating...' : 'جاري الحساب...')
+              : (language !== 'ar' ? 'Refresh Estimate' : 'تحديث التقدير')}
           </button>
 
           {/* Disclaimer */}

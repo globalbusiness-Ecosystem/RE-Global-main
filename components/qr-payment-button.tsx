@@ -83,7 +83,7 @@ function QRPaymentButtonComponent({
   }, [productData, purchaseQuantity, product, quantity]);
 
   // Memoize message lookup
-  const messages = useMemo(() => ERROR_MESSAGES[language], [language]);
+  const messages = useMemo(() => ERROR_MESSAGES[language === 'ar' ? 'ar' : 'en'], [language]);
 
   // Memoize purchase handler with useCallback
   const handlePurchase = useCallback(async () => {
@@ -158,7 +158,7 @@ function QRPaymentButtonComponent({
   // Memoize button label
   const buttonLabel = useMemo(() => {
     if (!product) return messages.generateQR;
-    return language === 'en'
+    return language !== 'ar'
       ? `Generate QR - ${priceLabel}`
       : `إنشاء QR - ${priceLabel}`;
   }, [product, priceLabel, language, messages]);
@@ -166,7 +166,7 @@ function QRPaymentButtonComponent({
   // Memoize button title
   const buttonTitle = useMemo(
     () =>
-      language === 'en'
+      language !== 'ar'
         ? `Generate QR Code - ${priceLabel}`
         : `إنشاء رمز QR - ${priceLabel}`,
     [language, priceLabel]
@@ -179,7 +179,7 @@ function QRPaymentButtonComponent({
         className={`w-full py-2 px-3 rounded-lg text-xs font-medium opacity-50 cursor-not-allowed flex items-center justify-center gap-2 bg-accent/20 text-accent ${className}`}
       >
         <QrCode className="w-3 h-3" />
-        {language === 'en' ? 'QR System' : 'نظام QR'}
+        {language !== 'ar' ? 'QR System' : 'نظام QR'}
       </button>
     );
   }
