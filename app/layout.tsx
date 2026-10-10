@@ -14,7 +14,6 @@ export const metadata: Metadata = {
     description: "Global real estate marketplace on Pi Network",
     type: "website",
   },
-  generator: 'v0.app'
 };
 
 export const viewport: Viewport = {
