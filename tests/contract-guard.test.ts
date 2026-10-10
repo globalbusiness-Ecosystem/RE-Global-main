@@ -13,7 +13,7 @@ function goodPayment(over: Partial<PiPayment> = {}): PiPayment {
   return {
     identifier: 'pay_12345678',
     user_uid: 'user-1',
-    amount: 12.5,
+    amount: 1,
     metadata: { propertyId: 'prop-1', transactionType: 'buy' },
     status: {
       developer_approved: true,
@@ -57,7 +57,7 @@ describe('cleanText', () => {
 
 describe('validatePiPayment', () => {
   it('accepts a completed payment by the right user for the right property', () => {
-    expect(validatePiPayment(goodPayment(), expected)).toEqual({ ok: true, amount: 12.5, type: 'buy' });
+    expect(validatePiPayment(goodPayment(), expected)).toEqual({ ok: true, amount: 1, type: 'buy' });
   });
   it('rejects a payment that belongs to someone else (403)', () => {
     const r = validatePiPayment(goodPayment({ user_uid: 'someone-else' }), expected);
@@ -83,7 +83,7 @@ describe('validatePiPayment', () => {
     expect(r).toMatchObject({ ok: false, status: 400 });
   });
   it('maps hotel to buy and rejects unknown transaction types', () => {
-    const hotel = validatePiPayment(goodPayment({ metadata: { propertyId: 'prop-1', transactionType: 'hotel' } }), expected);
+    const hotel = validatePiPayment(goodPayment({ amount: 50, metadata: { propertyId: 'prop-1', transactionType: 'hotel' } }), expected);
     expect(hotel).toMatchObject({ ok: true, type: 'buy' });
     const odd = validatePiPayment(goodPayment({ metadata: { propertyId: 'prop-1', transactionType: 'gift' } }), expected);
     expect(odd).toMatchObject({ ok: false, status: 400 });

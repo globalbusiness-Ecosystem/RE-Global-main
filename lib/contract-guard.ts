@@ -1,5 +1,7 @@
 // Pure validation helpers for /api/contracts/sign (no I/O, easy to unit test).
 
+import { checkPropertyPaymentIntent } from '@/lib/payment-rules';
+
 export const ALLOWED_CONTRACT_TYPES = ['buy', 'rent', 'invest', 'tokenized'] as const;
 export type ContractType = (typeof ALLOWED_CONTRACT_TYPES)[number];
 
@@ -69,6 +71,10 @@ export function validatePiPayment(
   const rawType = payment.metadata?.transactionType === 'hotel' ? 'buy' : payment.metadata?.transactionType;
   if (!ALLOWED_CONTRACT_TYPES.includes(rawType as ContractType)) {
     return { ok: false, status: 400, error: 'Unsupported transaction type' };
+  }
+  const intent = checkPropertyPaymentIntent(payment);
+  if (!intent.ok) {
+    return { ok: false, status: 400, error: intent.error };
   }
   const amount = Number(payment.amount);
   if (!Number.isFinite(amount) || amount <= 0) {
