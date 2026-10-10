@@ -3,16 +3,27 @@ import type { Metadata, Viewport } from "next";
 import { GeistSans } from "geist/font/sans";
 import { GeistMono } from "geist/font/mono";
 import { AppWrapper } from "@/components/app-wrapper";
+import { siteUrl } from "@/lib/site-url";
 import "./globals.css";
 
 export const metadata: Metadata = {
   title: "RE Platform - Global Real Estate Marketplace",
   description: "Buy, rent, invest & explore properties in 195 countries on Pi Network. Features 360° virtual tours, interactive world map, and tokenized real estate.",
   keywords: "real estate, buy property, rent apartments, invest, Pi Network, crypto",
+  metadataBase: new URL(siteUrl()),
+  alternates: { canonical: "/" },
+  robots: { index: true, follow: true },
   openGraph: {
     title: "RE Platform",
     description: "Global real estate marketplace on Pi Network",
     type: "website",
+    siteName: "RE Platform",
+    url: "/",
+  },
+  twitter: {
+    card: "summary",
+    title: "RE Platform - Global Real Estate Marketplace",
+    description: "Buy, rent, invest & explore properties on Pi Network.",
   },
 };
 
