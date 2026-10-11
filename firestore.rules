@@ -8,7 +8,8 @@ rules_version = '2';
 // Collections NOT listed here are denied to clients on purpose. They are used
 // only by server code (Admin SDK bypasses these rules):
 //   email_otps, signed_contracts, admin_login_attempts,
-//   walletBalances, liquidityPools, trades, users, transactions
+//   walletBalances, liquidityPools, trades, users, transactions,
+//   rate_limits (shared API rate limiter; enable a TTL policy on expireAt)
 
 service cloud.firestore {
   match /databases/{database}/documents {
