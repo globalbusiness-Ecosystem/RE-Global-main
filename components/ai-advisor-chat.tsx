@@ -1668,7 +1668,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
   };
 
   // Generate response based on hybrid smart logic
-  const generateResponse = (userMessage: string): string => {
+  const generateResponse = (userMessage: string): string | null => {
     const lowerMessage = userMessage.toLowerCase();
     const tier = getBudgetTier();
 ;

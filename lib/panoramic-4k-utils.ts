@@ -92,7 +92,7 @@ export class PanoramicImageCache {
     // Simple cache management
     if (this.cache.size >= 10) {
       const firstKey = this.cache.keys().next().value;
-      this.cache.delete(firstKey);
+      if (firstKey !== undefined) this.cache.delete(firstKey);
     }
     this.cache.set(url, img);
     this.loadingPromises.delete(url);

@@ -168,7 +168,7 @@ class FirebaseDatabase {
 
       const cacheKey = `properties_${JSON.stringify(filters || {})}`;
       if (this.collectionsCache.has(cacheKey)) {
-        return this.collectionsCache.get(cacheKey);
+        return this.collectionsCache.get(cacheKey) as Property[];
       }
 
       let q = query(collection(db, 'properties'));

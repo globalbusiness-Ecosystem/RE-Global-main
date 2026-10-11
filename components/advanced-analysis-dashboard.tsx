@@ -27,7 +27,7 @@ export function AdvancedAnalysisComponent({ language = 'en', userId }: AdvancedA
       forecast_market: { en: 'Forecast Markets', ar: 'توقعات الأسواق' },
       find_opportunities: { en: 'Find Opportunities', ar: 'ابحث عن الفرص' },
     };
-    return labels[key]?.[language] || key;
+    return labels[key]?.[language === 'ar' ? 'ar' : 'en'] || key;
   };
 
   const handleAnalyzePortfolio = async () => {

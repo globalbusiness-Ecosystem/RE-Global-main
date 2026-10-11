@@ -54,7 +54,7 @@ export async function fetchMarketData(location: string): Promise<MarketData> {
  * Convert market price to Pi equivalent
  */
 export function convertToPi(amount: number, currency: string): PiConversion {
-  const rate = PI_CONVERSION_RATES[`${currency}_to_PI`] || 0.0625;
+  const rate = (PI_CONVERSION_RATES as Record<string, number>)[`${currency}_to_PI`] || 0.0625;
   const piEquivalent = amount * rate;
 
   return {

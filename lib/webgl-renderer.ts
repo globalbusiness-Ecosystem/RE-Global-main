@@ -51,8 +51,8 @@ export class WebGLPanoramicRenderer {
   private positionBuffer: WebGLBuffer | null = null;
   private texCoordBuffer: WebGLBuffer | null = null;
   private indexBuffer: WebGLBuffer | null = null;
-  private sphereVertices: Float32Array;
-  private sphereIndices: Uint16Array;
+  private sphereVertices!: Float32Array;
+  private sphereIndices!: Uint16Array;
 
   constructor(canvas: HTMLCanvasElement) {
     this.gl = canvas.getContext('webgl', {

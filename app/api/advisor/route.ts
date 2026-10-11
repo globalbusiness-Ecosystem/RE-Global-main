@@ -101,7 +101,7 @@ export async function POST(req: Request) {
     else if (balance >= 20) budgetTier = 'moderate';
 
     const recommendations = propertyRecommendations[budgetTier as keyof typeof propertyRecommendations] || propertyRecommendations.budget;
-    const trends = marketTrends[userContext?.language || 'en' as keyof typeof marketTrends] || marketTrends.en;
+    const trends = marketTrends[userContext?.language === 'ar' ? 'ar' : 'en'];
 
     const systemPrompt = `You are Aladdin, an AI real estate advisor powered by Pi Network. You are a professional expert specializing in global property markets and Pi Network payments. 
 

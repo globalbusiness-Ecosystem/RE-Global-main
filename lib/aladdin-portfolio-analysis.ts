@@ -90,7 +90,7 @@ export class PortfolioAnalyzer {
   }
 
   private generateRebalancingSuggestions(portfolio: Portfolio): string[] {
-    const suggestions = [];
+    const suggestions: string[] = [];
     const markets = new Map<string, number>();
     
     portfolio.properties.forEach(p => {

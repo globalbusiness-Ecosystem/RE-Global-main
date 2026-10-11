@@ -1058,7 +1058,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                       {selectedProperty.type === 'invest' && t.typeInvest}
                     </span>
                     <span className="text-sm text-gray-400">
-                      {t.listedDaysAgo(selectedProperty.daysListed)}
+                      {t.listedDaysAgo(selectedProperty.daysListed ?? 0)}
                     </span>
                   </div>
                 </div>
