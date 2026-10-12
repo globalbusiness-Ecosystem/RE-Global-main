@@ -1,8 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { getStorage } from 'firebase-admin/storage';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminStorage } from '@/lib/firebase-admin';
 import { isAdminRequest } from '@/lib/admin-session';
 
 export const dynamic = 'force-dynamic';
@@ -31,8 +30,7 @@ export async function POST(req: NextRequest) {
   if (file.size > MAX_BYTES) return NextResponse.json({ ok: false, error: 'Image too large (max 4MB)' }, { status: 400 });
 
   try {
-    void adminDb; // ensures the admin app is initialised
-    const bucket = getStorage().bucket(bucketName);
+    const bucket = adminStorage.bucket(bucketName);
     const path = `properties/${Date.now()}-${randomUUID()}.${ext}`;
     const token = randomUUID();
     await bucket.file(path).save(Buffer.from(await file.arrayBuffer()), {

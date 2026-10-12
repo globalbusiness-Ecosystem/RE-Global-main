@@ -1,8 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
-import { getStorage } from 'firebase-admin/storage';
-import { adminDb } from '@/lib/firebase-admin';
+import { adminStorage } from '@/lib/firebase-admin';
 import { isAdminRequest } from '@/lib/admin-session';
 
 export const dynamic = 'force-dynamic';
@@ -33,8 +32,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    void adminDb; // ensures the admin app is initialised
-    const bucket = getStorage().bucket(bucketName);
+    const bucket = adminStorage.bucket(bucketName);
     const path = `contract-docs/${Date.now()}-${randomUUID()}.pdf`;
     const token = randomUUID();
     await bucket.file(path).save(bytes, {
