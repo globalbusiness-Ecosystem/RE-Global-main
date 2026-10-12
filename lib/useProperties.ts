@@ -25,6 +25,7 @@ export interface Property {
   contractUrl?: string;
   translations?: Record<string, { title?: string; location?: string; description?: string }>;
   createdAt?: any;
+  hidden?: boolean;
 }
 
 export function useProperties() {
@@ -40,7 +41,7 @@ export function useProperties() {
           orderBy('createdAt', 'desc')
         );
         const snapshot = await getDocs(q);
-        const data = snapshot.docs.map(doc => {
+        const data = snapshot.docs.filter(doc => doc.data().hidden !== true).map(doc => {
           const raw = doc.data();
           return {
             id: doc.id,

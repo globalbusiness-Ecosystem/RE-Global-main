@@ -1,42 +1,44 @@
 'use client';
-import { useState, useEffect } from 'react';
-import { db } from '@/lib/firebase';
-import { collection, getDocs } from 'firebase/firestore';
 
-const TR_LANGS: { code: string; label: string }[] = [
-  { code: 'ar', label: 'العربية' },
-  { code: 'fr', label: 'Français' },
-  { code: 'es', label: 'Español' },
-  { code: 'pt', label: 'Português' },
-  { code: 'ur', label: 'اردو' },
-  { code: 'zh', label: '中文' },
-];
+import { useCallback, useEffect, useState } from 'react';
+import DashboardTab from '@/components/admin/dashboard-tab';
+import PropertiesTab from '@/components/admin/properties-tab';
+import PaymentsTab from '@/components/admin/payments-tab';
+import UsersTab from '@/components/admin/users-tab';
+
+const TABS = [
+  { id: 'dashboard', icon: '📊', label: 'الرئيسية' },
+  { id: 'properties', icon: '🏠', label: 'العقارات' },
+  { id: 'payments', icon: '💳', label: 'المدفوعات' },
+  { id: 'users', icon: '👥', label: 'المستخدمون' },
+] as const;
+type TabId = (typeof TABS)[number]['id'];
 
 export default function AdminDashboard() {
   const [pin, setPin] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
-  const [properties, setProperties] = useState<any[]>([]);
-  const [tr, setTr] = useState<Record<string, Record<string, string>>>({});
-  const [trLoading, setTrLoading] = useState(false);
-  const [uploading, setUploading] = useState(false);
-  const [contracts, setContracts] = useState<any[]>([]);
-  const [contractQuery, setContractQuery] = useState('');
-  const [form, setForm] = useState({
-    title: '', price: '', currency: 'Pi', location: '', type: 'buy',
-    propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
-    area: '', description: '', image: '', images: '', vrUrl: '', contractUrl: '',
-    tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
-  });
+  const [tab, setTab] = useState<TabId>('dashboard');
 
   useEffect(() => {
     fetch('/api/admin-auth')
-      .then(res => res.json())
-      .then(data => setAuthenticated(!!data.ok))
+      .then((res) => res.json())
+      .then((data) => setAuthenticated(!!data.ok))
       .catch(() => setAuthenticated(false))
       .finally(() => setCheckingSession(false));
+    try {
+      const saved = localStorage.getItem('admin_tab') as TabId | null;
+      if (saved && TABS.some((t) => t.id === saved)) setTab(saved);
+    } catch { /* storage unavailable */ }
   }, []);
+
+  const go = (t: string) => {
+    setTab(t as TabId);
+    try { localStorage.setItem('admin_tab', t); } catch { /* ignore */ }
+  };
+  // Called by any tab when the server says the session is gone.
+  const expired = useCallback(() => setAuthenticated(false), []);
 
   const handleLogin = async () => {
     setLoginError('');
@@ -46,330 +48,77 @@ export default function AdminDashboard() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ pin }),
       });
-      if (res.ok) setAuthenticated(true);
-      else setLoginError('PIN غلط!');
+      if (res.ok) { setAuthenticated(true); setPin(''); }
+      else setLoginError(res.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'PIN غلط!');
     } catch {
       setLoginError('حصل خطأ في الاتصال، حاول تاني.');
     }
   };
 
-  const loadProperties = async () => {
-    const snap = await getDocs(collection(db, 'properties'));
-    setProperties(snap.docs.map(d => ({ id: d.id, ...d.data() })));
+  const logout = async () => {
+    await fetch('/api/admin-auth', { method: 'DELETE' }).catch(() => undefined);
+    setAuthenticated(false);
   };
-
-  useEffect(() => { if (authenticated) loadProperties(); }, [authenticated]);
-
-  const loadContracts = async () => {
-    try {
-      const res = await fetch('/api/admin/contracts');
-      const data = await res.json();
-      if (data.ok) setContracts(data.contracts || []);
-    } catch { /* ignore */ }
-  };
-
-  useEffect(() => { if (authenticated) loadContracts(); }, [authenticated]);
-
-  const setTrField = (lang: string, key: string, value: string) =>
-    setTr(prev => ({ ...prev, [lang]: { ...(prev[lang] || {}), [key]: value } }));
-
-  const autoTranslate = async () => {
-    if (!form.title.trim()) { alert('اكتب عنوان العقار الأول'); return; }
-    setTrLoading(true);
-    try {
-      const res = await fetch('/api/admin/translate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: form.title, location: form.location, description: form.description }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data.error || 'فشلت الترجمة');
-      setTr(data.translations || {});
-    } catch (e: any) {
-      alert('❌ ' + (e?.message || 'فشلت الترجمة'));
-    } finally {
-      setTrLoading(false);
-    }
-  };
-
-  // Shrinks the photo in the browser (max 1600px, JPEG) so it uploads fast on mobile data.
-  const shrink = (file: File, maxDim = 1600): Promise<Blob> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      const src = URL.createObjectURL(file);
-      img.onload = () => {
-        const scale = Math.min(1, maxDim / Math.max(img.width, img.height));
-        const c = document.createElement('canvas');
-        c.width = Math.round(img.width * scale);
-        c.height = Math.round(img.height * scale);
-        c.getContext('2d')!.drawImage(img, 0, 0, c.width, c.height);
-        URL.revokeObjectURL(src);
-        c.toBlob(b => (b ? resolve(b) : reject(new Error('تعذر قراءة الصورة'))), 'image/jpeg', 0.85);
-      };
-      img.onerror = () => reject(new Error('تعذر قراءة الصورة'));
-      img.src = src;
-    });
-
-  const uploadImage = async (file: File, target: 'main' | 'extra' | 'pano') => {
-    setUploading(true);
-    try {
-      let blob = await shrink(file, target === 'pano' ? 4096 : 1600);
-      if (blob.size > 3.8 * 1024 * 1024) blob = await shrink(file, 2800);
-      const fd = new FormData();
-      fd.append('file', new File([blob], 'photo.jpg', { type: 'image/jpeg' }));
-      const res = await fetch('/api/admin/upload-image', { method: 'POST', body: fd });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error(data.error || 'فشل رفع الصورة');
-      setForm(prev =>
-        target === 'main' ? { ...prev, image: data.url }
-        : target === 'pano' ? { ...prev, vrUrl: data.url }
-        : { ...prev, images: prev.images ? prev.images + ', ' + data.url : data.url });
-    } catch (e: any) {
-      alert('❌ ' + (e?.message || 'فشل رفع الصورة'));
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const uploadContract = async (file: File) => {
-    setUploading(true);
-    try {
-      const fd = new FormData();
-      fd.append('file', file);
-      const res = await fetch('/api/admin/upload-contract', { method: 'POST', body: fd });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok || !data.url) throw new Error(data.error || 'فشل رفع العقد');
-      setForm(prev => ({ ...prev, contractUrl: data.url }));
-    } catch (e: any) {
-      alert('❌ ' + (e?.message || 'فشل رفع العقد'));
-    } finally {
-      setUploading(false);
-    }
-  };
-
-  const handleAdd = async () => {
-    const res = await fetch('/api/admin/properties', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        ...form,
-        translations: tr,
-        titleAr: tr.ar?.title || '',
-        locationAr: tr.ar?.location || '',
-        descriptionAr: tr.ar?.description || '',
-        price: Number(form.price) || 0,
-        bedrooms: Number(form.bedrooms) || 0,
-        bathrooms: Number(form.bathrooms) || 0,
-        area: Number(form.area) || 0,
-        images: form.images.split(',').map(s => s.trim()).filter(Boolean),
-      }),
-    });
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      alert('❌ ' + (data.error || 'فشل إضافة العقار'));
-      return;
-    }
-    alert('✅ تم إضافة العقار!');
-    setForm({
-      title: '', price: '', currency: 'Pi', location: '', type: 'buy',
-      propertyType: 'apartment', status: 'available', bedrooms: '', bathrooms: '',
-      area: '', description: '', image: '', images: '', vrUrl: '', contractUrl: '',
-      tokenized: false, amenities: { pool: false, gym: false, parking: false, security: false }
-    });
-    setTr({});
-    loadProperties();
-  };
-
-  const handleDelete = async (id: string) => {
-    if (!confirm('تأكيد حذف العقار؟')) return;
-    const res = await fetch('/api/admin/properties?id=' + encodeURIComponent(id), { method: 'DELETE' });
-    if (!res.ok) {
-      alert('❌ فشل الحذف');
-      return;
-    }
-    loadProperties();
-  };
-
-  const inp = (ph: string, key: string) => (
-    <input placeholder={ph} value={(form as any)[key]}
-      onChange={e => setForm({ ...form, [key]: e.target.value })}
-      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '10px', width: '100%', display: 'block' }} />
-  );
-
-  const sel = (key: string, options: {v:string,l:string}[]) => (
-    <select value={(form as any)[key]} onChange={e => setForm({ ...form, [key]: e.target.value })}
-      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '10px', width: '100%', display: 'block' }}>
-      {options.map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
-    </select>
-  );
 
   if (checkingSession) return null;
 
-  if (!authenticated) return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ background: '#1a1a1a', padding: '40px', borderRadius: '16px', border: '1px solid #d4af37', textAlign: 'center' }}>
-        <h1 style={{ color: '#d4af37', marginBottom: '20px' }}>🔐 Admin Panel - RE Global</h1>
-        <input type="password" placeholder="PIN" value={pin} onChange={e => setPin(e.target.value)}
-          style={{ padding: '12px', borderRadius: '8px', border: '1px solid #d4af37', background: '#0a0a0a', color: 'white', marginBottom: '16px', width: '200px', display: 'block', margin: '0 auto 16px' }} />
-        <button onClick={handleLogin}
-          style={{ background: '#d4af37', color: 'black', padding: '12px 32px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', marginTop: '16px' }}>
-          دخول
-        </button>
+  if (!authenticated) {
+    return (
+      <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-4">
+        <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} className="w-full max-w-sm rounded-2xl border border-[#d4af37] bg-[#141414] p-8 text-center">
+          <h1 className="mb-5 text-xl font-bold text-[#d4af37]">🔐 لوحة تحكم RE Global</h1>
+          <input type="password" autoComplete="current-password" placeholder="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
+            className="mb-3 w-full rounded-lg border border-[#d4af37] bg-[#0a0a0a] px-3 py-3 text-center text-white focus:outline-none" />
+          {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}
+          <button type="submit" className="w-full rounded-lg bg-[#d4af37] py-3 font-bold text-black">دخول</button>
+        </form>
       </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div style={{ background: '#0a0a0a', minHeight: '100vh', padding: '20px', color: 'white' }}>
-      <h1 style={{ color: '#d4af37', marginBottom: '30px' }}>🏠 Admin Dashboard - RE Global</h1>
-
-      <div style={{ background: '#1a1a1a', padding: '24px', borderRadius: '16px', border: '1px solid #d4af37', marginBottom: '30px' }}>
-        <h2 style={{ color: '#d4af37', marginBottom: '16px' }}>إضافة عقار جديد</h2>
-
-        {inp('عنوان العقار', 'title')}
-        {inp('السعر', 'price')}
-
-        <label style={{ color: '#d4af37', fontSize: '13px' }}>العملة:</label>
-        {sel('currency', [{v:'Pi',l:'Pi'},{v:'USD',l:'USD'},{v:'EGP',l:'EGP'}])}
-
-        {inp('الموقع', 'location')}
-
-        <label style={{ color: '#d4af37', fontSize: '13px' }}>نوع الإعلان:</label>
-        {sel('type', [{v:'buy',l:'شراء'},{v:'rent',l:'إيجار'},{v:'hotel',l:'فندق'},{v:'tokenized',l:'Tokenized'},{v:'abroad',l:'خارج البلاد'},{v:'offplan',l:'أوف بلان'},{v:'invest',l:'استثمار'}])}
-
-        <label style={{ color: '#d4af37', fontSize: '13px' }}>نوع العقار:</label>
-        {sel('propertyType', [{v:'apartment',l:'شقة'},{v:'villa',l:'فيلا'},{v:'penthouse',l:'بنتهاوس'},{v:'commercial',l:'تجاري'}])}
-
-        <label style={{ color: '#d4af37', fontSize: '13px' }}>الحالة:</label>
-        {sel('status', [{v:'available',l:'متاح'},{v:'sold',l:'مباع'},{v:'under_construction',l:'تحت الإنشاء'}])}
-
-        {inp('غرف النوم', 'bedrooms')}
-        {inp('الحمامات', 'bathrooms')}
-        {inp('المساحة (م²)', 'area')}
-
-        <textarea placeholder="وصف العقار..." value={form.description}
-          onChange={e => setForm({ ...form, description: e.target.value })}
-          rows={4}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '10px', width: '100%', display: 'block', resize: 'vertical' }} />
-
-        <div style={{ border: '1px solid #d4af37', borderRadius: '12px', padding: '14px', marginBottom: '16px' }}>
-          <p style={{ color: '#d4af37', marginBottom: '6px' }}>🌍 الترجمات (الحقول فوق = English)</p>
-          <button type="button" onClick={autoTranslate} disabled={trLoading}
-            style={{ background: '#d4af37', color: 'black', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', marginBottom: '12px' }}>
-            {trLoading ? '...جاري الترجمة' : '✨ ترجمة تلقائية لـ 6 لغات'}
-          </button>
-          {TR_LANGS.map(l => (
-            <details key={l.code} style={{ marginBottom: '8px' }}>
-              <summary style={{ color: '#d4af37', cursor: 'pointer' }}>{l.label} {tr[l.code]?.title ? '✅' : ''}</summary>
-              <div dir={l.code === 'ar' || l.code === 'ur' ? 'rtl' : 'ltr'} style={{ marginTop: '8px' }}>
-                {(['title', 'location', 'description'] as const).map(k => (
-                  k === 'description' ? (
-                    <textarea key={k} placeholder={'description (' + l.code + ')'} rows={3} value={tr[l.code]?.[k] || ''}
-                      onChange={e => setTrField(l.code, k, e.target.value)}
-                      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '8px', width: '100%', display: 'block', resize: 'vertical' }} />
-                  ) : (
-                    <input key={k} placeholder={k + ' (' + l.code + ')'} value={tr[l.code]?.[k] || ''}
-                      onChange={e => setTrField(l.code, k, e.target.value)}
-                      style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '8px', width: '100%', display: 'block' }} />
-                  )
-                ))}
-              </div>
-            </details>
+    <div dir="rtl" className="min-h-screen bg-[#0a0a0a] text-white md:flex">
+      {/* Sidebar (desktop) */}
+      <aside className="hidden w-56 shrink-0 border-l border-[#222] bg-[#0f0f0f] p-4 md:flex md:flex-col">
+        <h1 className="mb-6 text-lg font-bold text-[#d4af37]">🏠 RE Global</h1>
+        <nav className="flex flex-1 flex-col gap-1">
+          {TABS.map((t) => (
+            <button key={t.id} onClick={() => go(t.id)}
+              className={`rounded-lg px-3 py-2.5 text-right text-sm font-semibold transition ${tab === t.id ? 'bg-[#d4af37] text-black' : 'text-gray-300 hover:bg-[#1c1c1c]'}`}>
+              {t.icon} {t.label}
+            </button>
           ))}
-        </div>
+          <a href="/admin/security" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-300 hover:bg-[#1c1c1c]">🛡️ الأمان</a>
+          <a href="/" target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-gray-300 hover:bg-[#1c1c1c]">🌐 فتح الموقع</a>
+        </nav>
+        <button onClick={logout} className="rounded-lg border border-[#333] py-2 text-sm text-gray-400 hover:bg-[#1c1c1c]">تسجيل خروج</button>
+      </aside>
 
-        <div style={{ display: 'flex', gap: '10px', marginBottom: '10px', flexWrap: 'wrap' }}>
-          {([['main', '📷 رفع الصورة الرئيسية'], ['extra', '➕ رفع صورة إضافية'], ['pano', '🥽 رفع بانوراما 360°']] as const).map(([t, label]) => (
-            <label key={t} style={{ background: '#d4af37', color: 'black', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}>
-              {uploading ? '...جاري الرفع' : label}
-              <input type="file" accept="image/*" disabled={uploading} style={{ display: 'none' }}
-                onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadImage(f, t); }} />
-            </label>
-          ))}
-        </div>
-        <div style={{ marginBottom: '10px' }}>
-          <label style={{ display: 'inline-block', background: '#d4af37', color: 'black', padding: '10px 16px', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', opacity: uploading ? 0.6 : 1 }}>
-            {uploading ? '...جاري الرفع' : '📄 رفع عقد PDF'}
-            <input type="file" accept="application/pdf" disabled={uploading} style={{ display: 'none' }}
-              onChange={e => { const f = e.target.files?.[0]; e.target.value = ''; if (f) uploadContract(f); }} />
-          </label>
-          {form.contractUrl && <span style={{ color: '#00ff88', fontSize: '13px', marginRight: '10px', marginLeft: '10px' }}>✅ تم رفع العقد</span>}
-        </div>
-
-        {form.vrUrl && <p style={{ color: '#00ff88', fontSize: '13px', marginBottom: '10px' }}>✅ تم رفع البانوراما</p>}
-        {form.image && <img src={form.image} alt="" style={{ width: '100%', maxHeight: '200px', objectFit: 'cover', borderRadius: '8px', marginBottom: '10px' }} />}
-
-        {inp('رابط الصورة الرئيسية', 'image')}
-        {inp('روابط صور إضافية (مفصولة بفاصلة)', 'images')}
-
-        <input placeholder="VR Tour URL (اختياري)" value={form.vrUrl}
-          onChange={e => setForm({ ...form, vrUrl: e.target.value })}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #d4af37', background: '#111', color: 'white', marginBottom: '10px', width: '100%', display: 'block' }} />
-
-        <div style={{ marginBottom: '16px' }}>
-          <label style={{ color: '#d4af37', display: 'block', marginBottom: '8px' }}>المرافق:</label>
-          {[['pool','مسبح'],['gym','جيم'],['parking','موقف'],['security','أمن']].map(([k,l]) => (
-            <label key={k} style={{ color: 'white', marginRight: '16px', cursor: 'pointer' }}>
-              <input type="checkbox" checked={(form.amenities as any)[k]}
-                onChange={e => setForm({ ...form, amenities: { ...form.amenities, [k]: e.target.checked } })}
-                style={{ marginRight: '4px' }} />
-              {l}
-            </label>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px', gap: '10px' }}>
-          <input type="checkbox" checked={form.tokenized} onChange={e => setForm({ ...form, tokenized: e.target.checked })} />
-          <label style={{ color: '#d4af37' }}>✅ Tokenized عقار مرمز</label>
-        </div>
-
-        <button onClick={handleAdd}
-          style={{ background: '#d4af37', color: 'black', padding: '14px 40px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}>
-          إضافة العقار
-        </button>
+      <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
+        <header className="sticky top-0 z-10 flex items-center justify-between border-b border-[#222] bg-[#0a0a0a]/95 px-4 py-3 backdrop-blur md:hidden">
+          <h1 className="font-bold text-[#d4af37]">🏠 RE Global — الأدمن</h1>
+          <button onClick={logout} className="text-xs text-gray-400">خروج</button>
+        </header>
+        <main className="mx-auto w-full max-w-5xl p-4 md:p-6">
+          <h2 className="mb-4 hidden text-xl font-bold md:block">{TABS.find((t) => t.id === tab)?.icon} {TABS.find((t) => t.id === tab)?.label}</h2>
+          {tab === 'dashboard' && <DashboardTab onUnauthorized={expired} goto={go} />}
+          {tab === 'properties' && <PropertiesTab onUnauthorized={expired} />}
+          {tab === 'payments' && <PaymentsTab onUnauthorized={expired} />}
+          {tab === 'users' && <UsersTab onUnauthorized={expired} />}
+        </main>
       </div>
 
-      <div style={{ background: '#1a1a1a', padding: '24px', borderRadius: '16px', border: '1px solid #d4af37', marginBottom: '30px' }}>
-        <h2 style={{ color: '#d4af37', marginBottom: '8px' }}>📜 كل العقود ({contracts.length})</h2>
-        <p style={{ color: '#999', fontSize: '13px', marginBottom: '12px' }}>
-          الإجمالي: {contracts.reduce((n, c) => n + (Number(c.amount) || 0), 0)} Pi
-        </p>
-        <input placeholder="بحث بالعقار أو المشتري أو رقم العقد" value={contractQuery}
-          onChange={e => setContractQuery(e.target.value)}
-          style={{ padding: '10px', borderRadius: '8px', border: '1px solid #333', background: '#111', color: 'white', marginBottom: '12px', width: '100%', display: 'block' }} />
-        {contracts
-          .filter(c => {
-            const q = contractQuery.trim().toLowerCase();
-            return !q || [c.propertyTitle, c.buyerUsername, c.id].some((v: any) => String(v || '').toLowerCase().includes(q));
-          })
-          .map(c => (
-            <div key={c.id} style={{ background: '#111', padding: '12px', borderRadius: '10px', border: '1px solid #333', marginBottom: '10px' }}>
-              <p style={{ color: '#d4af37', fontWeight: 'bold' }}>{c.propertyTitle}</p>
-              <p style={{ color: '#ccc', fontSize: '13px' }}>@{c.buyerUsername} — {c.amount} {c.currency} — {c.type}</p>
-              <p style={{ color: '#777', fontSize: '12px' }}>{c.status} | {new Date(c.createdAt).toLocaleString('ar-EG')}</p>
-              <a href={'/verify/' + c.id} target="_blank" rel="noreferrer" style={{ color: '#4488ff', fontSize: '13px' }}>فتح العقد ↗</a>
-            </div>
-          ))}
-        {contracts.length === 0 && <p style={{ color: '#777' }}>مفيش عقود لسه.</p>}
-      </div>
-
-      <h2 style={{ color: '#d4af37', marginBottom: '16px' }}>العقارات ({properties.length})</h2>
-      {properties.map(p => (
-        <div key={p.id} style={{ background: '#1a1a1a', padding: '16px', borderRadius: '12px', border: '1px solid #333', marginBottom: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <p style={{ color: '#d4af37', fontWeight: 'bold' }}>{p.title}</p>
-            <p style={{ color: '#999', fontSize: '14px' }}>{p.location} — {p.price} {p.currency} — {p.type}</p>
-            <p style={{ color: '#777', fontSize: '12px' }}>{p.propertyType} | {p.status}</p>
-            {p.tokenized && <span style={{ color: '#00ff88', fontSize: '12px' }}>✅ Tokenized </span>}
-            {p.vrUrl && <span style={{ color: '#4488ff', fontSize: '12px' }}>🥽 VR </span>}
-            {p.contractUrl && <span style={{ color: '#d4af37', fontSize: '12px' }}>📄 عقد </span>}
-          </div>
-          <button onClick={() => handleDelete(p.id)}
-            style={{ background: '#ff4444', color: 'white', padding: '8px 16px', borderRadius: '8px', border: 'none', cursor: 'pointer' }}>
-            حذف
+      {/* Bottom tab bar (mobile) */}
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-[#222] bg-[#0f0f0f] md:hidden">
+        {TABS.map((t) => (
+          <button key={t.id} onClick={() => go(t.id)} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-[#d4af37]' : 'text-gray-400'}`}>
+            <span className="block text-lg leading-none">{t.icon}</span>{t.label}
           </button>
-        </div>
-      ))}
+        ))}
+        <a href="/admin/security" className="py-2.5 text-center text-[11px] font-semibold text-gray-400">
+          <span className="block text-lg leading-none">🛡️</span>الأمان
+        </a>
+      </nav>
     </div>
   );
 }

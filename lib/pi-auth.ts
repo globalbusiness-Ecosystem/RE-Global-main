@@ -1,4 +1,5 @@
 import 'server-only';
+import { isBanned } from '@/lib/ban-list';
 
 const BRAND: unique symbol = Symbol('AuthenticatedPiUser');
 
@@ -49,6 +50,10 @@ export async function verifyPiAccessToken(accessToken: unknown): Promise<Authent
   const me = (await res.json()) as Partial<PiMeResponse>;
   if (!me.uid || !me.username) {
     throw new AuthError('Pi Platform API returned a malformed /v2/me response', 502);
+  }
+
+  if (await isBanned(me.username)) {
+    throw new AuthError('This account has been suspended', 403);
   }
 
   return { [BRAND]: true, uid: me.uid, username: me.username } as AuthenticatedPiUser;

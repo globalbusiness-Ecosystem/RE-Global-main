@@ -1,7 +1,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 
+const banned = new Set<string>();
+vi.mock('@/lib/ban-list', () => ({ isBanned: async (u: string) => banned.has(u) }));
+
 afterEach(() => {
+  banned.clear();
   vi.unstubAllGlobals();
 });
 
@@ -48,5 +52,11 @@ describe('verifyPiAccessToken', () => {
     const err = await verifyPiAccessToken('t').catch((e) => e);
     expect(err).toBeInstanceOf(AuthError);
     expect(err.status).toBe(503);
+  });
+
+  it('rejects a suspended account with 403', async () => {
+    banned.add('mallory');
+    stubFetch(() => json({ uid: 'u-9', username: 'mallory' }));
+    await expect(verifyPiAccessToken('tok')).rejects.toMatchObject({ name: 'AuthError', status: 403 });
   });
 });

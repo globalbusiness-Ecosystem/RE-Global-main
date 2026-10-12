@@ -3,162 +3,107 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { isAdminRequest } from '@/lib/admin-session';
+import { parsePropertyInput, STATUSES } from '@/lib/admin-property';
+import { logAdmin } from '@/lib/admin-audit';
 
 export const dynamic = 'force-dynamic';
 
-const TYPES = ['buy', 'rent', 'hotel', 'tokenized', 'abroad', 'offplan', 'invest'];
-const PROPERTY_TYPES = ['apartment', 'villa', 'penthouse', 'commercial'];
-const STATUSES = ['available', 'sold', 'under_construction'];
-const CURRENCIES = ['Pi', 'USD', 'EGP'];
-const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'];
-
-function str(v: unknown, max: number, multiline = false): string {
-  if (typeof v !== 'string') return '';
-  const cleaned = multiline
-    ? v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, '')
-    : v.replace(/[\u0000-\u001f\u007f]+/g, ' ');
-  return cleaned.trim().slice(0, max);
-}
-
-// '' is allowed (field left empty); null means "present but not a safe URL".
-function url(v: unknown): string | null {
-  const s = str(v, 2000);
-  if (!s) return '';
-  if (s.startsWith('/') && !s.startsWith('//')) return s;
-  try {
-    const u = new URL(s);
-    return u.protocol === 'https:' || u.protocol === 'http:' ? s : null;
-  } catch {
-    return null;
-  }
-}
-
-function num(v: unknown, min: number, max: number): number | null {
-  if (v === '' || v === null || v === undefined) return 0;
-  const n = typeof v === 'number' ? v : Number(v);
-  return Number.isFinite(n) && n >= min && n <= max ? n : null;
-}
-
 const bad = (error: string) => NextResponse.json({ ok: false, error }, { status: 400 });
 const unauthorized = () => NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+const serverError = () => NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
+const validId = (id: string) => /^[A-Za-z0-9_-]{1,128}$/.test(id);
+
+const iso = (v: any): string | null => v?.toDate?.().toISOString() ?? null;
+
+// All listings (including hidden ones) for the admin panel.
+export async function GET(req: NextRequest) {
+  if (!(await isAdminRequest(req))) return unauthorized();
+  try {
+    const snap = await adminDb.collection('properties').get();
+    const properties = snap.docs
+      .map((d) => {
+        const data = d.data();
+        return { id: d.id, ...data, createdAt: iso(data.createdAt), updatedAt: iso(data.updatedAt) };
+      })
+      .sort((a: any, b: any) => String(b.createdAt || '').localeCompare(String(a.createdAt || '')));
+    return NextResponse.json({ ok: true, properties }, { headers: { 'Cache-Control': 'no-store' } });
+  } catch (err) {
+    console.error('[admin/properties] list error:', err);
+    return serverError();
+  }
+}
 
 export async function POST(req: NextRequest) {
   if (!(await isAdminRequest(req))) return unauthorized();
+  const b = await req.json().catch(() => null);
+  const parsed = parsePropertyInput(b);
+  if (!parsed.ok) return bad(parsed.error);
 
-  let b: any;
   try {
-    b = await req.json();
-  } catch {
-    return bad('Invalid request');
-  }
-  if (!b || typeof b !== 'object') return bad('Invalid request');
-
-  const title = str(b.title, 200);
-  if (!title) return bad('Title is required');
-  const price = num(b.price, 0, 1e12);
-  const bedrooms = num(b.bedrooms, 0, 1000);
-  const bathrooms = num(b.bathrooms, 0, 1000);
-  const area = num(b.area, 0, 1e7);
-  if (price === null || bedrooms === null || bathrooms === null || area === null) return bad('Invalid number');
-  if (!CURRENCIES.includes(b.currency)) return bad('Invalid currency');
-  if (!TYPES.includes(b.type)) return bad('Invalid listing type');
-  if (!PROPERTY_TYPES.includes(b.propertyType)) return bad('Invalid property type');
-  if (!STATUSES.includes(b.status)) return bad('Invalid status');
-
-  const image = url(b.image);
-  const vrUrl = url(b.vrUrl);
-  const contractUrl = url(b.contractUrl);
-  if (image === null || vrUrl === null || contractUrl === null) return bad('Invalid URL');
-  const imagesIn: unknown[] = Array.isArray(b.images) ? b.images : [];
-  if (imagesIn.length > 30) return bad('Too many images');
-  const images: string[] = [];
-  for (const raw of imagesIn) {
-    const u = url(raw);
-    if (u === null) return bad('Invalid image URL');
-    if (u) images.push(u);
-  }
-
-  const amenitiesIn = b.amenities && typeof b.amenities === 'object' ? b.amenities : {};
-  const amenities = {
-    pool: amenitiesIn.pool === true,
-    gym: amenitiesIn.gym === true,
-    parking: amenitiesIn.parking === true,
-    security: amenitiesIn.security === true,
-  };
-
-  const doc: Record<string, unknown> = {
-    title,
-    location: str(b.location, 200),
-    price,
-    currency: b.currency,
-    type: b.type,
-    propertyType: b.propertyType,
-    status: b.status,
-    bedrooms,
-    bathrooms,
-    area,
-    description: str(b.description, 5000, true),
-    image,
-    images,
-    vrUrl,
-    contractUrl,
-    tokenized: b.tokenized === true,
-    amenities,
     // useProperties() orders by createdAt, so a listing without it never shows up.
-    createdAt: Timestamp.now(),
-    updatedAt: Timestamp.now(),
-  };
-
-  // Optional fields used by the app when present.
-  for (const k of ['titleAr', 'locationAr'] as const) {
-    const s = str(b[k], 200);
-    if (s) doc[k] = s;
-  }
-  const descAr = str(b.descriptionAr, 5000, true);
-  if (descAr) doc.descriptionAr = descAr;
-  if (b.featured === true) doc.featured = true;
-  const lat = num(b.lat, -90, 90);
-  const lng = num(b.lng, -180, 180);
-  if (lat === null || lng === null) return bad('Invalid coordinates');
-  if (b.lat !== undefined && b.lat !== '' && b.lng !== undefined && b.lng !== '') {
-    doc.lat = lat;
-    doc.lng = lng;
-  }
-  if (b.translations && typeof b.translations === 'object') {
-    const t: Record<string, Record<string, string>> = {};
-    for (const lang of LANGS) {
-      const src = b.translations[lang];
-      if (!src || typeof src !== 'object') continue;
-      const entry: Record<string, string> = {};
-      const tt = str(src.title, 200);
-      const tl = str(src.location, 200);
-      const td = str(src.description, 5000, true);
-      if (tt) entry.title = tt;
-      if (tl) entry.location = tl;
-      if (td) entry.description = td;
-      if (Object.keys(entry).length) t[lang] = entry;
-    }
-    if (Object.keys(t).length) doc.translations = t;
-  }
-
-  try {
-    const ref = await adminDb.collection('properties').add(doc);
+    const ref = await adminDb
+      .collection('properties')
+      .add({ ...parsed.doc, createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
+    await logAdmin('property.create', { id: ref.id, title: parsed.doc.title });
     return NextResponse.json({ ok: true, id: ref.id });
   } catch (err) {
     console.error('[admin/properties] add error:', err);
-    return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
+    return serverError();
+  }
+}
+
+// Two shapes:
+//   { patch: { hidden?, featured?, status? } }  -> quick toggles
+//   { ...fullPropertyFields }                    -> full edit (replaces the listing, keeps createdAt)
+export async function PATCH(req: NextRequest) {
+  if (!(await isAdminRequest(req))) return unauthorized();
+  const id = req.nextUrl.searchParams.get('id') ?? '';
+  if (!validId(id)) return bad('Invalid id');
+  const b = await req.json().catch(() => null);
+  if (!b || typeof b !== 'object') return bad('Invalid request');
+
+  const ref = adminDb.collection('properties').doc(id);
+  try {
+    if (b.patch && typeof b.patch === 'object') {
+      const update: Record<string, unknown> = {};
+      if (typeof b.patch.hidden === 'boolean') update.hidden = b.patch.hidden;
+      if (typeof b.patch.featured === 'boolean') update.featured = b.patch.featured;
+      if (b.patch.status !== undefined) {
+        if (!STATUSES.includes(b.patch.status)) return bad('Invalid status');
+        update.status = b.patch.status;
+      }
+      if (Object.keys(update).length === 0) return bad('Nothing to update');
+      const snap = await ref.get();
+      if (!snap.exists) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
+      await ref.update({ ...update, updatedAt: Timestamp.now() });
+      await logAdmin('property.toggle', { id, ...update });
+      return NextResponse.json({ ok: true });
+    }
+
+    const parsed = parsePropertyInput(b);
+    if (!parsed.ok) return bad(parsed.error);
+    const snap = await ref.get();
+    if (!snap.exists) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
+    const createdAt = snap.data()?.createdAt ?? Timestamp.now();
+    await ref.set({ ...parsed.doc, createdAt, updatedAt: Timestamp.now() });
+    await logAdmin('property.edit', { id, title: parsed.doc.title });
+    return NextResponse.json({ ok: true });
+  } catch (err) {
+    console.error('[admin/properties] update error:', err);
+    return serverError();
   }
 }
 
 export async function DELETE(req: NextRequest) {
   if (!(await isAdminRequest(req))) return unauthorized();
   const id = req.nextUrl.searchParams.get('id') ?? '';
-  if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) return bad('Invalid id');
+  if (!validId(id)) return bad('Invalid id');
   try {
     await adminDb.collection('properties').doc(id).delete();
+    await logAdmin('property.delete', { id });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[admin/properties] delete error:', err);
-    return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });
+    return serverError();
   }
 }
