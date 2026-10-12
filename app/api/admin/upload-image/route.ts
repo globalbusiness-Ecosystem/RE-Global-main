@@ -47,6 +47,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true, url });
   } catch (err) {
     console.error('[admin/upload-image] error:', err);
-    return NextResponse.json({ ok: false, error: 'Upload failed (is Storage enabled?)' }, { status: 502 });
+    // Admin-only endpoint: show the real reason so a Storage misconfiguration is easy to diagnose.
+    const reason = String((err as { message?: unknown })?.message ?? err).replace(/\s+/g, ' ').slice(0, 200);
+    return NextResponse.json({ ok: false, error: `Upload failed: ${reason}` }, { status: 502 });
   }
 }
