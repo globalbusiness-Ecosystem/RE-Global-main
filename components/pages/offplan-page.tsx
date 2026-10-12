@@ -7,6 +7,7 @@ import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { FirestoreListings } from '@/components/firestore-listings';
 
 interface OffPlanPageProps {
   language: NavLanguage;
@@ -130,6 +131,8 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
           {language === 'en' ? 'Off-Plan Properties' : 'العقارات قيد الإنشاء'}
         </h1>
       </div>
+
+      <FirestoreListings listingType="offplan" language={language} />
 
       <div className="space-y-4">
         {offplanProperties.map((property) => (

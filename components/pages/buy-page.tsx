@@ -238,7 +238,7 @@ const PropertyCard = memo(({
 PropertyCard.displayName = 'PropertyCard';
 
 // ─── Firebase Property Detail Modal ───────────────────────────────────────────
-function FirebasePropertyModal({
+export function FirebasePropertyModal({
   prop,
   language,
   onClose,
