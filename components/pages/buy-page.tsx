@@ -238,6 +238,14 @@ const PropertyCard = memo(({
 PropertyCard.displayName = 'PropertyCard';
 
 // ─── Firebase Property Detail Modal ───────────────────────────────────────────
+function modalTxType(t: string): 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized' {
+  if (t === 'rent') return 'rent';
+  if (t === 'hotel') return 'hotel';
+  if (t === 'invest' || t === 'offplan') return 'invest';
+  if (t === 'tokenized') return 'tokenized';
+  return 'buy';
+}
+
 export function FirebasePropertyModal({
   prop,
   language,
@@ -288,19 +296,19 @@ export function FirebasePropertyModal({
           {/* Details */}
           {(prop.bedrooms || prop.bathrooms || prop.area) && (
             <div className="flex gap-4 text-sm text-gray-300 border border-white/10 rounded-xl p-3">
-              {prop.bedrooms && (
+              {!!prop.bedrooms && (
                 <div className="flex items-center gap-1">
                   <Bed className="w-4 h-4 text-accent" />
                   <span>{prop.bedrooms} {language === 'en' ? 'Beds' : 'غرف'}</span>
                 </div>
               )}
-              {prop.bathrooms && (
+              {!!prop.bathrooms && (
                 <div className="flex items-center gap-1">
                   <Maximize2 className="w-4 h-4 text-accent" />
                   <span>{prop.bathrooms} {language === 'en' ? 'Baths' : 'حمام'}</span>
                 </div>
               )}
-              {prop.area && (
+              {!!prop.area && (
                 <div className="flex items-center gap-1">
                   <Maximize2 className="w-4 h-4 text-accent" />
                   <span>{prop.area} m²</span>
@@ -367,36 +375,16 @@ export function FirebasePropertyModal({
             </div>
           )}
 
-          {/* Buy Button */}
-          <button
-            className="w-full bg-accent hover:bg-accent/90 text-black font-bold py-3 rounded-xl transition text-base"
-            onClick={() => {
-              // @ts-ignore
-              (window.Pi as any).createPayment(
-                { amount: 1, memo: 'Property Purchase', metadata: { propertyId: prop.id } },
-                {
-                  onReadyForServerApproval: async (paymentId: string) => {
-                    await fetch('/api/payments/approve', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
-                      body: JSON.stringify({ paymentId }),
-                    });
-                  },
-                  onReadyForServerCompletion: async (paymentId: string, txid: string) => {
-                    await fetch('/api/payments/complete', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
-                      body: JSON.stringify({ paymentId, txid }),
-                    });
-                  },
-                  onCancel: () => console.log('Payment cancelled'),
-                  onError: (err: any) => console.error('Payment error:', err),
-                }
-              );
-            }}
-          >
-            {language === 'en' ? '🛒 Buy Now with Pi' : '🛒 اشتري الآن بـ Pi'}
-          </button>
+          {/* Buy Button: same flow as every other page (pays, then the server signs and records the contract) */}
+          <UnifiedPaymentButton
+            propertyId={prop.id}
+            propertyTitle={title}
+            price={prop.price}
+            transactionType={modalTxType(prop.type)}
+            language={language}
+            currency="PI"
+            className="w-full"
+          />
 
         </div>
       </div>
