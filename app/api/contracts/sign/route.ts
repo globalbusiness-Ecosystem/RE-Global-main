@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { lookupExpectedAmount } from '@/lib/property-price';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
@@ -53,7 +54,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not reach Pi Platform API' }, { status: 503 });
   }
 
-  const check = validatePiPayment(payment, { uid: user.uid, txid, propertyId });
+  let expectedAmount: number | null = null;
+  try {
+    expectedAmount = await lookupExpectedAmount(propertyId);
+  } catch {
+    return NextResponse.json({ error: 'Could not verify the property price' }, { status: 503 });
+  }
+  const check = validatePiPayment(payment, { uid: user.uid, txid, propertyId, expectedAmount });
   if (!check.ok) {
     return NextResponse.json({ error: check.error }, { status: check.status ?? 400 });
   }

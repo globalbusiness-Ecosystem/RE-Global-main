@@ -99,6 +99,9 @@ export function parsePropertyInput(b: any): ParsedProperty {
   }
   const descAr = str(b.descriptionAr, 5000, true);
   if (descAr) doc.descriptionAr = descAr;
+  const pay = num(b.payAmountPi, 0, 1e9);
+  if (pay === null) return fail('Invalid payment amount');
+  if (pay > 0) doc.payAmountPi = pay;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;
   const lat = num(b.lat, -90, 90);

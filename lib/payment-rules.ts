@@ -22,14 +22,26 @@ export interface IntentCheck {
 }
 
 // Returns ok for payments that are not about a property (nothing to enforce here).
+// Amount (in Pi) to charge for a listing: its explicit payAmountPi, else its price when priced in Pi.
+export function propertyPaymentAmount(d: { price?: unknown; currency?: unknown; payAmountPi?: unknown } | null | undefined): number | null {
+  if (!d) return null;
+  const pay = Number(d.payAmountPi);
+  if (Number.isFinite(pay) && pay > 0) return pay;
+  const price = Number(d.price);
+  const isPi = d.currency === undefined || d.currency === null || d.currency === '' || d.currency === 'Pi' || d.currency === 'PI';
+  if (isPi && Number.isFinite(price) && price > 0) return price;
+  return null;
+}
+
 export function checkPropertyPaymentIntent(payment: {
   amount?: number;
   metadata?: { propertyId?: unknown; transactionType?: unknown } | null;
-}): IntentCheck {
+}, overrideAmount?: number | null): IntentCheck {
   const md = payment.metadata;
   if (!md || md.propertyId === undefined || md.propertyId === null || md.propertyId === '') return { ok: true };
-  const expected = expectedAmountFor(md.transactionType);
-  if (expected === null) return { ok: false, error: 'Unsupported transaction type' };
+  const feeAmount = expectedAmountFor(md.transactionType);
+  if (feeAmount === null) return { ok: false, error: 'Unsupported transaction type' };
+  const expected = typeof overrideAmount === 'number' ? overrideAmount : feeAmount;
   const amount = Number(payment.amount);
   if (!Number.isFinite(amount) || Math.abs(amount - expected) > 1e-9) {
     return { ok: false, error: 'Unexpected payment amount' };

@@ -5,6 +5,7 @@ import { useProperties } from '@/lib/useProperties';
 import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { propertyPaymentAmount } from '@/lib/payment-rules';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
@@ -381,6 +382,7 @@ export function FirebasePropertyModal({
             propertyTitle={title}
             price={prop.price}
             transactionType={modalTxType(prop.type)}
+            amountPi={propertyPaymentAmount(prop) ?? undefined}
             language={language}
             currency="PI"
             className="w-full"

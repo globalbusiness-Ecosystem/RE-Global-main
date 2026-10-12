@@ -26,6 +26,7 @@ export interface Property {
   translations?: Record<string, { title?: string; location?: string; description?: string }>;
   createdAt?: any;
   hidden?: boolean;
+  payAmountPi?: number;
 }
 
 export function useProperties() {
@@ -50,6 +51,7 @@ export function useProperties() {
             bedrooms: raw.bedrooms !== undefined ? Number(raw.bedrooms) || 0 : undefined,
             bathrooms: raw.bathrooms !== undefined ? Number(raw.bathrooms) || 0 : undefined,
             area: raw.area !== undefined ? Number(raw.area) || 0 : undefined,
+            payAmountPi: raw.payAmountPi !== undefined ? Number(raw.payAmountPi) || undefined : undefined,
             lat: raw.lat !== undefined ? Number(raw.lat) : undefined,
             lng: raw.lng !== undefined ? Number(raw.lng) : undefined,
           };

@@ -12,6 +12,7 @@ interface UnifiedPaymentButtonProps {
   transactionType: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized';
   language: NavLanguage;
   currency: 'PI' | 'USD';
+  amountPi?: number;
   className?: string;
   onSuccess?: (result: any) => void;
   onError?: (error: Error) => void;
@@ -29,6 +30,7 @@ export function UnifiedPaymentButton({
   transactionType,
   language,
   currency,
+  amountPi,
   className = '',
   onSuccess,
   onError,
@@ -69,6 +71,8 @@ export function UnifiedPaymentButton({
         paymentAmount = 1;
         paymentMemo = 'Property Purchase';
       }
+
+      if (typeof amountPi === 'number' && amountPi > 0) paymentAmount = amountPi;
 
       console.log('[v0] Initiating Pi payment:', { amount: paymentAmount, memo: paymentMemo, type: transactionType });
       

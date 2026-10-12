@@ -47,7 +47,7 @@ export interface PaymentCheck {
 
 export function validatePiPayment(
   payment: PiPayment,
-  expected: { uid: string; txid: string; propertyId: string }
+  expected: { uid: string; txid: string; propertyId: string; expectedAmount?: number | null }
 ): PaymentCheck {
   if (!payment.user_uid || payment.user_uid !== expected.uid) {
     return { ok: false, status: 403, error: 'Payment does not belong to this user' };
@@ -72,7 +72,7 @@ export function validatePiPayment(
   if (!ALLOWED_CONTRACT_TYPES.includes(rawType as ContractType)) {
     return { ok: false, status: 400, error: 'Unsupported transaction type' };
   }
-  const intent = checkPropertyPaymentIntent(payment);
+  const intent = checkPropertyPaymentIntent(payment, expected.expectedAmount);
   if (!intent.ok) {
     return { ok: false, status: 400, error: intent.error };
   }

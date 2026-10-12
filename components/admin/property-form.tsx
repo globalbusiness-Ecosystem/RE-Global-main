@@ -14,7 +14,7 @@ type Tr = Record<string, Record<string, string>>;
 
 function blank() {
   return {
-    title: '', price: '', currency: 'Pi', location: '', type: 'buy', propertyType: 'apartment', status: 'available',
+    title: '', price: '', payAmountPi: '', currency: 'Pi', location: '', type: 'buy', propertyType: 'apartment', status: 'available',
     bedrooms: '', bathrooms: '', area: '', lat: '', lng: '', description: '', image: '', images: [] as string[],
     vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false,
     amenities: { pool: false, gym: false, parking: false, security: false } as Record<string, boolean>,
@@ -25,7 +25,7 @@ function fromProperty(p: any) {
   const f = blank();
   return {
     ...f,
-    title: p.title || '', price: String(p.price ?? ''), currency: p.currency || 'Pi', location: p.location || '',
+    title: p.title || '', price: String(p.price ?? ''), payAmountPi: p.payAmountPi ? String(p.payAmountPi) : '', currency: p.currency || 'Pi', location: p.location || '',
     type: p.type || 'buy', propertyType: p.propertyType || 'apartment', status: p.status || 'available',
     bedrooms: p.bedrooms ? String(p.bedrooms) : '', bathrooms: p.bathrooms ? String(p.bathrooms) : '', area: p.area ? String(p.area) : '',
     lat: p.lat !== undefined ? String(p.lat) : '', lng: p.lng !== undefined ? String(p.lng) : '',
@@ -163,6 +163,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <div className="sm:col-span-2">{text('title', 'عنوان العقار (English)')}</div>
         {text('price', 'السعر', 'number')}
         {select('currency', 'العملة', { Pi: 'Pi', USD: 'USD', EGP: 'EGP' })}
+        <div className="sm:col-span-2">{text('payAmountPi', 'المبلغ المطلوب دفعه بالـ π (اختياري: لو سبته فاضي والعملة Pi بيدفع السعر كله)', 'number')}</div>
         <div className="sm:col-span-2">{text('location', 'الموقع (English)')}</div>
         {select('type', 'نوع الإعلان', TYPE_LABELS)}
         {select('propertyType', 'نوع العقار', PROPERTY_TYPES)}
