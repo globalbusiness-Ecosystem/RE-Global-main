@@ -6,10 +6,13 @@ import { useProperties, pTitle, pLocation, type Property } from '@/lib/useProper
 import { FirebasePropertyModal } from '@/components/pages/buy-page';
 
 // Real listings added from the admin panel (Firestore), filtered by listing type.
-export function FirestoreListings({ listingType, language }: { listingType: string; language: NavLanguage }) {
+export function FirestoreListings({ listingType, featuredOnly, language }: { listingType?: string; featuredOnly?: boolean; language: NavLanguage }) {
   const { properties, loading } = useProperties();
   const [selected, setSelected] = useState<Property | null>(null);
-  const items = useMemo(() => properties.filter((p) => p.type === listingType), [properties, listingType]);
+  const items = useMemo(() => {
+    const list = properties.filter((p) => (!listingType || p.type === listingType) && (!featuredOnly || (p.featured && p.status !== 'sold')));
+    return featuredOnly ? list.slice(0, 6) : list;
+  }, [properties, listingType, featuredOnly]);
 
   if (loading) {
     return (
@@ -21,7 +24,9 @@ export function FirestoreListings({ listingType, language }: { listingType: stri
   return (
     <div className="space-y-4 mb-6">
       <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
-        {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
+        {featuredOnly
+          ? (language === 'en' ? '⭐ Featured Properties' : '⭐ عقارات مميزة')
+          : (language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة')}
       </h2>
       {items.map((prop) => (
         <div

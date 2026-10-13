@@ -1,8 +1,9 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { useEffect, useState } from 'react';
-import { HERO_SLIDES, HERO_STAT_LABELS, tt } from '@/lib/hero-i18n';
+import { useEffect, useMemo, useState } from 'react';
+import { useSiteContent } from '@/lib/useSiteContent';
+import { HERO_SLIDES, HERO_STAT_LABELS, tt, type HeroSlideI18n } from '@/lib/hero-i18n';
 
 interface Slide {
   id: number;
@@ -103,6 +104,22 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
   const [imageLoaded, setImageLoaded] = useState(false);
+  const { items: banners } = useSiteContent<any>('banners');
+  const list: (HeroSlideI18n & { link?: string })[] = useMemo(
+    () =>
+      banners.length
+        ? banners.map((b, i) => ({
+            id: 1000 + i,
+            type: b.buttonLabel ? ('action' as const) : ('hero' as const),
+            title: { en: b.title, ar: b.titleAr || b.title } as any,
+            subtitle: { en: b.subtitle || '', ar: b.subtitleAr || b.subtitle || '' } as any,
+            button: b.buttonLabel ? ({ en: b.buttonLabel, ar: b.buttonLabelAr || b.buttonLabel } as any) : undefined,
+            imageUrl: b.image || undefined,
+            link: b.link || undefined,
+          }))
+        : HERO_SLIDES,
+    [banners]
+  );
 
   const handleButtonClick = (buttonType: string) => {
     try {
@@ -130,7 +147,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
         setFade(false);
         setImageLoaded(false);
         setTimeout(() => {
-          setCurrentSlide((prev) => (prev + 1) % slides.length);
+          setCurrentSlide((prev) => (prev + 1) % list.length);
           setFade(true);
         }, 300);
       } catch (error) {
@@ -139,14 +156,14 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
     }, 4000);
 
     return () => clearInterval(interval);
-  }, []);
+  }, [list.length]);
 
-  const slide = HERO_SLIDES[currentSlide];
+  const slide = list[currentSlide % list.length];
 
   return (
     <div className="relative w-full h-96 bg-black overflow-hidden">
       {/* Slide Background */}
-      {slide.type !== 'stats' && (
+      {slide.type !== 'stats' && slide.imageUrl && (
         <div
           className={`absolute inset-0 bg-cover bg-center transition-opacity duration-300 ${
             fade ? 'opacity-100' : 'opacity-0'
@@ -163,7 +180,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
         />
       )}
 
-      {slide.type === 'stats' && (
+      {(slide.type === 'stats' || !slide.imageUrl) && (
         <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
       )}
 
@@ -182,6 +199,11 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
           {slide.type === 'action' && slide.button && (
             <button 
               onClick={() => {
+                const link = (slide as { link?: string }).link;
+                if (link) {
+                  window.dispatchEvent(new CustomEvent('navigateToPage', { detail: link }));
+                  return;
+                }
                 if (slide.id === 2) {
                   handleButtonClick('invest');
                 } else if (slide.id === 3) {
@@ -223,7 +245,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
 
       {/* Dot Indicators */}
       <div className="absolute bottom-6 left-1/2 transform -translate-x-1/2 flex gap-2 z-20">
-        {HERO_SLIDES.map((_, index) => (
+        {list.map((_, index) => (
           <button
             key={index}
             onClick={() => {

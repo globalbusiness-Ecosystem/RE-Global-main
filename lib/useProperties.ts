@@ -27,6 +27,7 @@ export interface Property {
   createdAt?: any;
   hidden?: boolean;
   payAmountPi?: number;
+  status?: string;
 }
 
 export function useProperties() {

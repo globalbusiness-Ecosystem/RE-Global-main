@@ -2,6 +2,7 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Users, Building2, Mail, Phone } from 'lucide-react';
+import { useSiteContent } from '@/lib/useSiteContent';
 
 interface PartnersPageProps {
   language: NavLanguage;
@@ -9,73 +10,8 @@ interface PartnersPageProps {
   showBackButton?: boolean;
 }
 
-const partners = [
-  {
-    id: 'partner-1',
-    nameEn: 'Global Real Estate Partners',
-    nameAr: 'شركاء العقارات العالمية',
-    descriptionEn: 'Leading international property developers',
-    descriptionAr: 'مطورو الممتلكات الدوليين الرائدين',
-    logo: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
-    contact: 'partner1@replatform.com',
-  },
-  {
-    id: 'partner-2',
-    nameEn: 'Premier Investments LLC',
-    nameAr: 'استثمارات بريمير',
-    descriptionEn: 'Luxury property investment specialists',
-    descriptionAr: 'متخصصو استثمار الممتلكات الفاخرة',
-    logo: 'https://images.unsplash.com/photo-1560264357-8d9766a64d97?w=400&h=300&fit=crop',
-    contact: 'investments@replatform.com',
-  },
-  {
-    id: 'partner-3',
-    nameEn: 'Urban Development Group',
-    nameAr: 'مجموعة التطوير الحضري',
-    descriptionEn: 'Smart city and sustainable projects',
-    descriptionAr: 'مشاريع المدن الذكية والمستدامة',
-    logo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop',
-    contact: 'urban@replatform.com',
-  },
-  {
-    id: 'partner-4',
-    nameEn: 'Asia Pacific Properties',
-    nameAr: 'خصائص آسيا والمحيط الهادئ',
-    descriptionEn: 'Asian market real estate specialists',
-    descriptionAr: 'متخصصو العقارات في السوق الآسيوية',
-    logo: 'https://images.unsplash.com/photo-1552664730-d307ca884978?w=400&h=300&fit=crop',
-    contact: 'asia@replatform.com',
-  },
-  {
-    id: 'partner-5',
-    nameEn: 'European Heritage Homes',
-    nameAr: 'منازل التراث الأوروبي',
-    descriptionEn: 'Historic and premium European properties',
-    descriptionAr: 'الممتلكات الأوروبية التاريخية والممتازة',
-    logo: 'https://images.unsplash.com/photo-1560264357-8d9766a64d97?w=400&h=300&fit=crop',
-    contact: 'europe@replatform.com',
-  },
-  {
-    id: 'partner-6',
-    nameEn: 'Crypto Real Estate Fund',
-    nameAr: 'صندوق العقارات المشفرة',
-    descriptionEn: 'Blockchain-based property investments',
-    descriptionAr: 'استثمارات الممتلكات المستندة إلى البلوك تشين',
-    logo: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?w=400&h=300&fit=crop',
-    contact: 'crypto@replatform.com',
-  },
-  {
-    id: 'partner-7',
-    nameEn: 'Luxury Resorts International',
-    nameAr: 'المنتجعات الفاخرة الدولية',
-    descriptionEn: 'High-end hotel and resort developments',
-    descriptionAr: 'تطوير الفنادق والمنتجعات عالية الجودة',
-    logo: 'https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?w=400&h=300&fit=crop',
-    contact: 'resorts@replatform.com',
-  },
-];
-
 export default function PartnersPage({ language, onBack, showBackButton }: PartnersPageProps) {
+  const { items: partners, loading } = useSiteContent<any>('partners');
   return (
     <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto">
       <div className="flex items-center gap-3 mb-6">
@@ -99,24 +35,30 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
           : 'شركاء العقارات الموثوقين في جميع أنحاء العالم'}
       </p>
 
+      {!loading && partners.length === 0 && (
+        <p className="text-gray-400 text-center py-8">{language === 'ar' ? 'الشركاء قريباً' : 'Partners coming soon'}</p>
+      )}
+
       <div className="space-y-4">
-        {partners.map((partner) => (
+        {partners.map((partner: any) => (
           <div key={partner.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition">
-            <div className="h-40 bg-muted overflow-hidden">
-              <img
-                src={partner.logo}
-                alt={partner.nameEn}
-                className="w-full h-full object-cover hover:scale-105 transition duration-300"
-              />
-            </div>
+            {partner.logo && (
+              <div className="h-40 bg-muted overflow-hidden">
+                <img
+                  src={partner.logo}
+                  alt={partner.name}
+                  className="w-full h-full object-cover hover:scale-105 transition duration-300"
+                />
+              </div>
+            )}
 
             <div className="p-4 space-y-3">
               <div>
                 <h3 className="font-semibold text-foreground">
-                  {language === 'en' ? partner.nameEn : partner.nameAr}
+                  {language === 'ar' ? partner.nameAr || partner.name : partner.name}
                 </h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {language === 'en' ? partner.descriptionEn : partner.descriptionAr}
+                  {language === 'ar' ? partner.descriptionAr || partner.description : partner.description}
                 </p>
               </div>
 
@@ -128,12 +70,24 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
               </div>
 
               <div className="flex gap-2">
-                <button className="flex-1 bg-accent text-accent-foreground rounded-lg py-2 font-medium hover:opacity-90 transition text-sm">
-                  {language === 'en' ? 'Contact' : 'اتصل'}
-                </button>
-                <button className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm">
-                  {language === 'en' ? 'Visit' : 'زيارة'}
-                </button>
+                {partner.contact && (
+                  <a
+                    href={partner.contact.includes('@') ? `mailto:${partner.contact}` : `tel:${partner.contact}`}
+                    className="flex-1 bg-accent text-accent-foreground rounded-lg py-2 font-medium hover:opacity-90 transition text-sm text-center"
+                  >
+                    {language === 'en' ? 'Contact' : 'اتصل'}
+                  </a>
+                )}
+                {partner.website && (
+                  <a
+                    href={partner.website}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm text-center"
+                  >
+                    {language === 'en' ? 'Visit' : 'زيارة'}
+                  </a>
+                )}
               </div>
             </div>
           </div>

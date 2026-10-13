@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
+import { FirestoreListings } from '@/components/firestore-listings';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import AIAdvisorChat from '@/components/ai-advisor-chat';
 import AIAdvisorVoiceChat from '@/components/ai-advisor-voice-chat';
@@ -91,6 +92,8 @@ export default function HomePage({
             ))}
           </div>
         </div>
+
+        <FirestoreListings featuredOnly language={language} />
 
         {/* Categories */}
         <h3 className="text-lg font-semibold text-white mb-6 tracking-wide">
