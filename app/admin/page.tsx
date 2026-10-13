@@ -5,12 +5,14 @@ import DashboardTab from '@/components/admin/dashboard-tab';
 import PropertiesTab from '@/components/admin/properties-tab';
 import PaymentsTab from '@/components/admin/payments-tab';
 import UsersTab from '@/components/admin/users-tab';
+import ContentTab from '@/components/admin/content-tab';
 
 const TABS = [
   { id: 'dashboard', icon: '📊', label: 'الرئيسية' },
   { id: 'properties', icon: '🏠', label: 'العقارات' },
   { id: 'payments', icon: '💳', label: 'المدفوعات' },
   { id: 'users', icon: '👥', label: 'المستخدمون' },
+  { id: 'content', icon: '🧩', label: 'المحتوى' },
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
@@ -105,11 +107,12 @@ export default function AdminDashboard() {
           {tab === 'properties' && <PropertiesTab onUnauthorized={expired} />}
           {tab === 'payments' && <PaymentsTab onUnauthorized={expired} />}
           {tab === 'users' && <UsersTab onUnauthorized={expired} />}
+          {tab === 'content' && <ContentTab onUnauthorized={expired} />}
         </main>
       </div>
 
       {/* Bottom tab bar (mobile) */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-5 border-t border-[#222] bg-[#0f0f0f] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-[#222] bg-[#0f0f0f] md:hidden">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => go(t.id)} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-[#d4af37]' : 'text-gray-400'}`}>
             <span className="block text-lg leading-none">{t.icon}</span>{t.label}
