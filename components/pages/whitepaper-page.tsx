@@ -4,6 +4,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { ChevronDown, Mail } from 'lucide-react';
 import { useState } from 'react';
 import { WHITEPAPER_I18N } from '@/lib/whitepaper-i18n';
+import { useTexts } from '@/lib/useTexts';
 
 interface WhitePaperPageProps {
   language: NavLanguage;
@@ -16,7 +17,7 @@ export default function WhitePaperPage({
   onBack,
   showBackButton = true,
 }: WhitePaperPageProps) {
-  const t = WHITEPAPER_I18N[language];
+  const t = useTexts('whitepaper', language, WHITEPAPER_I18N[language]);
   const [expandedSections, setExpandedSections] = useState<string[]>(['vision']);
 
   const toggleSection = (sectionId: string) => {

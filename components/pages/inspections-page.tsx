@@ -29,6 +29,7 @@ import {
   type InspectionSubScore,
 } from '@/lib/inspections';
 import { INSPECTIONS_I18N } from '@/lib/inspections-i18n';
+import { useTexts } from '@/lib/useTexts';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
 import InspectionSimulationScene from '@/components/InspectionSimulationScene';
 
@@ -125,7 +126,7 @@ function SubScoreRow({
 }
 
 export default function InspectionsPage({ language, onBack, onNavigate }: InspectionsPageProps) {
-  const t = INSPECTIONS_I18N[language];
+  const t = useTexts('inspections', language, INSPECTIONS_I18N[language]);
   const isArabic = language === 'ar';
   const isRTL = language === 'ar' || language === 'ur';
   const demo = DEMO_INSPECTION;

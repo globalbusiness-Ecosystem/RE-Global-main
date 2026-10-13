@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import TextsEditor from './texts-editor';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
 
 type Kind = 'banners' | 'partners';
@@ -195,15 +196,16 @@ function Manager({ kind, onUnauthorized }: { kind: Kind; onUnauthorized: () => v
 }
 
 export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => void }) {
-  const [kind, setKind] = useState<Kind>('banners');
+  const [kind, setKind] = useState<Kind | 'texts'>('banners');
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
         {(Object.keys(CONFIG) as Kind[]).map((k) => (
           <Btn key={k} small kind={kind === k ? 'gold' : 'ghost'} onClick={() => setKind(k)}>{CONFIG[k].title}</Btn>
         ))}
+        <Btn small kind={kind === 'texts' ? 'gold' : 'ghost'} onClick={() => setKind('texts')}>✍️ نصوص الصفحات</Btn>
       </div>
-      <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />
+      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
     </div>
   );
 }

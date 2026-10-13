@@ -6,6 +6,7 @@ import { Wallet, RefreshCw, Info } from 'lucide-react';
 import { SimplePiPaymentButton } from '@/components/simple-pi-payment-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { RE_TOKEN_I18N } from '@/lib/re-token-i18n';
+import { useTexts } from '@/lib/useTexts';
 
 interface RETokenPageProps {
   language: NavLanguage;
@@ -47,7 +48,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
   const activeAmount = customAmount !== '' ? Number(customAmount) : selectedAmount;
   const isAmountValid = Number.isFinite(activeAmount) && activeAmount >= MIN_RE;
 
-  const t = RE_TOKEN_I18N[language];
+  const t = useTexts('retoken', language, RE_TOKEN_I18N[language]);
   const isRTL = language === 'ar' || language === 'ur';
   const apiUrl = process.env.NEXT_PUBLIC_API_URL;
 
