@@ -3,6 +3,9 @@ import { pickLanguage, isNavLanguage } from '@/lib/detect-language';
 import { siteUrl } from '@/lib/site-url';
 import robots from '@/app/robots';
 import sitemap from '@/app/sitemap';
+import { vi } from 'vitest';
+
+vi.mock('@/lib/public-listings-server', () => ({ listPublicListings: async () => [] }));
 
 const ENV = { ...process.env };
 afterEach(() => {
@@ -57,9 +60,9 @@ describe('robots + sitemap', () => {
     expect(rule.disallow).toEqual(['/api/', '/admin']);
     expect(r.sitemap).toBe('https://example.com/sitemap.xml');
   });
-  it('lists only public routes with absolute URLs', () => {
+  it('lists only public routes with absolute URLs', async () => {
     process.env.NEXT_PUBLIC_BASE_URL = 'https://example.com';
-    const urls = sitemap().map((s) => s.url);
+    const urls = (await sitemap()).map((s) => s.url);
     expect(urls).toEqual(['https://example.com/', 'https://example.com/privacy', 'https://example.com/terms']);
   });
 });

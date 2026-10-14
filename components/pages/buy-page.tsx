@@ -392,6 +392,9 @@ export function FirebasePropertyModal({
 
           {/* Buy Button: same flow as every other page (pays, then the server signs and records the contract) */}
           <LegalNotice country={prop.country} language={language} />
+          <a data-testid="share-link" href={`/p/${prop.id}${language === 'ar' ? '?lang=ar' : ''}`} target="_blank" rel="noopener noreferrer" className="block text-center text-sm underline opacity-80 mb-3">
+            {language === 'ar' ? '🔗 رابط العقار للمشاركة' : '🔗 Shareable property link'}
+          </a>
 
           {isSold ? (
             <div className="w-full rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-300">
