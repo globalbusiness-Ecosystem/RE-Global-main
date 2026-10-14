@@ -162,7 +162,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
       <div className="grid gap-3 sm:grid-cols-2">
         <div className="sm:col-span-2">{text('title', 'عنوان العقار (English)')}</div>
         {text('price', 'السعر', 'number')}
-        {select('currency', 'العملة', { Pi: 'Pi', USD: 'USD', EGP: 'EGP' })}
+        {select('currency', 'العملة', { Pi: 'Pi', USD: 'USD (ثابت، يتحاسب بالـ π حسب السعر في تبويب المحتوى)', EGP: 'EGP' })}
         <div className="sm:col-span-2">{text('payAmountPi', 'المبلغ المطلوب دفعه بالـ π (اختياري: لو سبته فاضي والعملة Pi بيدفع السعر كله)', 'number')}</div>
         <div className="sm:col-span-2">{text('location', 'الموقع (English)')}</div>
         {select('type', 'نوع الإعلان', TYPE_LABELS)}

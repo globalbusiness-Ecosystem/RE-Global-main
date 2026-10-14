@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import TextsEditor from './texts-editor';
+import PricingSettings from './pricing-settings';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
 
 type Kind = 'banners' | 'partners';
@@ -196,7 +197,7 @@ function Manager({ kind, onUnauthorized }: { kind: Kind; onUnauthorized: () => v
 }
 
 export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => void }) {
-  const [kind, setKind] = useState<Kind | 'texts'>('banners');
+  const [kind, setKind] = useState<Kind | 'texts' | 'pricing'>('banners');
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
@@ -204,8 +205,9 @@ export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => v
           <Btn key={k} small kind={kind === k ? 'gold' : 'ghost'} onClick={() => setKind(k)}>{CONFIG[k].title}</Btn>
         ))}
         <Btn small kind={kind === 'texts' ? 'gold' : 'ghost'} onClick={() => setKind('texts')}>✍️ نصوص الصفحات</Btn>
+        <Btn small kind={kind === 'pricing' ? 'gold' : 'ghost'} onClick={() => setKind('pricing')}>💱 سعر Pi</Btn>
       </div>
-      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
+      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
     </div>
   );
 }

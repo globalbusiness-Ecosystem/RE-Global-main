@@ -1,4 +1,5 @@
 'use client';
+import { formatPropertyPrice } from '@/lib/price-format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lucide-react';
@@ -261,7 +262,7 @@ function FirebaseRentModal({
           )}
           <div>
             <p className="text-3xl font-bold text-accent">
-              {prop.price} π <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
+              {formatPropertyPrice(prop)} <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
             </p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
@@ -404,7 +405,7 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
                   </p>
                   <div className="flex justify-between items-center">
                     <p className="text-accent font-bold text-lg">
-                      {prop.price} π <span className="text-xs text-gray-400">/{language === 'en' ? 'mo' : 'شهر'}</span>
+                      {formatPropertyPrice(prop)} <span className="text-xs text-gray-400">/{language === 'en' ? 'mo' : 'شهر'}</span>
                     </p>
                     <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
                       <Eye className="w-3 h-3" />

@@ -5,7 +5,9 @@ import { useProperties } from '@/lib/useProperties';
 import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
-import { propertyPaymentAmount } from '@/lib/payment-rules';
+import { propertyPaymentAmount, isUsdPegged } from '@/lib/payment-rules';
+import { formatPropertyPrice } from '@/lib/price-format';
+import { usePiRate } from '@/lib/usePiRate';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
@@ -257,6 +259,8 @@ export function FirebasePropertyModal({
   onClose: () => void;
 }) {
   const { accessToken } = usePiAuth();
+  const piRate = usePiRate();
+  const payPi = propertyPaymentAmount(prop, piRate);
   const title = pTitle(prop, language);
   const location = pLocation(prop, language);
 
@@ -288,7 +292,14 @@ export function FirebasePropertyModal({
 
           {/* Price & Location */}
           <div>
-            <p className="text-3xl font-bold text-accent">{prop.price} π</p>
+            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop)}</p>
+            {isUsdPegged(prop.currency) && (
+              <p className="text-sm text-gray-400 mt-1">
+                {payPi
+                  ? (language === 'en' ? `You pay ≈ ${payPi} π` : `هتدفع ≈ ${payPi} π`)
+                  : (language === 'en' ? 'Payment in π is not available yet' : 'الدفع بالـ π مش متاح لسه')}
+              </p>
+            )}
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
             </p>
@@ -382,7 +393,7 @@ export function FirebasePropertyModal({
             propertyTitle={title}
             price={prop.price}
             transactionType={modalTxType(prop.type)}
-            amountPi={propertyPaymentAmount(prop) ?? undefined}
+            amountPi={payPi ?? undefined}
             language={language}
             currency="PI"
             className="w-full"
@@ -466,7 +477,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
                   {pLocation(prop, language)}
                 </p>
                 <div className="flex justify-between items-center">
-                  <p className="text-accent font-bold text-lg">{prop.price} π</p>
+                  <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 capitalize border border-gray-700 px-2 py-0.5 rounded">
                       {prop.type}

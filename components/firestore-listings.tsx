@@ -1,4 +1,5 @@
 'use client';
+import { formatPropertyPrice } from '@/lib/price-format';
 import { useMemo, useState } from 'react';
 import { Eye } from 'lucide-react';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -47,7 +48,7 @@ export function FirestoreListings({ listingType, featuredOnly, language }: { lis
             </div>
             <p className="text-gray-400 text-sm mb-2">{pLocation(prop, language)}</p>
             <div className="flex justify-between items-center">
-              <p className="text-accent font-bold text-lg">{prop.price} π</p>
+              <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}</p>
               <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
                 <Eye className="w-3 h-3" />
                 {language === 'en' ? 'Details' : 'تفاصيل'}

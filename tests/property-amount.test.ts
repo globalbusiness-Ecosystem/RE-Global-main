@@ -26,3 +26,29 @@ describe('checkPropertyPaymentIntent with a property amount', () => {
     expect(checkPropertyPaymentIntent(pay(250), null).ok).toBe(false);
   });
 });
+
+import { piFromUsd, isUsdPegged } from '@/lib/payment-rules';
+import { formatPropertyPrice } from '@/lib/price-format';
+
+describe('USD-pegged listings', () => {
+  it('converts USD to Pi at the admin rate, rounding up', () => {
+    expect(piFromUsd(1000, 0.2)).toBe(5000);
+    expect(piFromUsd(100, 0.3)).toBe(333.34);
+    expect(piFromUsd(100, 0)).toBeNull();
+    expect(piFromUsd(0, 0.2)).toBeNull();
+  });
+  it('uses the rate only for USD-pegged prices, and payAmountPi still wins', () => {
+    expect(propertyPaymentAmount({ price: 1000, currency: 'USD' }, 0.2)).toBe(5000);
+    expect(propertyPaymentAmount({ price: 1000, currency: 'OUSD' }, 0.5)).toBe(2000);
+    expect(propertyPaymentAmount({ price: 1000, currency: 'USD' })).toBeNull();
+    expect(propertyPaymentAmount({ price: 1000, currency: 'USD', payAmountPi: 7 }, 0.2)).toBe(7);
+    expect(propertyPaymentAmount({ price: 1000, currency: 'EGP' }, 0.2)).toBeNull();
+    expect(isUsdPegged('usd')).toBe(true);
+    expect(isUsdPegged('Pi')).toBe(false);
+  });
+  it('formats prices by currency', () => {
+    expect(formatPropertyPrice({ price: 5, currency: 'Pi' })).toBe('5 π');
+    expect(formatPropertyPrice({ price: 250000, currency: 'USD' })).toBe('$250,000');
+    expect(formatPropertyPrice({ price: 9 })).toBe('9 π');
+  });
+});
