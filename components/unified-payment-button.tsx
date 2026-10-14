@@ -92,11 +92,21 @@ export function UnifiedPaymentButton({
             onReadyForServerApproval: async (paymentId: string) => {
               console.log('[RE] Approving payment:', paymentId);
               try {
-                await fetch('/api/payments/approve', {
+                const approveRes = await fetch('/api/payments/approve', {
                   method: 'POST',
                   headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
                   body: JSON.stringify({ paymentId }),
                 });
+                if (!approveRes.ok) {
+                  const j = await approveRes.json().catch(() => ({}));
+                  fetch('/api/payments/cancel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
+                    body: JSON.stringify({ paymentId }),
+                  }).catch(() => undefined);
+                  reject(new Error(j?.error || 'Payment could not be approved'));
+                  return;
+                }
                 console.log('[RE] Approved ✅');
                 resolve({ paymentId, status: 'approved' });
               } catch (e) {

@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { lookupExpectedAmount } from '@/lib/property-price';
+import { finalizeSale } from '@/lib/property-reserve';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
@@ -155,6 +156,17 @@ export async function POST(req: NextRequest) {
     if ('conflict' in result) {
       return NextResponse.json({ error: 'Payment already used' }, { status: 409 });
     }
+    // Mark the property sold and record the owner (idempotent; a failure makes the client retry the whole call).
+    await finalizeSale({
+      propertyId,
+      uid: user.uid,
+      username: user.username,
+      paymentId,
+      contractId: String((result.record as Record<string, unknown>).contractId ?? ''),
+      propertyTitle,
+      amount: paidAmount,
+      currency: 'Pi',
+    });
     const { uid: _uid, ...publicRecord } = result.record as Record<string, unknown>;
     return NextResponse.json({ ...publicRecord, contractDocId: paymentId });
   } catch (e) {

@@ -9,6 +9,7 @@ import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/li
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { CONTRACTS_I18N } from '@/lib/contracts-i18n';
+import { MyProperties } from '@/components/my-properties';
 
 interface ContractsPageProps {
   language: NavLanguage;
@@ -230,6 +231,8 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             {adminMode ? t.admin : t.viewAll}
           </button>
         </div>
+
+        <MyProperties language={language} />
 
         {showPinPrompt && (
           <div className="bg-card border border-border rounded-lg p-4 space-y-3">

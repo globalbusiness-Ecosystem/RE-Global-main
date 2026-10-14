@@ -7,6 +7,7 @@ import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { propertyPaymentAmount, isUsdPegged } from '@/lib/payment-rules';
 import { formatPropertyPrice } from '@/lib/price-format';
+import { isExclusiveType } from '@/lib/property-lifecycle';
 import { usePiRate } from '@/lib/usePiRate';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
@@ -259,6 +260,7 @@ export function FirebasePropertyModal({
   onClose: () => void;
 }) {
   const { accessToken } = usePiAuth();
+  const isSold = isExclusiveType(prop.type) && prop.status === 'sold';
   const piRate = usePiRate();
   const payPi = propertyPaymentAmount(prop, piRate);
   const title = pTitle(prop, language);
@@ -388,7 +390,12 @@ export function FirebasePropertyModal({
           )}
 
           {/* Buy Button: same flow as every other page (pays, then the server signs and records the contract) */}
-          <UnifiedPaymentButton
+          {isSold ? (
+            <div className="w-full rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-300">
+              {language === 'en' ? 'This property has been sold' : 'العقار ده اتباع'}
+            </div>
+          ) : (
+<UnifiedPaymentButton
             propertyId={prop.id}
             propertyTitle={title}
             price={prop.price}
@@ -398,6 +405,7 @@ export function FirebasePropertyModal({
             currency="PI"
             className="w-full"
           />
+          )}
 
         </div>
       </div>
@@ -477,7 +485,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
                   {pLocation(prop, language)}
                 </p>
                 <div className="flex justify-between items-center">
-                  <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}</p>
+                  <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}{isExclusiveType(prop.type) && prop.status === 'sold' && <span className="ml-2 text-[11px] text-red-300 border border-red-400/50 px-1.5 py-0.5 rounded">{language === 'en' ? 'Sold' : 'مباع'}</span>}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 capitalize border border-gray-700 px-2 py-0.5 rounded">
                       {prop.type}

@@ -1,4 +1,5 @@
 'use client';
+import { isExclusiveType } from '@/lib/property-lifecycle';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { useMemo, useState } from 'react';
 import { Eye } from 'lucide-react';
@@ -48,7 +49,7 @@ export function FirestoreListings({ listingType, featuredOnly, language }: { lis
             </div>
             <p className="text-gray-400 text-sm mb-2">{pLocation(prop, language)}</p>
             <div className="flex justify-between items-center">
-              <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}</p>
+              <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}{isExclusiveType(prop.type) && prop.status === 'sold' && <span className="ml-2 text-[11px] text-red-300 border border-red-400/50 px-1.5 py-0.5 rounded">{language === 'en' ? 'Sold' : 'مباع'}</span>}</p>
               <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
                 <Eye className="w-3 h-3" />
                 {language === 'en' ? 'Details' : 'تفاصيل'}
