@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { lookupExpectedAmount } from '@/lib/property-price';
 import { finalizeSale } from '@/lib/property-reserve';
+import { getLegalProfile } from '@/lib/legal-server';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
@@ -70,6 +71,7 @@ export async function POST(req: NextRequest) {
 
   // 3) Property title: prefer our own record; fall back to a sanitised client value.
   let propertyTitle = cleanText(body.propertyTitle, 150);
+  let propertyCountry = '';
   if (!propertyId.includes('/')) {
     try {
       const snap = await Promise.race([
@@ -78,11 +80,13 @@ export async function POST(req: NextRequest) {
       ]);
       const t = snap && snap.exists ? cleanText(snap.data()?.title, 150) : '';
       if (t) propertyTitle = t;
+      if (snap && snap.exists && typeof snap.data()?.country === 'string') propertyCountry = snap.data()?.country;
     } catch {
       /* use client title */
     }
   }
   if (!propertyTitle) propertyTitle = `Property ${propertyId}`;
+  const legal = await getLegalProfile(propertyCountry);
 
   // 4) One payment -> one signed contract. Repeat calls return the stored one.
   const ref = adminDb.collection('signed_contracts').doc(paymentId);
@@ -130,6 +134,7 @@ export async function POST(req: NextRequest) {
         currency: 'Pi',
         paymentId,
         txid,
+        legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
       });
       const contractHash = hashContract(contractText);
       const record = {

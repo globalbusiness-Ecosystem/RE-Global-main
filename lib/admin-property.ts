@@ -1,6 +1,7 @@
 export const TYPES = ['buy', 'rent', 'hotel', 'tokenized', 'abroad', 'offplan', 'invest'];
 export const PROPERTY_TYPES = ['apartment', 'villa', 'penthouse', 'commercial'];
 export const STATUSES = ['available', 'sold', 'under_construction'];
+import { isCountry } from '@/lib/legal-profiles';
 const CURRENCIES = ['Pi', 'USD', 'EGP'];
 const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'];
 
@@ -102,6 +103,7 @@ export function parsePropertyInput(b: any): ParsedProperty {
   const pay = num(b.payAmountPi, 0, 1e9);
   if (pay === null) return fail('Invalid payment amount');
   if (pay > 0) doc.payAmountPi = pay;
+  if (isCountry(b.country)) doc.country = b.country;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;
   const lat = num(b.lat, -90, 90);

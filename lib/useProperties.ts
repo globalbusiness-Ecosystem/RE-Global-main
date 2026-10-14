@@ -28,6 +28,7 @@ export interface Property {
   hidden?: boolean;
   payAmountPi?: number;
   status?: string;
+  country?: string;
 }
 
 export function useProperties() {

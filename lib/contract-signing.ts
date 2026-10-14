@@ -12,11 +12,16 @@ export interface ContractInput {
   currency: string;
   paymentId: string;
   txid: string;
+  // Per-country wording (see lib/legal-profiles.ts). Omitted = the original UAE pilot wording.
+  legal?: { statusLine: string; governingLaw: string; extraClause?: string };
 }
 
 export function generateContractText(c: ContractInput): string {
+  const statusLine = c.legal?.statusLine ?? 'PILOT / TESTNET — Pending UAE Legal Review (Federal Decree-Law No. 46/2021)';
+  const governingLaw = c.legal?.governingLaw ?? 'the laws of the United Arab Emirates';
+  const extra = c.legal?.extraClause ? `\n7. Additional terms. ${c.legal.extraClause}` : '';
   return `RE GLOBAL — PROPERTY TRANSACTION CONTRACT
-Status: PILOT / TESTNET — Pending UAE Legal Review (Federal Decree-Law No. 46/2021)
+Status: ${statusLine}
 
 Contract ID: ${c.contractId}
 Date: ${new Date().toISOString()}
@@ -36,7 +41,7 @@ TERMS
 3. Proof of transaction. The parties agree that the on-chain Pi Network transaction record constitutes conclusive evidence of payment and of the Buyer's assent to this contract.
 4. Property condition. Where a certified RE Inspect report exists for this property, its findings and Health Score are incorporated into this contract by reference via the linked certificate hash.
 5. Pilot phase. This contract is issued during a technical pilot phase and does not yet constitute a legally binding real estate conveyance until reviewed and confirmed compliant with applicable law.
-6. Governing law. Upon legal finalization, this contract shall be governed by the laws of the United Arab Emirates.`;
+6. Governing law. Upon legal finalization, this contract shall be governed by ${governingLaw}.${extra}`;
 }
 
 export function hashContract(text: string): string {

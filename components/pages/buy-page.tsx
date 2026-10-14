@@ -8,6 +8,7 @@ import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { propertyPaymentAmount, isUsdPegged } from '@/lib/payment-rules';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { isExclusiveType } from '@/lib/property-lifecycle';
+import { LegalNotice } from '@/components/legal-notice';
 import { usePiRate } from '@/lib/usePiRate';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
@@ -390,6 +391,8 @@ export function FirebasePropertyModal({
           )}
 
           {/* Buy Button: same flow as every other page (pays, then the server signs and records the contract) */}
+          <LegalNotice country={prop.country} language={language} />
+
           {isSold ? (
             <div className="w-full rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-300">
               {language === 'en' ? 'This property has been sold' : 'العقار ده اتباع'}

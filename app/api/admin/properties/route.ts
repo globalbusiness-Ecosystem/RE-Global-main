@@ -85,7 +85,11 @@ export async function PATCH(req: NextRequest) {
     const snap = await ref.get();
     if (!snap.exists) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
     const createdAt = snap.data()?.createdAt ?? Timestamp.now();
-    await ref.set({ ...parsed.doc, createdAt, updatedAt: Timestamp.now() });
+    // Keep the sale record (set by a completed purchase) when the admin edits the listing.
+    const prev = (snap.data() ?? {}) as Record<string, unknown>;
+    const keep: Record<string, unknown> = {};
+    for (const k of ['soldTo', 'soldAt', 'soldPaymentId']) if (prev[k] !== undefined) keep[k] = prev[k];
+    await ref.set({ ...parsed.doc, ...keep, createdAt, updatedAt: Timestamp.now() });
     await logAdmin('property.edit', { id, title: parsed.doc.title });
     return NextResponse.json({ ok: true });
   } catch (err) {

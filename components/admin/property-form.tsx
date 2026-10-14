@@ -10,11 +10,14 @@ const TR_LANGS = [
 const PROPERTY_TYPES: Record<string, string> = { apartment: 'شقة', villa: 'فيلا', penthouse: 'بنتهاوس', commercial: 'تجاري' };
 const AMENITIES: [string, string][] = [['pool', 'مسبح'], ['gym', 'جيم'], ['parking', 'موقف'], ['security', 'أمن']];
 
+import { COUNTRIES } from '@/lib/legal-profiles';
+const COUNTRY_OPTS: Record<string, string> = { '': 'غير محدد', ...Object.fromEntries(Object.entries(COUNTRIES).map(([c, n]) => [c, n.ar])) };
+
 type Tr = Record<string, Record<string, string>>;
 
 function blank() {
   return {
-    title: '', price: '', payAmountPi: '', currency: 'Pi', location: '', type: 'buy', propertyType: 'apartment', status: 'available',
+    title: '', price: '', payAmountPi: '', currency: 'Pi', location: '', country: '', type: 'buy', propertyType: 'apartment', status: 'available',
     bedrooms: '', bathrooms: '', area: '', lat: '', lng: '', description: '', image: '', images: [] as string[],
     vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false,
     amenities: { pool: false, gym: false, parking: false, security: false } as Record<string, boolean>,
@@ -25,7 +28,7 @@ function fromProperty(p: any) {
   const f = blank();
   return {
     ...f,
-    title: p.title || '', price: String(p.price ?? ''), payAmountPi: p.payAmountPi ? String(p.payAmountPi) : '', currency: p.currency || 'Pi', location: p.location || '',
+    title: p.title || '', price: String(p.price ?? ''), payAmountPi: p.payAmountPi ? String(p.payAmountPi) : '', currency: p.currency || 'Pi', location: p.location || '', country: p.country || '',
     type: p.type || 'buy', propertyType: p.propertyType || 'apartment', status: p.status || 'available',
     bedrooms: p.bedrooms ? String(p.bedrooms) : '', bathrooms: p.bathrooms ? String(p.bathrooms) : '', area: p.area ? String(p.area) : '',
     lat: p.lat !== undefined ? String(p.lat) : '', lng: p.lng !== undefined ? String(p.lng) : '',
@@ -71,7 +74,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         onChange={(e) => set({ [key]: e.target.value } as any)} />
     </Field>
   );
-  const select = (key: 'currency' | 'type' | 'propertyType' | 'status', label: string, opts: Record<string, string>) => (
+  const select = (key: 'currency' | 'type' | 'propertyType' | 'status' | 'country', label: string, opts: Record<string, string>) => (
     <Field label={label}>
       <select className={inputCls} value={form[key]} onChange={(e) => set({ [key]: e.target.value } as any)}>
         {Object.entries(opts).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
@@ -165,6 +168,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         {select('currency', 'العملة', { Pi: 'Pi', USD: 'USD (ثابت، يتحاسب بالـ π حسب السعر في تبويب المحتوى)', EGP: 'EGP' })}
         <div className="sm:col-span-2">{text('payAmountPi', 'المبلغ المطلوب دفعه بالـ π (اختياري: لو سبته فاضي والعملة Pi بيدفع السعر كله)', 'number')}</div>
         <div className="sm:col-span-2">{text('location', 'الموقع (English)')}</div>
+        {select('country', 'دولة العقار (بتحدد نص العقد)', COUNTRY_OPTS)}
         {select('type', 'نوع الإعلان', TYPE_LABELS)}
         {select('propertyType', 'نوع العقار', PROPERTY_TYPES)}
         {select('status', 'الحالة', STATUS_LABELS)}
