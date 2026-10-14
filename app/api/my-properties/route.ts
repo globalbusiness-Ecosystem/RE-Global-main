@@ -22,7 +22,15 @@ export async function GET(req: NextRequest) {
         return { id: d.id, ...rest, createdAt: createdAt?.toDate ? createdAt.toDate().toISOString() : null };
       })
       .sort((a: any, b: any) => String(b.createdAt).localeCompare(String(a.createdAt)));
-    return NextResponse.json({ items }, { headers: { 'Cache-Control': 'no-store' } });
+    const bsnap = await adminDb.collection('bookings').where('uid', '==', user.uid).get();
+    const bookings = bsnap.docs
+      .map((d) => {
+        const { uid: _u, createdAt, ...rest } = d.data() as Record<string, any>;
+        void _u;
+        return { id: d.id, ...rest, createdAt: createdAt?.toDate ? createdAt.toDate().toISOString() : null };
+      })
+      .sort((a: any, b: any) => String(b.start).localeCompare(String(a.start)));
+    return NextResponse.json({ items, bookings }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('[my-properties] error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

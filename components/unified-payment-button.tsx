@@ -13,6 +13,8 @@ interface UnifiedPaymentButtonProps {
   language: NavLanguage;
   currency: 'PI' | 'USD';
   amountPi?: number;
+  booking?: { start: string; end: string };
+  disabled?: boolean;
   className?: string;
   onSuccess?: (result: any) => void;
   onError?: (error: Error) => void;
@@ -31,6 +33,8 @@ export function UnifiedPaymentButton({
   language,
   currency,
   amountPi,
+  booking,
+  disabled = false,
   className = '',
   onSuccess,
   onError,
@@ -86,6 +90,7 @@ export function UnifiedPaymentButton({
               propertyId,
               transactionType,
               currency,
+              ...(booking ? { booking: { start: booking.start, end: booking.end } } : {}),
             },
           },
           {
@@ -251,7 +256,7 @@ export function UnifiedPaymentButton({
     <>
       <button
         onClick={() => setShowPaymentModal(true)}
-        disabled={paymentState.status === 'processing' || !isPiAvailable}
+        disabled={disabled || paymentState.status === 'processing' || !isPiAvailable}
         className={`${getButtonColor()} text-accent-foreground py-2 px-3 rounded-lg font-semibold transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 text-sm w-full ${className}`}
       >
         {paymentState.status === 'processing' && (

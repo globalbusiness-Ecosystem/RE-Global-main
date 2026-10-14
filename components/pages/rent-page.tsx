@@ -5,6 +5,10 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { BookingPicker } from '@/components/booking-picker';
+import { propertyPaymentAmount } from '@/lib/payment-rules';
+import { usePiRate } from '@/lib/usePiRate';
+import type { BookingDates } from '@/lib/booking-rules';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
@@ -246,6 +250,9 @@ function FirebaseRentModal({
 }) {
   const title = pTitle(prop, language);
   const location = pLocation(prop, language);
+  const piRate = usePiRate();
+  const unitPi = propertyPaymentAmount(prop, piRate);
+  const [chosen, setChosen] = useState<{ booking: BookingDates; total: number } | null>(null);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4">
@@ -313,10 +320,16 @@ function FirebaseRentModal({
               />
             </div>
           ) : null}
+          {unitPi !== null && (
+            <BookingPicker propertyId={prop.id} type="rent" unitPi={unitPi} language={language} onChange={setChosen} />
+          )}
           <UnifiedPaymentButton
             propertyId={prop.id}
             propertyTitle={title}
-            price={prop.price}
+            price={chosen ? chosen.total : prop.price}
+            amountPi={chosen ? chosen.total : undefined}
+            booking={chosen?.booking}
+            disabled={unitPi !== null && !chosen}
             transactionType="rent"
             language={language}
             currency="PI"

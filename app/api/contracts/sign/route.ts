@@ -3,7 +3,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
-import { lookupExpectedAmount } from '@/lib/property-price';
+import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
+import { confirmBooking } from '@/lib/booking-calendar';
 import { finalizeSale } from '@/lib/property-reserve';
 import { getLegalProfile } from '@/lib/legal-server';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
@@ -56,13 +57,14 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Could not reach Pi Platform API' }, { status: 503 });
   }
 
-  let expectedAmount: number | null = null;
+  let quote: Quote;
   try {
-    expectedAmount = await lookupExpectedAmount(propertyId);
-  } catch {
+    quote = await resolveExpected(propertyId, payment.metadata, { allowPast: true });
+  } catch (e) {
+    if (e instanceof BookingInputError) return NextResponse.json({ error: e.message }, { status: 400 });
     return NextResponse.json({ error: 'Could not verify the property price' }, { status: 503 });
   }
-  const check = validatePiPayment(payment, { uid: user.uid, txid, propertyId, expectedAmount });
+  const check = validatePiPayment(payment, { uid: user.uid, txid, propertyId, expectedAmount: quote.amount });
   if (!check.ok) {
     return NextResponse.json({ error: check.error }, { status: check.status ?? 400 });
   }
@@ -162,6 +164,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment already used' }, { status: 409 });
     }
     // Mark the property sold and record the owner (idempotent; a failure makes the client retry the whole call).
+    if (quote.booking) {
+      await confirmBooking({
+        propertyId, uid: user.uid, username: user.username, paymentId,
+        contractId: String((result.record as Record<string, unknown>).contractId ?? ''),
+        propertyTitle, propertyType: quote.booking.type, start: quote.booking.start, end: quote.booking.end,
+        nights: quote.booking.nights, amount: paidAmount,
+      });
+    }
     await finalizeSale({
       propertyId,
       uid: user.uid,
