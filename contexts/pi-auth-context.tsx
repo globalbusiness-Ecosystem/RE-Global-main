@@ -7,6 +7,7 @@ import React, {
   useEffect,
   type ReactNode,
 } from "react";
+import { recoverIncompletePayment } from "@/lib/payment-recovery";
 import { flushSync } from "react-dom";
 import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { auth as firebaseAuth, trackFirebaseSignIn } from "@/lib/firebase";
@@ -222,10 +223,12 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         sandbox: PI_NETWORK_CONFIG.SANDBOX,
       });
       setAuthMessage("Authenticating with Pi...");
+      let incompletePayment: any = null;
       const authResult = await window.Pi.authenticate(
         ['payments', 'username'],
         (payment: any) => {
           console.log('[PiAuth] Incomplete payment found:', payment);
+          incompletePayment = payment;
         }
       );
       console.log('[PiAuth] Authenticated:', authResult.user.username);
@@ -233,6 +236,12 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
       setAccessToken(authResult.accessToken);
       setApiToken(authResult.accessToken);
       setIsPiVerified(true);
+      // A payment left unfinished last time (app closed after paying): finish it or release what it held. Non-blocking.
+      if (incompletePayment) {
+        recoverIncompletePayment(incompletePayment, authResult.accessToken)
+          .then((r) => console.log('[PiAuth] Incomplete payment recovery:', r))
+          .catch(() => undefined);
+      }
 
       // Give Firestore a verified identity (custom token minted server-side from the
       // Pi access token). Non-blocking: the app keeps working if this fails.
