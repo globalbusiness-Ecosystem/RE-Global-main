@@ -4,6 +4,7 @@ import { requireUser } from '@/lib/market-auth';
 import { isValidPaymentId, isValidTxid } from '@/lib/contract-guard';
 import { validateResalePayment, type ResalePayment } from '@/lib/market-rules';
 import { listingAmount, settleResale } from '@/lib/share-market';
+import { signResaleContract } from '@/lib/resale-contract';
 
 export const dynamic = 'force-dynamic';
 const NO_STORE = { 'Cache-Control': 'no-store' };
@@ -37,7 +38,13 @@ export async function POST(req: NextRequest) {
     if (!check.ok) return NextResponse.json({ error: check.error }, { status: check.status, headers: NO_STORE });
     const r = await settleResale({ paymentId, buyerUid: user.uid, buyerName: user.username, listingId, amount: expected });
     if (!r.recorded) return NextResponse.json({ error: 'Listing not found' }, { status: 404, headers: NO_STORE });
-    return NextResponse.json({ ok: true, status: r.status }, { headers: NO_STORE });
+    // A confirmed sale gets a signed contract. If signing fails the client retries: settlement is idempotent.
+    let contractId: string | null = null;
+    if (r.status === 'confirmed') {
+      const c = await signResaleContract({ paymentId, txid, listingId, buyerName: user.username, amount: expected });
+      contractId = c?.contractId ?? null;
+    }
+    return NextResponse.json({ ok: true, status: r.status, contractId }, { headers: NO_STORE });
   } catch (err) {
     console.error('[market/settle] error:', err);
     return NextResponse.json({ error: 'Settlement failed' }, { status: 500, headers: NO_STORE });

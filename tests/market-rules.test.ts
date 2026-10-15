@@ -114,3 +114,24 @@ describe('contract details', () => {
     expect(generateContractText({ ...base, booking: { start: 'a', end: 'b', nights: 1 } })).toContain('(1 night;');
   });
 });
+
+import { generateResaleContractText } from '@/lib/contract-signing';
+
+describe('resale contract', () => {
+  const base = { contractId: 'c', propertyId: 'p', propertyTitle: 'Villa', sellerUsername: 'sam', buyerUsername: 'bob', shares: 25, totalShares: 200, pricePerShare: 4, amount: 100, fee: 2, proceeds: 98, currency: 'Pi', paymentId: 'pay', txid: 'tx' };
+  it('names both parties, the shares, the price and the fee', () => {
+    const t = generateResaleContractText(base);
+    expect(t).toContain('Party A (Seller): @sam');
+    expect(t).toContain('Party B (Buyer): @bob');
+    expect(t).toContain('Shares sold: 25 of 200 (12.5% of the property)');
+    expect(t).toContain('Price per share: 4 Pi');
+    expect(t).toContain('Total price: 100 Pi');
+    expect(t).toContain('Platform fee: 2 Pi (the Seller receives 98 Pi)');
+  });
+  it('still reads well when the property has no share total, and adds the country clause', () => {
+    const t = generateResaleContractText({ ...base, totalShares: null, legal: { statusLine: 'S', governingLaw: 'Egyptian law', extraClause: 'Extra.' } });
+    expect(t).toContain('Shares sold: 25\n');
+    expect(t).toContain('Egyptian law');
+    expect(t).toContain('6. Additional terms. Extra.');
+  });
+});

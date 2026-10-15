@@ -397,7 +397,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                   <div>
                     <p className="font-medium">{c.propertyTitle}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {t.typeLabels[c.type]} · {c.amount.toLocaleString()} {c.currency}
+                      {(t.typeLabels as Record<string, string>)[c.type] ?? c.type} · {c.amount.toLocaleString()} {c.currency}
                     </p>
                   </div>
                   <span className={`shrink-0 text-xs px-2 py-1 rounded-full border ${statusStyles[c.status]}`}>

@@ -58,6 +58,57 @@ TERMS
 6. Governing law. Upon legal finalization, this contract shall be governed by ${governingLaw}.${extra}`;
 }
 
+export interface ResaleContractInput {
+  contractId: string;
+  propertyId: string;
+  propertyTitle: string;
+  sellerUsername: string;
+  buyerUsername: string;
+  shares: number;
+  totalShares: number | null;
+  pricePerShare: number;
+  amount: number;
+  fee: number;
+  proceeds: number;
+  currency: string;
+  paymentId: string;
+  txid: string;
+  legal?: { statusLine: string; governingLaw: string; extraClause?: string };
+}
+
+// Contract for shares sold from one user to another through the platform's shares market.
+export function generateResaleContractText(c: ResaleContractInput): string {
+  const statusLine = c.legal?.statusLine ?? 'PILOT / TESTNET — Pending UAE Legal Review (Federal Decree-Law No. 46/2021)';
+  const governingLaw = c.legal?.governingLaw ?? 'the laws of the United Arab Emirates';
+  const extra = c.legal?.extraClause ? `\n6. Additional terms. ${c.legal.extraClause}` : '';
+  const pct = c.totalShares ? ` (${Math.round((c.shares / c.totalShares) * 10000) / 100}% of the property)` : '';
+  const of = c.totalShares ? ` of ${c.totalShares}` : '';
+  return `RE GLOBAL — SHARES RESALE CONTRACT
+Status: ${statusLine}
+
+Contract ID: ${c.contractId}
+Date: ${new Date().toISOString()}
+
+PARTIES
+Party A (Seller): @${c.sellerUsername}
+Party B (Buyer): @${c.buyerUsername} — identity verified via Pi Network payment
+Facilitator: RE Global platform
+
+SUBJECT
+Property: ${c.propertyTitle} (ID: ${c.propertyId})
+Shares sold: ${c.shares}${of}${pct}
+Price per share: ${c.pricePerShare} ${c.currency}
+Total price: ${c.amount} ${c.currency}
+Platform fee: ${c.fee} ${c.currency} (the Seller receives ${c.proceeds} ${c.currency})
+
+TERMS
+1. Transfer. The Seller transfers the shares above to the Buyer. The transfer is recorded in the RE Global shares ledger and takes effect when the payment below is confirmed.
+2. Consideration. The Buyer has paid the total price via the Pi Network payment system (Payment ID: ${c.paymentId}, Transaction: ${c.txid}).
+3. Settlement. The platform keeps the fee above and owes the remainder to the Seller, to be paid out by the platform.
+4. Proof of transaction. The on-chain Pi Network transaction record constitutes conclusive evidence of payment and of the Buyer's assent to this contract.
+5. Pilot phase. This contract is issued during a technical pilot phase. It records an in-platform transfer of shares and is not yet a legally binding conveyance until reviewed and confirmed compliant with applicable law. Governing law upon finalization: ${governingLaw}.${extra}`;
+}
+
 export function hashContract(text: string): string {
   return crypto.createHash('sha256').update(text, 'utf8').digest('hex');
 }
