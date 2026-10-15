@@ -74,3 +74,18 @@ export function decideBooking(
 }
 
 export const BOOKING_ERRORS = { unavailable: 'These dates are no longer available' };
+
+// Admin summary of bookings. Only confirmed stays count as revenue; "review" ones need a manual look.
+export function bookingTotals(rows: { status: unknown; amount: number; end: string; nights: number }[], today: string) {
+  const confirmed = rows.filter((r) => r.status === 'confirmed');
+  return {
+    confirmed: confirmed.length,
+    upcoming: confirmed.filter((r) => r.end >= today).length,
+    nights: confirmed.reduce((n, r) => n + (Number(r.nights) || 0), 0),
+    revenue: confirmed.reduce((n, r) => n + Math.round(r.amount * 100), 0) / 100,
+    review: rows.filter((r) => r.status === 'review').length,
+  };
+}
+
+// A booking the admin may cancel (and refund): a confirmed stay, or one held back for review.
+export const isCancellableBooking = (status: unknown) => status === 'confirmed' || status === 'review';

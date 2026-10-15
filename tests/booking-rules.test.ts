@@ -65,3 +65,23 @@ describe('overlaps and decideBooking', () => {
     expect(r).toHaveLength(1);
   });
 });
+
+import { bookingTotals, isCancellableBooking } from '@/lib/booking-rules';
+
+describe('admin booking totals', () => {
+  it('counts only confirmed stays as revenue and splits upcoming from past', () => {
+    const t = bookingTotals([
+      { status: 'confirmed', amount: 10.5, end: '2026-12-01', nights: 3 },
+      { status: 'confirmed', amount: 20, end: '2026-01-01', nights: 30 },
+      { status: 'review', amount: 99, end: '2026-12-05', nights: 2 },
+      { status: 'cancelled', amount: 50, end: '2026-12-09', nights: 5 },
+    ], '2026-10-16');
+    expect(t).toEqual({ confirmed: 2, upcoming: 1, nights: 33, revenue: 30.5, review: 1 });
+  });
+  it('only confirmed or review bookings can be cancelled', () => {
+    expect(isCancellableBooking('confirmed')).toBe(true);
+    expect(isCancellableBooking('review')).toBe(true);
+    expect(isCancellableBooking('cancelled')).toBe(false);
+    expect(isCancellableBooking(undefined)).toBe(false);
+  });
+});
