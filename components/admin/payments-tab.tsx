@@ -5,6 +5,7 @@ import PayoutsPanel from './payouts-panel';
 import MarketFeeSettings from './market-fee-settings';
 import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
+import HoldingsPanel from './holdings-panel';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Empty, Badge, inputCls, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 
 const csvCell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -48,6 +49,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
     <div className="space-y-3">
       <PayoutsPanel onUnauthorized={onUnauthorized} />
       <BookingsPanel onUnauthorized={onUnauthorized} />
+      <HoldingsPanel onUnauthorized={onUnauthorized} />
       <MarketAdminPanel onUnauthorized={onUnauthorized} />
       <MarketFeeSettings onUnauthorized={onUnauthorized} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">

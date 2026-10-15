@@ -60,3 +60,24 @@ describe('decideShares', () => {
     expect(decideShares(s, req, NOW)).toMatchObject({ ok: true, available: 40 });
   });
 });
+
+import { holdingTotals, canCancelHolding } from '@/lib/share-rules';
+
+describe('admin share purchases', () => {
+  it('totals count only confirmed purchases and flag review ones', () => {
+    expect(holdingTotals([
+      { status: 'confirmed', shares: 10, amount: 12.5 },
+      { status: 'confirmed', shares: 5, amount: 6.25 },
+      { status: 'review', shares: 3, amount: 99 },
+      { status: 'cancelled', shares: 7, amount: 50 },
+    ])).toEqual({ confirmed: 2, shares: 15, volume: 18.75, review: 1 });
+  });
+  it('a review purchase can always be cancelled and returns no shares', () => {
+    expect(canCancelHolding('review', 3, 0)).toEqual({ ok: true, returnsShares: false });
+  });
+  it('a confirmed purchase can be cancelled only while the buyer still holds the shares', () => {
+    expect(canCancelHolding('confirmed', 10, 10)).toEqual({ ok: true, returnsShares: true });
+    expect(canCancelHolding('confirmed', 10, 4).ok).toBe(false);
+    expect(canCancelHolding('cancelled', 10, 10).ok).toBe(false);
+  });
+});

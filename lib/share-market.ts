@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp, type Transaction } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { canCancelHolding, holdingTotals } from '@/lib/share-rules';
 import {
   LISTING_RESERVE_MS, availableToList, feePctOf, marketTotals, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
 } from '@/lib/market-rules';
@@ -202,5 +203,39 @@ export async function adminCancelListing(listingId: string) {
     if (d.reservedBy && num(d.reservedUntilMs) > Date.now()) return { ok: false as const, status: 409, error: 'A buyer is paying for this listing right now' };
     tx.update(ref, { status: 'cancelled', cancelledAt: Timestamp.now(), cancelledBy: 'admin' });
     return { ok: true as const, title: String(d.propertyTitle ?? ''), sellerName: String(d.sellerName ?? '') };
+  });
+}
+
+// Admin: every purchase of shares from the platform, with totals.
+export async function adminHoldings(max = 100) {
+  const snap = await adminDb.collection('share_holdings').get();
+  const rows = snap.docs
+    .map((d) => { const x = d.data(); return { id: d.id, propertyId: x.propertyId, propertyTitle: x.propertyTitle, username: x.username, shares: num(x.shares), totalShares: num(x.totalShares), amount: num(x.amount), status: x.status, createdAt: iso(x.createdAt) }; })
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  return { totals: holdingTotals(rows), holdings: rows.slice(0, max) };
+}
+
+// Admin: cancel a share purchase and queue a refund. A confirmed purchase gives its shares back to the property;
+// one held for review never took any. Refused when the buyer already resold or listed the shares.
+export async function adminCancelHolding(paymentId: string) {
+  if (!okId(paymentId)) return { ok: false as const, status: 400, error: 'Invalid purchase' };
+  const hRef = adminDb.collection('share_holdings').doc(paymentId);
+  const pRef = adminDb.collection('payouts').doc(`refund-${paymentId}`);
+  return adminDb.runTransaction(async (tx) => {
+    const h = await tx.get(hRef);
+    if (!h.exists) return { ok: false as const, status: 404, error: 'Purchase not found' };
+    const d = h.data() as Record<string, unknown>;
+    const propertyId = String(d.propertyId ?? '');
+    const shares = num(d.shares);
+    const prop = okId(propertyId) ? await tx.get(adminDb.collection('properties').doc(propertyId)) : null;
+    const pos = d.status === 'confirmed' && okId(propertyId) ? await readPosition(tx, String(d.uid), propertyId) : null;
+    const verdict = canCancelHolding(d.status, shares, pos ? pos.available : 0);
+    if (!verdict.ok) return { ok: false as const, status: 409, error: verdict.error };
+    if (verdict.returnsShares && prop && prop.exists) {
+      tx.update(prop.ref, { sharesSold: Math.max(0, num(prop.data()?.sharesSold) - shares) });
+    }
+    tx.update(hRef, { status: 'cancelled', cancelledAt: Timestamp.now(), cancelledBy: 'admin' });
+    tx.set(pRef, { kind: 'refund', uid: d.uid, username: d.username, amount: num(d.amount), status: 'pending', paymentId, holdingId: paymentId, createdAt: Timestamp.now() });
+    return { ok: true as const, title: String(d.propertyTitle ?? ''), username: String(d.username ?? ''), amount: num(d.amount), shares };
   });
 }

@@ -55,3 +55,23 @@ export function decideShares(
 }
 
 export const SHARE_ERRORS = { unavailable: 'Not enough shares are available right now' };
+
+// Admin summary of share purchases from the platform. Only confirmed ones count; "review" ones need a manual look.
+export function holdingTotals(rows: { status: unknown; shares: number; amount: number }[]) {
+  const confirmed = rows.filter((r) => r.status === 'confirmed');
+  return {
+    confirmed: confirmed.length,
+    shares: confirmed.reduce((n, r) => n + (Number(r.shares) || 0), 0),
+    volume: confirmed.reduce((n, r) => n + Math.round(r.amount * 100), 0) / 100,
+    review: rows.filter((r) => r.status === 'review').length,
+  };
+}
+
+// May the admin cancel (and refund) this purchase? A purchase held for review never took shares, so it can always go.
+// A confirmed one can only go while the buyer still holds those shares (not resold and not on sale).
+export function canCancelHolding(status: unknown, shares: number, availableToBuyer: number): { ok: true; returnsShares: boolean } | { ok: false; error: string } {
+  if (status === 'review') return { ok: true, returnsShares: false };
+  if (status !== 'confirmed') return { ok: false, error: 'Purchase is already cancelled' };
+  if (availableToBuyer < shares) return { ok: false, error: 'The buyer no longer holds these shares (resold or listed for sale)' };
+  return { ok: true, returnsShares: true };
+}

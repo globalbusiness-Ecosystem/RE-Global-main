@@ -87,8 +87,8 @@ export function MyProperties({ language }: { language: string }) {
             </div>
             <div className="text-right shrink-0">
               <p className="text-accent text-sm font-bold">{h.amount} π</p>
-              <p className={`text-[11px] ${h.status === 'review' ? 'text-yellow-400' : 'text-green-400'}`}>
-                {h.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : (ar ? 'مؤكد' : 'Confirmed')}
+              <p className={`text-[11px] ${h.status === 'review' ? 'text-yellow-400' : h.status === 'cancelled' ? 'text-red-400' : 'text-green-400'}`}>
+                {h.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : h.status === 'cancelled' ? (ar ? 'ملغي واتسجل استرداد' : 'Cancelled, refund queued') : (ar ? 'مؤكد' : 'Confirmed')}
               </p>
             </div>
           </div>
