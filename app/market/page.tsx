@@ -1,4 +1,5 @@
 'use client';
+import Link from "next/link";
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
@@ -61,7 +62,7 @@ export default function SharesMarketPage() {
       <div className="max-w-2xl mx-auto space-y-6">
         <header className="flex items-center justify-between">
           <h1 className="text-xl font-bold text-amber-500">📈 {ar ? 'سوق الحصص' : 'Shares market'}</h1>
-          <a href="/" className="text-sm underline text-gray-300">{ar ? 'رجوع' : 'Back'}</a>
+          <Link href="/" className="text-sm underline text-gray-300">{ar ? 'رجوع' : 'Back'}</Link>
         </header>
         {msg && <p className="text-sm text-amber-400">{msg}</p>}
 

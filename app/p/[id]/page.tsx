@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { siteUrl } from '@/lib/site-url';
@@ -45,9 +46,9 @@ export default async function PropertyPublicPage({ params, searchParams }: Props
         {t.facts && <p className="text-muted-foreground">{t.facts}</p>}
         {t.body && <p>{t.body}</p>}
         <p className="flex gap-4 pt-4">
-          <a href="/" className="underline">{ar ? 'افتح في التطبيق' : 'Open in the app'}</a>
-          {l.country && <a href={`/country/${l.country.toLowerCase()}${ar ? '?lang=ar' : ''}`} className="underline">{COUNTRIES[l.country]?.[lang]}</a>}
-          <a href={`/p/${id}${ar ? '' : '?lang=ar'}`} className="underline">{ar ? 'English' : 'العربية'}</a>
+          <Link href="/" className="underline">{ar ? 'افتح في التطبيق' : 'Open in the app'}</Link>
+          {l.country && <Link href={`/country/${l.country.toLowerCase()}${ar ? '?lang=ar' : ''}`} className="underline">{COUNTRIES[l.country]?.[lang]}</Link>}
+          <Link href={`/p/${id}${ar ? '' : '?lang=ar'}`} className="underline">{ar ? 'English' : 'العربية'}</Link>
         </p>
       </div>
     </main>

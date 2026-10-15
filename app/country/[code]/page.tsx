@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { COUNTRIES } from '@/lib/legal-profiles';
@@ -37,13 +38,13 @@ export default async function CountryPage({ params, searchParams }: Props) {
             const t = listingTexts(l, lang);
             return (
               <li key={l.id} className="border rounded-lg p-4">
-                <a href={`/p/${l.id}${ar ? '?lang=ar' : ''}`} className="font-semibold underline">{t.title}</a>
+                <Link href={`/p/${l.id}${ar ? '?lang=ar' : ''}`} className="font-semibold underline">{t.title}</Link>
                 <p className="text-sm text-muted-foreground">{t.price}{t.place ? ` · ${t.place}` : ''}</p>
               </li>
             );
           })}
         </ul>
-        <a href="/" className="underline">{ar ? 'افتح في التطبيق' : 'Open in the app'}</a>
+        <Link href="/" className="underline">{ar ? 'افتح في التطبيق' : 'Open in the app'}</Link>
       </div>
     </main>
   );
