@@ -4,6 +4,10 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { MapPin, Bed, Maximize2, Video, Heart, Eye } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { SharePicker } from '@/components/share-picker';
+import { propertyPaymentAmount } from '@/lib/payment-rules';
+import { usePiRate } from '@/lib/usePiRate';
+import { totalSharesOf } from '@/lib/share-rules';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
@@ -121,6 +125,10 @@ function FirebaseInvestModal({
 }) {
   const title = pTitle(prop, language);
   const location = pLocation(prop, language);
+  const piRate = usePiRate();
+  const totalPi = propertyPaymentAmount(prop, piRate);
+  const totalShares = totalSharesOf(prop);
+  const [chosen, setChosen] = useState<{ count: number; total: number } | null>(null);
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4">
@@ -186,10 +194,16 @@ function FirebaseInvestModal({
               />
             </div>
           ) : null}
+          {totalShares !== null && (
+            <SharePicker totalShares={totalShares} sharesSold={prop.sharesSold} totalPi={totalPi} language={language} onChange={setChosen} />
+          )}
           <UnifiedPaymentButton
             propertyId={prop.id}
             propertyTitle={title}
-            price={prop.price}
+            price={chosen ? chosen.total : prop.price}
+            amountPi={chosen ? chosen.total : undefined}
+            shares={chosen?.count}
+            disabled={totalShares !== null && !chosen}
             transactionType="invest"
             language={language}
             currency="PI"

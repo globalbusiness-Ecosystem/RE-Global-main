@@ -103,6 +103,9 @@ export function parsePropertyInput(b: any): ParsedProperty {
   const pay = num(b.payAmountPi, 0, 1e9);
   if (pay === null) return fail('Invalid payment amount');
   if (pay > 0) doc.payAmountPi = pay;
+  const shares = num(b.totalShares, 0, 1_000_000);
+  if (shares === null || !Number.isInteger(shares)) return fail('Total shares must be a whole number');
+  if (shares > 0) doc.totalShares = shares;
   if (isCountry(b.country)) doc.country = b.country;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;

@@ -14,6 +14,7 @@ interface UnifiedPaymentButtonProps {
   currency: 'PI' | 'USD';
   amountPi?: number;
   booking?: { start: string; end: string };
+  shares?: number;
   disabled?: boolean;
   className?: string;
   onSuccess?: (result: any) => void;
@@ -34,6 +35,7 @@ export function UnifiedPaymentButton({
   currency,
   amountPi,
   booking,
+  shares,
   disabled = false,
   className = '',
   onSuccess,
@@ -91,6 +93,7 @@ export function UnifiedPaymentButton({
               transactionType,
               currency,
               ...(booking ? { booking: { start: booking.start, end: booking.end } } : {}),
+              ...(shares ? { shares } : {}),
             },
           },
           {

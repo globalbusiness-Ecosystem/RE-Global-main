@@ -33,3 +33,25 @@ describe('resolveExpected', () => {
     expect(await resolveExpected('demo', {})).toEqual({ amount: null });
   });
 });
+
+describe('resolveExpected with shares', () => {
+  it('prices the chosen shares of a share-based listing', async () => {
+    set({ type: 'invest', price: 1000, currency: 'Pi', totalShares: 100 });
+    const q = await resolveExpected('i1', { shares: 5 });
+    expect(q.amount).toBe(50);
+    expect(q.shares).toEqual({ count: 5, totalShares: 100, type: 'invest' });
+  });
+  it('uses payAmountPi as the value of the whole asset', async () => {
+    set({ type: 'tokenized', price: 999999, currency: 'Pi', payAmountPi: 200, totalShares: 40 });
+    expect((await resolveExpected('t1', { shares: 10 })).amount).toBe(50);
+  });
+  it('rejects a missing or oversized share count', async () => {
+    set({ type: 'invest', price: 1000, currency: 'Pi', totalShares: 100 });
+    await expect(resolveExpected('i1', {})).rejects.toBeInstanceOf(BookingInputError);
+    await expect(resolveExpected('i1', { shares: 101 })).rejects.toBeInstanceOf(BookingInputError);
+  });
+  it('keeps the old whole-price behaviour without totalShares', async () => {
+    set({ type: 'invest', price: 300, currency: 'Pi' });
+    expect(await resolveExpected('i2', {})).toEqual({ amount: 300 });
+  });
+});

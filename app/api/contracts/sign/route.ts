@@ -5,6 +5,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
 import { confirmBooking } from '@/lib/booking-calendar';
+import { confirmShares } from '@/lib/share-inventory';
 import { finalizeSale } from '@/lib/property-reserve';
 import { getLegalProfile } from '@/lib/legal-server';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
@@ -164,6 +165,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Payment already used' }, { status: 409 });
     }
     // Mark the property sold and record the owner (idempotent; a failure makes the client retry the whole call).
+    if (quote.shares) {
+      await confirmShares({
+        propertyId, uid: user.uid, username: user.username, paymentId,
+        contractId: String((result.record as Record<string, unknown>).contractId ?? ''),
+        propertyTitle, propertyType: quote.shares.type, count: quote.shares.count, totalShares: quote.shares.totalShares, amount: paidAmount,
+      });
+    }
     if (quote.booking) {
       await confirmBooking({
         propertyId, uid: user.uid, username: user.username, paymentId,

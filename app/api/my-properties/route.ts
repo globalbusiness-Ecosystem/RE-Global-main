@@ -30,7 +30,15 @@ export async function GET(req: NextRequest) {
         return { id: d.id, ...rest, createdAt: createdAt?.toDate ? createdAt.toDate().toISOString() : null };
       })
       .sort((a: any, b: any) => String(b.start).localeCompare(String(a.start)));
-    return NextResponse.json({ items, bookings }, { headers: { 'Cache-Control': 'no-store' } });
+    const hsnap = await adminDb.collection('share_holdings').where('uid', '==', user.uid).get();
+    const holdings = hsnap.docs
+      .map((d) => {
+        const { uid: _h, createdAt, ...rest } = d.data() as Record<string, any>;
+        void _h;
+        return { id: d.id, ...rest, createdAt: createdAt?.toDate ? createdAt.toDate().toISOString() : null };
+      })
+      .sort((a: any, b: any) => String(b.createdAt).localeCompare(String(a.createdAt)));
+    return NextResponse.json({ items, bookings, holdings }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('[my-properties] error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

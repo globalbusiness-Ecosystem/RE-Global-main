@@ -3,6 +3,8 @@ import { checkPropertyPaymentIntent } from '@/lib/payment-rules';
 import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
 import { holdBooking } from '@/lib/booking-calendar';
 import { BOOKING_ERRORS } from '@/lib/booking-rules';
+import { holdShares } from '@/lib/share-inventory';
+import { SHARE_ERRORS } from '@/lib/share-rules';
 import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { reserveForPayment } from '@/lib/property-reserve';
 import { RESERVE_ERRORS } from '@/lib/property-lifecycle';
@@ -23,6 +25,16 @@ export async function POST(req: NextRequest) {
   const intent = checkPropertyPaymentIntent(ctx.payment, quote.amount);
   if (!intent.ok) {
     return NextResponse.json({ error: intent.error }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+  }
+  // Listings sold by shares (invest / tokenized): hold the shares for this buyer, or refuse if they ran out.
+  if (quote.shares) {
+    try {
+      const h = await holdShares({ propertyId: String(ctx.payment.metadata?.propertyId), uid: ctx.user.uid, paymentId: ctx.paymentId, count: quote.shares.count });
+      if (!h.ok) return NextResponse.json({ error: SHARE_ERRORS.unavailable }, { status: 409, headers: { 'Cache-Control': 'no-store' } });
+    } catch {
+      return NextResponse.json({ error: 'Could not hold the shares, try again' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+    }
+    return piPaymentAction(ctx.paymentId, 'approve');
   }
   // Dated listings (rent / hotel): hold the dates for this guest, or refuse if they are taken.
   if (quote.booking) {

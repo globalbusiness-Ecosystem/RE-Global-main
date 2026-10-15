@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isUsdPegged, propertyPaymentAmount } from '@/lib/payment-rules';
 import { getPiUsdRate } from '@/lib/pricing';
 import { bookingTotal, isBookingType, validateBooking } from '@/lib/booking-rules';
+import { parseShares, sharesTotal, totalSharesOf } from '@/lib/share-rules';
 
 // The amount (in Pi) the platform expects for a Firestore property, or null when the
 // property is not in Firestore (demo listings) or has no usable price (fee rule applies).
@@ -27,7 +28,11 @@ export async function lookupExpectedAmount(propertyId: string): Promise<number |
 // The caller sent dates that cannot be booked (client error, not an outage).
 export class BookingInputError extends Error {}
 
-export type Quote = { amount: number | null; booking?: { start: string; end: string; nights: number; type: string } };
+export type Quote = {
+  amount: number | null;
+  booking?: { start: string; end: string; nights: number; type: string };
+  shares?: { count: number; totalShares: number; type: string };
+};
 
 // Like lookupExpectedAmount, but understands dated listings: for a rent / hotel property the
 // expected amount is the price for the dates in the payment metadata.
@@ -47,6 +52,16 @@ export async function resolveExpected(propertyId: string, metadata: unknown, opt
     if (unit === null) throw new Error('Pi rate not set for a USD-priced property');
   }
   const type = String(d.type ?? '');
+  const totalShares = totalSharesOf(d);
+  if (totalShares !== null && unit !== null) {
+    // Sold by shares: `unit` is the value of the whole asset; the buyer pays for the shares chosen.
+    const mdS = (metadata && typeof metadata === 'object' ? metadata : {}) as Record<string, unknown>;
+    const ps = parseShares(mdS.shares, totalShares);
+    if (!ps.ok) throw new BookingInputError(ps.error);
+    const amount = sharesTotal(unit, totalShares, ps.count);
+    if (amount === null) throw new Error('Could not price the shares');
+    return { amount, shares: { count: ps.count, totalShares, type } };
+  }
   if (!isBookingType(type) || unit === null) return { amount: unit };
   const md = (metadata && typeof metadata === 'object' ? metadata : {}) as Record<string, unknown>;
   const v = validateBooking(type, md.booking, Date.now(), opts);

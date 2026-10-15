@@ -88,7 +88,10 @@ export async function PATCH(req: NextRequest) {
     // Keep the sale record (set by a completed purchase) when the admin edits the listing.
     const prev = (snap.data() ?? {}) as Record<string, unknown>;
     const keep: Record<string, unknown> = {};
-    for (const k of ['soldTo', 'soldAt', 'soldPaymentId']) if (prev[k] !== undefined) keep[k] = prev[k];
+    for (const k of ['soldTo', 'soldAt', 'soldPaymentId', 'sharesSold']) if (prev[k] !== undefined) keep[k] = prev[k];
+    const sharesSold = Number(prev.sharesSold) || 0;
+    const newTotal = Number(parsed.doc.totalShares) || 0;
+    if (sharesSold > 0 && newTotal < sharesSold) return bad(`Total shares cannot be lower than the ${sharesSold} shares already sold`);
     await ref.set({ ...parsed.doc, ...keep, createdAt, updatedAt: Timestamp.now() });
     await logAdmin('property.edit', { id, title: parsed.doc.title });
     return NextResponse.json({ ok: true });

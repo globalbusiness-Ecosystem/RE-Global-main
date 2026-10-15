@@ -17,7 +17,7 @@ type Tr = Record<string, Record<string, string>>;
 
 function blank() {
   return {
-    title: '', price: '', payAmountPi: '', currency: 'Pi', location: '', country: '', type: 'buy', propertyType: 'apartment', status: 'available',
+    title: '', price: '', payAmountPi: '', totalShares: '', currency: 'Pi', location: '', country: '', type: 'buy', propertyType: 'apartment', status: 'available',
     bedrooms: '', bathrooms: '', area: '', lat: '', lng: '', description: '', image: '', images: [] as string[],
     vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false,
     amenities: { pool: false, gym: false, parking: false, security: false } as Record<string, boolean>,
@@ -28,7 +28,7 @@ function fromProperty(p: any) {
   const f = blank();
   return {
     ...f,
-    title: p.title || '', price: String(p.price ?? ''), payAmountPi: p.payAmountPi ? String(p.payAmountPi) : '', currency: p.currency || 'Pi', location: p.location || '', country: p.country || '',
+    title: p.title || '', price: String(p.price ?? ''), payAmountPi: p.payAmountPi ? String(p.payAmountPi) : '', totalShares: p.totalShares ? String(p.totalShares) : '', currency: p.currency || 'Pi', location: p.location || '', country: p.country || '',
     type: p.type || 'buy', propertyType: p.propertyType || 'apartment', status: p.status || 'available',
     bedrooms: p.bedrooms ? String(p.bedrooms) : '', bathrooms: p.bathrooms ? String(p.bathrooms) : '', area: p.area ? String(p.area) : '',
     lat: p.lat !== undefined ? String(p.lat) : '', lng: p.lng !== undefined ? String(p.lng) : '',
@@ -166,6 +166,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <div className="sm:col-span-2">{text('title', 'عنوان العقار (English)')}</div>
         {text('price', 'السعر', 'number')}
         {select('currency', 'العملة', { Pi: 'Pi', USD: 'USD (ثابت، يتحاسب بالـ π حسب السعر في تبويب المحتوى)', EGP: 'EGP' })}
+        <div className="sm:col-span-2">{text('totalShares', 'عدد الحصص (للاستثمار/المرمّز فقط: السعر بيبقى قيمة العقار كله والمشتري بيدفع حصصه. سيبه فاضي لو العقار بيتباع مرة واحدة)', 'number')}</div>
         <div className="sm:col-span-2">{text('payAmountPi', 'المبلغ المطلوب دفعه بالـ π (اختياري: لو سبته فاضي والعملة Pi بيدفع السعر كله)', 'number')}</div>
         <div className="sm:col-span-2">{text('location', 'الموقع (English)')}</div>
         {select('country', 'دولة العقار (بتحدد نص العقد)', COUNTRY_OPTS)}

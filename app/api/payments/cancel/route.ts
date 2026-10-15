@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { releaseReservation } from '@/lib/property-reserve';
 import { releaseBooking } from '@/lib/booking-calendar';
+import { releaseShares } from '@/lib/share-inventory';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,7 @@ export async function POST(req: NextRequest) {
   try {
     await releaseReservation(String(ctx.payment.metadata?.propertyId ?? ''), ctx.user.uid);
     await releaseBooking(String(ctx.payment.metadata?.propertyId ?? ''), ctx.paymentId);
+    await releaseShares(String(ctx.payment.metadata?.propertyId ?? ''), ctx.paymentId);
   } catch (e) {
     console.error('[payments/cancel] release failed:', e);
   }

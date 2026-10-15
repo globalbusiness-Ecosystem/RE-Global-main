@@ -29,6 +29,8 @@ export interface Property {
   payAmountPi?: number;
   status?: string;
   country?: string;
+  totalShares?: number;
+  sharesSold?: number;
 }
 
 export function useProperties() {
