@@ -137,6 +137,8 @@ export async function POST(req: NextRequest) {
         currency: 'Pi',
         paymentId,
         txid,
+        booking: quote.booking ? { start: quote.booking.start, end: quote.booking.end, nights: quote.booking.nights } : undefined,
+        shares: quote.shares ? { count: quote.shares.count, totalShares: quote.shares.totalShares } : undefined,
         legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
       });
       const contractHash = hashContract(contractText);

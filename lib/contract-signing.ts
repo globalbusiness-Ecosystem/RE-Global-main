@@ -13,7 +13,21 @@ export interface ContractInput {
   paymentId: string;
   txid: string;
   // Per-country wording (see lib/legal-profiles.ts). Omitted = the original UAE pilot wording.
+  // What exactly was bought: dates for a rent / hotel stay, a number of shares for a fractional purchase.
+  booking?: { start: string; end: string; nights: number };
+  shares?: { count: number; totalShares: number };
   legal?: { statusLine: string; governingLaw: string; extraClause?: string };
+}
+
+// Extra SUBJECT lines for dated stays and share purchases. Empty for a plain sale, so those contracts read as before.
+export function subjectDetails(c: Pick<ContractInput, 'booking' | 'shares'>): string {
+  const lines: string[] = [];
+  if (c.booking) lines.push(`Stay: ${c.booking.start} to ${c.booking.end} (${c.booking.nights} night${c.booking.nights === 1 ? '' : 's'}; check-out on the end date)`);
+  if (c.shares) {
+    const pct = Math.round((c.shares.count / c.shares.totalShares) * 10000) / 100;
+    lines.push(`Shares: ${c.shares.count} of ${c.shares.totalShares} (${pct}% of the property)`);
+  }
+  return lines.length ? '\n' + lines.join('\n') : '';
 }
 
 export function generateContractText(c: ContractInput): string {
@@ -33,7 +47,7 @@ Party B (Platform): RE Global (${c.sellerUsername})
 SUBJECT
 Property: ${c.propertyTitle} (ID: ${c.propertyId})
 Transaction type: ${c.type}
-Amount: ${c.amount} ${c.currency}
+Amount: ${c.amount} ${c.currency}${subjectDetails(c)}
 
 TERMS
 1. Subject matter. The Buyer agrees to purchase, and the Platform agrees to transfer rights to, the property described above, subject to the terms herein.

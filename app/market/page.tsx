@@ -19,9 +19,10 @@ export default function SharesMarketPage() {
   const [me, setMe] = useState<{ positions: Position[]; listings: Mine[]; payouts: Payout[] } | null>(null);
   const [form, setForm] = useState<{ propertyId: string; shares: string; price: string } | null>(null);
   const [msg, setMsg] = useState('');
+  const [feePct, setFeePct] = useState(2);
 
   const load = useCallback(async () => {
-    fetch('/api/market/listings', { cache: 'no-store' }).then((r) => r.json()).then((d) => setListings(Array.isArray(d.listings) ? d.listings : [])).catch(() => undefined);
+    fetch('/api/market/listings', { cache: 'no-store' }).then((r) => r.json()).then((d) => { setListings(Array.isArray(d.listings) ? d.listings : []); if (typeof d.feePct === 'number') setFeePct(d.feePct); }).catch(() => undefined);
     if (!accessToken) { setMe(null); return; }
     fetch('/api/market/me', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null)).then((d) => setMe(d && Array.isArray(d.positions) ? d : null)).catch(() => undefined);
@@ -51,7 +52,7 @@ export default function SharesMarketPage() {
   };
 
   const total = form ? listingTotal(Number(form.shares), Number(form.price)) : null;
-  const split = total ? feeSplit(total) : null;
+  const split = total ? feeSplit(total, feePct) : null;
   const card = 'rounded-xl border border-white/10 p-3 space-y-2';
   const input = 'w-full rounded-lg bg-black/30 border border-white/10 p-2 text-sm text-white';
 

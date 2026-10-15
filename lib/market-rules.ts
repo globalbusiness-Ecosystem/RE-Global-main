@@ -13,10 +13,20 @@ export function listingTotal(shares: number, pricePerShare: number): number | nu
   return Math.ceil(shares * pricePerShare * 100 - 1e-9) / 100;
 }
 
+export const MAX_FEE_PCT = 20;
+// Admin-entered fee percent: 0..20, at most 2 decimals. null = not acceptable.
+export function parseFeePct(raw: unknown): number | null {
+  const n = raw === null || raw === undefined || (typeof raw === 'string' && raw.trim() === '') ? NaN : Number(raw);
+  if (!Number.isFinite(n) || n < 0 || n > MAX_FEE_PCT) return null;
+  return Math.round(n * 100) / 100;
+}
+// A stored fee percent, or the default when it is missing or out of range.
+export const feePctOf = (raw: unknown): number => parseFeePct(raw) ?? RESALE_FEE_PCT;
+
 // Platform fee (rounded UP) and what the seller is owed.
 export function feeSplit(total: number, pct = RESALE_FEE_PCT): { fee: number; proceeds: number } {
   const c = toCents(total);
-  const fee = Math.ceil((c * pct) / 100 - 1e-9);
+  const fee = Math.max(0, Math.ceil((c * pct) / 100 - 1e-9)) + 0;
   return { fee: fee / 100, proceeds: Math.max(0, c - fee) / 100 };
 }
 

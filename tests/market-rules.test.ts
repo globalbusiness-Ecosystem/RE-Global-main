@@ -79,3 +79,38 @@ describe('validateResalePayment', () => {
     expect(validateResalePayment({ ...base, metadata: { transactionType: 'buy', listingId: 'L1' } }, exp).ok).toBe(false);
   });
 });
+
+import { parseFeePct, feePctOf, RESALE_FEE_PCT } from '@/lib/market-rules';
+import { generateContractText } from '@/lib/contract-signing';
+
+describe('fee percent setting', () => {
+  it('accepts 0..20 with two decimals and rejects the rest', () => {
+    expect(parseFeePct(0)).toBe(0);
+    expect(parseFeePct('2.5')).toBe(2.5);
+    expect(parseFeePct(1.239)).toBe(1.24);
+    expect(parseFeePct(20)).toBe(20);
+    for (const bad of [-1, 20.01, 'abc', '', null, undefined, NaN]) expect(parseFeePct(bad)).toBeNull();
+  });
+  it('falls back to the default when nothing valid is stored', () => {
+    expect(feePctOf(undefined)).toBe(RESALE_FEE_PCT);
+    expect(feePctOf(null)).toBe(RESALE_FEE_PCT);
+    expect(feePctOf(5)).toBe(5);
+    expect(feePctOf(0)).toBe(0);
+    expect(feeSplit(100, 5)).toEqual({ fee: 5, proceeds: 95 });
+    expect(feeSplit(100, 0)).toEqual({ fee: 0, proceeds: 100 });
+  });
+});
+
+describe('contract details', () => {
+  const base = { contractId: 'c', propertyId: 'p', propertyTitle: 'T', buyerUsername: 'u', sellerUsername: 'RE', type: 'hotel', amount: 5, currency: 'Pi', paymentId: 'pay', txid: 'tx' };
+  it('writes dates and shares into the subject, and nothing extra for a plain sale', () => {
+    const plain = generateContractText(base);
+    expect(plain).not.toContain('Stay:');
+    expect(plain).not.toContain('Shares:');
+    const stay = generateContractText({ ...base, booking: { start: '2026-11-01', end: '2026-11-04', nights: 3 } });
+    expect(stay).toContain('Stay: 2026-11-01 to 2026-11-04 (3 nights');
+    const sh = generateContractText({ ...base, shares: { count: 25, totalShares: 200 } });
+    expect(sh).toContain('Shares: 25 of 200 (12.5% of the property)');
+    expect(generateContractText({ ...base, booking: { start: 'a', end: 'b', nights: 1 } })).toContain('(1 night;');
+  });
+});

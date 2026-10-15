@@ -2,7 +2,7 @@ import 'server-only';
 import { Timestamp, type Transaction } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import {
-  LISTING_RESERVE_MS, availableToList, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
+  LISTING_RESERVE_MS, availableToList, feePctOf, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
 } from '@/lib/market-rules';
 
 const okId = (id: unknown): id is string => typeof id === 'string' && !!id && !id.includes('/') && id.length <= 128;
@@ -30,7 +30,7 @@ export async function createListing(a: { uid: string; username: string; property
   const lockRef = adminDb.collection('share_locks').doc(`${a.uid}_${a.propertyId}`);
   const propRef = adminDb.collection('properties').doc(a.propertyId);
   return adminDb.runTransaction(async (tx) => {
-    const [lock, prop, pos] = await Promise.all([tx.get(lockRef), tx.get(propRef), readPosition(tx, a.uid, a.propertyId)]);
+    const [lock, prop, pos, set] = await Promise.all([tx.get(lockRef), tx.get(propRef), readPosition(tx, a.uid, a.propertyId), tx.get(adminDb.collection('settings').doc('market'))]);
     void lock;
     if (!prop.exists) return { ok: false as const, status: 404, error: 'Property not found' };
     const parsed = parseListingInput({ shares: a.shares, pricePerShare: a.pricePerShare }, pos.available);
@@ -40,7 +40,7 @@ export async function createListing(a: { uid: string; username: string; property
     tx.set(ref, {
       sellerUid: a.uid, sellerName: a.username, propertyId: a.propertyId,
       propertyTitle: String(prop.data()?.title ?? '').slice(0, 150),
-      shares: parsed.shares, pricePerShare: parsed.pricePerShare, status: 'open', createdAt: Timestamp.now(),
+      shares: parsed.shares, pricePerShare: parsed.pricePerShare, feePct: feePctOf(set.exists ? set.data()?.resaleFeePct : undefined), status: 'open', createdAt: Timestamp.now(),
     });
     return { ok: true as const, id: ref.id };
   });
@@ -112,7 +112,7 @@ export async function settleResale(a: { paymentId: string; buyerUid: string; buy
       tx.set(pRef, { kind: 'refund', uid: a.buyerUid, username: a.buyerName, amount: a.amount, status: 'pending', listingId: a.listingId, paymentId: a.paymentId, createdAt: Timestamp.now() });
       return { recorded: true as const, status: 'review' };
     }
-    const { fee, proceeds } = feeSplit(a.amount);
+    const { fee, proceeds } = feeSplit(a.amount, feePctOf(d.feePct));
     if (verdict === 'mark') {
       tx.update(lRef, { status: 'sold', soldTo: a.buyerName, soldAt: Timestamp.now(), soldPaymentId: a.paymentId, reservedBy: null, reservedUntilMs: null });
     }

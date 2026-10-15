@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/market-auth';
 import { createListing, listOpenListings } from '@/lib/share-market';
+import { getResaleFeePct } from '@/lib/market-settings';
 import { consumeRateLimit } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
@@ -10,10 +11,11 @@ const NO_STORE = { 'Cache-Control': 'no-store' };
 // Public: shares currently for sale.
 export async function GET() {
   try {
-    return NextResponse.json({ listings: await listOpenListings() }, { headers: NO_STORE });
+    const [listings, feePct] = await Promise.all([listOpenListings(), getResaleFeePct()]);
+    return NextResponse.json({ listings, feePct }, { headers: NO_STORE });
   } catch (err) {
     console.error('[market/listings] list error:', err);
-    return NextResponse.json({ listings: [] }, { headers: NO_STORE });
+    return NextResponse.json({ listings: [], feePct: 2 }, { headers: NO_STORE });
   }
 }
 
