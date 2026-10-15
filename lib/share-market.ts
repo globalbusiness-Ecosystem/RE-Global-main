@@ -2,7 +2,7 @@ import 'server-only';
 import { Timestamp, type Transaction } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import {
-  LISTING_RESERVE_MS, availableToList, feePctOf, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
+  LISTING_RESERVE_MS, availableToList, feePctOf, marketTotals, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
 } from '@/lib/market-rules';
 
 const okId = (id: unknown): id is string => typeof id === 'string' && !!id && !id.includes('/') && id.length <= 128;
@@ -171,4 +171,36 @@ export async function myMarket(uid: string) {
     .map((d) => { const x = d.data(); return { id: d.id, kind: x.kind, amount: num(x.amount), status: x.status, createdAt: iso(x.createdAt) }; })
     .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
   return { positions, listings, payouts };
+}
+
+// Admin: everything on the shares market in one view (recent first, capped).
+export async function adminMarketOverview(max = 100) {
+  const db = adminDb;
+  const [ls, ts] = await Promise.all([
+    db.collection('share_listings').get(),
+    db.collection('share_transfers').get(),
+  ]);
+  const listings = ls.docs
+    .map((d) => { const x = d.data(); return { id: d.id, propertyId: x.propertyId, propertyTitle: x.propertyTitle, sellerName: x.sellerName, shares: num(x.shares), pricePerShare: num(x.pricePerShare), feePct: x.feePct ?? null, status: x.status, reserved: !!x.reservedBy && num(x.reservedUntilMs) > Date.now(), soldTo: x.soldTo ?? null, createdAt: iso(x.createdAt) }; })
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  const transfers = ts.docs
+    .map((d) => { const x = d.data(); return { id: d.id, propertyId: x.propertyId, fromName: x.fromName ?? null, buyerName: x.buyerName, shares: num(x.shares), amount: num(x.amount), fee: num(x.fee), status: x.status, createdAt: iso(x.createdAt) }; })
+    .sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+  const totals = marketTotals(transfers, listings.filter((l) => l.status === 'open').length);
+  return { totals, listings: listings.slice(0, max), transfers: transfers.slice(0, max) };
+}
+
+// Admin: take an open listing off the market (not while a buyer is paying for it).
+export async function adminCancelListing(listingId: string) {
+  if (!okId(listingId)) return { ok: false as const, status: 400, error: 'Invalid listing' };
+  const ref = adminDb.collection('share_listings').doc(listingId);
+  return adminDb.runTransaction(async (tx) => {
+    const s = await tx.get(ref);
+    if (!s.exists) return { ok: false as const, status: 404, error: 'Listing not found' };
+    const d = s.data() as Record<string, unknown>;
+    if (d.status !== 'open') return { ok: false as const, status: 409, error: 'Listing is not open' };
+    if (d.reservedBy && num(d.reservedUntilMs) > Date.now()) return { ok: false as const, status: 409, error: 'A buyer is paying for this listing right now' };
+    tx.update(ref, { status: 'cancelled', cancelledAt: Timestamp.now(), cancelledBy: 'admin' });
+    return { ok: true as const, title: String(d.propertyTitle ?? ''), sellerName: String(d.sellerName ?? '') };
+  });
 }

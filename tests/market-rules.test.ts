@@ -135,3 +135,17 @@ describe('resale contract', () => {
     expect(t).toContain('6. Additional terms. Extra.');
   });
 });
+
+import { marketTotals } from '@/lib/market-rules';
+
+describe('admin market totals', () => {
+  it('counts only confirmed sales in volume and fees, and flags review ones', () => {
+    const t = marketTotals([
+      { status: 'confirmed', amount: 100, fee: 2 },
+      { status: 'confirmed', amount: 10.5, fee: 0.21 },
+      { status: 'review', amount: 50, fee: 0 },
+    ], 3);
+    expect(t).toEqual({ open: 3, sold: 2, review: 1, volume: 110.5, fees: 2.21 });
+    expect(marketTotals([], 0)).toEqual({ open: 0, sold: 0, review: 0, volume: 0, fees: 0 });
+  });
+});

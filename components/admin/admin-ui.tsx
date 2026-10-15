@@ -83,7 +83,7 @@ export function Empty({ children }: { children: ReactNode }) {
 }
 
 export const TYPE_LABELS: Record<string, string> = {
-  buy: 'شراء', rent: 'إيجار', hotel: 'فندق', tokenized: 'Tokenized', abroad: 'خارج البلاد', offplan: 'أوف بلان', invest: 'استثمار',
+  buy: 'شراء', rent: 'إيجار', hotel: 'فندق', tokenized: 'Tokenized', abroad: 'خارج البلاد', offplan: 'أوف بلان', invest: 'استثمار', resale: 'إعادة بيع حصص',
 };
 export const STATUS_LABELS: Record<string, string> = { available: 'متاح', sold: 'مباع', under_construction: 'تحت الإنشاء' };
 

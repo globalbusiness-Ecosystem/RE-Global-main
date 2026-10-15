@@ -13,6 +13,18 @@ export function listingTotal(shares: number, pricePerShare: number): number | nu
   return Math.ceil(shares * pricePerShare * 100 - 1e-9) / 100;
 }
 
+// Admin summary of resales: only confirmed sales count towards volume and fees; "review" ones are flagged.
+export function marketTotals(transfers: { status: unknown; amount: number; fee: number }[], open: number) {
+  const confirmed = transfers.filter((t) => t.status === 'confirmed');
+  return {
+    open,
+    sold: confirmed.length,
+    review: transfers.filter((t) => t.status === 'review').length,
+    volume: confirmed.reduce((n, t) => n + toCents(t.amount), 0) / 100,
+    fees: confirmed.reduce((n, t) => n + toCents(t.fee), 0) / 100,
+  };
+}
+
 export const MAX_FEE_PCT = 20;
 // Admin-entered fee percent: 0..20, at most 2 decimals. null = not acceptable.
 export function parseFeePct(raw: unknown): number | null {
