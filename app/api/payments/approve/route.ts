@@ -4,6 +4,8 @@ import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-p
 import { holdBooking } from '@/lib/booking-calendar';
 import { BOOKING_ERRORS } from '@/lib/booking-rules';
 import { holdShares } from '@/lib/share-inventory';
+import { reserveListing, releaseListing } from '@/lib/share-market';
+import { MARKET_ERRORS } from '@/lib/market-rules';
 import { SHARE_ERRORS } from '@/lib/share-rules';
 import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { reserveForPayment } from '@/lib/property-reserve';
@@ -15,6 +17,23 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const ctx = await authorizePayment(req, body?.paymentId);
   if (ctx instanceof NextResponse) return ctx;
+  // Resale of shares between users: the amount is the listing's price, and the listing is held for this buyer.
+  if (ctx.payment.metadata?.transactionType === 'resale') {
+    try {
+      const r = await reserveListing(ctx.payment.metadata?.listingId, ctx.user.uid, ctx.paymentId);
+      if (!r.ok) {
+        const msg = 'code' in r && r.code ? MARKET_ERRORS[r.code as keyof typeof MARKET_ERRORS] : r.error;
+        return NextResponse.json({ error: msg }, { status: r.status, headers: { 'Cache-Control': 'no-store' } });
+      }
+      if (Math.round(Number(ctx.payment.amount) * 100) !== Math.round(r.total * 100)) {
+        await releaseListing(ctx.payment.metadata?.listingId, ctx.paymentId).catch(() => undefined);
+        return NextResponse.json({ error: 'Unexpected payment amount' }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Could not reserve the listing, try again' }, { status: 503, headers: { 'Cache-Control': 'no-store' } });
+    }
+    return piPaymentAction(ctx.paymentId, 'approve');
+  }
   let quote: Quote;
   try {
     quote = await resolveExpected(String(ctx.payment.metadata?.propertyId ?? ''), ctx.payment.metadata);

@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import PayoutsPanel from './payouts-panel';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Empty, Badge, inputCls, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 
 const csvCell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
@@ -42,6 +43,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
 
   return (
     <div className="space-y-3">
+      <PayoutsPanel onUnauthorized={onUnauthorized} />
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Stat label="عدد المدفوعات" value={filtered.length} />
         <Stat label="الإجمالي" value={`${total} π`} />

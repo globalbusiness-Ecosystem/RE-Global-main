@@ -3,6 +3,7 @@ import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { releaseReservation } from '@/lib/property-reserve';
 import { releaseBooking } from '@/lib/booking-calendar';
 import { releaseShares } from '@/lib/share-inventory';
+import { releaseListing } from '@/lib/share-market';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +16,7 @@ export async function POST(req: NextRequest) {
     await releaseReservation(String(ctx.payment.metadata?.propertyId ?? ''), ctx.user.uid);
     await releaseBooking(String(ctx.payment.metadata?.propertyId ?? ''), ctx.paymentId);
     await releaseShares(String(ctx.payment.metadata?.propertyId ?? ''), ctx.paymentId);
+    await releaseListing(ctx.payment.metadata?.listingId, ctx.paymentId);
   } catch (e) {
     console.error('[payments/cancel] release failed:', e);
   }

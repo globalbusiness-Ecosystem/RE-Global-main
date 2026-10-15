@@ -75,7 +75,10 @@ export function MyProperties({ language }: { language: string }) {
     )}
     {holdings.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
-        <h2 className="text-sm font-bold text-accent">📈 {ar ? 'حصصي' : 'My shares'} ({holdings.length})</h2>
+        <h2 className="text-sm font-bold text-accent flex items-center justify-between">
+          <span>📈 {ar ? 'حصصي' : 'My shares'} ({holdings.length})</span>
+          <a href="/market" className="text-xs underline">{ar ? 'سوق الحصص' : 'Shares market'}</a>
+        </h2>
         {holdings.map((h) => (
           <div key={h.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 p-3">
             <div className="min-w-0">

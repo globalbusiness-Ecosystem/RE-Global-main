@@ -1,0 +1,81 @@
+import { describe, it, expect } from 'vitest';
+import { listingTotal, feeSplit, parseListingInput, ownedShares, availableToList, decideBuy, decideSettle, validateResalePayment } from '@/lib/market-rules';
+
+describe('money', () => {
+  it('totals round up and the fee is 2% rounded up', () => {
+    expect(listingTotal(3, 10)).toBe(30);
+    expect(listingTotal(3, 0.333)).toBe(1);
+    expect(listingTotal(0, 10)).toBeNull();
+    expect(listingTotal(2, 0)).toBeNull();
+    expect(feeSplit(100)).toEqual({ fee: 2, proceeds: 98 });
+    expect(feeSplit(10.5)).toEqual({ fee: 0.21, proceeds: 10.29 });
+    expect(feeSplit(0.01)).toEqual({ fee: 0.01, proceeds: 0 });
+  });
+  it('fee plus proceeds always equals the total', () => {
+    for (const t of [0.01, 1.37, 33.34, 999.99]) {
+      const { fee, proceeds } = feeSplit(t);
+      expect(Math.round((fee + proceeds) * 100)).toBe(Math.round(t * 100));
+    }
+  });
+});
+
+describe('parseListingInput', () => {
+  it('accepts whole shares within what is available and a positive price', () => {
+    expect(parseListingInput({ shares: '5', pricePerShare: '2.555' }, 10)).toEqual({ ok: true, shares: 5, pricePerShare: 2.56 });
+    expect(parseListingInput({ shares: 11, pricePerShare: 1 }, 10).ok).toBe(false);
+    expect(parseListingInput({ shares: 0, pricePerShare: 1 }, 10).ok).toBe(false);
+    expect(parseListingInput({ shares: 1.5, pricePerShare: 1 }, 10).ok).toBe(false);
+    expect(parseListingInput({ shares: 1, pricePerShare: 0 }, 10).ok).toBe(false);
+    expect(parseListingInput({ shares: 1, pricePerShare: 0.001 }, 10).ok).toBe(false);
+    expect(parseListingInput({ shares: 1, pricePerShare: 'abc' }, 10).ok).toBe(false);
+  });
+});
+
+describe('positions', () => {
+  it('owned = bought + received - sold, never negative', () => {
+    expect(ownedShares(10, 5, 3)).toBe(12);
+    expect(ownedShares(0, 0, 3)).toBe(0);
+    expect(availableToList(12, 5)).toBe(7);
+    expect(availableToList(2, 5)).toBe(0);
+  });
+});
+
+describe('decideBuy / decideSettle', () => {
+  const NOW = 1000;
+  it('only open listings, not your own, not someone else\'s live reservation', () => {
+    expect(decideBuy({ status: 'open', sellerUid: 's' }, 'b', NOW)).toEqual({ ok: true });
+    expect(decideBuy({ status: 'sold', sellerUid: 's' }, 'b', NOW)).toEqual({ ok: false, code: 'gone' });
+    expect(decideBuy({ status: 'cancelled', sellerUid: 's' }, 'b', NOW)).toEqual({ ok: false, code: 'gone' });
+    expect(decideBuy({ status: 'open', sellerUid: 'b' }, 'b', NOW)).toEqual({ ok: false, code: 'own' });
+    expect(decideBuy({ status: 'open', sellerUid: 's', reservedBy: 'x', reservedUntilMs: NOW + 5 }, 'b', NOW)).toEqual({ ok: false, code: 'reserved' });
+    expect(decideBuy({ status: 'open', sellerUid: 's', reservedBy: 'x', reservedUntilMs: NOW - 5 }, 'b', NOW)).toEqual({ ok: true });
+    expect(decideBuy({ status: 'open', sellerUid: 's', reservedBy: 'b', reservedUntilMs: NOW + 5 }, 'b', NOW)).toEqual({ ok: true });
+  });
+  it('settles once per payment', () => {
+    expect(decideSettle({ status: 'open' }, 'p1')).toBe('mark');
+    expect(decideSettle({ status: 'sold', soldPaymentId: 'p1' }, 'p1')).toBe('already');
+    expect(decideSettle({ status: 'sold', soldPaymentId: 'p2' }, 'p1')).toBe('conflict');
+    expect(decideSettle({ status: 'cancelled' }, 'p1')).toBe('conflict');
+  });
+});
+
+describe('validateResalePayment', () => {
+  const base = {
+    user_uid: 'b', amount: 30,
+    metadata: { transactionType: 'resale', listingId: 'L1' },
+    status: { developer_approved: true, transaction_verified: true, developer_completed: true },
+    transaction: { txid: 'tx1' },
+  };
+  const exp = { uid: 'b', txid: 'tx1', listingId: 'L1', expectedAmount: 30 };
+  it('accepts an exact, completed payment', () => {
+    expect(validateResalePayment(base, exp).ok).toBe(true);
+  });
+  it('rejects other users, wrong amount, wrong listing, wrong txid and unfinished payments', () => {
+    expect(validateResalePayment({ ...base, user_uid: 'z' }, exp).ok).toBe(false);
+    expect(validateResalePayment({ ...base, amount: 29.99 }, exp).ok).toBe(false);
+    expect(validateResalePayment(base, { ...exp, listingId: 'L2' }).ok).toBe(false);
+    expect(validateResalePayment(base, { ...exp, txid: 'other' }).ok).toBe(false);
+    expect(validateResalePayment({ ...base, status: { developer_approved: true } }, exp).ok).toBe(false);
+    expect(validateResalePayment({ ...base, metadata: { transactionType: 'buy', listingId: 'L1' } }, exp).ok).toBe(false);
+  });
+});

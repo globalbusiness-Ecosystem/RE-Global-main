@@ -26,7 +26,7 @@ export interface PiPayment {
   identifier?: string;
   user_uid?: string;
   amount?: number;
-  metadata?: { propertyId?: unknown; transactionType?: unknown } | null;
+  metadata?: { propertyId?: unknown; transactionType?: unknown; listingId?: unknown } | null;
   status?: {
     developer_approved?: boolean;
     transaction_verified?: boolean;

@@ -9,12 +9,13 @@ interface UnifiedPaymentButtonProps {
   propertyId: string;
   propertyTitle: string;
   price: number;
-  transactionType: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized';
+  transactionType: 'buy' | 'rent' | 'hotel' | 'invest' | 'tokenized' | 'resale';
   language: NavLanguage;
   currency: 'PI' | 'USD';
   amountPi?: number;
   booking?: { start: string; end: string };
   shares?: number;
+  listingId?: string;
   disabled?: boolean;
   className?: string;
   onSuccess?: (result: any) => void;
@@ -36,6 +37,7 @@ export function UnifiedPaymentButton({
   amountPi,
   booking,
   shares,
+  listingId,
   disabled = false,
   className = '',
   onSuccess,
@@ -53,6 +55,7 @@ export function UnifiedPaymentButton({
       hotel: language === 'en' ? 'Book' : 'احجز',
       invest: language === 'en' ? 'Invest' : 'استثمر',
       tokenized: language === 'en' ? 'Tokenize' : 'رمز',
+      resale: language === 'en' ? 'Buy shares' : 'اشتري الحصص',
     };
     return labels[transactionType];
   };
@@ -94,6 +97,7 @@ export function UnifiedPaymentButton({
               currency,
               ...(booking ? { booking: { start: booking.start, end: booking.end } } : {}),
               ...(shares ? { shares } : {}),
+              ...(listingId ? { listingId } : {}),
             },
           },
           {
@@ -136,13 +140,13 @@ export function UnifiedPaymentButton({
                 // Retry on transient failures; stop on definite rejections (4xx).
                 for (let attempt = 1; attempt <= 3; attempt++) {
                   try {
-                    const signRes = await fetch('/api/contracts/sign', {
+                    const signRes = await fetch(transactionType === 'resale' ? '/api/market/settle' : '/api/contracts/sign', {
                       method: 'POST',
                       headers: {
                         'Content-Type': 'application/json',
                         Authorization: `Bearer ${accessToken ?? ''}`,
                       },
-                      body: JSON.stringify({ propertyId, propertyTitle, paymentId, txid }),
+                      body: JSON.stringify(transactionType === 'resale' ? { paymentId, txid } : { propertyId, propertyTitle, paymentId, txid }),
                     });
                     if (signRes.ok) {
                       console.log('[RE] Contract signed and recorded ✅');
