@@ -11,6 +11,12 @@ rules_version = '2';
 //   walletBalances, liquidityPools, trades, users, transactions,
 //   rate_limits (shared API rate limiter; enable a TTL policy on expireAt),
 //   banned_users (suspended accounts), admin_audit (admin activity log)
+//   settings (pricing rate, resale fee), site_texts, legal_profiles,
+//   bookings, booking_calendars, property_reservations,
+//   share_holdings, share_holds, share_locks, share_listings, share_transfers,
+//   ownerships, payouts (refunds and resale proceeds the admin pays by hand)
+// Money and share state must never be client-writable: every change goes
+// through an API route that checks the Pi payment first.
 
 service cloud.firestore {
   match /databases/{database}/documents {
