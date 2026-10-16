@@ -1,9 +1,10 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { pendingFirst } from '@/lib/market-rules';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate, GOLD } from './admin-ui';
 
-type Payout = { id: string; kind: string; uid: string; username: string; amount: number; fee?: number; gross?: number; status: string; createdAt: string | null; paidAt: string | null; paymentId?: string };
+type Payout = { id: string; kind: string; uid: string; username: string; amount: number; fee?: number; gross?: number; status: string; createdAt: string | null; paidAt: string | null; paymentId?: string; note?: string };
 
 // Money the platform owes after share resales: seller proceeds and refunds. The admin sends the Pi by hand, then marks it paid.
 export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -20,9 +21,10 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
 
   const markPaid = async (id: string) => {
     if (!window.confirm('تأكد إنك حوّلت المبلغ للمستخدم قبل ما تعلّمه مدفوع.')) return;
+    const note = window.prompt('رقم عملية التحويل أو ملاحظة (اختياري):') ?? '';
     setBusy(id);
     try {
-      await adminApi('/api/admin/payouts', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id }) });
+      await adminApi('/api/admin/payouts', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id, note }) });
       load();
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
@@ -37,7 +39,7 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
   return (
     <Card title={`💸 مستحقات سوق الحصص (${pending.length} معلّقة · ${Math.round(owed * 100) / 100} π)`}>
       <div className="space-y-2">
-        {rows.slice(0, 50).map((r) => (
+        {pendingFirst(rows).slice(0, 50).map((r) => (
           <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 truncate font-bold text-white">@{r.username}</p>
@@ -50,8 +52,12 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
               {r.fee ? <span>· عمولة {r.fee} π</span> : null}
               <span className="truncate" dir="ltr">uid: {r.uid}</span>
             </div>
+            {r.status === 'paid' && r.note ? <p className="mt-1 text-xs text-gray-500" dir="auto">📝 {r.note}</p> : null}
             {r.status === 'pending' && (
-              <div className="mt-2"><Btn small onClick={() => markPaid(r.id)} disabled={busy === r.id}>✅ تم التحويل</Btn></div>
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Btn small onClick={() => navigator.clipboard?.writeText(`@${r.username} ${r.amount}`).catch(() => undefined)}>📋 نسخ الاسم والمبلغ</Btn>
+                <Btn small onClick={() => markPaid(r.id)} disabled={busy === r.id}>✅ تم التحويل</Btn>
+              </div>
             )}
           </div>
         ))}

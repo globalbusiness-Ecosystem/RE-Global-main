@@ -30,6 +30,15 @@ export function pendingOwed(payouts: { status: unknown; amount: number }[]): num
   return payouts.filter((p) => p.status === 'pending').reduce((n, p) => n + toCents(p.amount), 0) / 100;
 }
 
+// Pending payouts first (the admin's to-do list), newest first inside each group.
+export function pendingFirst<T extends { status: unknown; createdAt?: string | null }>(rows: T[]): T[] {
+  return [...rows].sort((a, b) => {
+    const pa = a.status === 'pending' ? 0 : 1;
+    const pb = b.status === 'pending' ? 0 : 1;
+    return pa - pb || String(b.createdAt ?? '').localeCompare(String(a.createdAt ?? ''));
+  });
+}
+
 export const MAX_FEE_PCT = 20;
 // Admin-entered fee percent: 0..20, at most 2 decimals. null = not acceptable.
 export function parseFeePct(raw: unknown): number | null {

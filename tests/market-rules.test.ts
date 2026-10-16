@@ -162,3 +162,18 @@ describe('what a user is owed', () => {
     expect(pendingOwed([])).toBe(0);
   });
 });
+
+import { pendingFirst } from '@/lib/market-rules';
+
+describe('pending payouts first', () => {
+  it('puts unpaid ones on top, newest first inside each group', () => {
+    const rows = [
+      { id: 'a', status: 'paid', createdAt: '2026-10-03' },
+      { id: 'b', status: 'pending', createdAt: '2026-10-01' },
+      { id: 'c', status: 'pending', createdAt: '2026-10-02' },
+      { id: 'd', status: 'paid', createdAt: '2026-10-04' },
+    ];
+    expect(pendingFirst(rows).map((r) => r.id)).toEqual(['c', 'b', 'd', 'a']);
+    expect(rows[0].id).toBe('a');
+  });
+});
