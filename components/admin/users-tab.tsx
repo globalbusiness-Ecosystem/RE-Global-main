@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import UserDetail from './user-detail';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Empty, Badge, inputCls, fmtDate } from './admin-ui';
 
 export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -9,6 +10,7 @@ export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => voi
   const [q, setQ] = useState('');
   const [filter, setFilter] = useState('all');
   const [shown, setShown] = useState(30);
+  const [open, setOpen] = useState('');
 
   const load = useCallback(() => {
     adminApi<{ users: any[] }>('/api/admin/users')
@@ -64,7 +66,8 @@ export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => voi
       </Card>
       {filtered.length === 0 && <Empty>مفيش مستخدمين مطابقين.</Empty>}
       {filtered.slice(0, shown).map((u) => (
-        <div key={u.username} className={`flex items-center justify-between gap-3 rounded-2xl border bg-[#141414] p-3 ${u.banned ? 'border-red-900' : 'border-[#2a2a2a]'}`}>
+        <div key={u.username} className={`rounded-2xl border bg-[#141414] p-3 ${u.banned ? 'border-red-900' : 'border-[#2a2a2a]'}`}>
+        <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
             <p className="truncate font-bold text-white">@{u.username}</p>
             {u.email && <p className="truncate text-xs text-gray-400" dir="ltr">{u.email}</p>}
@@ -75,7 +78,12 @@ export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => voi
             </div>
             {u.lastActivity && <p className="mt-1 text-[11px] text-gray-600">آخر نشاط: {fmtDate(u.lastActivity)}</p>}
           </div>
-          <Btn small kind={u.banned ? 'ghost' : 'danger'} onClick={() => toggleBan(u)}>{u.banned ? 'إلغاء الحظر' : '🚫 حظر'}</Btn>
+          <div className="flex shrink-0 flex-col gap-1">
+            <Btn small kind="ghost" onClick={() => setOpen(open === u.username ? '' : u.username)}>{open === u.username ? 'إخفاء' : '📂 تفاصيل'}</Btn>
+            <Btn small kind={u.banned ? 'ghost' : 'danger'} onClick={() => toggleBan(u)}>{u.banned ? 'إلغاء الحظر' : '🚫 حظر'}</Btn>
+          </div>
+        </div>
+        {open === u.username && <UserDetail username={u.username} onUnauthorized={onUnauthorized} />}
         </div>
       ))}
       {filtered.length > shown && <div className="text-center"><Btn kind="ghost" onClick={() => setShown(shown + 30)}>عرض المزيد ({filtered.length - shown})</Btn></div>}
