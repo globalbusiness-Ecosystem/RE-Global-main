@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { pendingFirst } from '@/lib/market-rules';
+import { toCsv } from '@/lib/csv';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate, GOLD } from './admin-ui';
 
 type Payout = { id: string; kind: string; uid: string; username: string; amount: number; fee?: number; gross?: number; status: string; createdAt: string | null; paidAt: string | null; paymentId?: string; note?: string };
@@ -31,13 +32,25 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
     } finally { setBusy(''); }
   };
 
+  const exportCsv = () => {
+    if (!rows) return;
+    const csv = toCsv(
+      ['id', 'username', 'kind', 'amount', 'fee', 'status', 'created', 'paid', 'note'],
+      pendingFirst(rows).map((r) => [r.id, r.username, r.kind, r.amount, r.fee ?? '', r.status, r.createdAt ?? '', r.paidAt ?? '', r.note ?? '']),
+    );
+    const url = URL.createObjectURL(new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' }));
+    const a = document.createElement('a');
+    a.href = url; a.download = `payouts-${new Date().toISOString().slice(0, 10)}.csv`; a.click();
+    URL.revokeObjectURL(url);
+  };
+
   if (error) return <Empty>❌ {error}</Empty>;
   if (!rows) return null;
   if (rows.length === 0) return null;
   const pending = rows.filter((r) => r.status === 'pending');
   const owed = pending.reduce((n, r) => n + (Number(r.amount) || 0), 0);
   return (
-    <Card title={`💸 مستحقات سوق الحصص (${pending.length} معلّقة · ${Math.round(owed * 100) / 100} π)`}>
+    <Card title={`💸 مستحقات سوق الحصص (${pending.length} معلّقة · ${Math.round(owed * 100) / 100} π)`} right={<Btn small onClick={exportCsv}>⬇️ CSV</Btn>}>
       <div className="space-y-2">
         {pendingFirst(rows).slice(0, 50).map((r) => (
           <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
