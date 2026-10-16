@@ -75,3 +75,17 @@ export function canCancelHolding(status: unknown, shares: number, availableToBuy
   if (availableToBuyer < shares) return { ok: false, error: 'The buyer no longer holds these shares (resold or listed for sale)' };
   return { ok: true, returnsShares: true };
 }
+
+export type ShareCheckProperty = { id: string; title: string; sharesSold: number };
+export type ShareCheckHolding = { propertyId: string; shares: number; status: unknown };
+
+// A property's sold-shares counter must equal the shares of its confirmed purchases.
+// Returns the properties where the two disagree (old data from before purchases were recorded can show up here).
+export function shareMismatches(props: ShareCheckProperty[], holdings: ShareCheckHolding[]): ShareCheckProperty[] {
+  const confirmed = new Map<string, number>();
+  for (const h of holdings) {
+    if (h.status !== 'confirmed') continue;
+    confirmed.set(h.propertyId, (confirmed.get(h.propertyId) ?? 0) + (Number(h.shares) || 0));
+  }
+  return props.filter((p) => (Number(p.sharesSold) || 0) !== (confirmed.get(p.id) ?? 0));
+}

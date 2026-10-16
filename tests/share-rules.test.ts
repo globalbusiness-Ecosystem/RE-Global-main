@@ -81,3 +81,27 @@ describe('admin share purchases', () => {
     expect(canCancelHolding('cancelled', 10, 10).ok).toBe(false);
   });
 });
+
+import { shareMismatches } from '@/lib/share-rules';
+
+describe('shareMismatches', () => {
+  const props = [
+    { id: 'a', title: 'A', sharesSold: 5 },
+    { id: 'b', title: 'B', sharesSold: 3 },
+    { id: 'c', title: 'C', sharesSold: 0 },
+    { id: 'd', title: 'D', sharesSold: 2 },
+  ];
+  it('flags only the properties where the counter and the confirmed purchases disagree', () => {
+    const holdings = [
+      { propertyId: 'a', shares: 2, status: 'confirmed' },
+      { propertyId: 'a', shares: 3, status: 'confirmed' },
+      { propertyId: 'b', shares: 1, status: 'confirmed' },
+      { propertyId: 'b', shares: 2, status: 'review' },
+      { propertyId: 'd', shares: 2, status: 'cancelled' },
+    ];
+    expect(shareMismatches(props, holdings).map((p) => p.id)).toEqual(['b', 'd']);
+  });
+  it('is quiet when nothing was sold', () => {
+    expect(shareMismatches([{ id: 'x', title: 'X', sharesSold: 0 }], [])).toEqual([]);
+  });
+});

@@ -6,6 +6,8 @@ export type AttentionInput = {
   piRateSet: boolean;
   pendingPayouts: { count: number; amount: number };
   review: { bookings: number; holdings: number; transfers: number };
+  /** Titles of properties whose sold-shares counter does not match the confirmed purchases. */
+  shareMismatches?: string[];
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
@@ -24,5 +26,7 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (r.holdings > 0) out.push({ id: 'review-holdings', level: 'bad', text: `${r.holdings} شراء حصص محتاج مراجعة (المشتري دفع والحصص خلصت): الغيه عشان يتعمله استرداد.`, tab: 'payments' });
   if (r.transfers > 0) out.push({ id: 'review-transfers', level: 'bad', text: `${r.transfers} عملية في سوق الحصص محتاجة مراجعة: ليها استرداد معلّق.`, tab: 'payments' });
   if (i.pendingPayouts.count > 0) out.push({ id: 'payouts', level: 'warn', text: `${i.pendingPayouts.count} مستحقات معلّقة (${round2(i.pendingPayouts.amount)} π) محتاجة تحويل منك.`, tab: 'payments' });
+  const m = i.shareMismatches ?? [];
+  if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
   return out;
 }

@@ -28,3 +28,14 @@ describe('buildAttention', () => {
     expect(items.slice(0, 3).every((x) => x.level === 'bad')).toBe(true);
   });
 });
+
+describe('share counter check', () => {
+  it('warns about properties whose sold counter disagrees with confirmed purchases', () => {
+    const items = buildAttention({ ...ok, shareMismatches: ['Villa A', 'Villa B', 'C', 'D'] });
+    expect(items.map((x) => x.id)).toEqual(['share-mismatch']);
+    expect(items[0].level).toBe('warn');
+    expect(items[0].text).toContain('4 عقار');
+    expect(items[0].text).toContain('...');
+    expect(buildAttention({ ...ok, shareMismatches: [] })).toEqual([]);
+  });
+});
