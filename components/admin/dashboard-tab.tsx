@@ -3,11 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Card, Stat, Empty, Badge, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 import AttentionPanel from './attention-panel';
-
-const ACTIONS: Record<string, string> = {
-  'property.create': 'إضافة عقار', 'property.edit': 'تعديل عقار', 'property.toggle': 'تغيير حالة عقار',
-  'property.delete': 'حذف عقار', 'user.ban': 'حظر مستخدم', 'user.unban': 'إلغاء حظر مستخدم',
-};
+import { auditLabel, auditSummary } from '@/lib/audit-labels';
 
 export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized: () => void; goto: (tab: string) => void }) {
   const [data, setData] = useState<any>(null);
@@ -79,8 +75,8 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
         <Card title="آخر نشاط الأدمن">
           {data.activity.length === 0 ? <Empty>لسه مفيش نشاط مسجّل.</Empty> : data.activity.map((a: any) => (
             <div key={a.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-              <span className="text-white">{ACTIONS[a.action] || a.action}</span>
-              <span className="mx-2 text-xs text-gray-500">{a.detail?.title || a.detail?.username || a.detail?.id || ''}</span>
+              <span className="text-white">{auditLabel(a.action)}</span>
+              <span className="mx-2 text-xs text-gray-500">{auditSummary(a.action, a.detail)}</span>
               <span className="block text-xs text-gray-600">{fmtDate(a.at)}</span>
             </div>
           ))}
