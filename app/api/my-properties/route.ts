@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { rateLimited } from '@/lib/rate-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -13,6 +14,8 @@ export async function GET(req: NextRequest) {
   } catch (err) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: err instanceof AuthError ? err.status : 401 });
   }
+  const limited = await rateLimited('my-properties', user.uid, 60, 10 * 60 * 1000);
+  if (limited) return limited;
   try {
     const snap = await adminDb.collection('ownerships').where('uid', '==', user.uid).get();
     const items = snap.docs

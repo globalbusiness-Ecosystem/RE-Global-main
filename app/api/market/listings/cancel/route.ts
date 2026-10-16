@@ -2,12 +2,15 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/market-auth';
 import { cancelListing } from '@/lib/share-market';
+import { rateLimited } from '@/lib/rate-guard';
 
 export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const user = await requireUser(req);
   if (user instanceof NextResponse) return user;
+  const limited = await rateLimited('listing-cancel', user.uid, 30, 60 * 60 * 1000);
+  if (limited) return limited;
   const body = await req.json().catch(() => ({}));
   try {
     const r = await cancelListing(user.uid, String(body?.listingId ?? ''));
