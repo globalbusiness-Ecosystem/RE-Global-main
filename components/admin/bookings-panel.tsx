@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Badge } from './admin-ui';
 
 type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string };
@@ -36,7 +37,7 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
   if (!data.bookings.length) return null;
   const { totals } = data;
   return (
-    <Card title="🗓️ الحجوزات">
+    <Card title="🗓️ الحجوزات" right={<Btn small onClick={() => downloadCsv('bookings', ['id', 'property', 'guest', 'start', 'end', 'nights', 'amount', 'status'], data.bookings.map((x) => [x.id, x.propertyTitle, x.username, x.start, x.end, x.nights, x.amount, x.status]))}>⬇️ CSV</Btn>}>
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="حجوزات مؤكدة" value={totals.confirmed} />

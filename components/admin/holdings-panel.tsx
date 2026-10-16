@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback, useEffect, useState } from 'react';
+import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Badge, fmtDate } from './admin-ui';
 
 type Holding = { id: string; propertyTitle: string; username: string; shares: number; totalShares: number; amount: number; status: string; createdAt: string | null };
@@ -36,7 +37,7 @@ export default function HoldingsPanel({ onUnauthorized }: { onUnauthorized: () =
   if (!data.holdings.length) return null;
   const { totals } = data;
   return (
-    <Card title="🧩 مشتريات الحصص">
+    <Card title="🧩 مشتريات الحصص" right={<Btn small onClick={() => downloadCsv('share-purchases', ['id', 'property', 'buyer', 'shares', 'totalShares', 'amount', 'status', 'created'], data.holdings.map((x) => [x.id, x.propertyTitle, x.username, x.shares, x.totalShares, x.amount, x.status, x.createdAt ?? '']))}>⬇️ CSV</Btn>}>
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
         <Stat label="مشتريات مؤكدة" value={totals.confirmed} />
