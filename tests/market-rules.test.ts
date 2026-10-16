@@ -149,3 +149,16 @@ describe('admin market totals', () => {
     expect(marketTotals([], 0)).toEqual({ open: 0, sold: 0, review: 0, volume: 0, fees: 0 });
   });
 });
+
+import { pendingOwed } from '@/lib/market-rules';
+
+describe('what a user is owed', () => {
+  it('adds up only the payouts not paid yet, without float drift', () => {
+    expect(pendingOwed([
+      { status: 'pending', amount: 0.1 },
+      { status: 'pending', amount: 0.2 },
+      { status: 'paid', amount: 50 },
+    ])).toBe(0.3);
+    expect(pendingOwed([])).toBe(0);
+  });
+});

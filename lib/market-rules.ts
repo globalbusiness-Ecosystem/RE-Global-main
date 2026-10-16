@@ -25,6 +25,11 @@ export function marketTotals(transfers: { status: unknown; amount: number; fee: 
   };
 }
 
+// What the platform still owes a user: the sum of their payouts that are not paid yet.
+export function pendingOwed(payouts: { status: unknown; amount: number }[]): number {
+  return payouts.filter((p) => p.status === 'pending').reduce((n, p) => n + toCents(p.amount), 0) / 100;
+}
+
 export const MAX_FEE_PCT = 20;
 // Admin-entered fee percent: 0..20, at most 2 decimals. null = not acceptable.
 export function parseFeePct(raw: unknown): number | null {
