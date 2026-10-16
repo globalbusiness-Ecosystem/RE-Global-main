@@ -6,9 +6,8 @@ import MarketFeeSettings from './market-fee-settings';
 import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
 import HoldingsPanel from './holdings-panel';
+import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Empty, Badge, inputCls, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
-
-const csvCell = (v: unknown) => `"${String(v ?? '').replace(/"/g, '""')}"`;
 
 export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<any[] | null>(null);
@@ -31,16 +30,12 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
   const total = filtered.reduce((n, c) => n + (Number(c.amount) || 0), 0);
   const types = [...new Set((rows || []).map((c) => c.type).filter(Boolean))];
 
-  const exportCsv = () => {
-    const head = ['contract_id', 'date', 'property', 'buyer', 'type', 'amount', 'currency', 'status', 'txid'];
-    const lines = filtered.map((c) => [c.id, c.createdAt, c.propertyTitle, c.buyerUsername, c.type, c.amount, c.currency, c.status, c.txid].map(csvCell).join(','));
-    const blob = new Blob(['﻿' + [head.join(','), ...lines].join('\n')], { type: 'text/csv;charset=utf-8' });
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = `payments-${new Date().toISOString().slice(0, 10)}.csv`;
-    a.click();
-    URL.revokeObjectURL(a.href);
-  };
+  const exportCsv = () =>
+    downloadCsv(
+      'payments',
+      ['contract_id', 'date', 'property', 'buyer', 'type', 'amount', 'currency', 'status', 'txid'],
+      filtered.map((c) => [c.id, c.createdAt, c.propertyTitle, c.buyerUsername, c.type, c.amount, c.currency, c.status, c.txid]),
+    );
 
   if (error) return <Empty>❌ {error}</Empty>;
   if (!rows) return <Empty>...جاري التحميل</Empty>;
