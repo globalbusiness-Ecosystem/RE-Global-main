@@ -1,10 +1,11 @@
 import { describe, it, expect, afterEach, vi } from 'vitest';
-import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { verifyPiAccessToken, AuthError, _clearPiAuthCache } from '@/lib/pi-auth';
 
 const banned = new Set<string>();
 vi.mock('@/lib/ban-list', () => ({ isBanned: async (u: string) => banned.has(u) }));
 
 afterEach(() => {
+  _clearPiAuthCache();
   banned.clear();
   vi.unstubAllGlobals();
 });
@@ -58,5 +59,37 @@ describe('verifyPiAccessToken', () => {
     banned.add('mallory');
     stubFetch(() => json({ uid: 'u-9', username: 'mallory' }));
     await expect(verifyPiAccessToken('tok')).rejects.toMatchObject({ name: 'AuthError', status: 403 });
+  });
+});
+
+describe('verifyPiAccessToken cache and timeout', () => {
+  it('trusts a token Pi just vouched for, so a burst costs one request', async () => {
+    const f = stubFetch(() => json({ uid: 'u-1', username: 'alice' }));
+    await verifyPiAccessToken('burst-token');
+    const again = await verifyPiAccessToken('burst-token');
+    expect(again.username).toBe('alice');
+    expect(f).toHaveBeenCalledTimes(1);
+    await verifyPiAccessToken('another-token');
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+
+  it('still blocks a suspended account while its token is cached', async () => {
+    stubFetch(() => json({ uid: 'u-2', username: 'bob' }));
+    await verifyPiAccessToken('bob-token');
+    banned.add('bob');
+    await expect(verifyPiAccessToken('bob-token')).rejects.toMatchObject({ status: 403 });
+  });
+
+  it('never caches a failed check', async () => {
+    const f = stubFetch(() => json({}, 401));
+    await expect(verifyPiAccessToken('bad-token')).rejects.toMatchObject({ status: 401 });
+    await expect(verifyPiAccessToken('bad-token')).rejects.toMatchObject({ status: 401 });
+    expect(f).toHaveBeenCalledTimes(2);
+  });
+
+  it('gives up on a hanging Pi API instead of waiting forever', async () => {
+    const f = stubFetch(() => json({ uid: 'u-3', username: 'carol' }));
+    await verifyPiAccessToken('timeout-token');
+    expect(f.mock.calls[0][1]!.signal).toBeInstanceOf(AbortSignal);
   });
 });
