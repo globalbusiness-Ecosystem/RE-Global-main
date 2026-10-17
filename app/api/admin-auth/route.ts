@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
 import { matchTotp } from '@/lib/totp';
 import { logAdmin } from '@/lib/admin-audit';
+import { spendLoginAttempt } from '@/lib/admin-login-budget';
 import {
   ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken,
   isAdminSessionConfigured,
@@ -96,6 +97,10 @@ export async function POST(req: NextRequest) {
   const key = clientKey(req);
   if (await checkLocked(key)) {
     return NextResponse.json({ ok: false, error: `Too many attempts. Try again in ${LOCK_MINUTES} minutes.` }, { status: 429 });
+  }
+  const budget = await spendLoginAttempt();
+  if (!budget.ok) {
+    return NextResponse.json({ ok: false, error: 'Too many attempts. Try again later.' }, { status: 429, headers: { 'Retry-After': String(budget.retryAfter) } });
   }
   const totpSecret = process.env.ADMIN_TOTP_SECRET?.trim();
   let pin: unknown, code: unknown;
