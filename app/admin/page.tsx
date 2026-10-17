@@ -18,6 +18,8 @@ type TabId = (typeof TABS)[number]['id'];
 
 export default function AdminDashboard() {
   const [pin, setPin] = useState('');
+  const [code, setCode] = useState('');
+  const [twoFactor, setTwoFactor] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
@@ -26,7 +28,7 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetch('/api/admin-auth')
       .then((res) => res.json())
-      .then((data) => setAuthenticated(!!data.ok))
+      .then((data) => { setAuthenticated(!!data.ok); setTwoFactor(!!data.twoFactor); })
       .catch(() => setAuthenticated(false))
       .finally(() => setCheckingSession(false));
     try {
@@ -48,10 +50,10 @@ export default function AdminDashboard() {
       const res = await fetch('/api/admin-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
+        body: JSON.stringify({ pin, code }),
       });
-      if (res.ok) { setAuthenticated(true); setPin(''); }
-      else setLoginError(res.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'PIN غلط!');
+      if (res.ok) { setAuthenticated(true); setPin(''); setCode(''); }
+      else setLoginError(res.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : twoFactor ? 'PIN أو الكود غلط!' : 'PIN غلط!');
     } catch {
       setLoginError('حصل خطأ في الاتصال، حاول تاني.');
     }
@@ -71,6 +73,10 @@ export default function AdminDashboard() {
           <h1 className="mb-5 text-xl font-bold text-[#d4af37]">🔐 لوحة تحكم RE Global</h1>
           <input type="password" autoComplete="current-password" placeholder="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
             className="mb-3 w-full rounded-lg border border-[#d4af37] bg-[#0a0a0a] px-3 py-3 text-center text-white focus:outline-none" />
+          {twoFactor && (
+            <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="كود التحقق (6 أرقام)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+              className="mb-3 w-full rounded-lg border border-[#d4af37] bg-[#0a0a0a] px-3 py-3 text-center tracking-widest text-white focus:outline-none" />
+          )}
           {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}
           <button type="submit" className="w-full rounded-lg bg-[#d4af37] py-3 font-bold text-black">دخول</button>
         </form>

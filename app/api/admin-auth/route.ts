@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { matchTotp } from '@/lib/totp';
+import { logAdmin } from '@/lib/admin-audit';
 import {
   ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken,
   isAdminRequest, isAdminSessionConfigured,
@@ -65,6 +67,26 @@ async function clearFailures(key: string): Promise<void> {
   if (db) { try { await db.collection('admin_login_attempts').doc(key).delete(); } catch { /* ignore */ } }
 }
 
+// A 6-digit code works once: remember the last accepted 30-second step, refuse the same step (or older) again.
+const memoryStep = { v: 0 };
+async function acceptStep(step: number): Promise<boolean> {
+  const db = await getDb();
+  if (db) {
+    try {
+      const ref = db.collection('admin_login_attempts').doc('_totp');
+      return await db.runTransaction(async (tx) => {
+        const last = Number((await tx.get(ref)).data()?.lastStep || 0);
+        if (step <= last) return false;
+        tx.set(ref, { lastStep: step, updatedAt: Date.now() });
+        return true;
+      });
+    } catch { /* fall back to memory */ }
+  }
+  if (step <= memoryStep.v) return false;
+  memoryStep.v = step;
+  return true;
+}
+
 export async function POST(req: NextRequest) {
   const ADMIN_PIN = process.env.ADMIN_PIN;
   if (!ADMIN_PIN || !isAdminSessionConfigured()) {
@@ -74,15 +96,25 @@ export async function POST(req: NextRequest) {
   if (await checkLocked(key)) {
     return NextResponse.json({ ok: false, error: `Too many attempts. Try again in ${LOCK_MINUTES} minutes.` }, { status: 429 });
   }
-  let pin: unknown;
-  try { ({ pin } = await req.json()); }
+  const totpSecret = process.env.ADMIN_TOTP_SECRET?.trim();
+  let pin: unknown, code: unknown;
+  try { ({ pin, code } = await req.json()); }
   catch { return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 }); }
 
   if (typeof pin !== 'string' || !safeEqual(pin, ADMIN_PIN)) {
     await registerFailure(key);
     return NextResponse.json({ ok: false }, { status: 401 });
   }
+  if (totpSecret) {
+    // Second step: the 6-digit code. A wrong code counts like a wrong PIN, and the answer never says which one was wrong.
+    const step = matchTotp(totpSecret, code);
+    if (step === null || !(await acceptStep(step))) {
+      await registerFailure(key);
+      return NextResponse.json({ ok: false }, { status: 401 });
+    }
+  }
   await clearFailures(key);
+  await logAdmin('admin.login', { twoFactor: !!totpSecret });
   const token = await createAdminToken();
   if (!token) return NextResponse.json({ ok: false, error: 'Server not configured' }, { status: 500 });
 
@@ -94,7 +126,7 @@ export async function POST(req: NextRequest) {
   return res;
 }
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ ok: await isAdminRequest(req) });
+  return NextResponse.json({ ok: await isAdminRequest(req), twoFactor: !!process.env.ADMIN_TOTP_SECRET?.trim() });
 }
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });

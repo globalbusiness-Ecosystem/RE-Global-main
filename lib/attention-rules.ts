@@ -1,7 +1,7 @@
 // What the admin should look at right now. Pure: takes plain counts and yes/no flags (never secret values).
 
 export type AttentionInput = {
-  env: { PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean; ADMIN_SESSION_SECRET: boolean };
+  env: { PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean; ADMIN_SESSION_SECRET: boolean; ADMIN_TOTP_SECRET?: boolean };
   usdProperties: number;
   piRateSet: boolean;
   pendingPayouts: { count: number; amount: number };
@@ -28,5 +28,6 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (i.pendingPayouts.count > 0) out.push({ id: 'payouts', level: 'warn', text: `${i.pendingPayouts.count} مستحقات معلّقة (${round2(i.pendingPayouts.amount)} π) محتاجة تحويل منك.`, tab: 'payments' });
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
+  if (i.env.ADMIN_TOTP_SECRET === false) out.push({ id: 'env-2fa', level: 'warn', text: 'دخول الأدمن بالـ PIN بس: فعّل التحقق بخطوتين (ADMIN_TOTP_SECRET). الخطوات في دليل التشغيل.', tab: 'dashboard' });
   return out;
 }

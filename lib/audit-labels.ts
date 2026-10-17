@@ -6,6 +6,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   'booking.cancel': 'إلغاء حجز', 'shares.cancel': 'إلغاء حصص مستثمر', 'market.listing.cancel': 'إلغاء عرض في سوق الحصص',
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
+  'admin.login': 'تسجيل دخول الأدمن',
   'legal.save': 'حفظ إعدادات قانونية', 'texts.save': 'حفظ نصوص الموقع',
 };
 

@@ -39,3 +39,11 @@ describe('share counter check', () => {
     expect(buildAttention({ ...ok, shareMismatches: [] })).toEqual([]);
   });
 });
+
+describe('admin two-step login check', () => {
+  it('warns only when the second step is known to be missing', () => {
+    expect(buildAttention({ ...ok, env: { ...ok.env, ADMIN_TOTP_SECRET: false } }).map((x) => x.id)).toEqual(['env-2fa']);
+    expect(buildAttention({ ...ok, env: { ...ok.env, ADMIN_TOTP_SECRET: true } })).toEqual([]);
+    expect(buildAttention(ok)).toEqual([]);
+  });
+});
