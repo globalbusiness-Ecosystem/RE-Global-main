@@ -5,6 +5,7 @@ import { sendEmail, emailConfigured } from '@/lib/send-email';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { rateLimited, ipLimited } from '@/lib/rate-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -41,6 +42,12 @@ export async function POST(req: NextRequest) {
   if (!email || !isValidEmail(email)) {
     return NextResponse.json({ ok: false, error: 'Missing or invalid email' }, { status: 400 });
   }
+  // Stops the endpoint from being used to flood someone's inbox: per user, per address and per IP.
+  const mailKey = crypto.createHash('sha256').update(email.trim().toLowerCase()).digest('hex').slice(0, 32);
+  const limited = (await rateLimited('otp-send', user.uid, 5, 60 * 60 * 1000))
+    || (await rateLimited('otp-mail', mailKey, 3, 60 * 60 * 1000))
+    || (await ipLimited('otp-ip', req, 20, 60 * 60 * 1000));
+  if (limited) return limited;
   const username = user.username;
   const docRef = adminDb.collection('email_otps').doc(username);
 

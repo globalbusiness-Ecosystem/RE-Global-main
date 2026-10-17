@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminAuth } from '@/lib/firebase-admin';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { rateLimited } from '@/lib/rate-guard';
 
 export const dynamic = 'force-dynamic';
 
@@ -16,6 +17,9 @@ export async function POST(req: NextRequest) {
     const status = err instanceof AuthError ? err.status : 401;
     return NextResponse.json({ error: 'Not authenticated' }, { status });
   }
+
+  const limited = await rateLimited('fbtoken', user.uid, 30, 10 * 60 * 1000);
+  if (limited) return limited;
 
   try {
     const token = await adminAuth.createCustomToken(user.uid, { username: user.username });

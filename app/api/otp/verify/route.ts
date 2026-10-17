@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { rateLimited } from '@/lib/rate-guard';
 
 export const dynamic = 'force-dynamic';
 const MAX_ATTEMPTS = 5;
@@ -38,6 +39,9 @@ export async function POST(req: NextRequest) {
   if (typeof code !== 'string' || !/^\d{6}$/.test(code)) {
     return NextResponse.json({ ok: false, error: 'Missing or invalid code' }, { status: 400 });
   }
+  // A new code gives 5 fresh guesses, so also cap the total number of tries per hour.
+  const limited = await rateLimited('otp-verify', user.uid, 30, 60 * 60 * 1000);
+  if (limited) return limited;
   const username = user.username;
   const otpRef = adminDb.collection('email_otps').doc(username);
 

@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { verifyPiAccessToken, AuthError, type AuthenticatedPiUser } from '@/lib/pi-auth';
 import { isValidPaymentId, type PiPayment } from '@/lib/contract-guard';
+import { rateLimited } from '@/lib/rate-guard';
 
 const PI_API = 'https://api.minepi.com/v2';
 
@@ -30,6 +31,10 @@ export async function authorizePayment(
   } catch (err) {
     return fail(err instanceof AuthError ? err.status : 401, 'Not authenticated');
   }
+
+  // Every call below hits the Pi API with the platform key: cap how fast one user can trigger that.
+  const limited = await rateLimited('pay', user.uid, 60, 10 * 60 * 1000);
+  if (limited) return limited;
 
   if (!process.env.PI_API_KEY) return fail(500, 'Payments are not configured');
 

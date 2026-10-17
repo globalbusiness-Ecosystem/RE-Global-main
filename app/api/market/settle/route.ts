@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { requireUser } from '@/lib/market-auth';
+import { rateLimited } from '@/lib/rate-guard';
 import { isValidPaymentId, isValidTxid } from '@/lib/contract-guard';
 import { validateResalePayment, type ResalePayment } from '@/lib/market-rules';
 import { listingAmount, settleResale } from '@/lib/share-market';
@@ -13,6 +14,8 @@ const NO_STORE = { 'Cache-Control': 'no-store' };
 export async function POST(req: NextRequest) {
   const user = await requireUser(req);
   if (user instanceof NextResponse) return user;
+  const limited = await rateLimited('settle', user.uid, 30, 10 * 60 * 1000);
+  if (limited) return limited;
   const body = await req.json().catch(() => ({}));
   const { paymentId, txid } = body ?? {};
   if (!isValidPaymentId(paymentId) || !isValidTxid(txid)) return NextResponse.json({ error: 'Missing or invalid fields' }, { status: 400, headers: NO_STORE });

@@ -1,5 +1,6 @@
 import 'server-only';
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { ipLimited } from '@/lib/rate-guard';
 import { adminDb } from '@/lib/firebase-admin';
 
 export const dynamic = 'force-dynamic';
@@ -14,7 +15,9 @@ function withTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-export async function GET() {
+export async function GET(req: NextRequest) {
+  const limited = await ipLimited('health', req, 30, 60 * 1000);
+  if (limited) return limited;
   let database = false;
   try {
     await withTimeout(adminDb.collection('settings').doc('global').get(), 3000);

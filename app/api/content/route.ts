@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
+import { ipLimited } from '@/lib/rate-guard';
 import { COLLECTION, isKind } from '@/lib/site-content';
 
 export const dynamic = 'force-dynamic';
@@ -8,6 +9,8 @@ export const dynamic = 'force-dynamic';
 // Public, read-only: active banners / partners for the site. Fails soft with an empty
 // list so pages fall back to their defaults if the database is unreachable.
 export async function GET(req: NextRequest) {
+  const limited = await ipLimited('content', req, 120, 10 * 60 * 1000);
+  if (limited) return limited;
   const kind = req.nextUrl.searchParams.get('kind');
   if (!isKind(kind)) return NextResponse.json({ items: [] }, { status: 400 });
   try {

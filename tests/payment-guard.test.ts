@@ -81,3 +81,15 @@ describe('authorizePayment', () => {
     expect(((lookup[1] as RequestInit).headers as Record<string, string>).Authorization).toBe('Key test-key');
   });
 });
+
+describe('payment rate limit', () => {
+  it('answers 429 when one user hammers the payment routes', async () => {
+    piStub({ me: { uid: 'u-spammer', username: 'spammer' }, payment: { user_uid: 'u-spammer' } });
+    let last = 200;
+    for (let i = 0; i < 65; i++) {
+      const r = await authorizePayment(req('spam-token'), PAYMENT_ID);
+      last = r instanceof NextResponse ? r.status : 200;
+    }
+    expect(last).toBe(429);
+  });
+});

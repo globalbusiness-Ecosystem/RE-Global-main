@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { rateLimited } from '@/lib/rate-guard';
 import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
 import { confirmBooking } from '@/lib/booking-calendar';
 import { confirmShares } from '@/lib/share-inventory';
@@ -29,6 +30,8 @@ export async function POST(req: NextRequest) {
     const status = err instanceof AuthError ? err.status : 401;
     return NextResponse.json({ error: 'Not authenticated' }, { status });
   }
+  const limited = await rateLimited('sign', user.uid, 30, 10 * 60 * 1000);
+  if (limited) return limited;
 
   let body: Record<string, unknown>;
   try {
