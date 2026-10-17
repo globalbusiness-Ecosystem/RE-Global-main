@@ -7,6 +7,7 @@ import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { propertyPaymentAmount, isUsdPegged } from '@/lib/payment-rules';
 import { formatPropertyPrice } from '@/lib/price-format';
+import { PriceUsd } from '@/components/price-usd';
 import { isExclusiveType } from '@/lib/property-lifecycle';
 import { LegalNotice } from '@/components/legal-notice';
 import { usePiRate } from '@/lib/usePiRate';
@@ -295,7 +296,7 @@ export function FirebasePropertyModal({
 
           {/* Price & Location */}
           <div>
-            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop)}</p>
+            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /></p>
             {isUsdPegged(prop.currency) && (
               <p className="text-sm text-gray-400 mt-1">
                 {payPi

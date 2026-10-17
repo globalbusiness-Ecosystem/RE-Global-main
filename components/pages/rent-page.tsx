@@ -1,5 +1,6 @@
 'use client';
 import { formatPropertyPrice } from '@/lib/price-format';
+import { PriceUsd } from '@/components/price-usd';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lucide-react';
@@ -269,7 +270,7 @@ function FirebaseRentModal({
           )}
           <div>
             <p className="text-3xl font-bold text-accent">
-              {formatPropertyPrice(prop)} <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
+              {formatPropertyPrice(prop)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
             </p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
