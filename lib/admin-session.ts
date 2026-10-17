@@ -29,7 +29,7 @@ export function isAdminSessionConfigured(): boolean {
 export async function createAdminToken(): Promise<string | null> {
   const secret = getSecret();
   if (!secret) return null;
-  const payload = toB64Url(enc.encode(JSON.stringify({ v: 1, exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS })));
+  const payload = toB64Url(enc.encode(JSON.stringify({ v: 1, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS })));
   const key = await hmacKey(secret, 'sign');
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(payload)));
   return `${payload}.${toB64Url(sig)}`;
@@ -50,6 +50,19 @@ export async function verifyAdminToken(token: string | undefined | null): Promis
     return false;
   }
 }
+// When the session was issued (seconds). Old tokens without it count as 0, so a revoke always cuts them off.
+export function adminTokenIssuedAt(token: string | undefined | null): number {
+  try {
+    const data = JSON.parse(new TextDecoder().decode(fromB64Url(String(token).split('.')[0])));
+    return typeof data?.iat === 'number' ? data.iat : 0;
+  } catch { return 0; }
+}
 export async function isAdminRequest(req: { cookies: { get(name: string): { value: string } | undefined } }): Promise<boolean> {
-  return verifyAdminToken(req.cookies.get(COOKIE_NAME)?.value);
+  const token = req.cookies.get(COOKIE_NAME)?.value;
+  if (!(await verifyAdminToken(token))) return false;
+  try {
+    const { revokedBefore } = await import('@/lib/admin-revoke');
+    if (adminTokenIssuedAt(token) <= (await revokedBefore())) return false;
+  } catch { /* store unreachable: the signed token and its 8 h expiry still apply */ }
+  return true;
 }

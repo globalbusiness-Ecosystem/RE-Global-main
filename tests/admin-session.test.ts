@@ -74,3 +74,30 @@ describe('admin session token', () => {
     expect(await isAdminRequest(without)).toBe(false);
   });
 });
+
+describe('revoking admin sessions', () => {
+  it('cuts off sessions issued before the revoke, keeps later ones', async () => {
+    const { revokeAllSessions, _resetRevokeCache } = await import('@/lib/admin-revoke');
+    const { adminTokenIssuedAt } = await import('@/lib/admin-session');
+    _resetRevokeCache();
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date('2026-01-01T10:00:00Z'));
+    const old = (await createAdminToken())!;
+    expect(adminTokenIssuedAt(old)).toBe(Math.floor(Date.now() / 1000));
+    const req = (t: string) => ({ cookies: { get: (n: string) => (n === ADMIN_COOKIE_NAME ? { value: t } : undefined) } });
+    expect(await isAdminRequest(req(old))).toBe(true);
+    vi.setSystemTime(new Date('2026-01-01T10:05:00Z'));
+    await revokeAllSessions();
+    expect(await isAdminRequest(req(old))).toBe(false);
+    vi.setSystemTime(new Date('2026-01-01T10:06:00Z'));
+    const fresh = (await createAdminToken())!;
+    expect(await isAdminRequest(req(fresh))).toBe(true);
+    _resetRevokeCache();
+  });
+
+  it('treats tokens without a timestamp as issued at 0', async () => {
+    const { adminTokenIssuedAt } = await import('@/lib/admin-session');
+    expect(adminTokenIssuedAt('garbage')).toBe(0);
+    expect(adminTokenIssuedAt(undefined)).toBe(0);
+  });
+});
