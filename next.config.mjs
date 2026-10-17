@@ -54,12 +54,34 @@ const nextConfig = {
             // Allows Pi's sandbox/browser to embed the app; blocks everyone else.
             key: 'Content-Security-Policy',
             value:
-              "frame-ancestors 'self' https://sandbox.minepi.com https://*.minepi.com https://*.pinet.com",
+              "object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://sandbox.minepi.com https://*.minepi.com https://*.pinet.com",
           },
           {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          // Always HTTPS, even for first-time visitors on a downgraded link.
+          { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
+          // Do not leak full URLs (they can contain ids) to other sites.
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          // The app uses the camera, microphone and location itself (tours, QR scan, voice, map), never third-party frames.
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self), payment=(self), usb=(), bluetooth=(), serial=()' },
+          { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+        ],
+      },
+      {
+        // The admin panel and its API must never be indexed or cached.
+        source: '/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+          { key: 'Cache-Control', value: 'no-store' },
+        ],
+      },
+      {
+        source: '/api/admin/:path*',
+        headers: [
+          { key: 'X-Robots-Tag', value: 'noindex, nofollow, noarchive' },
+          { key: 'Cache-Control', value: 'no-store' },
         ],
       },
       {
