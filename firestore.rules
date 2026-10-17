@@ -34,6 +34,11 @@ service cloud.firestore {
       return signedIn() && request.auth.token.username == username;
     }
 
+    // Caps how many fields a client-written document may have (keeps junk and storage abuse out).
+    function fieldsAtMost(n) {
+      return request.resource.data.keys().size() <= n;
+    }
+
     // Public catalogue. Written only by the server (/api/admin/properties).
     match /properties/{id} {
       allow read: if true;
@@ -58,9 +63,9 @@ service cloud.firestore {
     // by the owner but only the server (OTP flow) can set them.
     match /profiles/{username} {
       allow read: if isMe(username);
-      allow create: if isMe(username)
+      allow create: if isMe(username) && fieldsAtMost(40)
         && request.resource.data.get('emailVerified', false) == false;
-      allow update: if isMe(username)
+      allow update: if isMe(username) && fieldsAtMost(40)
         && (request.resource.data.get('emailVerified', false) == false
             || (request.resource.data.get('emailVerified', false) == resource.data.get('emailVerified', false)
                 && request.resource.data.get('verifiedEmail', '') == resource.data.get('verifiedEmail', '')));
@@ -68,13 +73,15 @@ service cloud.firestore {
     }
 
     match /preferences/{username} {
-      allow read, write: if isMe(username);
+      allow read: if isMe(username);
+      allow create, update: if isMe(username) && fieldsAtMost(40);
+      allow delete: if isMe(username);
     }
 
     match /favorites/{id} {
       allow get: if signedIn() && resource.data.username == me();
       allow list: if signedIn() && resource.data.username == me();
-      allow create: if signedIn() && request.resource.data.username == me();
+      allow create: if signedIn() && request.resource.data.username == me() && fieldsAtMost(12);
       allow delete: if signedIn() && resource.data.username == me();
       allow update: if false;
     }
@@ -84,9 +91,9 @@ service cloud.firestore {
     match /referrals/{username} {
       allow get: if isMe(username);
       allow list: if signedIn() && resource.data.referredBy == me();
-      allow create: if isMe(username)
+      allow create: if isMe(username) && fieldsAtMost(10)
         && !('referredBy' in request.resource.data);
-      allow update: if isMe(username)
+      allow update: if isMe(username) && fieldsAtMost(10)
         && request.resource.data.get('referredBy', null) == resource.data.get('referredBy', null)
         && (!('code' in resource.data) || request.resource.data.code == resource.data.code);
       allow delete: if false;
