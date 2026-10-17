@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { alertReview } from '@/lib/admin-alert';
 import { RESERVE_MS, decideReservation, decideSale, isExclusiveType } from '@/lib/property-lifecycle';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 128;
@@ -49,12 +50,15 @@ export async function finalizeSale(a: {
   const propRef = adminDb.collection('properties').doc(a.propertyId);
   const resRef = adminDb.collection('property_reservations').doc(a.propertyId);
   const ownRef = adminDb.collection('ownerships').doc(a.paymentId);
-  return adminDb.runTransaction(async (tx) => {
+  let fresh = false;
+  const out = await adminDb.runTransaction(async (tx) => {
+    fresh = false;
     const [p, o, r] = await Promise.all([tx.get(propRef), tx.get(ownRef), tx.get(resRef)]);
     if (!p.exists || !isExclusiveType(p.data()?.type)) return { recorded: false as const };
     if (o.exists) return { recorded: true as const, status: o.data()?.status as string };
     const verdict = decideSale(p.data() as { status?: unknown; soldPaymentId?: unknown }, a.paymentId);
     const status = verdict === 'conflict' ? 'review' : 'confirmed';
+    fresh = status === 'review';
     if (verdict === 'mark') {
       tx.update(propRef, { status: 'sold', soldTo: a.username, soldAt: Timestamp.now(), soldPaymentId: a.paymentId });
     }
@@ -67,4 +71,6 @@ export async function finalizeSale(a: {
     });
     return { recorded: true as const, status };
   });
+  if (fresh) await alertReview('شراء عقار', { 'رقم الدفع': a.paymentId, 'العقار': a.propertyTitle, 'المبلغ': a.amount + ' ' + a.currency, 'المستخدم': a.username });
+  return out;
 }

@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { alertReview } from '@/lib/admin-alert';
 import { SHARE_HOLD_MS, decideShares, liveHolds, totalSharesOf, type ShareHold } from '@/lib/share-rules';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 128;
@@ -48,7 +49,9 @@ export async function confirmShares(a: {
   const pRef = adminDb.collection('properties').doc(a.propertyId);
   const hRef = holdsRef(a.propertyId);
   const oRef = adminDb.collection('share_holdings').doc(a.paymentId);
-  return adminDb.runTransaction(async (tx) => {
+  let fresh = false;
+  const out = await adminDb.runTransaction(async (tx) => {
+    fresh = false;
     const [p, h, o] = await Promise.all([tx.get(pRef), tx.get(hRef), tx.get(oRef)]);
     if (o.exists) return { recorded: true as const, status: o.data()?.status as string };
     if (!p.exists) return { recorded: false as const };
@@ -56,6 +59,7 @@ export async function confirmShares(a: {
     const total = totalSharesOf(p.data() as { type?: unknown; totalShares?: unknown }) ?? a.totalShares;
     const v = decideShares({ totalShares: total, sold, holds: readHolds(h) }, a, Date.now());
     const status = v.ok ? 'confirmed' : 'review';
+    fresh = status === 'review';
     if (v.ok) tx.update(pRef, { sharesSold: sold + a.count });
     const rest = readHolds(h).filter((x) => x.paymentId !== a.paymentId);
     if (rest.length !== readHolds(h).length) tx.set(hRef, { holds: liveHolds(rest, Date.now()), updatedAt: Timestamp.now() });
@@ -66,4 +70,6 @@ export async function confirmShares(a: {
     });
     return { recorded: true as const, status };
   });
+  if (fresh) await alertReview('شراء أسهم', { 'رقم الدفع': a.paymentId, 'العقار': a.propertyTitle, 'الأسهم': String(a.count), 'المبلغ': a.amount + ' Pi', 'المستخدم': a.username });
+  return out;
 }

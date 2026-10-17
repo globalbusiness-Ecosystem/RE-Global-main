@@ -46,3 +46,8 @@ export async function alertAdmin(kind: string, title: string, details: Record<st
     return false;
   }
 }
+
+/** A payment landed in manual review (refund needed). Called once, when the record is first created. */
+export function alertReview(label: string, details: Record<string, string>): Promise<boolean> {
+  return alertAdmin('review', 'عملية محتاجة مراجعة يدوية: ' + label, details);
+}

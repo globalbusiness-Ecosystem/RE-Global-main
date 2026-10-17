@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { alertReview } from '@/lib/admin-alert';
 import { HOLD_MS, activeRanges, decideBooking, type BookingDates, type Range } from '@/lib/booking-rules';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 128;
@@ -44,12 +45,15 @@ export async function confirmBooking(a: BookingDates & {
   if (!okId(a.propertyId)) return { recorded: false as const };
   const ref = calRef(a.propertyId);
   const bRef = adminDb.collection('bookings').doc(a.paymentId);
-  return adminDb.runTransaction(async (tx) => {
+  let fresh = false;
+  const out = await adminDb.runTransaction(async (tx) => {
+    fresh = false;
     const [cal, b] = await Promise.all([tx.get(ref), tx.get(bRef)]);
     if (b.exists) return { recorded: true as const, status: b.data()?.status as string };
     const now = Date.now();
     const v = decideBooking(read(cal), a, now);
     const status = v.ok ? 'confirmed' : 'review';
+    fresh = status === 'review';
     if (v.ok) {
       const confirmed: Range = { start: a.start, end: a.end, paymentId: a.paymentId, uid: a.uid, username: a.username, status: 'confirmed' };
       tx.set(ref, { ranges: [...v.ranges, confirmed], updatedAt: Timestamp.now() });
@@ -61,6 +65,8 @@ export async function confirmBooking(a: BookingDates & {
     });
     return { recorded: true as const, status };
   });
+  if (fresh) await alertReview('حجز', { 'رقم الدفع': a.paymentId, 'العقار': a.propertyTitle, 'الليالي': String(a.nights), 'المبلغ': a.amount + ' Pi', 'المستخدم': a.username });
+  return out;
 }
 
 // Public view: which days are taken (no names, no payment ids).

@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp, type Transaction } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { alertReview } from '@/lib/admin-alert';
 import { canCancelHolding, holdingTotals } from '@/lib/share-rules';
 import {
   LISTING_RESERVE_MS, availableToList, feePctOf, marketTotals, decideBuy, decideSettle, feeSplit, listingTotal, ownedShares, parseListingInput,
@@ -101,7 +102,9 @@ export async function settleResale(a: { paymentId: string; buyerUid: string; buy
   const lRef = adminDb.collection('share_listings').doc(a.listingId);
   const tRef = adminDb.collection('share_transfers').doc(a.paymentId);
   const pRef = adminDb.collection('payouts').doc(a.paymentId);
-  return adminDb.runTransaction(async (tx) => {
+  let fresh = false;
+  const out = await adminDb.runTransaction(async (tx) => {
+    fresh = false;
     const [l, t] = await Promise.all([tx.get(lRef), tx.get(tRef)]);
     if (t.exists) return { recorded: true as const, status: t.data()?.status as string };
     if (!l.exists) return { recorded: false as const };
@@ -111,6 +114,7 @@ export async function settleResale(a: { paymentId: string; buyerUid: string; buy
     if (verdict === 'conflict') {
       tx.set(tRef, { ...common, fromUid: d.sellerUid, toUid: a.buyerUid, shares: num(d.shares), amount: a.amount, status: 'review' });
       tx.set(pRef, { kind: 'refund', uid: a.buyerUid, username: a.buyerName, amount: a.amount, status: 'pending', listingId: a.listingId, paymentId: a.paymentId, createdAt: Timestamp.now() });
+      fresh = true;
       return { recorded: true as const, status: 'review' };
     }
     const { fee, proceeds } = feeSplit(a.amount, feePctOf(d.feePct));
@@ -121,6 +125,8 @@ export async function settleResale(a: { paymentId: string; buyerUid: string; buy
     tx.set(pRef, { kind: 'proceeds', uid: d.sellerUid, username: d.sellerName, amount: proceeds, fee, gross: a.amount, status: 'pending', listingId: a.listingId, paymentId: a.paymentId, createdAt: Timestamp.now() });
     return { recorded: true as const, status: 'confirmed' };
   });
+  if (fresh) await alertReview('إعادة بيع أسهم', { 'رقم الدفع': a.paymentId, 'المبلغ': a.amount + ' Pi', 'المشتري': a.buyerName });
+  return out;
 }
 
 const iso = (v: unknown) => ((v as { toDate?: () => Date })?.toDate ? (v as { toDate: () => Date }).toDate().toISOString() : null);
