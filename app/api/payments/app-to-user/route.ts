@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
 const MAX_AMOUNT = Number(process.env.PI_A2U_MAX_AMOUNT) > 0 ? Number(process.env.PI_A2U_MAX_AMOUNT) : 10;

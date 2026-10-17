@@ -1,7 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
 

@@ -58,11 +58,6 @@ export function adminTokenIssuedAt(token: string | undefined | null): number {
   } catch { return 0; }
 }
 export async function isAdminRequest(req: { cookies: { get(name: string): { value: string } | undefined } }): Promise<boolean> {
-  const token = req.cookies.get(COOKIE_NAME)?.value;
-  if (!(await verifyAdminToken(token))) return false;
-  try {
-    const { revokedBefore } = await import('@/lib/admin-revoke');
-    if (adminTokenIssuedAt(token) <= (await revokedBefore())) return false;
-  } catch { /* store unreachable: the signed token and its 8 h expiry still apply */ }
-  return true;
+  // Signature and expiry only (middleware runs on the edge). API routes use isAdminRequest from lib/admin-guard.
+  return verifyAdminToken(req.cookies.get(COOKIE_NAME)?.value);
 }

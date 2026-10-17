@@ -1,7 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { Anthropic } from '@anthropic-ai/sdk';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
 

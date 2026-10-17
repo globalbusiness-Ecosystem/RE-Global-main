@@ -2,7 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { randomUUID } from 'crypto';
 import { uploadToSupabase } from '@/lib/supabase-storage';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
 

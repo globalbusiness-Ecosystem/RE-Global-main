@@ -1,6 +1,6 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { adminMarketOverview, adminCancelListing } from '@/lib/share-market';
 

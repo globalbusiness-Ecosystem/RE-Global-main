@@ -1,6 +1,6 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 import { validUsername } from '@/lib/ban-list';
 import { adminUserDetail } from '@/lib/admin-user';
 

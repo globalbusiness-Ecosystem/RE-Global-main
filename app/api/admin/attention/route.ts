@@ -1,6 +1,6 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 import { gatherAttention } from '@/lib/admin-attention';
 
 export const dynamic = 'force-dynamic';

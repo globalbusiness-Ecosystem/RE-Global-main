@@ -78,6 +78,7 @@ describe('admin session token', () => {
 describe('revoking admin sessions', () => {
   it('cuts off sessions issued before the revoke, keeps later ones', async () => {
     const { revokeAllSessions, _resetRevokeCache } = await import('@/lib/admin-revoke');
+    const { isAdminRequest } = await import('@/lib/admin-guard');
     const { adminTokenIssuedAt } = await import('@/lib/admin-session');
     _resetRevokeCache();
     vi.useFakeTimers();

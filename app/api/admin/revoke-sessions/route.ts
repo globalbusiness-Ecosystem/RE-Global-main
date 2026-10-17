@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest, ADMIN_COOKIE_NAME } from '@/lib/admin-session';
+import { ADMIN_COOKIE_NAME } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 import { revokeAllSessions } from '@/lib/admin-revoke';
 import { logAdmin } from '@/lib/admin-audit';
 

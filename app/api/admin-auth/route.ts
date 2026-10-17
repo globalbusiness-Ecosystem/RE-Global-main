@@ -4,8 +4,9 @@ import { matchTotp } from '@/lib/totp';
 import { logAdmin } from '@/lib/admin-audit';
 import {
   ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken,
-  isAdminRequest, isAdminSessionConfigured,
+  isAdminSessionConfigured,
 } from '@/lib/admin-session';
+import { isAdminRequest } from '@/lib/admin-guard';
 
 export const dynamic = 'force-dynamic';
 
