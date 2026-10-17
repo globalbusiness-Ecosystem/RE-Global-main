@@ -35,3 +35,13 @@ describe('security headers', () => {
     }
   });
 });
+
+describe('report-only content security policy', () => {
+  it('reports to our endpoint and never blocks (report-only header, no enforcing script-src)', async () => {
+    const all = (await rules()).find((r) => r.source === '/:path*');
+    const ro = header(all, 'Content-Security-Policy-Report-Only') ?? '';
+    expect(ro).toContain('report-uri /api/csp-report');
+    expect(ro).toContain('https://sdk.minepi.com');
+    expect(header(all, 'Content-Security-Policy')).not.toContain('script-src');
+  });
+});

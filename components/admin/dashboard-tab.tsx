@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Card, Stat, Empty, Badge, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 import AttentionPanel from './attention-panel';
 import ActivityLog from './activity-log';
+import CspPanel from './csp-panel';
 import { auditLabel, auditSummary } from '@/lib/audit-labels';
 
 export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized: () => void; goto: (tab: string) => void }) {
@@ -84,6 +85,7 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
         </Card>
       </div>
       <ActivityLog onUnauthorized={onUnauthorized} />
+      <CspPanel onUnauthorized={onUnauthorized} />
     </div>
   );
 }

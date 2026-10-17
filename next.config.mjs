@@ -67,6 +67,12 @@ const nextConfig = {
           // The app uses the camera, microphone and location itself (tours, QR scan, voice, map), never third-party frames.
           { key: 'Permissions-Policy', value: 'camera=(self), microphone=(self), geolocation=(self), payment=(self), usb=(), bluetooth=(), serial=()' },
           { key: 'X-Permitted-Cross-Domain-Policies', value: 'none' },
+          // Report-only: blocks nothing. Browsers report what the site loads to /api/csp-report so a strict policy can be built from facts.
+          {
+            key: 'Content-Security-Policy-Report-Only',
+            value:
+              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:; worker-src 'self' blob:; report-uri /api/csp-report",
+          },
         ],
       },
       {

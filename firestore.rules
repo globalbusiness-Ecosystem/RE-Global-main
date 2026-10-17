@@ -14,7 +14,8 @@ rules_version = '2';
 //   settings (pricing rate, resale fee), site_texts, legal_profiles,
 //   bookings, booking_calendars, property_reservations,
 //   share_holdings, share_holds, share_locks, share_listings, share_transfers,
-//   ownerships, payouts (refunds and resale proceeds the admin pays by hand)
+//   ownerships, payouts (refunds and resale proceeds the admin pays by hand),
+//   csp_reports (counters from the report-only content security policy)
 // Money and share state must never be client-writable: every change goes
 // through an API route that checks the Pi payment first.
 
