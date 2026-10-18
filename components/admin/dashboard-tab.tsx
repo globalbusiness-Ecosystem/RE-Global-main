@@ -5,6 +5,7 @@ import { adminApi, UnauthorizedError, Card, Stat, Empty, Badge, TYPE_LABELS, fmt
 import AttentionPanel from './attention-panel';
 import ActivityLog from './activity-log';
 import CspPanel from './csp-panel';
+import ClientErrorsPanel from './client-errors-panel';
 import RevokeSessions from './revoke-sessions';
 import BackupPanel from './backup-panel';
 import { auditLabel, auditSummary } from '@/lib/audit-labels';
@@ -88,6 +89,7 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
       </div>
       <ActivityLog onUnauthorized={onUnauthorized} />
       <CspPanel onUnauthorized={onUnauthorized} />
+      <ClientErrorsPanel onUnauthorized={onUnauthorized} />
       <BackupPanel onUnauthorized={onUnauthorized} />
       <RevokeSessions onUnauthorized={onUnauthorized} />
     </div>

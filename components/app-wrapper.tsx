@@ -5,6 +5,7 @@ import { useEffect } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OfflineBanner } from "./offline-banner";
+import { ErrorReporter } from "./error-reporter";
 import { TermsConsentModal } from "./terms-consent-modal";
 import { Toaster } from "sonner";
 import { useServiceWorker } from "@/hooks/use-service-worker";
@@ -23,6 +24,7 @@ function AppContent({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <ErrorReporter />
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
       {isInitialized && <TermsConsentModal />}
       {children}
