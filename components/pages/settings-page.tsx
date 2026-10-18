@@ -23,6 +23,7 @@ import {
   Home,
   FileCheck2,
 } from 'lucide-react';
+import { MyDataPanel } from '@/components/my-data-panel';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
@@ -546,6 +547,8 @@ export default function SettingsPage({
               </button>
             )}
           </div>
+
+          <MyDataPanel />
 
           {showAdminPanel && (
             <div className="bg-card border border-accent rounded-lg p-4">
