@@ -5,6 +5,7 @@ import { siteUrl } from '@/lib/site-url';
 import { COUNTRIES } from '@/lib/legal-profiles';
 import { getPublicListing } from '@/lib/public-listings-server';
 import { listingJsonLd, listingTexts, seoLang } from '@/lib/public-listings';
+import { ReportListing } from '@/components/report-listing';
 
 export const revalidate = 300;
 type Props = { params: Promise<{ id: string }>; searchParams: Promise<{ lang?: string }> };
@@ -50,6 +51,7 @@ export default async function PropertyPublicPage({ params, searchParams }: Props
           {l.country && <Link href={`/country/${l.country.toLowerCase()}${ar ? '?lang=ar' : ''}`} className="underline">{COUNTRIES[l.country]?.[lang]}</Link>}
           <Link href={`/p/${id}${ar ? '' : '?lang=ar'}`} className="underline">{ar ? 'English' : 'العربية'}</Link>
         </p>
+        <ReportListing id={id} />
       </div>
     </main>
   );

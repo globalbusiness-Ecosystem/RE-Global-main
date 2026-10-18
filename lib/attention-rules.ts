@@ -8,6 +8,8 @@ export type AttentionInput = {
   review: { bookings: number; holdings: number; transfers: number };
   /** Titles of properties whose sold-shares counter does not match the confirmed purchases. */
   shareMismatches?: string[];
+  /** Reports about listings that nobody has looked at yet. */
+  openReports?: number;
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
@@ -28,6 +30,7 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (i.pendingPayouts.count > 0) out.push({ id: 'payouts', level: 'warn', text: `${i.pendingPayouts.count} مستحقات معلّقة (${round2(i.pendingPayouts.amount)} π) محتاجة تحويل منك.`, tab: 'payments' });
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
+  if ((i.openReports ?? 0) > 0) out.push({ id: 'reports', level: 'warn', text: `${i.openReports} بلاغ على عقارات مستني مراجعتك (من صفحة العقار العامة): افتح لوحة التحكم ← بلاغات العقارات.`, tab: 'dashboard' });
   if (i.env.ADMIN_TOTP_SECRET === false) out.push({ id: 'env-2fa', level: 'warn', text: 'دخول الأدمن بالـ PIN بس: فعّل التحقق بخطوتين (ADMIN_TOTP_SECRET). الخطوات في دليل التشغيل.', tab: 'dashboard' });
   if (i.env.ADMIN_PIN_STRONG === false) out.push({ id: 'env-pin', level: 'warn', text: 'الـ PIN بتاع الأدمن ضعيف (قصير أو أرقام بسيطة): غيّره في Vercel (ADMIN_PIN) لـ 10 حروف/أرقام أو أكتر، أو 8 فيها حروف وأرقام.', tab: 'dashboard' });
   if (i.env.ADMIN_ALERT_EMAIL === false) out.push({ id: 'env-alert', level: 'warn', text: 'مفيش إيميل تنبيهات أمنية: ضيف ADMIN_ALERT_EMAIL في Vercel عشان توصلك رسالة عند أي دخول جديد للأدمن.', tab: 'dashboard' });
