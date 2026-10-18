@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { TrendingUp, MapPin, Home, DollarSign, Users, Activity, ArrowUp, ArrowDown } from 'lucide-react';
@@ -172,7 +173,7 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
             <Home className="w-5 h-5 text-accent" />
           </div>
           <p className="text-2xl font-bold text-accent">
-            {totalStats.totalProperties.toLocaleString()}
+            {formatNumber(totalStats.totalProperties, language)}
           </p>
           <p className="text-xs text-green-500 mt-1">{t.thisMonthGrowth}</p>
         </div>
@@ -382,13 +383,13 @@ export default function AnalyticsPage({ language, currency }: AnalyticsPageProps
                     </div>
                   </td>
                   <td className="p-2 text-right text-muted-foreground">
-                    {region.totalProperties.toLocaleString()}
+                    {formatNumber(region.totalProperties, language)}
                   </td>
                   <td className="p-2 text-right font-semibold text-accent">
                     {(region.avgPrice / 1000).toFixed(0)}K {currency}
                   </td>
                   <td className="p-2 text-right font-semibold text-secondary">
-                    {region.rentAvg.toLocaleString()} {currency}
+                    {formatNumber(region.rentAvg, language)} {currency}
                   </td>
                   <td className="p-2 text-right">
                     <div className="bg-accent/20 rounded px-2 py-1 inline-block">

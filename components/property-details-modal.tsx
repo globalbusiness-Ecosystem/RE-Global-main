@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useState, useCallback } from 'react';
@@ -60,7 +61,7 @@ export const PropertyDetailsModal = memo(
     const description = language === 'en' 
       ? property.descriptionEn 
       : property.descriptionAr;
-    const formattedPrice = property.price.toLocaleString('en-US');
+    const formattedPrice = formatNumber(property.price, language);
 
     const currentImage = property.images[selectedImageIndex];
 

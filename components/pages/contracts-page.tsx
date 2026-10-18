@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
@@ -397,7 +398,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                   <div>
                     <p className="font-medium">{c.propertyTitle}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
-                      {(t.typeLabels as Record<string, string>)[c.type] ?? c.type} · {c.amount.toLocaleString()} {c.currency}
+                      {(t.typeLabels as Record<string, string>)[c.type] ?? c.type} · {formatNumber(c.amount, language)} {c.currency}
                     </p>
                   </div>
                   <span className={`shrink-0 text-xs px-2 py-1 rounded-full border ${statusStyles[c.status]}`}>

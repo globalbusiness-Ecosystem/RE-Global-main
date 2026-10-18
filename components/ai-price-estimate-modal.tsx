@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState, useMemo, memo, useCallback } from 'react';
@@ -128,7 +129,7 @@ export default memo(function AIPriceEstimate({
             <div className="flex justify-between items-end">
               <div>
                 <p className="text-xs text-muted-foreground mb-1">{currentLabels.listed}</p>
-                <p className="text-2xl font-bold text-foreground">{listedPrice.toLocaleString()}π</p>
+                <p className="text-2xl font-bold text-foreground">{formatNumber(listedPrice, language)}π</p>
               </div>
               <TrendingUp className="w-5 h-5 text-accent/50" />
             </div>
@@ -144,7 +145,7 @@ export default memo(function AIPriceEstimate({
                 </div>
               ) : (
                 <>
-                  <p className="text-2xl font-bold text-accent">{fairValue.toLocaleString()}π</p>
+                  <p className="text-2xl font-bold text-accent">{formatNumber(fairValue, language)}π</p>
                   {priceMetrics.difference !== 0 && (
                     <p className="text-xs text-muted-foreground mt-1">
                       {priceMetrics.isUnderpriced ? '-' : '+'}{Math.abs(Number(priceMetrics.percentageDiff))}%
@@ -162,7 +163,7 @@ export default memo(function AIPriceEstimate({
             <div className="flex items-center justify-between mb-2">
               <p className="text-xs text-muted-foreground">{currentLabels.difference}</p>
               <p className={`text-sm font-semibold ${priceMetrics.isUnderpriced ? 'text-green-500' : 'text-red-500'}`}>
-                {priceMetrics.isUnderpriced ? '-' : '+'}{Math.abs(priceMetrics.difference).toLocaleString()}π
+                {priceMetrics.isUnderpriced ? '-' : '+'}{formatNumber(Math.abs(priceMetrics.difference), language)}π
               </p>
             </div>
             <p className={`text-xs font-medium ${priceMetrics.isUnderpriced ? 'text-green-500' : 'text-red-500'}`}>

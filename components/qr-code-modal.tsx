@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
@@ -90,7 +91,7 @@ export const QRCodeModal = ({
             </div>
             <div>
               <span className="text-xs">{language === 'en' ? 'Price' : 'السعر'}:</span>
-              <p className="font-medium text-foreground">{price.toLocaleString()}π</p>
+              <p className="font-medium text-foreground">{formatNumber(price, language)}π</p>
             </div>
             <div>
               <span className="text-xs">{language === 'en' ? 'Bedrooms' : 'الغرف'}:</span>

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo } from 'react';
@@ -159,11 +160,11 @@ export default memo(function PropertyPhotoAnalysisCard({
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-bold text-amber-400">
-                ${analysis.priceRange.min.toLocaleString()}
+                ${formatNumber(analysis.priceRange.min, language)}
               </span>
               <span className="text-xs text-slate-500">-</span>
               <span className="text-lg font-bold text-amber-400">
-                ${analysis.priceRange.max.toLocaleString()}
+                ${formatNumber(analysis.priceRange.max, language)}
               </span>
             </div>
             <p className="text-xs text-slate-500">{currentLabels.perSqm}</p>
@@ -176,11 +177,11 @@ export default memo(function PropertyPhotoAnalysisCard({
           <div className="space-y-1">
             <div className="flex items-baseline gap-1">
               <span className="text-lg font-bold text-amber-400">
-                {analysis.piEstimate.min.toLocaleString()}π
+                {formatNumber(analysis.piEstimate.min, language)}π
               </span>
               <span className="text-xs text-slate-500">-</span>
               <span className="text-lg font-bold text-amber-400">
-                {analysis.piEstimate.max.toLocaleString()}π
+                {formatNumber(analysis.piEstimate.max, language)}π
               </span>
             </div>
             <p className="text-xs text-slate-500">Fractional</p>

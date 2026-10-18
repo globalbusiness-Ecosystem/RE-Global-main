@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { Home } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { formatPropertyPrice } from '@/lib/price-format';
+import { formatDate } from '@/lib/format';
 import { pendingOwed } from '@/lib/market-rules';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
@@ -46,10 +47,10 @@ export function MyProperties({ language }: { language: string }) {
           <div className="min-w-0">
             <p className="text-white text-sm font-semibold truncate">{o.propertyTitle}</p>
             {o.location && <p className="text-xs text-gray-400 truncate">{o.location}</p>}
-            {o.createdAt && <p className="text-[11px] text-gray-500">{new Date(o.createdAt).toLocaleDateString(ar ? 'ar-EG' : 'en-US')}</p>}
+            {o.createdAt && <p className="text-[11px] text-gray-500">{formatDate(o.createdAt, language)}</p>}
           </div>
           <div className="text-right shrink-0">
-            <p className="text-accent text-sm font-bold">{formatPropertyPrice({ price: o.amount, currency: o.currency })}</p>
+            <p className="text-accent text-sm font-bold">{formatPropertyPrice({ price: o.amount, currency: o.currency }, language)}</p>
             <p className={`text-[11px] ${o.status === 'review' ? 'text-yellow-400' : 'text-green-400'}`}>
               {o.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : (ar ? 'مؤكد' : 'Confirmed')}
             </p>

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { FileText, Bed, Maximize2, Video, Heart } from 'lucide-react';
@@ -187,7 +188,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
                     {language === 'en' ? 'Starting Price' : 'السعر الابتدائي'}
                   </p>
                   <p className="text-lg font-bold text-accent">
-                    {property.price.toLocaleString()} {currency}
+                    {formatNumber(property.price, language)} {currency}
                   </p>
                 </div>
                 <div className="flex flex-col items-end">

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
@@ -113,7 +114,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
   const stats = [
     { labelEn: 'Favorites Saved', labelKey: 'favoritesSaved' as const, value: String(favorites.length), icon: Home, color: 'from-accent to-amber-500', pageId: 'favorites' },
     { labelEn: 'My Contracts', labelKey: 'myContracts' as const, value: String(contracts.length), icon: ScrollText, color: 'from-blue-500 to-blue-600', pageId: 'contracts' },
-    { labelEn: 'Portfolio Value', labelKey: 'portfolioValueLabel' as const, value: `${portfolioValue.toLocaleString()}π`, icon: TrendingUp, color: 'from-green-500 to-green-600', pageId: 'contracts' },
+    { labelEn: 'Portfolio Value', labelKey: 'portfolioValueLabel' as const, value: `${formatNumber(portfolioValue, language)}π`, icon: TrendingUp, color: 'from-green-500 to-green-600', pageId: 'contracts' },
   ];
 
   const handleQuickAction = (pageId: string) => {
@@ -213,7 +214,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
                   <div className="flex items-end justify-between">
                     <div>
                       <p className="text-[10px] text-muted-foreground">{t.yourStake}</p>
-                      <p className="text-lg font-bold text-accent">{c.amount.toLocaleString()} {c.currency}</p>
+                      <p className="text-lg font-bold text-accent">{formatNumber(c.amount, language)} {c.currency}</p>
                     </div>
                     <p className="text-xs text-muted-foreground">
                       {t.statusLabels[c.status]}
@@ -250,7 +251,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
                     <p className="text-xs text-muted-foreground">{getLocalizedLocation(p, language)}</p>
                   </div>
                   <p className="text-accent font-bold text-sm shrink-0 ml-3">
-                    {p.price.toLocaleString()} {p.currency || 'π'}
+                    {formatNumber(p.price, language)} {p.currency || 'π'}
                   </p>
                 </Card>
               ))}
@@ -310,7 +311,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
             <h3 className="font-semibold text-foreground">{t.yourPortfolio}</h3>
           </div>
           <p className="text-sm text-muted-foreground mb-4">
-            {t.portfolioSummary(investments.length, portfolioValue.toLocaleString())}
+            {t.portfolioSummary(investments.length, formatNumber(portfolioValue, language))}
           </p>
           <Button onClick={() => handleQuickAction('contracts')} className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
             {t.viewFullDetails}

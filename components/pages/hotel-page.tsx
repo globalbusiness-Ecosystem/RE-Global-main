@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { MapPin, Bed, Maximize2, Video, Heart, Eye } from 'lucide-react';
@@ -146,7 +147,7 @@ function FirebaseHotelModal({
             <img src={prop.image} alt={title} className="w-full h-52 object-cover rounded-xl" />
           )}
           <div>
-            <p className="text-3xl font-bold text-accent">{prop.price.toLocaleString()} π</p>
+            <p className="text-3xl font-bold text-accent">{formatNumber(prop.price, language)} π</p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
             </p>
@@ -294,7 +295,7 @@ export default function HotelPage({ language, currency, favorites, toggleFavorit
                     {pLocation(prop, language)}
                   </p>
                   <div className="flex justify-between items-center">
-                    <p className="text-accent font-bold text-lg">{prop.price.toLocaleString()} π</p>
+                    <p className="text-accent font-bold text-lg">{formatNumber(prop.price, language)} π</p>
                     <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
                       <Eye className="w-3 h-3" />
                       {language === 'en' ? 'Details' : 'تفاصيل'}
@@ -362,7 +363,7 @@ export default function HotelPage({ language, currency, favorites, toggleFavorit
                     {language === 'en' ? 'Price' : 'السعر'}
                   </p>
                   <p className="text-lg font-bold text-accent">
-                    {property.price.toLocaleString()} {currency}
+                    {formatNumber(property.price, language)} {currency}
                   </p>
                 </div>
                 <div className="flex flex-col items-end">

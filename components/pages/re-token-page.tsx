@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
@@ -139,7 +140,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
               {t.yourBalance}
             </p>
             <p className="text-2xl font-bold text-foreground">
-              {loading ? '...' : `${(wallet?.balance ?? 0).toLocaleString()} ${t.credits}`}
+              {loading ? '...' : `${formatNumber((wallet?.balance ?? 0), language)} ${t.credits}`}
             </p>
           </div>
         )}
@@ -166,7 +167,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
                     : 'bg-background text-muted-foreground border-border hover:border-accent/50'
                 }`}
               >
-                {amount.toLocaleString()}
+                {formatNumber(amount, language)}
               </button>
             ))}
           </div>
@@ -212,7 +213,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
                   <span className="text-muted-foreground">
                     {t.creditValue}
                   </span>
-                  <span className="text-foreground font-medium">${quote.valueUsd.toLocaleString()}</span>
+                  <span className="text-foreground font-medium">${formatNumber(quote.valueUsd, language)}</span>
                 </div>
                 <div className="flex justify-between text-xs">
                   <span className="text-muted-foreground">

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useMemo, useState, useEffect, memo, useCallback } from 'react';
@@ -280,8 +281,8 @@ AVERAGE MARKET TREND: +${avgTrendChange}%
                     <span className="text-lg">{city.flag}</span>
                     <span className="font-medium text-foreground">{city.city}</span>
                   </td>
-                  <td className="py-3 px-2 text-right text-muted-foreground">{city.lastWeek.toLocaleString()}π</td>
-                  <td className="py-3 px-2 text-right font-semibold text-foreground">{city.thisWeek.toLocaleString()}π</td>
+                  <td className="py-3 px-2 text-right text-muted-foreground">{formatNumber(city.lastWeek, language)}π</td>
+                  <td className="py-3 px-2 text-right font-semibold text-foreground">{formatNumber(city.thisWeek, language)}π</td>
                   <td className={`py-3 px-2 text-right font-semibold flex items-center justify-end gap-1 ${city.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
                     {city.change >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
                     {city.change >= 0 ? '+' : ''}{city.change}%

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useProperties } from '@/lib/useProperties';
@@ -187,7 +188,7 @@ const PropertyCard = memo(({
             {language === 'en' ? 'Price' : 'السعر'}
           </p>
           <p className="text-xl font-bold text-accent">
-            {property.price.toLocaleString()} {currency}
+            {formatNumber(property.price, language)} {currency}
           </p>
         </div>
         <div className="flex flex-col items-end">
@@ -296,7 +297,7 @@ export function FirebasePropertyModal({
 
           {/* Price & Location */}
           <div>
-            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /></p>
+            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop, language)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /></p>
             {isUsdPegged(prop.currency) && (
               <p className="text-sm text-gray-400 mt-1">
                 {payPi
@@ -492,7 +493,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
                   {pLocation(prop, language)}
                 </p>
                 <div className="flex justify-between items-center">
-                  <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop)}{isExclusiveType(prop.type) && prop.status === 'sold' && <span className="ml-2 text-[11px] text-red-300 border border-red-400/50 px-1.5 py-0.5 rounded">{language === 'en' ? 'Sold' : 'مباع'}</span>}</p>
+                  <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop, language)}{isExclusiveType(prop.type) && prop.status === 'sold' && <span className="ml-2 text-[11px] text-red-300 border border-red-400/50 px-1.5 py-0.5 rounded">{language === 'en' ? 'Sold' : 'مباع'}</span>}</p>
                   <div className="flex items-center gap-2">
                     <span className="text-xs text-gray-500 capitalize border border-gray-700 px-2 py-0.5 rounded">
                       {prop.type}

@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { PriceUsd } from '@/components/price-usd';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -183,7 +184,7 @@ const RentPropertyCard = memo(({
             {language === 'en' ? 'Monthly' : 'شهري'}
           </p>
           <p className="text-xl font-bold text-accent">
-            {property.price.toLocaleString()} {currency}
+            {formatNumber(property.price, language)} {currency}
           </p>
         </div>
         <div className="flex flex-col items-end">
@@ -270,7 +271,7 @@ function FirebaseRentModal({
           )}
           <div>
             <p className="text-3xl font-bold text-accent">
-              {formatPropertyPrice(prop)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
+              {formatPropertyPrice(prop, language)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
             </p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
@@ -419,7 +420,7 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
                   </p>
                   <div className="flex justify-between items-center">
                     <p className="text-accent font-bold text-lg">
-                      {formatPropertyPrice(prop)} <span className="text-xs text-gray-400">/{language === 'en' ? 'mo' : 'شهر'}</span>
+                      {formatPropertyPrice(prop, language)} <span className="text-xs text-gray-400">/{language === 'en' ? 'mo' : 'شهر'}</span>
                     </p>
                     <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
                       <Eye className="w-3 h-3" />

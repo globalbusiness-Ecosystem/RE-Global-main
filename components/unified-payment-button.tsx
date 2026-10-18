@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
@@ -315,7 +316,7 @@ export function UnifiedPaymentButton({
                   {language === 'en' ? 'Amount' : 'المبلغ'}
                 </span>
                 <span className="font-bold text-xl text-accent">
-                  {price.toLocaleString()} {currency}
+                  {formatNumber(price, language)} {currency}
                 </span>
               </div>
             </div>

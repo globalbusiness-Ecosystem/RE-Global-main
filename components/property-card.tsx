@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useMemo, useState, useCallback } from 'react';
@@ -59,7 +60,7 @@ export const PropertyCard = memo(
     );
 
     const formattedPrice = useMemo(
-      () => price.toLocaleString('en-US'),
+      () => formatNumber(price, language),
       [price]
     );
 

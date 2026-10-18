@@ -1,4 +1,5 @@
 'use client';
+import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Heart } from 'lucide-react';
@@ -31,7 +32,7 @@ export default function FavoritesPage({
 
   const formatPrice = (price: number) => {
     if (currency === 'PI') {
-      return `π ${price.toLocaleString()}`;
+      return `π ${formatNumber(price, language)}`;
     }
     return `$${(price / 1000).toFixed(0)}K`;
   };
