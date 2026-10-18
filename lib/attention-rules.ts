@@ -1,7 +1,7 @@
 // What the admin should look at right now. Pure: takes plain counts and yes/no flags (never secret values).
 
 export type AttentionInput = {
-  env: { PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean; ADMIN_SESSION_SECRET: boolean; ADMIN_TOTP_SECRET?: boolean; ADMIN_PIN_STRONG?: boolean; ADMIN_ALERT_EMAIL?: boolean };
+  env: { PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean; ADMIN_SESSION_SECRET: boolean; ADMIN_TOTP_SECRET?: boolean; ADMIN_PIN_STRONG?: boolean; ADMIN_ALERT_EMAIL?: boolean; CRON_SECRET?: boolean };
   usdProperties: number;
   piRateSet: boolean;
   pendingPayouts: { count: number; amount: number };
@@ -31,5 +31,6 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (i.env.ADMIN_TOTP_SECRET === false) out.push({ id: 'env-2fa', level: 'warn', text: 'دخول الأدمن بالـ PIN بس: فعّل التحقق بخطوتين (ADMIN_TOTP_SECRET). الخطوات في دليل التشغيل.', tab: 'dashboard' });
   if (i.env.ADMIN_PIN_STRONG === false) out.push({ id: 'env-pin', level: 'warn', text: 'الـ PIN بتاع الأدمن ضعيف (قصير أو أرقام بسيطة): غيّره في Vercel (ADMIN_PIN) لـ 10 حروف/أرقام أو أكتر، أو 8 فيها حروف وأرقام.', tab: 'dashboard' });
   if (i.env.ADMIN_ALERT_EMAIL === false) out.push({ id: 'env-alert', level: 'warn', text: 'مفيش إيميل تنبيهات أمنية: ضيف ADMIN_ALERT_EMAIL في Vercel عشان توصلك رسالة عند أي دخول جديد للأدمن.', tab: 'dashboard' });
+  if (i.env.CRON_SECRET === false) out.push({ id: 'env-cron', level: 'warn', text: 'الملخص اليومي على الإيميل مش شغال: ضيف CRON_SECRET (نص عشوائي طويل) في Vercel.', tab: 'dashboard' });
   return out;
 }
