@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { ListingCard } from '@/components/listing-card';
 
 import { Globe, Bed, Maximize2, Video, Heart, MapPin, Eye } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
@@ -411,38 +412,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {firebaseProperties.map((prop) => (
-              <div
-                key={prop.id}
-                onClick={() => setSelectedProp(prop)}
-                className="rounded-lg border border-accent/40 overflow-hidden hover:border-accent transition cursor-pointer"
-                style={{ backgroundColor: '#1a2332' }}
-              >
-                {prop.image && (
-                  <img src={prop.image} alt={prop.title} className="w-full h-44 object-cover" />
-                )}
-                <div className="p-4">
-                  <div className="flex justify-between items-start mb-1">
-                    <h4 className="text-white font-semibold text-base">
-                      {pTitle(prop, language)}
-                    </h4>
-                    {prop.featured && (
-                      <span className="text-xs bg-accent text-black px-2 py-0.5 rounded font-bold">
-                        {language === 'en' ? 'Featured' : 'مميز'}
-                      </span>
-                    )}
-                  </div>
-                  <p className="text-gray-400 text-sm mb-2">
-                    {pLocation(prop, language)}
-                  </p>
-                  <div className="flex justify-between items-center">
-                    <p className="text-accent font-bold text-lg">{formatNumber(prop.price, language)} π</p>
-                    <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
-                      <Eye className="w-3 h-3" />
-                      {language === 'en' ? 'Details' : 'تفاصيل'}
-                    </span>
-                  </div>
-                </div>
-              </div>
+              <ListingCard key={prop.id} prop={prop} language={language} isFavorite={favorites.includes(prop.id)} onToggleFavorite={() => toggleFavorite(prop.id)} onOpenDetails={() => setSelectedProp(prop)} />
             ))}
           </div>
         </div>

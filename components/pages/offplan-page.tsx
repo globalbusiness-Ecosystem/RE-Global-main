@@ -133,7 +133,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
         </h1>
       </div>
 
-      <FirestoreListings listingType="offplan" language={language} />
+      <FirestoreListings listingType="offplan" language={language} favorites={favorites} toggleFavorite={toggleFavorite} />
 
       <div className="space-y-4">
         {offplanProperties.map((property) => (

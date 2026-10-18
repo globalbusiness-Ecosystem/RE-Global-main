@@ -1,15 +1,14 @@
 'use client';
-import { isExclusiveType } from '@/lib/property-lifecycle';
-import { formatPropertyPrice } from '@/lib/price-format';
-import { PriceUsd } from '@/components/price-usd';
 import { useMemo, useState } from 'react';
-import { Eye } from 'lucide-react';
 import type { NavLanguage } from '@/lib/nav-i18n';
-import { useProperties, pTitle, pLocation, type Property } from '@/lib/useProperties';
+import { useProperties, type Property } from '@/lib/useProperties';
 import { FirebasePropertyModal } from '@/components/pages/buy-page';
+import { ListingCard } from '@/components/listing-card';
 
 // Real listings added from the admin panel (Firestore), filtered by listing type.
-export function FirestoreListings({ listingType, featuredOnly, language }: { listingType?: string; featuredOnly?: boolean; language: NavLanguage }) {
+export function FirestoreListings({ listingType, featuredOnly, language, favorites, toggleFavorite }: {
+  listingType?: string; featuredOnly?: boolean; language: NavLanguage; favorites?: string[]; toggleFavorite?: (id: string) => void;
+}) {
   const { properties, loading } = useProperties();
   const [selected, setSelected] = useState<Property | null>(null);
   const items = useMemo(() => {
@@ -32,32 +31,14 @@ export function FirestoreListings({ listingType, featuredOnly, language }: { lis
           : (language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة')}
       </h2>
       {items.map((prop) => (
-        <div
+        <ListingCard
           key={prop.id}
-          onClick={() => setSelected(prop)}
-          className="rounded-lg border border-accent/40 overflow-hidden hover:border-accent transition cursor-pointer"
-          style={{ backgroundColor: '#1a2332' }}
-        >
-          {prop.image && <img src={prop.image} alt={prop.title} className="w-full h-44 object-cover" />}
-          <div className="p-4">
-            <div className="flex justify-between items-start mb-1">
-              <h4 className="text-white font-semibold text-base">{pTitle(prop, language)}</h4>
-              {prop.featured && (
-                <span className="text-xs bg-accent text-black px-2 py-0.5 rounded font-bold">
-                  {language === 'en' ? 'Featured' : 'مميز'}
-                </span>
-              )}
-            </div>
-            <p className="text-gray-400 text-sm mb-2">{pLocation(prop, language)}</p>
-            <div className="flex justify-between items-center">
-              <p className="text-accent font-bold text-lg">{formatPropertyPrice(prop, language)}<PriceUsd prop={prop} />{isExclusiveType(prop.type) && prop.status === 'sold' && <span className="ml-2 text-[11px] text-red-300 border border-red-400/50 px-1.5 py-0.5 rounded">{language === 'en' ? 'Sold' : 'مباع'}</span>}</p>
-              <span className="text-xs text-accent border border-accent/50 px-2 py-0.5 rounded flex items-center gap-1">
-                <Eye className="w-3 h-3" />
-                {language === 'en' ? 'Details' : 'تفاصيل'}
-              </span>
-            </div>
-          </div>
-        </div>
+          prop={prop}
+          language={language}
+          isFavorite={favorites?.includes(prop.id)}
+          onToggleFavorite={toggleFavorite ? () => toggleFavorite(prop.id) : undefined}
+          onOpenDetails={() => setSelected(prop)}
+        />
       ))}
       {selected && <FirebasePropertyModal prop={selected} language={language} onClose={() => setSelected(null)} />}
     </div>

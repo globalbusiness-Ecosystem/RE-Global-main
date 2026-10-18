@@ -17,6 +17,11 @@ import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { MAP_I18N, getMapPropertyTitle } from '@/lib/map-i18n';
+import { PanoramaModal } from '@/components/panorama-modal';
+import { FOCUS_KEY, parseFocus, type MapFocus } from '@/lib/map-focus';
+import { CARD_I18N } from '@/lib/card-i18n';
+import { usePiRate } from '@/lib/usePiRate';
+import { propertyPaymentAmount } from '@/lib/payment-rules';
 
 // Leaflet lazy imports with performance optimization
 let L: any;
@@ -41,6 +46,12 @@ interface Property {
   roiScore?: number;
   marketTrend?: 'up' | 'down' | 'stable';
   daysListed?: number;
+  /** Added from the admin panel: always shown, whatever the price filter says. */
+  isAdmin?: boolean;
+  vrUrl?: string;
+  currency?: string;
+  payAmountPi?: number;
+  status?: string;
 }
 
 // Property data - same as before
@@ -125,6 +136,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const t = MAP_I18N[language];
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
+  const mapInitStarted = useRef(false);
   const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
 
@@ -151,16 +163,21 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const updateThrottleRef = useRef(0);
 
   const { properties: firebaseProps } = useProperties();
+  const piRate = usePiRate();
+  const tc = CARD_I18N[language] ?? CARD_I18N.en;
+  const [mapReady, setMapReady] = useState(false);
+  const [focus, setFocus] = useState<MapFocus | null>(null);
+  const focusMarkerRef = useRef<any>(null);
 
   const filteredProperties = useMemo(() => {
-    const allProperties: Property[] = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1} as Property))];
+    const allProperties: Property[] = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1, isAdmin: true} as Property))];
     let filtered = allProperties.filter((p) => {
       const matchType = filterType === 'all' || p.type === filterType;
       const matchSearch =
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         p.titleAr.includes(searchTerm) ||
         p.city.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchPrice = p.price >= priceRange[0] && p.price <= priceRange[1];
+      const matchPrice = p.isAdmin || (p.price >= priceRange[0] && p.price <= priceRange[1]);
       const matchCountry = selectedCountries.length === 0 || selectedCountries.includes(p.country);
       return matchType && matchSearch && matchPrice && matchCountry;
     });
@@ -179,6 +196,26 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
     return filtered;
   }, [properties, firebaseProps, filterType, searchTerm, priceRange, selectedCountries, sortBy]);
+
+  // A listing card sent the visitor here: remember where, then fly to that exact spot once the map is ready.
+  useEffect(() => {
+    let raw: string | null = null;
+    try { raw = sessionStorage.getItem(FOCUS_KEY); sessionStorage.removeItem(FOCUS_KEY); } catch { /* private mode */ }
+    const f = parseFocus(raw);
+    if (f) setFocus(f);
+  }, []);
+  useEffect(() => {
+    if (!focus || !mapReady || !mapInstanceRef.current || !L) return;
+    const map = mapInstanceRef.current;
+    try {
+      if (focusMarkerRef.current) map.removeLayer(focusMarkerRef.current);
+      focusMarkerRef.current = L.circleMarker([focus.lat, focus.lng], { radius: 16, color: '#d4af37', weight: 3, fillColor: '#d4af37', fillOpacity: 0.25 }).addTo(map);
+      map.flyTo([focus.lat, focus.lng], 17, { duration: 1.5 });
+    } catch (e) {
+      console.error('Focus error:', e);
+    }
+  }, [focus, mapReady]);
+  const focusProp = useMemo(() => (focus ? filteredProperties.find((p) => String(p.id) === focus.id) ?? null : null), [focus, filteredProperties]);
 
   const countries = useMemo(() => {
     const unique = Array.from(new Set(properties.map(p => p.country))).sort();
@@ -241,7 +278,8 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   }, [filteredProperties]);
 
   const initMapOnDemand = useCallback(async () => {
-    if (mapInitialized || !mapContainerRef.current || mapInstanceRef.current) return;
+    if (!mapContainerRef.current || mapInstanceRef.current || mapInitStarted.current) return;
+    mapInitStarted.current = true;
     
     try {
       await initializeMap();
@@ -276,6 +314,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
       map.on('moveend zoomend', handleMapEvent);
 
       mapInstanceRef.current = map;
+      setMapReady(true);
       updateMarkers(map);
     } catch (error) {
       console.error('Error initializing map:', error);
@@ -347,7 +386,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
         
         const marker = L.circleMarker([property.lat, property.lng], {
           radius: 8,
-          fillColor: colorMap[property.type],
+          fillColor: (colorMap as Record<string, string>)[property.type] ?? '#d4af37',
           color: '#fff',
           weight: 2,
           opacity: 1,
@@ -967,8 +1006,45 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           </div>
         )}
 
-        {/* VR Tour Viewer */}
-        {showPanoramicTour && selectedProperty && (
+        {/* Where a property card sent the visitor: its exact spot on the map */}
+        {focus && !showDetailPanel && !showPanoramicTour && (
+          <div className="fixed bottom-20 left-3 right-3 z-40 flex items-center gap-3 rounded-xl border border-accent/40 bg-black/85 p-3 backdrop-blur" role="status">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs text-accent">📍 {tc.here}</p>
+              <p className="truncate text-sm font-semibold text-white">{focusProp ? getMapPropertyTitle(focusProp, language) : (focus.title ?? '')}</p>
+              {focusProp && <p className="truncate text-xs text-gray-400">{focusProp.city}</p>}
+            </div>
+            {focusProp && (
+              <button type="button" onClick={() => { setSelectedProperty(focusProp); setShowDetailPanel(true); }} className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-black">{tc.details}</button>
+            )}
+            {focusProp?.vrUrl && (
+              <button type="button" onClick={() => { setSelectedProperty(focusProp); setShowPanoramicTour(true); }} className="rounded-lg border border-accent px-3 py-2 text-xs font-semibold text-accent">{tc.tour}</button>
+            )}
+            <button
+              type="button"
+              aria-label={tc.close}
+              onClick={() => {
+                setFocus(null);
+                try { if (focusMarkerRef.current && mapInstanceRef.current) mapInstanceRef.current.removeLayer(focusMarkerRef.current); } catch { /* already gone */ }
+                focusMarkerRef.current = null;
+              }}
+              className="rounded-lg p-2 text-white hover:bg-white/10"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        )}
+
+        {/* VR Tour Viewer: the property's own 360 photo when the admin added one */}
+        {showPanoramicTour && selectedProperty?.vrUrl && (
+          <PanoramaModal
+            url={selectedProperty.vrUrl}
+            title={getMapPropertyTitle(selectedProperty, language)}
+            language={language}
+            onClose={() => { setShowPanoramicTour(false); setSelectedProperty(null); }}
+          />
+        )}
+        {showPanoramicTour && selectedProperty && !selectedProperty.vrUrl && (
           <VRPropertyTourViewer
             property={DEMO_PROPERTY}
             onClose={() => {
@@ -1204,6 +1280,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     propertyId={String(selectedProperty.id)}
                     propertyTitle={getMapPropertyTitle(selectedProperty, language)}
                     price={selectedProperty.price}
+                    amountPi={selectedProperty.isAdmin ? (propertyPaymentAmount(selectedProperty, piRate) ?? undefined) : undefined}
                     transactionType={selectedProperty.type === 'invest' ? 'invest' : selectedProperty.type === 'rent' ? 'rent' : selectedProperty.type === 'hotel' ? 'hotel' : 'buy'}
                     language={language}
                     currency="PI"
