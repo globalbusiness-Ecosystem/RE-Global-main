@@ -54,7 +54,7 @@ class OTPAuthenticationManager {
         verified: false,
       });
 
-      console.log('[OTP] OTP generated:', otp, 'Expires:', expiresAt);
+      console.log('[OTP] OTP generated. Expires:', expiresAt);
 
       // In production, send via Twilio or similar
       // await this.sendViaSMS(formattedPhone, `Your RE Platform OTP is: ${otp}`);

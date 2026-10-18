@@ -114,6 +114,11 @@ export default function PrivacyPolicyPage() {
             Blockchain transaction records may persist indefinitely as part of the underlying
             network.
           </p>
+          <p>
+            Technical records (error reports, security-policy reports, rate-limit counters and expired
+            one-time codes) are deleted automatically, after at most 90 days. Reports about listings are
+            deleted 6 months after they are closed.
+          </p>
         </Section>
 
         <Section title="7. Your Choices and Rights">

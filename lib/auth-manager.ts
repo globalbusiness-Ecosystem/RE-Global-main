@@ -109,7 +109,7 @@ export function useOTP() {
     setError('');
     try {
       const code = manager.generateOTP(identifier);
-      console.log(`[v0] OTP generated: ${code}`);
+      console.log('[v0] OTP generated');
       setOtp(code);
       return code;
     } catch (err) {
