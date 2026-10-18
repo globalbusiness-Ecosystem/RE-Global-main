@@ -6,6 +6,8 @@ import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OfflineBanner } from "./offline-banner";
 import { ErrorReporter } from "./error-reporter";
+import { SkipLink } from "./skip-link";
+import { A11yEnhancer } from "./a11y-enhancer";
 import { TermsConsentModal } from "./terms-consent-modal";
 import { Toaster } from "sonner";
 import { useServiceWorker } from "@/hooks/use-service-worker";
@@ -24,10 +26,12 @@ function AppContent({ children }: { children: ReactNode }) {
 
   return (
     <>
+      <SkipLink />
+      <A11yEnhancer />
       <ErrorReporter />
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
       {isInitialized && <TermsConsentModal />}
-      {children}
+      <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>
       <Toaster
         position="top-center"
         theme="dark"

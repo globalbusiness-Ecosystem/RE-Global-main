@@ -19,7 +19,7 @@ export function ErrorView({ kind, reset }: { kind: 'error' | 'notfound'; reset?:
   const rtl = lang === 'ar' || lang === 'ur';
   const btn = { padding: '10px 20px', borderRadius: 8, fontSize: 14, cursor: 'pointer', textDecoration: 'none', display: 'inline-block' } as const;
   return (
-    <main dir={rtl ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24, textAlign: 'center', background: '#0a0a0a', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
+    <div role="alert" dir={rtl ? 'rtl' : 'ltr'} style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 12, padding: 24, textAlign: 'center', background: '#0a0a0a', color: '#fff', fontFamily: 'system-ui, sans-serif' }}>
       <div style={{ fontSize: 40, color: '#d4af37' }}>{kind === 'error' ? '!' : '404'}</div>
       <h1 style={{ fontSize: 22, margin: 0 }}>{kind === 'error' ? t.errorTitle : t.notFoundTitle}</h1>
       <p style={{ maxWidth: 380, margin: 0, color: '#9ca3af', fontSize: 14, lineHeight: 1.6 }}>{kind === 'error' ? t.errorBody : t.notFoundBody}</p>
@@ -27,6 +27,6 @@ export function ErrorView({ kind, reset }: { kind: 'error' | 'notfound'; reset?:
         {kind === 'error' && reset && <button onClick={reset} style={{ ...btn, background: '#d4af37', color: '#000', border: 'none' }}>{t.retry}</button>}
         <a href="/" style={{ ...btn, border: '1px solid #444', color: '#fff' }}>{t.home}</a>
       </div>
-    </main>
+    </div>
   );
 }
