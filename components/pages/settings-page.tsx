@@ -23,6 +23,7 @@ import {
   Home,
   FileCheck2,
 } from 'lucide-react';
+import { CurrencyPicker } from '@/components/currency-picker';
 import { MyDataPanel } from '@/components/my-data-panel';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
@@ -547,6 +548,8 @@ export default function SettingsPage({
               </button>
             )}
           </div>
+
+          <CurrencyPicker />
 
           <MyDataPanel />
 
