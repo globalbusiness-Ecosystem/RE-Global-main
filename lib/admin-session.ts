@@ -1,5 +1,11 @@
 const COOKIE_NAME = 'admin_session';
-const SESSION_TTL_SECONDS = 60 * 60 * 8;
+const DEFAULT_SESSION_HOURS = 8;
+/** How long an admin session lasts. ADMIN_SESSION_HOURS may set 1 to 24 hours; anything else keeps the default of 8. */
+export function sessionTtlSeconds(hours: unknown): number {
+  const n = Number(hours);
+  return Number.isFinite(n) && n >= 1 && n <= 24 ? Math.round(n * 3600) : DEFAULT_SESSION_HOURS * 3600;
+}
+const SESSION_TTL_SECONDS = sessionTtlSeconds(process.env.ADMIN_SESSION_HOURS);
 export const ADMIN_COOKIE_NAME = COOKIE_NAME;
 export const ADMIN_SESSION_TTL_SECONDS = SESSION_TTL_SECONDS;
 const enc = new TextEncoder();
