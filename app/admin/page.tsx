@@ -6,6 +6,7 @@ import PropertiesTab from '@/components/admin/properties-tab';
 import PaymentsTab from '@/components/admin/payments-tab';
 import UsersTab from '@/components/admin/users-tab';
 import ContentTab from '@/components/admin/content-tab';
+import IdleGuard from '@/components/admin/idle-guard';
 
 const TABS = [
   { id: 'dashboard', icon: '📊', label: 'الرئيسية' },
@@ -86,6 +87,7 @@ export default function AdminDashboard() {
 
   return (
     <div dir="rtl" className="min-h-screen bg-[#0a0a0a] text-white md:flex">
+      <IdleGuard onTimeout={logout} />
       {/* Sidebar (desktop) */}
       <aside className="hidden w-56 shrink-0 border-l border-[#222] bg-[#0f0f0f] p-4 md:flex md:flex-col">
         <h1 className="mb-6 text-lg font-bold text-[#d4af37]">🏠 RE Global</h1>
