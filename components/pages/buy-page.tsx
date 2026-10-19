@@ -3,6 +3,10 @@ import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
+import { ShareListing } from '@/components/share-listing';
+import { ReportListing } from '@/components/report-listing';
+import { sharePath } from '@/lib/share';
+import { SHARE_I18N } from '@/lib/share-i18n';
 
 import { useProperties } from '@/lib/useProperties';
 import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
@@ -396,9 +400,12 @@ export function FirebasePropertyModal({
 
           {/* Buy Button: same flow as every other page (pays, then the server signs and records the contract) */}
           <LegalNotice country={prop.country} language={language} />
-          <a data-testid="share-link" href={`/p/${prop.id}${language === 'ar' ? '?lang=ar' : ''}`} target="_blank" rel="noopener noreferrer" className="block text-center text-sm underline opacity-80 mb-3">
-            {language === 'ar' ? '🔗 رابط العقار للمشاركة' : '🔗 Shareable property link'}
-          </a>
+          <div className="mb-3 flex flex-wrap items-center justify-center gap-3">
+            <ShareListing id={prop.id} title={title} language={language} />
+            <a data-testid="share-link" href={sharePath(prop.id, language)} target="_blank" rel="noopener noreferrer" className="text-sm underline opacity-80">
+              🔗 {(SHARE_I18N[language] ?? SHARE_I18N.en).openPage}
+            </a>
+          </div>
 
           {isSold ? (
             <div className="w-full rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-300">
@@ -416,6 +423,8 @@ export function FirebasePropertyModal({
             className="w-full"
           />
           )}
+
+          <ReportListing id={prop.id} />
 
         </div>
       </div>
