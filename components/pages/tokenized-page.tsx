@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
 import { Zap, Bed, Maximize2, Video, Heart, MapPin, Eye } from 'lucide-react';
@@ -395,6 +396,7 @@ export default function TokenizedPage({ language, currency, favorites, toggleFav
             {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
           </h2>
         )}
+        <DemoOnly>
         {tokenizedProperties.map((property) => (
           <div key={property.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition">
             <div className="relative h-48 bg-muted overflow-hidden">
@@ -509,6 +511,7 @@ export default function TokenizedPage({ language, currency, favorites, toggleFav
             </div>
           </div>
         ))}
+        </DemoOnly>
       </div>
 
       {/* VR Tour Modal */}

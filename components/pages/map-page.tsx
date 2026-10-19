@@ -21,6 +21,7 @@ import { PanoramaModal } from '@/components/panorama-modal';
 import { FOCUS_KEY, parseFocus, type MapFocus } from '@/lib/map-focus';
 import { CARD_I18N } from '@/lib/card-i18n';
 import { usePiRate } from '@/lib/usePiRate';
+import { useShowDemo } from '@/lib/use-demo-listings';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
 
 // Leaflet lazy imports with performance optimization
@@ -164,13 +165,14 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
   const { properties: firebaseProps } = useProperties();
   const piRate = usePiRate();
+  const showDemo = useShowDemo();
   const tc = CARD_I18N[language] ?? CARD_I18N.en;
   const [mapReady, setMapReady] = useState(false);
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const focusMarkerRef = useRef<any>(null);
 
   const filteredProperties = useMemo(() => {
-    const allProperties: Property[] = [...properties, ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1, isAdmin: true} as Property))];
+    const allProperties: Property[] = [...(showDemo === false ? [] : properties), ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1, isAdmin: true} as Property))];
     let filtered = allProperties.filter((p) => {
       const matchType = filterType === 'all' || p.type === filterType;
       const matchSearch =
@@ -195,7 +197,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
     }
 
     return filtered;
-  }, [properties, firebaseProps, filterType, searchTerm, priceRange, selectedCountries, sortBy]);
+  }, [properties, showDemo, firebaseProps, filterType, searchTerm, priceRange, selectedCountries, sortBy]);
 
   // A listing card sent the visitor here: remember where, then fly to that exact spot once the map is ready.
   useEffect(() => {

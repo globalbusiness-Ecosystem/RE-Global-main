@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
 import { MapPin, Bed, Maximize2, Video, Heart, Eye } from 'lucide-react';
@@ -268,6 +269,7 @@ export default function InvestPage({ language, currency, favorites, toggleFavori
             {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
           </h2>
         )}
+        <DemoOnly>
         {investProperties.map((property) => (
           <div key={property.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition">
             <div className="relative h-48 bg-muted overflow-hidden">
@@ -371,6 +373,7 @@ export default function InvestPage({ language, currency, favorites, toggleFavori
             </div>
           </div>
         ))}
+        </DemoOnly>
       </div>
 
       {/* VR Tour Modal */}

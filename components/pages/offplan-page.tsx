@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { DemoOnly } from '@/components/demo-only';
 
 import { FileText, Bed, Maximize2, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
@@ -136,6 +137,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
       <FirestoreListings listingType="offplan" language={language} favorites={favorites} toggleFavorite={toggleFavorite} />
 
       <div className="space-y-4">
+        <DemoOnly>
         {offplanProperties.map((property) => (
           <div key={property.id} className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-lg transition">
             <div className="relative h-48 bg-muted overflow-hidden">
@@ -242,6 +244,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
             </div>
           </div>
         ))}
+        </DemoOnly>
       </div>
 
       {/* VR Tour Modal */}

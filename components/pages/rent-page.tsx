@@ -3,6 +3,7 @@ import { formatNumber } from '@/lib/format';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { PriceUsd } from '@/components/price-usd';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
 import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lucide-react';
@@ -410,6 +411,7 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
           </h2>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DemoOnly>
           {rentProperties.map((property) => (
             <RentPropertyCard
               key={property.id}
@@ -421,6 +423,7 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
               onTourClick={() => setActiveTourId(property.id)}
             />
           ))}
+          </DemoOnly>
         </div>
       </div>
 

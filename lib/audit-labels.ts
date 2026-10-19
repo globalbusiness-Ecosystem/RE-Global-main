@@ -7,7 +7,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
   'admin.login': 'تسجيل دخول الأدمن', 'admin.revoke': 'خروج من كل جلسات الأدمن', 'admin.backup': 'تصدير نسخة احتياطية',
-  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'texts.save': 'حفظ نصوص الموقع',
+  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'texts.save': 'حفظ نصوص الموقع', 'display.demo': 'إظهار/إخفاء العقارات التجريبية',
 };
 
 export function auditLabel(action: string): string {
@@ -23,6 +23,7 @@ export function auditSummary(action: string, detail: Record<string, unknown> | n
     case 'booking.cancel': return [s(d.title), d.guest ? `@${s(d.guest)}` : '', d.refund != null ? `استرداد ${s(d.refund)} π` : ''].filter(Boolean).join(' · ');
     case 'shares.cancel': return [s(d.title), d.buyer ? `@${s(d.buyer)}` : '', d.shares != null ? `${s(d.shares)} حصة` : '', d.refund != null ? `استرداد ${s(d.refund)} π` : ''].filter(Boolean).join(' · ');
     case 'market.listing.cancel': return [s(d.title), d.seller ? `@${s(d.seller)}` : ''].filter(Boolean).join(' · ');
+    case 'display.demo': return d.to === false ? 'إخفاء' : 'إظهار';
     case 'market.fee': return `${s(d.from)}% ← ${s(d.to)}%`;
     case 'pricing.rate': return `${s(d.from)} ← ${s(d.to)}`;
     case 'payout.paid': return [s(d.id), s(d.note)].filter(Boolean).join(' · ');

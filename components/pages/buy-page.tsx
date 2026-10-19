@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
 import { useProperties } from '@/lib/useProperties';
@@ -483,6 +484,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
           </h2>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <DemoOnly>
           {buyProperties.map((property) => (
             <PropertyCard
               key={property.id}
@@ -494,6 +496,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
               onTourClick={() => setActiveTourId(property.id)}
             />
           ))}
+          </DemoOnly>
         </div>
       </div>
 
