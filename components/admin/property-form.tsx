@@ -2,6 +2,8 @@
 
 import { useState } from 'react';
 import { adminApi, Btn, Card, Field, inputCls, GOLD, TYPE_LABELS, STATUS_LABELS } from './admin-ui';
+import { osmLink } from '@/lib/geocode';
+import { hasValidCoords } from '@/lib/map-focus';
 
 const TR_LANGS = [
   { code: 'ar', label: 'العربية' }, { code: 'fr', label: 'Français' }, { code: 'es', label: 'Español' },
@@ -64,6 +66,8 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
   const [busy, setBusy] = useState(false);
   const [trBusy, setTrBusy] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [geoBusy, setGeoBusy] = useState(false);
+  const [geoNote, setGeoNote] = useState('');
   const set = (patch: Partial<ReturnType<typeof blank>>) => setForm((f) => ({ ...f, ...patch }));
   const setTrField = (lang: string, key: string, value: string) =>
     setTr((prev) => ({ ...prev, [lang]: { ...(prev[lang] || {}), [key]: value } }));
@@ -131,8 +135,27 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
     }
   };
 
+  const findOnMap = async () => {
+    if (!form.location.trim()) return alert('اكتب الموقع (English) الأول');
+    setGeoBusy(true);
+    setGeoNote('');
+    try {
+      const hit = await adminApi<{ lat: number; lng: number; label: string }>('/api/admin/geocode', {
+        method: 'POST',
+        body: JSON.stringify({ location: form.location, country: form.country }),
+      });
+      set({ lat: String(hit.lat), lng: String(hit.lng) });
+      setGeoNote('✅ ' + hit.label);
+    } catch (e: any) {
+      setGeoNote('❌ ' + (/not found/i.test(e?.message || '') ? 'مش لاقي المكان. جرّب عنوان أدق (الحي + المدينة) أو اكتب الإحداثيات بإيدك' : e?.message || 'فشل تحديد المكان'));
+    } finally {
+      setGeoBusy(false);
+    }
+  };
+
   const save = async () => {
     if (!form.title.trim()) return alert('اكتب عنوان العقار');
+    if (!hasValidCoords(form.lat, form.lng) && !confirm('مفيش إحداثيات للعقار: زرار الخريطة 📍 هيبقى معطّل للزوار. تكمّل الحفظ كده؟')) return;
     setSaving(true);
     try {
       const body = JSON.stringify({
@@ -178,6 +201,13 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         {text('bathrooms', 'الحمامات', 'number')}
         {text('lat', 'خط العرض Latitude (للخريطة)', 'number')}
         {text('lng', 'خط الطول Longitude (للخريطة)', 'number')}
+        <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
+          <Btn small onClick={findOnMap} disabled={geoBusy}>{geoBusy ? '...بدوّر' : '📍 حدّد المكان من الموقع (English)'}</Btn>
+          {osmLink(form.lat, form.lng) && (
+            <a href={osmLink(form.lat, form.lng) as string} target="_blank" rel="noopener noreferrer" className="text-xs text-[#d4af37] underline">راجع المكان على الخريطة</a>
+          )}
+          {geoNote && <span className="text-xs text-gray-300">{geoNote}</span>}
+        </div>
         <div className="sm:col-span-2">
           <Field label="الوصف (English)">
             <textarea rows={4} className={inputCls} value={form.description} onChange={(e) => set({ description: e.target.value })} />
