@@ -24,6 +24,8 @@ export type PublicListing = {
   area?: number;
   lat?: number;
   lng?: number;
+  /** ISO time of the last edit, when the document has one. */
+  updatedAt?: string;
   translations: Partial<Record<SeoLang, { title: string; location: string; description: string }>>;
   sold: boolean;
 };
@@ -31,6 +33,17 @@ export type PublicListing = {
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const num = (v: unknown) => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Number(v) : undefined);
 const EXCLUSIVE = ['buy', 'offplan', 'abroad'];
+
+// Firestore Timestamp, Date, number or ISO string -> ISO string (or undefined for anything else).
+function isoTime(v: unknown): string | undefined {
+  try {
+    const d = v && typeof (v as { toDate?: unknown }).toDate === 'function' ? (v as { toDate: () => Date }).toDate()
+      : typeof v === 'string' || typeof v === 'number' ? new Date(v) : null;
+    return d && !Number.isNaN(d.getTime()) ? d.toISOString() : undefined;
+  } catch {
+    return undefined;
+  }
+}
 
 // Only the three text fields of the supported languages, as plain strings.
 function readTranslations(raw: unknown): PublicListing['translations'] {
@@ -70,6 +83,7 @@ export function toPublicListing(id: string, raw: Record<string, unknown> | undef
     bathrooms: num(raw.bathrooms),
     area: num(raw.area),
     ...(hasValidCoords(raw.lat, raw.lng) ? { lat: Number(raw.lat), lng: Number(raw.lng) } : {}),
+    ...(isoTime(raw.updatedAt) ? { updatedAt: isoTime(raw.updatedAt) } : {}),
     translations: readTranslations(raw.translations),
     sold: EXCLUSIVE.includes(type) && raw.status === 'sold',
   };
