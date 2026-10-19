@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, inputCls, TYPE_LABELS, STATUS_LABELS, GOLD } from './admin-ui';
 import PropertyForm from './property-form';
+import { listingGaps, hasCriticalGap, GAP_LABELS, CRITICAL_GAPS } from '@/lib/listing-quality';
 
 const PAGE = 20;
 
@@ -32,6 +33,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
       if (view === 'visible' && p.hidden === true) return false;
       if (view === 'featured' && p.featured !== true) return false;
       if (view === 'sold' && p.status !== 'sold') return false;
+      if (view === 'incomplete' && !hasCriticalGap(listingGaps(p))) return false;
       return !s || [p.title, p.location, p.id].some((v) => String(v || '').toLowerCase().includes(s));
     });
   }, [items, q, type, view]);
@@ -63,7 +65,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
           </select>
           <select className={inputCls} value={view} onChange={(e) => { setView(e.target.value); setShown(PAGE); }}>
             <option value="all">الكل</option><option value="visible">ظاهر للزوار</option><option value="hidden">مخفي</option>
-            <option value="featured">مميز</option><option value="sold">مباع</option>
+            <option value="featured">مميز</option><option value="sold">مباع</option><option value="incomplete">ناقصة البيانات</option>
           </select>
         </div>
       </Card>
@@ -86,7 +88,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
               {p.tokenized && <Badge tone="blue">Tokenized</Badge>}
               {p.vrUrl && <Badge tone="blue">🥽 VR</Badge>}
               {p.contractUrl && <Badge>📄 عقد</Badge>}
-              {!(p.lat !== undefined && p.lng !== undefined) && <Badge>بدون موقع خريطة</Badge>}
+              {listingGaps(p).map((g) => <Badge key={g} tone={CRITICAL_GAPS.includes(g) ? 'red' : undefined}>{GAP_LABELS[g]}</Badge>)}
             </div>
             <div className="mt-2 flex flex-wrap gap-1.5">
               <Btn small kind="ghost" onClick={() => setEditing(p)}>✏️ تعديل</Btn>

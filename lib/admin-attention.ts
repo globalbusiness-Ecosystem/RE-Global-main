@@ -5,6 +5,7 @@ import { isUsdPegged } from '@/lib/payment-rules';
 import { buildAttention, type AttentionInput } from '@/lib/attention-rules';
 import { shareMismatches } from '@/lib/share-rules';
 import { isStrongPin } from '@/lib/pin-strength';
+import { countIncomplete } from '@/lib/listing-quality';
 
 const has = (k: string) => !!process.env[k];
 const count = async (q: FirebaseFirestore.Query) => (await q.count().get()).data().count;
@@ -13,7 +14,7 @@ const count = async (q: FirebaseFirestore.Query) => (await q.count().get()).data
 export async function gatherAttention() {
   const db = adminDb;
   const [props, rate, payouts, rb, rh, rt, confirmed] = await Promise.all([
-    db.collection('properties').select('currency', 'title', 'sharesSold').get(),
+    db.collection('properties').select('currency', 'title', 'sharesSold', 'hidden', 'image', 'images', 'price', 'lat', 'lng').get(),
     getPiUsdRate().catch(() => null),
     db.collection('payouts').where('status', '==', 'pending').limit(500).get(),
     count(db.collection('bookings').where('status', '==', 'review')),
@@ -27,6 +28,7 @@ export async function gatherAttention() {
     usdProperties: props.docs.filter((d) => isUsdPegged(d.data().currency)).length,
     piRateSet: rate !== null,
     openReports,
+    incompleteListings: countIncomplete(props.docs.map((d) => d.data())),
     pendingPayouts: { count: payouts.size, amount: payouts.docs.reduce((n, d) => n + (Number(d.data().amount) || 0), 0) },
     review: { bookings: rb, holdings: rh, transfers: rt },
     shareMismatches: shareMismatches(

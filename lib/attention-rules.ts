@@ -10,6 +10,8 @@ export type AttentionInput = {
   shareMismatches?: string[];
   /** Reports about listings that nobody has looked at yet. */
   openReports?: number;
+  /** Visible listings with no photo, no price or no map spot. */
+  incompleteListings?: number;
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
@@ -31,6 +33,7 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
   if ((i.openReports ?? 0) > 0) out.push({ id: 'reports', level: 'warn', text: `${i.openReports} بلاغ على عقارات مستني مراجعتك (من صفحة العقار العامة): افتح لوحة التحكم ← بلاغات العقارات.`, tab: 'dashboard' });
+  if ((i.incompleteListings ?? 0) > 0) out.push({ id: 'incomplete-listings', level: 'warn', text: `${i.incompleteListings} عقار ظاهر للزوار ناقصه صورة أو سعر أو موقع خريطة (زرار 📍 معطّل عندهم): افتح العقارات ← ناقصة البيانات.`, tab: 'properties' });
   if (i.env.ADMIN_TOTP_SECRET === false) out.push({ id: 'env-2fa', level: 'warn', text: 'دخول الأدمن بالـ PIN بس: فعّل التحقق بخطوتين (ADMIN_TOTP_SECRET). الخطوات في دليل التشغيل.', tab: 'dashboard' });
   if (i.env.ADMIN_PIN_STRONG === false) out.push({ id: 'env-pin', level: 'warn', text: 'الـ PIN بتاع الأدمن ضعيف (قصير أو أرقام بسيطة): غيّره في Vercel (ADMIN_PIN) لـ 10 حروف/أرقام أو أكتر، أو 8 فيها حروف وأرقام.', tab: 'dashboard' });
   if (i.env.ADMIN_ALERT_EMAIL === false) out.push({ id: 'env-alert', level: 'warn', text: 'مفيش إيميل تنبيهات أمنية: ضيف ADMIN_ALERT_EMAIL في Vercel عشان توصلك رسالة عند أي دخول جديد للأدمن.', tab: 'dashboard' });
