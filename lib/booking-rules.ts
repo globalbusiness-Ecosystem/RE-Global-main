@@ -14,6 +14,8 @@ export type BookingDates = { start: string; end: string; guests?: number };
 export type Range = {
   start: string; end: string; paymentId: string; uid: string; username?: string;
   status: 'hold' | 'confirmed'; expiresAtMs?: number;
+  /** Dates the admin closed (maintenance, own use): no guest, no payment. */
+  block?: boolean; note?: string;
 };
 
 // 'YYYY-MM-DD' -> UTC midnight in ms, or null when it is not a real calendar day.
@@ -92,3 +94,31 @@ export function bookingTotals(rows: { status: unknown; amount: number; end: stri
 
 // A booking the admin may cancel (and refund): a confirmed stay, or one held back for review.
 export const isCancellableBooking = (status: unknown) => status === 'confirmed' || status === 'review';
+
+// ---- Dates the admin closes on a hotel / rental (maintenance, owner stay, ...) ----
+export const BLOCK_MAX_NIGHTS = 365;
+export const BLOCK_NOTE_MAX = 120;
+export const isBlock = (r: Pick<Range, 'block'>) => r.block === true;
+
+export type BlockCheck = { ok: true; start: string; end: string; nights: number; note: string } | { ok: false; error: string };
+
+// Today or later, check-out after check-in, at most a year. The note is plain text and optional.
+export function validateBlock(raw: unknown, nowMs: number): BlockCheck {
+  const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
+  const s = parseDay(r.start);
+  const e = parseDay(r.end);
+  if (s === null || e === null) return { ok: false, error: 'Choose valid dates' };
+  if (s < dayStart(nowMs)) return { ok: false, error: 'The start date is in the past' };
+  const nights = Math.round((e - s) / DAY_MS);
+  if (nights < 1) return { ok: false, error: 'The end date must be after the start date' };
+  if (nights > BLOCK_MAX_NIGHTS) return { ok: false, error: `Maximum ${BLOCK_MAX_NIGHTS} nights` };
+  const note = typeof r.note === 'string' ? r.note.replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, BLOCK_NOTE_MAX) : '';
+  return { ok: true, start: r.start as string, end: r.end as string, nights, note };
+}
+
+// Closing dates is refused when any live stay or hold already uses them: cancel that booking first.
+export function decideBlock(ranges: Range[], req: BookingDates, nowMs: number): { ok: true; ranges: Range[] } | { ok: false; code: 'unavailable' } {
+  const live = activeRanges(ranges, nowMs);
+  if (live.some((r) => overlaps(r, req))) return { ok: false, code: 'unavailable' };
+  return { ok: true, ranges: live };
+}
