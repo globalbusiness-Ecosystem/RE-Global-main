@@ -5,6 +5,7 @@ import { bookingTotal, overlaps, validateBooking, type BookingDates } from '@/li
 import { bookingErrorText, bookingStrings, formatDay, nightsLabel } from '@/lib/booking-i18n';
 import { formatNumber } from '@/lib/format';
 import { guestStrings } from '@/lib/guests';
+import { AvailabilityCalendar } from '@/components/availability-calendar';
 
 // Check-in / check-out dates for a rent or hotel listing, with the taken days and the total in Pi.
 // Calls onChange with the chosen dates and total only when they are valid and free.
@@ -50,6 +51,7 @@ export function BookingPicker({ propertyId, type, unitPi, language, maxGuests, o
   return (
     <div className="space-y-2 rounded-xl border border-accent/20 p-3">
       <p className="text-sm font-semibold text-white">{hotel ? t.stayDates : t.rentalPeriod}</p>
+      <AvailabilityCalendar busy={busy} start={start} end={end} language={language} today={today} onPick={(s, e) => { setStart(s); setEnd(e); }} />
       <div className="grid grid-cols-2 gap-2">
         <label className="text-xs text-gray-400">{hotel ? t.checkIn : t.from}
           <input type="date" lang="en" min={today} value={start} onChange={(e) => setStart(e.target.value)} className={cls} />
