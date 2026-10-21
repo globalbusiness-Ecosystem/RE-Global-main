@@ -3,6 +3,8 @@ import { COUNTRIES, isCountry } from '@/lib/legal-profiles';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { hasValidCoords } from '@/lib/map-focus';
 import { SEO_LANGS, SEO_I18N, countryName, isRtl, seoLang, type SeoLang } from '@/lib/seo-i18n';
+import { MAX_GUESTS_LIMIT, TIME_RE, stayFacts } from '@/lib/stay-info';
+import { bookingStrings } from '@/lib/booking-i18n';
 
 export { seoLang, type SeoLang };
 
@@ -22,6 +24,10 @@ export type PublicListing = {
   bedrooms?: number;
   bathrooms?: number;
   area?: number;
+  /** Hotel / rental facts set by the admin (HH:MM times, guest limit). */
+  checkInTime?: string;
+  checkOutTime?: string;
+  maxGuests?: number;
   lat?: number;
   lng?: number;
   /** ISO time of the last edit, when the document has one. */
@@ -33,6 +39,7 @@ export type PublicListing = {
 const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const num = (v: unknown) => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Number(v) : undefined);
 const EXCLUSIVE = ['buy', 'offplan', 'abroad'];
+const isStay = (t: string) => t === 'hotel' || t === 'rent';
 
 // Firestore Timestamp, Date, number or ISO string -> ISO string (or undefined for anything else).
 function isoTime(v: unknown): string | undefined {
@@ -82,6 +89,9 @@ export function toPublicListing(id: string, raw: Record<string, unknown> | undef
     bedrooms: num(raw.bedrooms),
     bathrooms: num(raw.bathrooms),
     area: num(raw.area),
+    ...(typeof raw.checkInTime === 'string' && TIME_RE.test(raw.checkInTime) ? { checkInTime: raw.checkInTime } : {}),
+    ...(typeof raw.checkOutTime === 'string' && TIME_RE.test(raw.checkOutTime) ? { checkOutTime: raw.checkOutTime } : {}),
+    ...(Number.isInteger(Number(raw.maxGuests)) && Number(raw.maxGuests) >= 1 && Number(raw.maxGuests) <= MAX_GUESTS_LIMIT ? { maxGuests: Number(raw.maxGuests) } : {}),
     ...(hasValidCoords(raw.lat, raw.lng) ? { lat: Number(raw.lat), lng: Number(raw.lng) } : {}),
     ...(isoTime(raw.updatedAt) ? { updatedAt: isoTime(raw.updatedAt) } : {}),
     translations: readTranslations(raw.translations),
@@ -101,8 +111,10 @@ export function listingTexts(l: PublicListing, lang: SeoLang) {
     l.bedrooms ? `${l.bedrooms} ${S.bed}` : '',
     l.bathrooms ? `${l.bathrooms} ${S.bath}` : '',
     l.area ? `${l.area} m²` : '',
+    ...(isStay(l.type) ? stayFacts(l, lang).map((f) => f.text) : []),
   ].filter(Boolean).join(' · ');
-  const price = formatPropertyPrice(l, lang);
+  const unit = l.type === 'hotel' ? bookingStrings(lang).perNight : l.type === 'rent' ? bookingStrings(lang).perMonth : '';
+  const price = formatPropertyPrice(l, lang) + (unit ? ` / ${unit}` : '');
   const body = raw.replace(/\s+/g, ' ').trim();
   const description = [price, place, facts, body].filter(Boolean).join(' — ').slice(0, 300);
   return { title, place, facts, price, body, description };
@@ -114,14 +126,23 @@ export function listingJsonLd(l: PublicListing, base: string, lang: SeoLang) {
   const url = `${base}/p/${l.id}`;
   const countryEn = l.country ? COUNTRIES[l.country]?.en : undefined;
   const hasGeo = l.lat !== undefined && l.lng !== undefined;
+  const hotel = l.type === 'hotel';
+  const currency = l.currency.toUpperCase() === 'PI' ? 'XPI' : l.currency.toUpperCase();
   return {
     '@context': 'https://schema.org',
-    '@type': 'RealEstateListing',
+    '@type': hotel ? 'Hotel' : 'RealEstateListing',
     name: t.title,
     url,
     inLanguage: lang,
     description: t.description,
     ...(l.image ? { image: l.image } : {}),
+    ...(hotel ? {
+      ...(l.checkInTime ? { checkinTime: l.checkInTime } : {}),
+      ...(l.checkOutTime ? { checkoutTime: l.checkOutTime } : {}),
+      ...(l.maxGuests ? { occupancy: { '@type': 'QuantitativeValue', maxValue: l.maxGuests } } : {}),
+      ...(hasGeo ? { geo: { '@type': 'GeoCoordinates', latitude: l.lat, longitude: l.lng } } : {}),
+      address: { '@type': 'PostalAddress', ...(t.place ? { streetAddress: t.place } : {}), ...(l.country ? { addressCountry: l.country } : {}) },
+    } : {}),
     ...(hasGeo
       ? {
           contentLocation: {
@@ -137,7 +158,8 @@ export function listingJsonLd(l: PublicListing, base: string, lang: SeoLang) {
     offers: {
       '@type': 'Offer',
       price: l.price,
-      priceCurrency: l.currency.toUpperCase() === 'PI' ? 'XPI' : l.currency.toUpperCase(),
+      priceCurrency: currency,
+      ...(isStay(l.type) ? { priceSpecification: { '@type': 'UnitPriceSpecification', price: l.price, priceCurrency: currency, unitCode: hotel ? 'DAY' : 'MON' } } : {}),
       availability: l.sold ? 'https://schema.org/SoldOut' : 'https://schema.org/InStock',
       url,
     },
