@@ -6,11 +6,11 @@ import { usePiAuth } from '@/contexts/pi-auth-context';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { formatDate } from '@/lib/format';
 import { pendingOwed } from '@/lib/market-rules';
+import { MyBookingsList, type Booked } from '@/components/my-bookings-list';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
 
 // The signed-in user's purchased properties.
-type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string };
 
 type Payout = { id: string; kind: string; amount: number; status: string };
 
@@ -59,25 +59,7 @@ export function MyProperties({ language }: { language: string }) {
       ))}
     </section>
     )}
-    {bookings.length > 0 && (
-      <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
-        <h2 className="text-sm font-bold text-accent">📅 {ar ? 'حجوزاتي' : 'My bookings'} ({bookings.length})</h2>
-        {bookings.map((b) => (
-          <div key={b.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 p-3">
-            <div className="min-w-0">
-              <p className="text-white text-sm font-semibold truncate">{b.propertyTitle}</p>
-              <p className="text-xs text-gray-400">{b.start} → {b.end} · {b.nights} {ar ? 'ليلة' : 'nights'}</p>
-            </div>
-            <div className="text-right shrink-0">
-              <p className="text-accent text-sm font-bold">{b.amount} π</p>
-              <p className={`text-[11px] ${b.status === 'review' ? 'text-yellow-400' : b.status === 'cancelled' ? 'text-red-400' : 'text-green-400'}`}>
-                {b.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : b.status === 'cancelled' ? (ar ? 'ملغي واتسجل استرداد' : 'Cancelled, refund queued') : (ar ? 'مؤكد' : 'Confirmed')}
-              </p>
-            </div>
-          </div>
-        ))}
-      </section>
-    )}
+    {bookings.length > 0 && <MyBookingsList bookings={bookings} language={language} />}
     {holdings.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
         <h2 className="text-sm font-bold text-accent flex items-center justify-between">

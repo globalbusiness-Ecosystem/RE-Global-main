@@ -205,7 +205,7 @@ function FirebaseHotelModal({
           ) : null}
           <StayFacts info={prop} language={language} />
           {unitPi !== null && (
-            <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} onChange={setChosen} />
+            <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} maxGuests={prop.maxGuests} onChange={setChosen} />
           )}
           {chosen ? (
             <UnifiedPaymentButton

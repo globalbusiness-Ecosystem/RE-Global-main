@@ -4,19 +4,22 @@ import { useEffect, useMemo, useState } from 'react';
 import { bookingTotal, overlaps, validateBooking, type BookingDates } from '@/lib/booking-rules';
 import { bookingErrorText, bookingStrings, formatDay, nightsLabel } from '@/lib/booking-i18n';
 import { formatNumber } from '@/lib/format';
+import { guestStrings } from '@/lib/guests';
 
 // Check-in / check-out dates for a rent or hotel listing, with the taken days and the total in Pi.
 // Calls onChange with the chosen dates and total only when they are valid and free.
-export function BookingPicker({ propertyId, type, unitPi, language, onChange }: {
+export function BookingPicker({ propertyId, type, unitPi, language, maxGuests, onChange }: {
   propertyId: string;
   type: 'rent' | 'hotel';
   unitPi: number | null;
   language: string;
+  maxGuests?: number;
   onChange: (v: { booking: BookingDates; total: number } | null) => void;
 }) {
   const t = bookingStrings(language);
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
+  const [guests, setGuests] = useState(1);
   const [busy, setBusy] = useState<BookingDates[]>([]);
   const today = new Date().toISOString().slice(0, 10);
 
@@ -29,6 +32,7 @@ export function BookingPicker({ propertyId, type, unitPi, language, onChange }: 
     return () => { alive = false; };
   }, [propertyId]);
 
+  const askGuests = Number.isInteger(maxGuests) && (maxGuests as number) >= 1;
   const result = useMemo(() => {
     if (!start || !end) return { error: '' as string, value: null as null | { booking: BookingDates; total: number; nights: number } };
     const v = validateBooking(type, { start, end }, Date.now());
@@ -36,8 +40,8 @@ export function BookingPicker({ propertyId, type, unitPi, language, onChange }: 
     if (busy.some((b) => overlaps(b, v))) return { error: t.unavailable, value: null };
     const total = unitPi ? bookingTotal(type, unitPi, v.nights) : null;
     if (total === null) return { error: t.noPrice, value: null };
-    return { error: '', value: { booking: { start: v.start, end: v.end }, total, nights: v.nights } };
-  }, [start, end, busy, type, unitPi, language, t]);
+    return { error: '', value: { booking: { start: v.start, end: v.end, ...(askGuests ? { guests } : {}) }, total, nights: v.nights } };
+  }, [start, end, busy, type, unitPi, language, t, guests, askGuests]);
 
   useEffect(() => { onChange(result.value ? { booking: result.value.booking, total: result.value.total } : null); }, [result.value]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -54,6 +58,13 @@ export function BookingPicker({ propertyId, type, unitPi, language, onChange }: 
           <input type="date" lang="en" min={start || today} value={end} onChange={(e) => setEnd(e.target.value)} className={cls} />
         </label>
       </div>
+      {askGuests && (
+        <label className="block text-xs text-gray-400">{guestStrings(language).label}
+          <select value={guests} onChange={(e) => setGuests(Number(e.target.value))} className={cls}>
+            {Array.from({ length: maxGuests as number }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+          </select>
+        </label>
+      )}
       {result.error && <p className="text-xs text-red-400" role="alert">{result.error}</p>}
       {result.value && (
         <div className="space-y-0.5">

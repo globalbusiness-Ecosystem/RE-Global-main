@@ -14,7 +14,7 @@ export async function adminBookings(max = 100) {
       const x = d.data();
       return {
         id: d.id, propertyId: x.propertyId, propertyTitle: x.propertyTitle, propertyType: x.propertyType, username: x.username,
-        start: String(x.start ?? ''), end: String(x.end ?? ''), nights: Number(x.nights) || 0, amount: Number(x.amount) || 0,
+        start: String(x.start ?? ''), end: String(x.end ?? ''), nights: Number(x.nights) || 0, amount: Number(x.amount) || 0, guests: Number(x.guests) || undefined,
         status: x.status, createdAt: iso(x.createdAt),
       };
     })

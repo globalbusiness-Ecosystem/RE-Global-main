@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Badge } from './admin-ui';
 
-type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string };
+type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number };
 type Data = { totals: { confirmed: number; upcoming: number; nights: number; revenue: number; review: number }; bookings: Booking[] };
 
 const LABEL: Record<string, string> = { confirmed: 'مؤكد', review: 'مراجعة', cancelled: 'ملغي' };
@@ -62,6 +62,7 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
               <span>@{b.username}</span>
               <span dir="ltr">{b.start} → {b.end}</span>
               <span>· {b.nights} ليلة</span>
+              {b.guests ? <span>· {b.guests} ضيف</span> : null}
             </div>
             {(b.status === 'confirmed' || b.status === 'review') && (
               <div className="mt-2"><Btn small kind="danger" onClick={() => cancel(b)} disabled={busy === b.id}>إلغاء + استرداد</Btn></div>

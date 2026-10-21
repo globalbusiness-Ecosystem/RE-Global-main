@@ -3,6 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isUsdPegged, propertyPaymentAmount } from '@/lib/payment-rules';
 import { getPiUsdRate } from '@/lib/pricing';
 import { bookingTotal, isBookingType, validateBooking } from '@/lib/booking-rules';
+import { parseGuests } from '@/lib/guests';
 import { parseShares, sharesTotal, totalSharesOf } from '@/lib/share-rules';
 
 // The amount (in Pi) the platform expects for a Firestore property, or null when the
@@ -30,7 +31,7 @@ export class BookingInputError extends Error {}
 
 export type Quote = {
   amount: number | null;
-  booking?: { start: string; end: string; nights: number; type: string };
+  booking?: { start: string; end: string; nights: number; type: string; guests: number };
   shares?: { count: number; totalShares: number; type: string };
 };
 
@@ -66,7 +67,9 @@ export async function resolveExpected(propertyId: string, metadata: unknown, opt
   const md = (metadata && typeof metadata === 'object' ? metadata : {}) as Record<string, unknown>;
   const v = validateBooking(type, md.booking, Date.now(), opts);
   if (!v.ok) throw new BookingInputError(v.error);
+  const g = parseGuests((md.booking as Record<string, unknown> | undefined)?.guests, d.maxGuests);
+  if (!g.ok) throw new BookingInputError(g.error);
   const total = bookingTotal(type, unit, v.nights);
   if (total === null) throw new Error('Could not price the booking');
-  return { amount: total, booking: { start: v.start, end: v.end, nights: v.nights, type } };
+  return { amount: total, booking: { start: v.start, end: v.end, nights: v.nights, type, guests: g.guests } };
 }

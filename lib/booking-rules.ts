@@ -10,7 +10,7 @@ export const NIGHT_LIMITS: Record<string, { min: number; max: number }> = {
   rent: { min: 30, max: 365 },
 };
 
-export type BookingDates = { start: string; end: string };
+export type BookingDates = { start: string; end: string; guests?: number };
 export type Range = {
   start: string; end: string; paymentId: string; uid: string; username?: string;
   status: 'hold' | 'confirmed'; expiresAtMs?: number;

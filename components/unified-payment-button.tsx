@@ -14,7 +14,7 @@ interface UnifiedPaymentButtonProps {
   language: NavLanguage;
   currency: 'PI' | 'USD';
   amountPi?: number;
-  booking?: { start: string; end: string };
+  booking?: { start: string; end: string; guests?: number };
   shares?: number;
   listingId?: string;
   disabled?: boolean;
@@ -96,7 +96,7 @@ export function UnifiedPaymentButton({
               propertyId,
               transactionType,
               currency,
-              ...(booking ? { booking: { start: booking.start, end: booking.end } } : {}),
+              ...(booking ? { booking: { start: booking.start, end: booking.end, ...(booking.guests ? { guests: booking.guests } : {}) } } : {}),
               ...(shares ? { shares } : {}),
               ...(listingId ? { listingId } : {}),
             },

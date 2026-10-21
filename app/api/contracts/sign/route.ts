@@ -182,7 +182,7 @@ export async function POST(req: NextRequest) {
         propertyId, uid: user.uid, username: user.username, paymentId,
         contractId: String((result.record as Record<string, unknown>).contractId ?? ''),
         propertyTitle, propertyType: quote.booking.type, start: quote.booking.start, end: quote.booking.end,
-        nights: quote.booking.nights, amount: paidAmount,
+        nights: quote.booking.nights, amount: paidAmount, guests: quote.booking.guests,
       });
     }
     await finalizeSale({
