@@ -6,6 +6,8 @@ import { formatNumber } from '@/lib/format';
 import { guestsText } from '@/lib/guests';
 import { canReview } from '@/lib/stay-reviews';
 import { ReviewForm } from '@/components/review-form';
+import { CancelBooking } from '@/components/cancel-booking';
+import { useState } from 'react';
 
 export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; reviewed?: boolean };
 
@@ -23,10 +25,11 @@ function download(b: Booked) {
 // The signed-in user's stays: upcoming first, with a countdown, a readable status and an "add to calendar" file.
 export function MyBookingsList({ bookings, language }: { bookings: Booked[]; language: string }) {
   const t = myBookingStrings(language);
+  const [gone, setGone] = useState<Record<string, boolean>>({});
   const today = new Date().toISOString().slice(0, 10);
   const rank = { current: 0, upcoming: 1, past: 2 } as const;
   const rows = bookings
-    .map((b) => ({ b, phase: bookingPhase(b.start, b.end, today) }))
+    .map((b0) => { const b = gone[b0.id] ? { ...b0, status: 'cancelled' } : b0; return { b, phase: bookingPhase(b.start, b.end, today) }; })
     .sort((x, y) => rank[x.phase] - rank[y.phase] || (x.phase === 'past' ? y.b.start.localeCompare(x.b.start) : x.b.start.localeCompare(y.b.start)));
   return (
     <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
@@ -55,6 +58,7 @@ export function MyBookingsList({ bookings, language }: { bookings: Booked[]; lan
               )}
             </div>
             {canReview(b, today) && <ReviewForm bookingId={b.id} language={language} reviewed={b.reviewed} />}
+            {!cancelled && phase === 'upcoming' && b.status === 'confirmed' && <CancelBooking bookingId={b.id} language={language} onDone={() => setGone((g) => ({ ...g, [b.id]: true }))} />}
           </div>
         );
       })}

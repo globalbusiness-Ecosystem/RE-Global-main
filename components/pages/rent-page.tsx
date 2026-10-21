@@ -13,6 +13,7 @@ import { BookingPicker } from '@/components/booking-picker';
 import { bookingStrings } from '@/lib/booking-i18n';
 import { StayFacts } from '@/components/stay-facts';
 import { ReviewsList } from '@/components/reviews-list';
+import { CancellationNote } from '@/components/cancellation-note';
 import { ListingFilters } from '@/components/listing-filters';
 import { EMPTY_FILTERS, filterListings, type Filters } from '@/lib/listing-filters';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
@@ -331,6 +332,7 @@ function FirebaseRentModal({
           ) : null}
           <StayFacts info={prop} language={language} />
           <ReviewsList propertyId={prop.id} language={language} />
+          <CancellationNote language={language} />
           {unitPi !== null && (
             <BookingPicker propertyId={prop.id} type="rent" unitPi={unitPi} language={language} maxGuests={prop.maxGuests} onChange={setChosen} />
           )}

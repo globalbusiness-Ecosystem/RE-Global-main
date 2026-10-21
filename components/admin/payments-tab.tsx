@@ -7,6 +7,7 @@ import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
 import BlockDates from './block-dates';
 import ReviewsPanel from './reviews-panel';
+import CancellationSettings from './cancellation-settings';
 import HoldingsPanel from './holdings-panel';
 import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Empty, Badge, inputCls, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
@@ -48,6 +49,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
       <BookingsPanel onUnauthorized={onUnauthorized} />
       <BlockDates onUnauthorized={onUnauthorized} />
       <ReviewsPanel onUnauthorized={onUnauthorized} />
+      <CancellationSettings onUnauthorized={onUnauthorized} />
       <HoldingsPanel onUnauthorized={onUnauthorized} />
       <MarketAdminPanel onUnauthorized={onUnauthorized} />
       <MarketFeeSettings onUnauthorized={onUnauthorized} />
