@@ -12,6 +12,8 @@ import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { BookingPicker } from '@/components/booking-picker';
 import { bookingStrings } from '@/lib/booking-i18n';
 import { StayFacts } from '@/components/stay-facts';
+import { ListingFilters } from '@/components/listing-filters';
+import { EMPTY_FILTERS, filterListings, type Filters } from '@/lib/listing-filters';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
 import { usePiRate } from '@/lib/usePiRate';
 import type { BookingDates } from '@/lib/booking-rules';
@@ -365,6 +367,12 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
     () => properties.filter(p => p.type === 'rent'),
     [properties]
   );
+  const [filters, setFilters] = useState<Filters>(EMPTY_FILTERS);
+  const filterRate = usePiRate();
+  const shownProperties = useMemo(
+    () => filterListings(firebaseProperties, filters, filterRate, (p) => `${pTitle(p, language)} ${pLocation(p, language)}`),
+    [firebaseProperties, filters, filterRate, language]
+  );
 
   const activeTourProperty = rentProperties.find((p) => p.id === activeTourId);
 
@@ -403,8 +411,9 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
           <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
             {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
           </h2>
+          <ListingFilters value={filters} onChange={setFilters} language={language} shown={shownProperties.length} total={firebaseProperties.length} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {firebaseProperties.map((prop) => (
+            {shownProperties.map((prop) => (
               <ListingCard key={prop.id} prop={prop} language={language} isFavorite={favorites.includes(prop.id)} onToggleFavorite={() => toggleFavorite(prop.id)} onOpenDetails={() => setSelectedProp(prop)} />
             ))}
           </div>
