@@ -2,6 +2,7 @@ export const TYPES = ['buy', 'rent', 'hotel', 'tokenized', 'abroad', 'offplan', 
 export const PROPERTY_TYPES = ['apartment', 'villa', 'penthouse', 'commercial'];
 export const STATUSES = ['available', 'sold', 'under_construction'];
 import { isCountry } from '@/lib/legal-profiles';
+import { parseStayInfo } from '@/lib/stay-info';
 const CURRENCIES = ['Pi', 'USD', 'EGP'];
 const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'];
 
@@ -106,6 +107,9 @@ export function parsePropertyInput(b: any): ParsedProperty {
   const shares = num(b.totalShares, 0, 1_000_000);
   if (shares === null || !Number.isInteger(shares)) return fail('Total shares must be a whole number');
   if (shares > 0) doc.totalShares = shares;
+  const stay = parseStayInfo(b);
+  if (!stay.ok) return fail(stay.error);
+  Object.assign(doc, stay.info);
   if (isCountry(b.country)) doc.country = b.country;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;

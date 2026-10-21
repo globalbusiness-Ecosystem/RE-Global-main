@@ -8,6 +8,10 @@ import { MapPin, Bed, Maximize2, Video, Heart, Eye } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { BookingPicker } from '@/components/booking-picker';
+import { bookingStrings } from '@/lib/booking-i18n';
+import { StayFacts } from '@/components/stay-facts';
+import { formatPropertyPrice } from '@/lib/price-format';
+import { PriceUsd } from '@/components/price-usd';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
 import { usePiRate } from '@/lib/usePiRate';
 import type { BookingDates } from '@/lib/booking-rules';
@@ -149,7 +153,7 @@ function FirebaseHotelModal({
             <img src={prop.image} alt={title} className="w-full h-52 object-cover rounded-xl" />
           )}
           <div>
-            <p className="text-3xl font-bold text-accent">{formatNumber(prop.price, language)} π</p>
+            <p className="text-3xl font-bold text-accent">{formatPropertyPrice(prop, language)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm font-normal text-gray-400">/ {bookingStrings(language).perNight}</span></p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
             </p>
@@ -199,21 +203,27 @@ function FirebaseHotelModal({
               />
             </div>
           ) : null}
+          <StayFacts info={prop} language={language} />
           {unitPi !== null && (
             <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} onChange={setChosen} />
           )}
-          <UnifiedPaymentButton
-            propertyId={prop.id}
-            propertyTitle={title}
-            price={chosen ? chosen.total : prop.price}
-            amountPi={chosen ? chosen.total : undefined}
-            booking={chosen?.booking}
-            disabled={unitPi !== null && !chosen}
-            transactionType="hotel"
-            language={language}
-            currency="PI"
-            className="w-full"
-          />
+          {chosen ? (
+            <UnifiedPaymentButton
+              propertyId={prop.id}
+              propertyTitle={title}
+              price={chosen.total}
+              amountPi={chosen.total}
+              booking={chosen.booking}
+              transactionType="hotel"
+              language={language}
+              currency="PI"
+              className="w-full"
+            />
+          ) : (
+            <button type="button" disabled className="w-full rounded-lg bg-accent/40 py-3 font-semibold text-black/70 cursor-not-allowed">
+              {unitPi !== null ? bookingStrings(language).chooseDates : bookingStrings(language).noPrice}
+            </button>
+          )}
         </div>
       </div>
     </div>

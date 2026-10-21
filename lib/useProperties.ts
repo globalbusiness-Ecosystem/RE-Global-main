@@ -31,6 +31,9 @@ export interface Property {
   country?: string;
   totalShares?: number;
   sharesSold?: number;
+  checkInTime?: string;
+  checkOutTime?: string;
+  maxGuests?: number;
 }
 
 export function useProperties() {

@@ -10,6 +10,8 @@ import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lu
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { BookingPicker } from '@/components/booking-picker';
+import { bookingStrings } from '@/lib/booking-i18n';
+import { StayFacts } from '@/components/stay-facts';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
 import { usePiRate } from '@/lib/usePiRate';
 import type { BookingDates } from '@/lib/booking-rules';
@@ -324,21 +326,27 @@ function FirebaseRentModal({
               />
             </div>
           ) : null}
+          <StayFacts info={prop} language={language} />
           {unitPi !== null && (
             <BookingPicker propertyId={prop.id} type="rent" unitPi={unitPi} language={language} onChange={setChosen} />
           )}
-          <UnifiedPaymentButton
-            propertyId={prop.id}
-            propertyTitle={title}
-            price={chosen ? chosen.total : prop.price}
-            amountPi={chosen ? chosen.total : undefined}
-            booking={chosen?.booking}
-            disabled={unitPi !== null && !chosen}
-            transactionType="rent"
-            language={language}
-            currency="PI"
-            className="w-full"
-          />
+          {chosen ? (
+            <UnifiedPaymentButton
+              propertyId={prop.id}
+              propertyTitle={title}
+              price={chosen.total}
+              amountPi={chosen.total}
+              booking={chosen.booking}
+              transactionType="rent"
+              language={language}
+              currency="PI"
+              className="w-full"
+            />
+          ) : (
+            <button type="button" disabled className="w-full rounded-lg bg-accent/40 py-3 font-semibold text-black/70 cursor-not-allowed">
+              {unitPi !== null ? bookingStrings(language).chooseDates : bookingStrings(language).noPrice}
+            </button>
+          )}
         </div>
       </div>
     </div>

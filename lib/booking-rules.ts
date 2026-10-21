@@ -26,7 +26,10 @@ export function parseDay(s: unknown): number | null {
 
 export const dayStart = (nowMs: number) => Math.floor(nowMs / DAY_MS) * DAY_MS;
 
-export type BookingCheck = { ok: true; start: string; end: string; nights: number } | { ok: false; error: string };
+export type BookingErrorCode = 'invalid' | 'past' | 'min' | 'max';
+export type BookingCheck =
+  | { ok: true; start: string; end: string; nights: number }
+  | { ok: false; error: string; code: BookingErrorCode; limit?: number };
 
 // check-out is the day the guest leaves, so nights = end - start. A start up to one day in the past
 // is tolerated because the buyer's local date can be ahead of UTC.
@@ -35,11 +38,11 @@ export function validateBooking(type: string, raw: unknown, nowMs: number, opts:
   const s = parseDay(r.start);
   const e = parseDay(r.end);
   const lim = NIGHT_LIMITS[type];
-  if (s === null || e === null || !lim) return { ok: false, error: 'Choose valid dates' };
-  if (!opts.allowPast && s < dayStart(nowMs) - DAY_MS) return { ok: false, error: 'The start date is in the past' };
+  if (s === null || e === null || !lim) return { ok: false, error: 'Choose valid dates', code: 'invalid' };
+  if (!opts.allowPast && s < dayStart(nowMs) - DAY_MS) return { ok: false, error: 'The start date is in the past', code: 'past' };
   const nights = Math.round((e - s) / DAY_MS);
-  if (nights < lim.min) return { ok: false, error: `Minimum stay is ${lim.min} night${lim.min > 1 ? 's' : ''}` };
-  if (nights > lim.max) return { ok: false, error: `Maximum stay is ${lim.max} nights` };
+  if (nights < lim.min) return { ok: false, error: `Minimum stay is ${lim.min} night${lim.min > 1 ? 's' : ''}`, code: 'min', limit: lim.min };
+  if (nights > lim.max) return { ok: false, error: `Maximum stay is ${lim.max} nights`, code: 'max', limit: lim.max };
   return { ok: true, start: r.start as string, end: r.end as string, nights };
 }
 

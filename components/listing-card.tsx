@@ -12,6 +12,8 @@ import { propertyPaymentAmount } from '@/lib/payment-rules';
 import { isExclusiveType } from '@/lib/property-lifecycle';
 import { usePiRate } from '@/lib/usePiRate';
 import { CARD_I18N } from '@/lib/card-i18n';
+import { isBookingType } from '@/lib/booking-rules';
+import { bookingStrings } from '@/lib/booking-i18n';
 import { PriceUsd } from '@/components/price-usd';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
@@ -39,6 +41,8 @@ export const ListingCard = memo(function ListingCard({
   const sold = isExclusiveType(prop.type) && prop.status === 'sold';
   const focus = focusFromProperty({ id: prop.id, lat: prop.lat, lng: prop.lng, title });
   const payPi = propertyPaymentAmount(prop, piRate);
+  const dated = isBookingType(prop.type);
+  const bt = bookingStrings(language);
 
   const openMap = () => {
     if (!focus) return;
@@ -86,7 +90,7 @@ export const ListingCard = memo(function ListingCard({
         <div className="border-t border-border pt-3 flex items-center justify-between">
           <div>
             <p className="text-xs text-muted-foreground">{t.price}</p>
-            <p className="text-xl font-bold text-accent">{formatPropertyPrice(prop, language)}</p>
+            <p className="text-xl font-bold text-accent">{formatPropertyPrice(prop, language)}{dated && <span className="text-xs font-normal text-muted-foreground"> / {prop.type === 'hotel' ? bt.perNight : bt.perMonth}</span>}</p>
             <PriceUsd prop={prop} className="text-xs text-muted-foreground" />
           </div>
           <div className="flex flex-col items-end">
@@ -98,6 +102,8 @@ export const ListingCard = memo(function ListingCard({
         <div className="grid grid-cols-3 gap-2 pt-2">
           {sold ? (
             <div className="col-span-1 flex items-center justify-center rounded-lg border border-red-500/40 bg-red-500/10 py-2 text-sm text-red-300">{t.sold}</div>
+          ) : dated ? (
+            <button type="button" onClick={onOpenDetails} disabled={!onOpenDetails} className="col-span-1 rounded-lg bg-accent py-2 text-sm font-semibold text-black hover:opacity-90 disabled:opacity-40">{bt.chooseDates}</button>
           ) : (
             <UnifiedPaymentButton
               propertyId={prop.id}
