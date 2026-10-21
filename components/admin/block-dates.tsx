@@ -5,6 +5,7 @@ import { adminApi, UnauthorizedError, Btn, Card, Field, inputCls } from './admin
 
 type Prop = { id: string; title: string; type: string };
 type Block = { id: string; start: string; end: string; note: string };
+const feedUrl = (id: string) => `${typeof window === 'undefined' ? '' : window.location.origin}/api/bookings/ical/${encodeURIComponent(id)}.ics`;
 
 // Admin: close dates on a hotel or rental (maintenance, owner stay). Guests then cannot book or pay for those nights.
 export default function BlockDates({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -54,6 +55,15 @@ export default function BlockDates({ onUnauthorized }: { onUnauthorized: () => v
     <Card title="🔒 قفل أيام على فندق / إيجار">
       <p className="mb-2 text-xs text-gray-400">الأيام المقفولة مش بتتحجز ولا بتتدفع. لو فيها حجز ضيف، الغي الحجز الأول من لوحة الحجوزات.</p>
       {msg && <p className="mb-2 text-xs text-gray-200">{msg}</p>}
+      {pid && (
+        <div className="mb-3 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300">
+          <p className="mb-1">رابط التقويم (iCal) — حطه في Google Calendar أو Airbnb أو Booking عشان الأيام المحجوزة تتزامن:</p>
+          <div className="flex items-center gap-2">
+            <input readOnly dir="ltr" className={inputCls} value={feedUrl(pid)} onFocus={(e) => e.currentTarget.select()} />
+            <Btn small kind="ghost" onClick={() => { try { navigator.clipboard.writeText(feedUrl(pid)); setMsg('✅ الرابط اتنسخ'); } catch { /* ignore */ } }}>انسخ</Btn>
+          </div>
+        </div>
+      )}
       <div className="grid gap-2 sm:grid-cols-2">
         <div className="sm:col-span-2">
           <Field label="العقار">
