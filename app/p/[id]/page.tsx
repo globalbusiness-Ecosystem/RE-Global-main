@@ -4,6 +4,7 @@ import { siteUrl } from '@/lib/site-url';
 import { COUNTRIES } from '@/lib/legal-profiles';
 import { getPublicListing } from '@/lib/public-listings-server';
 import { listingJsonLd, listingTexts, seoLang } from '@/lib/public-listings';
+import { reviewCount } from '@/lib/stay-reviews';
 import { ReportListing } from '@/components/report-listing';
 import { SeoLangSwitch } from '@/components/seo-lang-switch';
 import { SEO_I18N, countryName, isRtl, seoAlternates } from '@/lib/seo-i18n';
@@ -46,6 +47,7 @@ export default async function PropertyPublicPage({ params, searchParams }: Props
         {l.image && <img src={l.image} alt={t.title} className="w-full rounded-xl object-cover max-h-96" />}
         <h1 className="text-3xl font-bold">{t.title}</h1>
         <p className="text-xl text-accent">{t.price}{l.sold ? ` — ${S.sold}` : ''}</p>
+        {l.ratingValue && l.ratingCount ? <p className="text-sm"><span className="text-yellow-500" aria-hidden>★</span> <strong>{l.ratingValue.toFixed(1)}</strong> / 5 · {reviewCount(lang, l.ratingCount)}</p> : null}
         {t.place && <p>{t.place}</p>}
         {t.facts && <p className="text-muted-foreground">{t.facts}</p>}
         {t.body && <p>{t.body}</p>}

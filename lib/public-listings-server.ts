@@ -1,6 +1,7 @@
 import 'server-only';
 import { adminDb } from '@/lib/firebase-admin';
-import { toPublicListing, type PublicListing } from '@/lib/public-listings';
+import { toPublicListing, withRating, type PublicListing } from '@/lib/public-listings';
+import { publicReviews } from '@/lib/stay-reviews-server';
 
 const withTimeout = <T,>(p: Promise<T>) =>
   Promise.race([p, new Promise<never>((_, rej) => setTimeout(() => rej(new Error('timeout')), 4000))]);
@@ -10,7 +11,10 @@ export async function getPublicListing(id: string): Promise<PublicListing | null
   if (!/^[A-Za-z0-9_-]{1,128}$/.test(id)) return null;
   try {
     const snap = await withTimeout(adminDb.collection('properties').doc(id).get());
-    return snap.exists ? toPublicListing(snap.id, snap.data()) : null;
+    const l = snap.exists ? toPublicListing(snap.id, snap.data()) : null;
+    if (!l || (l.type !== 'hotel' && l.type !== 'rent')) return l;
+    // The review average is optional: a problem here must never break the page.
+    try { return withRating(l, (await withTimeout(publicReviews(l.id))).summary); } catch { return l; }
   } catch {
     return null;
   }

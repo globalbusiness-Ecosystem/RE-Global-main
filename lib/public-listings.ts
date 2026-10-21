@@ -30,6 +30,9 @@ export type PublicListing = {
   maxGuests?: number;
   lat?: number;
   lng?: number;
+  /** Average of the visible guest reviews (1-5) and how many there are. Hotels and rentals only. */
+  ratingValue?: number;
+  ratingCount?: number;
   /** ISO time of the last edit, when the document has one. */
   updatedAt?: string;
   translations: Partial<Record<SeoLang, { title: string; location: string; description: string }>>;
@@ -40,6 +43,12 @@ const str = (v: unknown) => (typeof v === 'string' ? v : '');
 const num = (v: unknown) => (v !== undefined && v !== null && Number.isFinite(Number(v)) ? Number(v) : undefined);
 const EXCLUSIVE = ['buy', 'offplan', 'abroad'];
 const isStay = (t: string) => t === 'hotel' || t === 'rent';
+
+// Adds the review average to a hotel / rental listing. Nothing is added when there are no reviews.
+export function withRating(l: PublicListing, s: { count: number; avg: number } | null | undefined): PublicListing {
+  if (!s || !isStay(l.type) || !(s.count >= 1) || !(s.avg >= 1 && s.avg <= 5)) return l;
+  return { ...l, ratingValue: s.avg, ratingCount: s.count };
+}
 
 // Firestore Timestamp, Date, number or ISO string -> ISO string (or undefined for anything else).
 function isoTime(v: unknown): string | undefined {
@@ -142,6 +151,7 @@ export function listingJsonLd(l: PublicListing, base: string, lang: SeoLang) {
       ...(l.maxGuests ? { occupancy: { '@type': 'QuantitativeValue', maxValue: l.maxGuests } } : {}),
       ...(hasGeo ? { geo: { '@type': 'GeoCoordinates', latitude: l.lat, longitude: l.lng } } : {}),
       address: { '@type': 'PostalAddress', ...(t.place ? { streetAddress: t.place } : {}), ...(l.country ? { addressCountry: l.country } : {}) },
+      ...(l.ratingValue && l.ratingCount ? { aggregateRating: { '@type': 'AggregateRating', ratingValue: l.ratingValue, reviewCount: l.ratingCount, bestRating: 5, worstRating: 1 } } : {}),
     } : {}),
     ...(hasGeo
       ? {
