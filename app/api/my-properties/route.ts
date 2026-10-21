@@ -33,6 +33,10 @@ export async function GET(req: NextRequest) {
         return { id: d.id, ...rest, createdAt: createdAt?.toDate ? createdAt.toDate().toISOString() : null };
       })
       .sort((a: any, b: any) => String(b.start).localeCompare(String(a.start)));
+    // Which finished stays this guest already reviewed (the review id is the booking id).
+    const rsnap = await adminDb.collection('stay_reviews').where('uid', '==', user.uid).get();
+    const reviewedIds = new Set(rsnap.docs.map((d) => d.id));
+    const bookingsOut = bookings.map((b: any) => ({ ...b, reviewed: reviewedIds.has(b.id) }));
     const hsnap = await adminDb.collection('share_holdings').where('uid', '==', user.uid).get();
     const holdings = hsnap.docs
       .map((d) => {
@@ -49,7 +53,7 @@ export async function GET(req: NextRequest) {
         return { id: d.id, kind: x.kind, amount: Number(x.amount) || 0, status: x.status, createdAt: x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : null };
       })
       .sort((a: any, b: any) => String(b.createdAt).localeCompare(String(a.createdAt)));
-    return NextResponse.json({ items, bookings, holdings, payouts }, { headers: { 'Cache-Control': 'no-store' } });
+    return NextResponse.json({ items, bookings: bookingsOut, holdings, payouts }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     console.error('[my-properties] error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500 });

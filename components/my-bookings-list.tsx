@@ -4,8 +4,10 @@ import { bookingPhase, buildIcs, countdownText, daysUntil, myBookingStrings } fr
 import { formatDay, nightsLabel } from '@/lib/booking-i18n';
 import { formatNumber } from '@/lib/format';
 import { guestsText } from '@/lib/guests';
+import { canReview } from '@/lib/stay-reviews';
+import { ReviewForm } from '@/components/review-form';
 
-export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number };
+export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; reviewed?: boolean };
 
 function download(b: Booked) {
   const ics = buildIcs(b, new Date().toISOString());
@@ -52,6 +54,7 @@ export function MyBookingsList({ bookings, language }: { bookings: Booked[]; lan
                 <button type="button" onClick={() => download(b)} className="rounded border border-accent/50 px-2 py-0.5 text-xs text-accent hover:bg-accent/10">📆 {t.addToCalendar}</button>
               )}
             </div>
+            {canReview(b, today) && <ReviewForm bookingId={b.id} language={language} reviewed={b.reviewed} />}
           </div>
         );
       })}

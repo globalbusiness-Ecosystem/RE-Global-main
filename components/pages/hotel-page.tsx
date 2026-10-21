@@ -10,6 +10,7 @@ import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { BookingPicker } from '@/components/booking-picker';
 import { bookingStrings } from '@/lib/booking-i18n';
 import { StayFacts } from '@/components/stay-facts';
+import { ReviewsList } from '@/components/reviews-list';
 import { ListingFilters } from '@/components/listing-filters';
 import { EMPTY_FILTERS, filterListings, type Filters } from '@/lib/listing-filters';
 import { formatPropertyPrice } from '@/lib/price-format';
@@ -206,6 +207,7 @@ function FirebaseHotelModal({
             </div>
           ) : null}
           <StayFacts info={prop} language={language} />
+          <ReviewsList propertyId={prop.id} language={language} />
           {unitPi !== null && (
             <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} maxGuests={prop.maxGuests} onChange={setChosen} />
           )}
