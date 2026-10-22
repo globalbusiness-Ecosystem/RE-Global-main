@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Badge } from './admin-ui';
 
-type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number };
+type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; note?: string };
 type Data = { totals: { confirmed: number; upcoming: number; nights: number; revenue: number; review: number }; bookings: Booking[] };
 
 const LABEL: Record<string, string> = { confirmed: 'مؤكد', review: 'مراجعة', cancelled: 'ملغي' };
@@ -37,7 +37,7 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
   if (!data.bookings.length) return null;
   const { totals } = data;
   return (
-    <Card title="🗓️ الحجوزات" right={<Btn small onClick={() => downloadCsv('bookings', ['id', 'property', 'guest', 'start', 'end', 'nights', 'amount', 'status'], data.bookings.map((x) => [x.id, x.propertyTitle, x.username, x.start, x.end, x.nights, x.amount, x.status]))}>⬇️ CSV</Btn>}>
+    <Card title="🗓️ الحجوزات" right={<Btn small onClick={() => downloadCsv('bookings', ['id', 'property', 'guest', 'start', 'end', 'nights', 'amount', 'status', 'request'], data.bookings.map((x) => [x.id, x.propertyTitle, x.username, x.start, x.end, x.nights, x.amount, x.status, x.note ?? '']))}>⬇️ CSV</Btn>}>
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <Stat label="حجوزات مؤكدة" value={totals.confirmed} />
@@ -64,6 +64,7 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
               <span>· {b.nights} ليلة</span>
               {b.guests ? <span>· {b.guests} ضيف</span> : null}
             </div>
+            {b.note ? <p className="mt-2 whitespace-pre-line break-words rounded-lg bg-[#1d1d1d] p-2 text-xs text-yellow-200">💬 {b.note}</p> : null}
             {(b.status === 'confirmed' || b.status === 'review') && (
               <div className="mt-2"><Btn small kind="danger" onClick={() => cancel(b)} disabled={busy === b.id}>إلغاء + استرداد</Btn></div>
             )}

@@ -7,10 +7,12 @@ import { guestsText } from '@/lib/guests';
 import { canReview } from '@/lib/stay-reviews';
 import { ReviewForm } from '@/components/review-form';
 import { ReceiptButton } from '@/components/receipt-button';
+import { GuestRequest } from '@/components/guest-request';
+import { canEditRequest } from '@/lib/guest-requests';
 import { CancelBooking } from '@/components/cancel-booking';
 import { useState } from 'react';
 
-export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; reviewed?: boolean };
+export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; reviewed?: boolean; guestNote?: string };
 
 function download(b: Booked) {
   const ics = buildIcs(b, new Date().toISOString());
@@ -59,6 +61,7 @@ export function MyBookingsList({ bookings, language }: { bookings: Booked[]; lan
               )}
             </div>
             {canReview(b, today) && <ReviewForm bookingId={b.id} language={language} reviewed={b.reviewed} />}
+            {!cancelled && canEditRequest(b, today) && <GuestRequest bookingId={b.id} language={language} initial={b.guestNote} />}
             {!cancelled && b.status === 'confirmed' && <ReceiptButton bookingId={b.id} language={language} />}
             {!cancelled && phase === 'upcoming' && b.status === 'confirmed' && <CancelBooking bookingId={b.id} language={language} onDone={() => setGone((g) => ({ ...g, [b.id]: true }))} />}
           </div>
