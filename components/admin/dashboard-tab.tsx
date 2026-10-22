@@ -9,6 +9,7 @@ import ClientErrorsPanel from './client-errors-panel';
 import ListingReportsPanel from './listing-reports-panel';
 import RevokeSessions from './revoke-sessions';
 import BackupPanel from './backup-panel';
+import SubTabs from './sub-tabs';
 import { auditLabel, auditSummary } from '@/lib/audit-labels';
 
 export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized: () => void; goto: (tab: string) => void }) {
@@ -88,12 +89,24 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
           ))}
         </Card>
       </div>
-      <ActivityLog onUnauthorized={onUnauthorized} />
-      <CspPanel onUnauthorized={onUnauthorized} />
-      <ListingReportsPanel onUnauthorized={onUnauthorized} />
-      <ClientErrorsPanel onUnauthorized={onUnauthorized} />
-      <BackupPanel onUnauthorized={onUnauthorized} />
-      <RevokeSessions onUnauthorized={onUnauthorized} />
+      <SubTabs
+        storeKey="dashboard"
+        tabs={[
+          { id: 'activity', icon: '📜', label: 'سجل النشاط', render: () => <ActivityLog onUnauthorized={onUnauthorized} /> },
+          { id: 'reports', icon: '🚩', label: 'البلاغات', render: () => <ListingReportsPanel onUnauthorized={onUnauthorized} /> },
+          {
+            id: 'security', icon: '🛡️', label: 'الأمان والأخطاء',
+            render: () => (
+              <>
+                <CspPanel onUnauthorized={onUnauthorized} />
+                <ClientErrorsPanel onUnauthorized={onUnauthorized} />
+                <RevokeSessions onUnauthorized={onUnauthorized} />
+              </>
+            ),
+          },
+          { id: 'backup', icon: '💾', label: 'النسخ الاحتياطي', render: () => <BackupPanel onUnauthorized={onUnauthorized} /> },
+        ]}
+      />
     </div>
   );
 }
