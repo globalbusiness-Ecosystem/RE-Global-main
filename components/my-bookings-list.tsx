@@ -6,6 +6,7 @@ import { formatNumber } from '@/lib/format';
 import { guestsText } from '@/lib/guests';
 import { canReview } from '@/lib/stay-reviews';
 import { ReviewForm } from '@/components/review-form';
+import { ReceiptButton } from '@/components/receipt-button';
 import { CancelBooking } from '@/components/cancel-booking';
 import { useState } from 'react';
 
@@ -58,6 +59,7 @@ export function MyBookingsList({ bookings, language }: { bookings: Booked[]; lan
               )}
             </div>
             {canReview(b, today) && <ReviewForm bookingId={b.id} language={language} reviewed={b.reviewed} />}
+            {!cancelled && b.status === 'confirmed' && <ReceiptButton bookingId={b.id} language={language} />}
             {!cancelled && phase === 'upcoming' && b.status === 'confirmed' && <CancelBooking bookingId={b.id} language={language} onDone={() => setGone((g) => ({ ...g, [b.id]: true }))} />}
           </div>
         );
