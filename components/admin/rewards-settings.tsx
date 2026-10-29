@@ -15,7 +15,7 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
   useEffect(() => {
     adminApi<{ rules: Rules }>('/api/admin/rewards')
       .then(({ rules: r }) => setF({
-        stay: String(r.points.stay), purchase: String(r.points.purchase), review: String(r.points.review),
+        stay: String(r.points.stay), purchase: String(r.points.purchase), review: String(r.points.review), referral: String(r.points.referral),
         silver: String(r.tiers.silver), gold: String(r.tiers.gold), platinum: String(r.tiers.platinum),
         b_bronze: r.benefits.bronze, b_silver: r.benefits.silver, b_gold: r.benefits.gold, b_platinum: r.benefits.platinum,
       }))
@@ -24,7 +24,7 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
 
   const set = (k: string, v: string) => setF((cur) => (cur ? { ...cur, [k]: v } : cur));
   const rules = f ? parseRules({
-    points: { stay: f.stay, purchase: f.purchase, review: f.review },
+    points: { stay: f.stay, purchase: f.purchase, review: f.review, referral: f.referral },
     tiers: { silver: f.silver, gold: f.gold, platinum: f.platinum },
     benefits: { bronze: f.b_bronze, silver: f.b_silver, gold: f.b_gold, platinum: f.b_platinum },
   }) : null;
@@ -47,11 +47,12 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
   return (
     <div className="space-y-3">
       <Card title="🎁 برنامج المكافآت">
-        <p className="mb-3 text-xs text-gray-400">النقاط بتتحسب أوتوماتيك من حاجات حصلت فعلاً: إقامة خلصت ومؤكدة، شراء عقار اتم، وتقييم ظاهر. الحجز الملغي أو اللي تحت المراجعة مالوش نقاط. الإحالات مش بتتحسب (لأنها مسجلة من المتصفح ومش مضمونة).</p>
-        <div className="grid gap-2 sm:grid-cols-3">
+        <p className="mb-3 text-xs text-gray-400">النقاط بتتحسب أوتوماتيك من حاجات حصلت فعلاً: إقامة خلصت ومؤكدة، شراء عقار اتم، وتقييم ظاهر. الحجز الملغي أو اللي تحت المراجعة مالوش نقاط. الإحالة بتتحسب لما الصديق اللي استخدم كود العضو (قبل أول حجز أو شراء ليه) يخلّص إقامة أو شراء فعلاً، وبحد أقصى 50 صديق للعضو.</p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {num('stay', 'نقاط كل إقامة مكتملة')}
           {num('purchase', 'نقاط كل شراء عقار')}
           {num('review', 'نقاط كل تقييم')}
+          {num('referral', 'نقاط كل صديق مدعو خلّص إقامة/شراء')}
         </div>
       </Card>
       <Card title="🏅 المستويات">

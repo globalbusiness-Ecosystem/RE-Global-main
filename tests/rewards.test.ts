@@ -21,7 +21,7 @@ import {
 } from '@/lib/rewards';
 import { myRewards } from '@/lib/rewards-server';
 
-const valid = { points: { stay: 100, purchase: 500, review: 20 }, tiers: { silver: 300, gold: 1000, platinum: 3000 }, benefits: { gold: '  Late checkout  ' } };
+const valid = { points: { stay: 100, purchase: 500, review: 20, referral: 50 }, tiers: { silver: 300, gold: 1000, platinum: 3000 }, benefits: { gold: '  Late checkout  ' } };
 
 describe('parseRules', () => {
   it('accepts the defaults and trims benefits', () => {
@@ -29,16 +29,19 @@ describe('parseRules', () => {
     expect(r?.tiers).toEqual({ bronze: 0, silver: 300, gold: 1000, platinum: 3000 });
     expect(r?.benefits.gold).toBe('Late checkout');
     expect(r?.benefits.bronze).toBe('');
-    expect(parseRules({ ...valid, points: { stay: '50', purchase: '0', review: '5' } })?.points).toEqual({ stay: 50, purchase: 0, review: 5 });
+    expect(parseRules({ ...valid, points: { stay: '50', purchase: '0', review: '5', referral: '7' } })?.points).toEqual({ stay: 50, purchase: 0, review: 5, referral: 7 });
+    // rules saved before referral points existed still load, with the default
+    expect(parseRules({ ...valid, points: { stay: 1, purchase: 2, review: 3 } })?.points.referral).toBe(50);
   });
   it('rejects bad points and unordered levels', () => {
     expect(parseRules(null)).toBeNull();
-    expect(parseRules({ ...valid, points: { stay: -1, purchase: 1, review: 1 } })).toBeNull();
-    expect(parseRules({ ...valid, points: { stay: 1.5, purchase: 1, review: 1 } })).toBeNull();
-    expect(parseRules({ ...valid, points: { stay: 10001, purchase: 1, review: 1 } })).toBeNull();
+    expect(parseRules({ ...valid, points: { stay: -1, purchase: 1, review: 1, referral: 1 } })).toBeNull();
+    expect(parseRules({ ...valid, points: { stay: 1.5, purchase: 1, review: 1, referral: 1 } })).toBeNull();
+    expect(parseRules({ ...valid, points: { stay: 10001, purchase: 1, review: 1, referral: 1 } })).toBeNull();
     expect(parseRules({ ...valid, tiers: { silver: 300, gold: 300, platinum: 3000 } })).toBeNull();
     expect(parseRules({ ...valid, tiers: { silver: 0, gold: 10, platinum: 20 } })).toBeNull();
     expect(parseRules({ ...valid, tiers: { silver: 5, gold: 10 } })).toBeNull();
+    expect(parseRules({ ...valid, points: { stay: 1, purchase: 1, review: 1, referral: 10001 } })).toBeNull();
   });
   it('cuts long benefit text and strips control characters', () => {
     const r = parseRules({ ...valid, benefits: { gold: 'a\u0000b' + 'x'.repeat(500) } });
@@ -53,7 +56,7 @@ describe('parseRules', () => {
 
 describe('points and levels', () => {
   const rules = DEFAULT_RULES;
-  it('adds points per action', () => expect(pointsFor({ stays: 2, purchases: 1, reviews: 3 }, rules)).toBe(200 + 500 + 60));
+  it('adds points per action', () => expect(pointsFor({ stays: 2, purchases: 1, reviews: 3, referrals: 2 }, rules)).toBe(200 + 500 + 60 + 100));
   it('finds the level, including the exact threshold', () => {
     expect(tierFor(0, rules)).toBe('bronze');
     expect(tierFor(299, rules)).toBe('bronze');
@@ -97,7 +100,7 @@ describe('myRewards', () => {
     store.contracts = { x: { buyerUsername: 'sam', status: 'completed', type: 'buy' }, y: { buyerUsername: 'other', status: 'completed', type: 'buy' } };
     store.stay_reviews = { a: { uid: 'u1', hidden: false }, z: { uid: 'u1', hidden: true } };
     const r = await myRewards('u1', 'sam', now);
-    expect(r.counts).toEqual({ stays: 1, purchases: 1, reviews: 1 });
+    expect(r.counts).toEqual({ stays: 1, purchases: 1, reviews: 1, referrals: 0 });
     expect(r.points).toBe(100 + 500 + 20);
     expect(r.tier).toBe('silver');
   });

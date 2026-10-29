@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Award, Gift, Star, Home, MessageSquare, BedDouble, type LucideIcon } from 'lucide-react';
+import { Award, Gift, Star, Home, MessageSquare, BedDouble, UserPlus, Ticket, type LucideIcon } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { TIER_IDS, rewardStrings, tierName, type Counts, type Rules, type TierId } from '@/lib/rewards';
 import { formatNumber } from '@/lib/format';
 import { IconBadge } from '@/components/ui/icon-badge';
 
-type Data = { points: number; counts: Counts; rules: Rules; tier: TierId; next: TierId | null; remaining: number; pct: number };
+type Data = { points: number; counts: Counts; rules: Rules; referral: { invited: number; qualified: number; referredBy: boolean }; tier: TierId; next: TierId | null; remaining: number; pct: number };
 
 const TIER_COLOR: Record<TierId, string> = { bronze: '#cd7f32', silver: '#9ca3af', gold: '#d4af37', platinum: '#7dd3fc' };
 
@@ -17,6 +17,10 @@ export function RewardsPanel({ language }: { language: string }) {
   const t = rewardStrings(language);
   const [data, setData] = useState<Data | null>(null);
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
+  const [reload, setReload] = useState(0);
+  const [code, setCode] = useState('');
+  const [codeMsg, setCodeMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [applying, setApplying] = useState(false);
 
   useEffect(() => {
     if (!accessToken) return;
@@ -27,7 +31,22 @@ export function RewardsPanel({ language }: { language: string }) {
       .then((d) => { if (alive) { setData(d); setState('ready'); } })
       .catch(() => { if (alive) setState('error'); });
     return () => { alive = false; };
-  }, [accessToken]);
+  }, [accessToken, reload]);
+
+  const applyCode = async () => {
+    if (!accessToken || applying) return;
+    setApplying(true); setCodeMsg(null);
+    try {
+      const r = await fetch('/api/referrals/redeem', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}` }, body: JSON.stringify({ code }) });
+      const d = await r.json().catch(() => null);
+      if (r.ok) { setCodeMsg({ ok: true, text: t.applied }); setCode(''); setReload((n) => n + 1); }
+      else {
+        const map: Record<string, string> = { notFound: t.errNotFound, own: t.errOwn, already: t.errAlready, notNew: t.errNotNew, mutual: t.errMutual, invalid: t.errInvalid };
+        setCodeMsg({ ok: false, text: map[d?.error] ?? t.errInvalid });
+      }
+    } catch { setCodeMsg({ ok: false, text: t.loadError }); }
+    finally { setApplying(false); }
+  };
 
   const card = 'bg-card border border-border rounded-lg p-4';
   const head = (icon: LucideIcon, text: string) => (
@@ -43,6 +62,7 @@ export function RewardsPanel({ language }: { language: string }) {
     { icon: BedDouble, label: t.stay, each: data.rules.points.stay, count: data.counts.stays },
     { icon: Home, label: t.purchase, each: data.rules.points.purchase, count: data.counts.purchases },
     { icon: MessageSquare, label: t.review, each: data.rules.points.review, count: data.counts.reviews },
+    { icon: UserPlus, label: t.referral, each: data.rules.points.referral, count: data.counts.referrals },
   ];
   const benefit = data.rules.benefits[data.tier];
 
@@ -83,6 +103,29 @@ export function RewardsPanel({ language }: { language: string }) {
             </div>
           ))}
         </div>
+      </div>
+
+      <div className={card}>
+        {head(UserPlus, t.inviteTitle)}
+        <p className="text-xs text-muted-foreground">{t.inviteLine.replace('{n}', formatNumber(data.referral.invited, language)).replace('{m}', formatNumber(data.referral.qualified, language))}</p>
+        {!data.referral.referredBy && (
+          <div className="mt-4 border-t border-border pt-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground"><IconBadge icon={Ticket} size="sm" />{t.codeTitle}</div>
+            <p className="mb-2 text-xs text-muted-foreground">{t.codeHint}</p>
+            <div className="flex gap-2">
+              <input
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 12))}
+                placeholder={t.codePlaceholder}
+                dir="ltr"
+                className="min-w-0 flex-1 rounded-lg bg-muted px-3 py-2.5 font-mono text-sm text-foreground"
+                aria-label={t.codePlaceholder}
+              />
+              <button onClick={applyCode} disabled={applying || code.length < 4} className="shrink-0 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground disabled:opacity-50">{t.apply}</button>
+            </div>
+            {codeMsg && <p className={`mt-2 text-xs ${codeMsg.ok ? 'text-emerald-500' : 'text-red-400'}`} role="status">{codeMsg.text}</p>}
+          </div>
+        )}
       </div>
 
       <div className={card}>
