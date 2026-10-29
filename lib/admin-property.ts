@@ -110,6 +110,7 @@ export function parsePropertyInput(b: any): ParsedProperty {
   const stay = parseStayInfo(b);
   if (!stay.ok) return fail(stay.error);
   Object.assign(doc, stay.info);
+  if (doc.type !== 'hotel') { delete doc.minNights; delete doc.maxNights; }
   if (isCountry(b.country)) doc.country = b.country;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;

@@ -3,7 +3,7 @@ import { COUNTRIES, isCountry } from '@/lib/legal-profiles';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { hasValidCoords } from '@/lib/map-focus';
 import { SEO_LANGS, SEO_I18N, countryName, isRtl, seoLang, type SeoLang } from '@/lib/seo-i18n';
-import { MAX_GUESTS_LIMIT, TIME_RE, stayFacts } from '@/lib/stay-info';
+import { MAX_GUESTS_LIMIT, NIGHTS_LIMIT, TIME_RE, stayFacts } from '@/lib/stay-info';
 import { bookingStrings } from '@/lib/booking-i18n';
 
 export { seoLang, type SeoLang };
@@ -28,6 +28,8 @@ export type PublicListing = {
   checkInTime?: string;
   checkOutTime?: string;
   maxGuests?: number;
+  minNights?: number;
+  maxNights?: number;
   lat?: number;
   lng?: number;
   /** Average of the visible guest reviews (1-5) and how many there are. Hotels and rentals only. */
@@ -101,6 +103,8 @@ export function toPublicListing(id: string, raw: Record<string, unknown> | undef
     ...(typeof raw.checkInTime === 'string' && TIME_RE.test(raw.checkInTime) ? { checkInTime: raw.checkInTime } : {}),
     ...(typeof raw.checkOutTime === 'string' && TIME_RE.test(raw.checkOutTime) ? { checkOutTime: raw.checkOutTime } : {}),
     ...(Number.isInteger(Number(raw.maxGuests)) && Number(raw.maxGuests) >= 1 && Number(raw.maxGuests) <= MAX_GUESTS_LIMIT ? { maxGuests: Number(raw.maxGuests) } : {}),
+    ...(type === 'hotel' && Number.isInteger(Number(raw.minNights)) && Number(raw.minNights) >= 1 && Number(raw.minNights) <= NIGHTS_LIMIT ? { minNights: Number(raw.minNights) } : {}),
+    ...(type === 'hotel' && Number.isInteger(Number(raw.maxNights)) && Number(raw.maxNights) >= 1 && Number(raw.maxNights) <= NIGHTS_LIMIT ? { maxNights: Number(raw.maxNights) } : {}),
     ...(hasValidCoords(raw.lat, raw.lng) ? { lat: Number(raw.lat), lng: Number(raw.lng) } : {}),
     ...(isoTime(raw.updatedAt) ? { updatedAt: isoTime(raw.updatedAt) } : {}),
     translations: readTranslations(raw.translations),

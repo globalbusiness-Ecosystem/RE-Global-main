@@ -34,6 +34,8 @@ export interface Property {
   checkInTime?: string;
   checkOutTime?: string;
   maxGuests?: number;
+  minNights?: number;
+  maxNights?: number;
 }
 
 export function useProperties() {

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
-import { bookingTotal, overlaps, validateBooking, type BookingDates } from '@/lib/booking-rules';
+import { bookingTotal, overlaps, stayLimits, validateBooking, type BookingDates } from '@/lib/booking-rules';
 import { bookingErrorText, bookingStrings, formatDay, nightsLabel } from '@/lib/booking-i18n';
 import { formatNumber } from '@/lib/format';
 import { guestStrings } from '@/lib/guests';
@@ -9,12 +9,14 @@ import { AvailabilityCalendar } from '@/components/availability-calendar';
 
 // Check-in / check-out dates for a rent or hotel listing, with the taken days and the total in Pi.
 // Calls onChange with the chosen dates and total only when they are valid and free.
-export function BookingPicker({ propertyId, type, unitPi, language, maxGuests, onChange }: {
+export function BookingPicker({ propertyId, type, unitPi, language, maxGuests, minNights, maxNights, onChange }: {
   propertyId: string;
   type: 'rent' | 'hotel';
   unitPi: number | null;
   language: string;
   maxGuests?: number;
+  minNights?: number;
+  maxNights?: number;
   onChange: (v: { booking: BookingDates; total: number } | null) => void;
 }) {
   const t = bookingStrings(language);
@@ -36,13 +38,13 @@ export function BookingPicker({ propertyId, type, unitPi, language, maxGuests, o
   const askGuests = Number.isInteger(maxGuests) && (maxGuests as number) >= 1;
   const result = useMemo(() => {
     if (!start || !end) return { error: '' as string, value: null as null | { booking: BookingDates; total: number; nights: number } };
-    const v = validateBooking(type, { start, end }, Date.now());
+    const v = validateBooking(type, { start, end }, Date.now(), { limits: stayLimits(type, { minNights, maxNights }) });
     if (!v.ok) return { error: bookingErrorText(language, v.code, v.limit), value: null };
     if (busy.some((b) => overlaps(b, v))) return { error: t.unavailable, value: null };
     const total = unitPi ? bookingTotal(type, unitPi, v.nights) : null;
     if (total === null) return { error: t.noPrice, value: null };
     return { error: '', value: { booking: { start: v.start, end: v.end, ...(askGuests ? { guests } : {}) }, total, nights: v.nights } };
-  }, [start, end, busy, type, unitPi, language, t, guests, askGuests]);
+  }, [start, end, busy, type, unitPi, language, t, guests, askGuests, minNights, maxNights]);
 
   useEffect(() => { onChange(result.value ? { booking: result.value.booking, total: result.value.total } : null); }, [result.value]); // eslint-disable-line react-hooks/exhaustive-deps
 

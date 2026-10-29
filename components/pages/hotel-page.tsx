@@ -211,7 +211,7 @@ function FirebaseHotelModal({
           <ReviewsList propertyId={prop.id} language={language} />
           <CancellationNote language={language} />
           {unitPi !== null && (
-            <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} maxGuests={prop.maxGuests} onChange={setChosen} />
+            <BookingPicker propertyId={prop.id} type="hotel" unitPi={unitPi} language={language} maxGuests={prop.maxGuests} minNights={prop.minNights} maxNights={prop.maxNights} onChange={setChosen} />
           )}
           {chosen ? (
             <UnifiedPaymentButton

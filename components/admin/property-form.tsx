@@ -22,7 +22,7 @@ function blank() {
     title: '', price: '', payAmountPi: '', totalShares: '', currency: 'Pi', location: '', country: '', type: 'buy', propertyType: 'apartment', status: 'available',
     bedrooms: '', bathrooms: '', area: '', lat: '', lng: '', description: '', image: '', images: [] as string[],
     vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false,
-    checkInTime: '', checkOutTime: '', maxGuests: '',
+    checkInTime: '', checkOutTime: '', maxGuests: '', minNights: '', maxNights: '',
     amenities: { pool: false, gym: false, parking: false, security: false } as Record<string, boolean>,
   };
 }
@@ -38,6 +38,7 @@ function fromProperty(p: any) {
     description: p.description || '', image: p.image || '', images: (Array.isArray(p.images) ? p.images : []) as string[],
     vrUrl: p.vrUrl || '', contractUrl: p.contractUrl || '', tokenized: p.tokenized === true, featured: p.featured === true,
     checkInTime: p.checkInTime || '', checkOutTime: p.checkOutTime || '', maxGuests: p.maxGuests ? String(p.maxGuests) : '',
+    minNights: p.minNights ? String(p.minNights) : '', maxNights: p.maxNights ? String(p.maxNights) : '',
     hidden: p.hidden === true, amenities: { ...f.amenities, ...(p.amenities || {}) },
   };
 }
@@ -204,6 +205,8 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         {(form.type === 'hotel' || form.type === 'rent') && text('checkInTime', 'ساعة الدخول (اختياري)', 'time')}
         {(form.type === 'hotel' || form.type === 'rent') && text('checkOutTime', 'ساعة الخروج (اختياري)', 'time')}
         {(form.type === 'hotel' || form.type === 'rent') && text('maxGuests', 'أقصى عدد ضيوف (اختياري)', 'number')}
+        {form.type === 'hotel' && text('minNights', 'أقل عدد ليالي للحجز (اختياري، من 1 لـ 60)', 'number')}
+        {form.type === 'hotel' && text('maxNights', 'أقصى عدد ليالي للحجز (اختياري، لحد 60)', 'number')}
         {text('lat', 'خط العرض Latitude (للخريطة)', 'number')}
         {text('lng', 'خط الطول Longitude (للخريطة)', 'number')}
         <div className="sm:col-span-2 flex flex-wrap items-center gap-2">

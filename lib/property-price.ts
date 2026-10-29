@@ -2,7 +2,7 @@ import 'server-only';
 import { adminDb } from '@/lib/firebase-admin';
 import { isUsdPegged, propertyPaymentAmount } from '@/lib/payment-rules';
 import { getPiUsdRate } from '@/lib/pricing';
-import { bookingTotal, isBookingType, validateBooking } from '@/lib/booking-rules';
+import { bookingTotal, isBookingType, stayLimits, validateBooking } from '@/lib/booking-rules';
 import { parseGuests } from '@/lib/guests';
 import { parseShares, sharesTotal, totalSharesOf } from '@/lib/share-rules';
 
@@ -65,7 +65,7 @@ export async function resolveExpected(propertyId: string, metadata: unknown, opt
   }
   if (!isBookingType(type) || unit === null) return { amount: unit };
   const md = (metadata && typeof metadata === 'object' ? metadata : {}) as Record<string, unknown>;
-  const v = validateBooking(type, md.booking, Date.now(), opts);
+  const v = validateBooking(type, md.booking, Date.now(), { ...opts, limits: stayLimits(type, d) });
   if (!v.ok) throw new BookingInputError(v.error);
   const g = parseGuests((md.booking as Record<string, unknown> | undefined)?.guests, d.maxGuests);
   if (!g.ok) throw new BookingInputError(g.error);

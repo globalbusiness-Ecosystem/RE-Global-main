@@ -35,17 +35,31 @@ export type BookingCheck =
 
 // check-out is the day the guest leaves, so nights = end - start. A start up to one day in the past
 // is tolerated because the buyer's local date can be ahead of UTC.
-export function validateBooking(type: string, raw: unknown, nowMs: number, opts: { allowPast?: boolean } = {}): BookingCheck {
+export function validateBooking(type: string, raw: unknown, nowMs: number, opts: { allowPast?: boolean; limits?: { min: number; max: number } } = {}): BookingCheck {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
   const s = parseDay(r.start);
   const e = parseDay(r.end);
-  const lim = NIGHT_LIMITS[type];
+  const lim = opts.limits ?? NIGHT_LIMITS[type];
   if (s === null || e === null || !lim) return { ok: false, error: 'Choose valid dates', code: 'invalid' };
   if (!opts.allowPast && s < dayStart(nowMs) - DAY_MS) return { ok: false, error: 'The start date is in the past', code: 'past' };
   const nights = Math.round((e - s) / DAY_MS);
   if (nights < lim.min) return { ok: false, error: `Minimum stay is ${lim.min} night${lim.min > 1 ? 's' : ''}`, code: 'min', limit: lim.min };
   if (nights > lim.max) return { ok: false, error: `Maximum stay is ${lim.max} nights`, code: 'max', limit: lim.max };
   return { ok: true, start: r.start as string, end: r.end as string, nights };
+}
+
+// Stay limits for one listing. Only hotels may narrow the platform range (the admin sets
+// minNights / maxNights on the property); anything invalid or outside the range is ignored.
+export function stayLimits(type: string, raw?: unknown): { min: number; max: number } | undefined {
+  const base = NIGHT_LIMITS[type];
+  if (!base || type !== 'hotel' || !raw || typeof raw !== 'object') return base;
+  const r = raw as Record<string, unknown>;
+  const whole = (v: unknown) => (v === undefined || v === null || v === '' || !Number.isInteger(Number(v)) ? null : Number(v));
+  const lo = whole(r.minNights);
+  const hi = whole(r.maxNights);
+  const min = lo !== null && lo >= base.min && lo <= base.max ? lo : base.min;
+  const max = hi !== null && hi >= min && hi <= base.max ? hi : base.max;
+  return { min, max };
 }
 
 // Total in Pi, rounded UP to 2 decimals so the platform never undercharges.
