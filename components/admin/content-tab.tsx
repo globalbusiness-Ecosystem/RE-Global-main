@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import TextsEditor from './texts-editor';
 import PricingSettings from './pricing-settings';
 import LegalSettings from './legal-settings';
+import RewardsSettings from './rewards-settings';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
 
 type Kind = 'banners' | 'partners';
@@ -198,7 +199,7 @@ function Manager({ kind, onUnauthorized }: { kind: Kind; onUnauthorized: () => v
 }
 
 export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => void }) {
-  const [kind, setKind] = useState<Kind | 'texts' | 'pricing' | 'legal'>('banners');
+  const [kind, setKind] = useState<Kind | 'texts' | 'pricing' | 'legal' | 'rewards'>('banners');
   return (
     <div className="space-y-3">
       <div className="flex gap-2">
@@ -208,8 +209,9 @@ export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => v
         <Btn small kind={kind === 'texts' ? 'gold' : 'ghost'} onClick={() => setKind('texts')}>✍️ نصوص الصفحات</Btn>
         <Btn small kind={kind === 'pricing' ? 'gold' : 'ghost'} onClick={() => setKind('pricing')}>💱 سعر Pi</Btn>
         <Btn small kind={kind === 'legal' ? 'gold' : 'ghost'} onClick={() => setKind('legal')}>⚖️ القانون</Btn>
+        <Btn small kind={kind === 'rewards' ? 'gold' : 'ghost'} onClick={() => setKind('rewards')}>🎁 المكافآت</Btn>
       </div>
-      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
+      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : kind === 'rewards' ? <RewardsSettings onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
     </div>
   );
 }

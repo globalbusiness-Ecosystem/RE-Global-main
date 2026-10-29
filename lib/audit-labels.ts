@@ -3,7 +3,7 @@
 export const AUDIT_LABELS: Record<string, string> = {
   'property.create': 'إضافة عقار', 'property.edit': 'تعديل عقار', 'property.toggle': 'تغيير حالة عقار', 'property.delete': 'حذف عقار',
   'user.ban': 'حظر مستخدم', 'user.unban': 'إلغاء حظر مستخدم',
-  'booking.cancel': 'إلغاء حجز', 'booking.block': 'إغلاق أيام على عقار', 'booking.unblock': 'فتح أيام كانت مغلقة', 'booking.policy': 'تعديل سياسة الإلغاء', 'review.hide': 'إخفاء تقييم ضيف', 'review.show': 'إظهار تقييم ضيف', 'shares.cancel': 'إلغاء حصص مستثمر', 'market.listing.cancel': 'إلغاء عرض في سوق الحصص',
+  'rewards.rules': 'تعديل برنامج المكافآت', 'booking.cancel': 'إلغاء حجز', 'booking.block': 'إغلاق أيام على عقار', 'booking.unblock': 'فتح أيام كانت مغلقة', 'booking.policy': 'تعديل سياسة الإلغاء', 'review.hide': 'إخفاء تقييم ضيف', 'review.show': 'إظهار تقييم ضيف', 'shares.cancel': 'إلغاء حصص مستثمر', 'market.listing.cancel': 'إلغاء عرض في سوق الحصص',
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
   'admin.login': 'تسجيل دخول الأدمن', 'admin.revoke': 'خروج من كل جلسات الأدمن', 'admin.backup': 'تصدير نسخة احتياطية',
@@ -23,6 +23,7 @@ export function auditSummary(action: string, detail: Record<string, unknown> | n
     case 'booking.cancel': return [s(d.title), d.guest ? `@${s(d.guest)}` : '', d.refund != null ? `استرداد ${s(d.refund)} π` : ''].filter(Boolean).join(' · ');
     case 'booking.block': case 'booking.unblock': return [s(d.title), d.start && d.end ? `${s(d.start)} → ${s(d.end)}` : '', s(d.note)].filter(Boolean).join(' · ');
     case 'review.hide': case 'review.show': return s(d.title);
+    case 'rewards.rules': return `${s(d.from)} ← ${s(d.to)}`;
     case 'booking.policy': return `${s(d.from)} ← ${s(d.to)}`;
     case 'shares.cancel': return [s(d.title), d.buyer ? `@${s(d.buyer)}` : '', d.shares != null ? `${s(d.shares)} حصة` : '', d.refund != null ? `استرداد ${s(d.refund)} π` : ''].filter(Boolean).join(' · ');
     case 'market.listing.cancel': return [s(d.title), d.seller ? `@${s(d.seller)}` : ''].filter(Boolean).join(' · ');

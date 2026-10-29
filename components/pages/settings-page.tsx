@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react';
 import {
   Lock,
   ChevronLeft,
-  ChevronRight,
   Check,
   Globe2,
   Moon,
@@ -22,9 +21,15 @@ import {
   TrendingUp,
   Home,
   FileCheck2,
+  Gift,
+  Download,
+  Trash2,
+  type LucideIcon,
 } from 'lucide-react';
 import { CurrencyPicker } from '@/components/currency-picker';
 import { MyDataPanel } from '@/components/my-data-panel';
+import { RewardsPanel } from '@/components/rewards-panel';
+import { IconBadge, RowChevron } from '@/components/ui/icon-badge';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
@@ -56,10 +61,13 @@ function readStoredBool(key: string, fallback: boolean): boolean {
   return fallback;
 }
 
-type SettingsTab = 'profile' | 'security' | 'notifications';
+type SettingsTab = 'profile' | 'rewards' | 'security' | 'notifications';
+
+const TAB_ICONS: Record<SettingsTab, LucideIcon> = { profile: User, rewards: Gift, security: ShieldCheck, notifications: Bell };
 
 const TAB_LABELS: Record<SettingsTab, { en: string; ar: string }> = {
   profile: { en: 'Profile', ar: 'الملف الشخصي' },
+  rewards: { en: 'Rewards', ar: 'المكافآت' },
   security: { en: 'Security', ar: 'الأمان' },
   notifications: { en: 'Notifications', ar: 'الإشعارات' },
 };
@@ -68,9 +76,10 @@ function tabLabel(tab: SettingsTab, language: NavLanguage) {
   return language === 'ar' ? TAB_LABELS[tab].ar : TAB_LABELS[tab].en;
 }
 
-function SectionLabel({ children }: { children: React.ReactNode }) {
+function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: LucideIcon }) {
   return (
-    <div className="flex items-center gap-2 mb-3 text-foreground font-semibold">
+    <div className="flex items-center gap-2.5 mb-3 text-foreground font-semibold">
+      {icon && <IconBadge icon={icon} />}
       {children}
     </div>
   );
@@ -233,7 +242,7 @@ export default function SettingsPage({
           className="p-1 hover:opacity-70 transition text-accent"
           title={t.backToHome}
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-6 h-6 rtl:rotate-180" aria-hidden />
         </button>
         <h2 className="text-2xl font-bold text-accent flex-1 text-center">
           {t.settings}
@@ -281,27 +290,32 @@ export default function SettingsPage({
         </div>
       </div>
 
-      <div className="flex gap-1 bg-muted rounded-lg p-1">
-        {(['profile', 'security', 'notifications'] as SettingsTab[]).map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-2 rounded-md text-sm font-medium transition ${
-              activeTab === tab
-                ? 'bg-accent text-accent-foreground'
-                : 'text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {tabLabel(tab, language)}
-          </button>
-        ))}
+      <div role="tablist" className="flex gap-1 bg-muted rounded-lg p-1">
+        {(['profile', 'rewards', 'security', 'notifications'] as SettingsTab[]).map((tab) => {
+          const TabIcon = TAB_ICONS[tab];
+          return (
+            <button
+              key={tab}
+              role="tab"
+              aria-selected={activeTab === tab}
+              onClick={() => setActiveTab(tab)}
+              className={`flex-1 min-w-0 flex flex-col items-center justify-center gap-0.5 py-2 px-1 rounded-md text-[11px] font-medium transition sm:flex-row sm:gap-1.5 sm:text-sm ${
+                activeTab === tab
+                  ? 'bg-accent text-accent-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <TabIcon className="w-4 h-4 shrink-0" aria-hidden />
+              <span className="truncate">{tabLabel(tab, language)}</span>
+            </button>
+          );
+        })}
       </div>
 
       {activeTab === 'profile' && (
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <Users className="w-4 h-4 text-accent" />
+            <SectionLabel icon={Users}>
               {language === 'ar' ? 'كود الإحالة' : 'Referral Code'}
             </SectionLabel>
             <div className="flex items-center justify-between bg-muted rounded-lg px-3 py-2.5">
@@ -357,17 +371,17 @@ export default function SettingsPage({
                 onClick={() => onNavigate?.('partners')}
                 className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-accent/5 transition"
               >
-                <span className="text-sm font-medium text-foreground">
+                <span className="flex items-center gap-3 text-sm font-medium text-foreground">
+                  <IconBadge icon={Users} size="sm" />
                   {language === 'ar' ? 'المجتمع' : 'Community'}
                 </span>
-                <ChevronRight className="w-4 h-4 text-muted-foreground" />
+                <RowChevron />
               </button>
             </div>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <Globe2 className="w-4 h-4 text-accent" />
+            <SectionLabel icon={Globe2}>
               {t.language}
             </SectionLabel>
             <div className="grid grid-cols-2 gap-2">
@@ -389,8 +403,7 @@ export default function SettingsPage({
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <Coins className="w-4 h-4 text-accent" />
+            <SectionLabel icon={Coins}>
               {t.reToken}
             </SectionLabel>
             <div className="grid grid-cols-2 gap-3 mb-3">
@@ -422,16 +435,16 @@ export default function SettingsPage({
               className="w-full flex items-center justify-between px-4 py-3.5 hover:bg-muted/50 transition"
             >
               <div className="flex items-center gap-3">
-                <FileText className="w-4 h-4 text-accent" />
+                <IconBadge icon={FileText} size="sm" />
                 <span className="font-semibold text-foreground text-sm">{t.whitePaper}</span>
               </div>
-              <ChevronRight className="w-4 h-4 text-muted-foreground" />
+              <RowChevron />
             </button>
           </div>
 
           <div className="bg-card border border-border rounded-lg overflow-hidden">
             <div className="px-4 pt-4">
-              <SectionLabel>{t.contactUs}</SectionLabel>
+              <SectionLabel icon={Phone}>{t.contactUs}</SectionLabel>
             </div>
             <div className="divide-y divide-border">
               <a
@@ -440,19 +453,18 @@ export default function SettingsPage({
                 rel="noopener noreferrer"
                 className="flex items-center gap-3 px-4 py-3.5 hover:bg-accent/5 transition group"
               >
-                <AtSign className="w-4 h-4 text-accent shrink-0" />
+                <IconBadge icon={AtSign} size="sm" />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs text-muted-foreground">{t.instagram}</p>
                   <p className="text-sm font-medium text-foreground">@alshaibgroup.pi</p>
                 </div>
-                <ChevronRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                <RowChevron />
               </a>
             </div>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <ShieldCheck className="w-4 h-4 text-accent" />
+            <SectionLabel icon={ShieldCheck}>
               {language === 'ar' ? 'البيانات والخصوصية' : 'Data & Privacy'}
             </SectionLabel>
             <div className="space-y-2">
@@ -462,8 +474,8 @@ export default function SettingsPage({
                 rel="noopener noreferrer"
                 className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
               >
-                <span>{language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}</span>
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                <span className="flex items-center gap-3"><IconBadge icon={Lock} size="sm" />{language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}</span>
+                <RowChevron />
               </a>
               <a
                 href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
@@ -475,8 +487,8 @@ export default function SettingsPage({
                 )}`}
                 className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
               >
-                <span>{language === 'ar' ? 'طلب نسخة من بياناتي' : 'Request a copy of my data'}</span>
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                <span className="flex items-center gap-3"><IconBadge icon={Download} size="sm" />{language === 'ar' ? 'طلب نسخة من بياناتي' : 'Request a copy of my data'}</span>
+                <RowChevron />
               </a>
               <a
                 href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
@@ -488,15 +500,14 @@ export default function SettingsPage({
                 )}`}
                 className="flex items-center justify-between py-2 text-sm text-red-400 hover:text-red-300 transition"
               >
-                <span>{language === 'ar' ? 'طلب حذف الحساب' : 'Request account deletion'}</span>
-                <ChevronRight className="w-4 h-4 rtl:rotate-180" />
+                <span className="flex items-center gap-3"><IconBadge icon={Trash2} tone="red" size="sm" />{language === 'ar' ? 'طلب حذف الحساب' : 'Request account deletion'}</span>
+                <RowChevron className="text-red-400" />
               </a>
             </div>
           </div>
 
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <Info className="w-4 h-4 text-accent" />
+            <SectionLabel icon={Info}>
               {t.aboutRePlatform}
             </SectionLabel>
             <div className="space-y-1.5 text-xs">
@@ -508,11 +519,12 @@ export default function SettingsPage({
         </div>
       )}
 
+      {activeTab === 'rewards' && <RewardsPanel language={language} />}
+
       {activeTab === 'security' && (
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel>
-              <ShieldCheck className="w-4 h-4 text-accent" />
+            <SectionLabel icon={ShieldCheck}>
               {language === 'ar' ? 'حالة الحساب' : 'Account Status'}
             </SectionLabel>
             <div className="space-y-2 text-sm">
@@ -575,7 +587,7 @@ export default function SettingsPage({
         <div className="bg-card border border-border rounded-lg divide-y divide-border">
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <Moon className="w-4 h-4 text-accent shrink-0" />
+              <IconBadge icon={Moon} size="sm" />
               <div>
                 <h3 className="font-semibold text-foreground text-sm">{t.darkMode}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{t.luxuryDarkTheme}</p>
@@ -593,7 +605,7 @@ export default function SettingsPage({
 
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
-              <Bell className="w-4 h-4 text-accent shrink-0" />
+              <IconBadge icon={Bell} size="sm" />
               <div>
                 <h3 className="font-semibold text-foreground text-sm">{t.notifications}</h3>
                 <p className="text-xs text-muted-foreground mt-0.5">{t.propertyMarketAlerts}</p>
@@ -604,27 +616,27 @@ export default function SettingsPage({
 
           {notifications && (
             <>
-              <div className="flex items-center justify-between px-4 py-3 pl-11">
+              <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
-                  <TrendingUp className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <TrendingUp className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
                     {language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'}
                   </p>
                 </div>
                 <ToggleSwitch checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
               </div>
-              <div className="flex items-center justify-between px-4 py-3 pl-11">
+              <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
-                  <Home className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <Home className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
                     {language === 'ar' ? 'عقارات جديدة' : 'New listings'}
                   </p>
                 </div>
                 <ToggleSwitch checked={newListings} onClick={handleNewListingsToggle} small />
               </div>
-              <div className="flex items-center justify-between px-4 py-3 pl-11">
+              <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
-                  <FileCheck2 className="w-3.5 h-3.5 text-accent shrink-0" />
+                  <FileCheck2 className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
                     {language === 'ar' ? 'تحديثات العقود' : 'Contract updates'}
                   </p>
