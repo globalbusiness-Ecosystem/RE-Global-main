@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, inputCls, TYPE_LABELS, STATUS_LABELS, GOLD } from './admin-ui';
 import PropertyForm from './property-form';
 import DisplaySettings from './display-settings';
+import SubTabs from './sub-tabs';
 import { listingGaps, hasCriticalGap, GAP_LABELS, CRITICAL_GAPS } from '@/lib/listing-quality';
 
 const PAGE = 20;
@@ -56,8 +57,13 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
   }
 
   return (
-    <div className="space-y-3">
-      <DisplaySettings onUnauthorized={onUnauthorized} />
+    <SubTabs
+      storeKey="properties"
+      tabs={[
+        {
+          id: 'list', icon: '🏠', label: 'العقارات',
+          render: () => (
+            <>
       <Card title={`العقارات (${items?.length ?? '…'})`} right={<Btn small onClick={() => setEditing(null)}>➕ عقار جديد</Btn>}>
         <div className="grid gap-2 sm:grid-cols-3">
           <input className={inputCls} placeholder="🔍 بحث بالعنوان أو الموقع أو المعرّف" value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} />
@@ -103,6 +109,11 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
         </div>
       ))}
       {filtered.length > shown && <div className="text-center"><Btn kind="ghost" onClick={() => setShown(shown + PAGE)}>عرض المزيد ({filtered.length - shown})</Btn></div>}
-    </div>
+            </>
+          ),
+        },
+        { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => <DisplaySettings onUnauthorized={onUnauthorized} /> },
+      ]}
+    />
   );
 }

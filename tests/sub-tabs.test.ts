@@ -52,3 +52,13 @@ describe('admin tabs wiring', () => {
     }
   });
 });
+
+describe('properties tab wiring', () => {
+  it('has a list tab and a display-settings tab', () => {
+    const s = readFileSync('components/admin/properties-tab.tsx', 'utf8');
+    expect(s).toContain("storeKey=\"properties\"");
+    expect(s.split('<DisplaySettings ').length - 1).toBe(1);
+    expect(s).toContain("id: 'list'");
+    expect(s).toContain("id: 'display'");
+  });
+});
