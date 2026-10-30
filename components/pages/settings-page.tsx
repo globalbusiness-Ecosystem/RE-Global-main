@@ -30,6 +30,7 @@ import { CurrencyPicker } from '@/components/currency-picker';
 import { MyDataPanel } from '@/components/my-data-panel';
 import { RewardsPanel } from '@/components/rewards-panel';
 import { IconBadge, RowChevron } from '@/components/ui/icon-badge';
+import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { Button } from '@/components/ui/button';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
@@ -82,23 +83,6 @@ function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: Lu
       {icon && <IconBadge icon={icon} />}
       {children}
     </div>
-  );
-}
-
-function ToggleSwitch({ checked, onClick, small }: { checked: boolean; onClick: () => void; small?: boolean }) {
-  return (
-    <button
-      onClick={onClick}
-      className={`${small ? 'w-9 h-5' : 'w-12 h-7'} rounded-full transition flex items-center shrink-0 ${
-        checked ? 'bg-accent' : 'bg-muted'
-      }`}
-    >
-      <div
-        className={`${small ? 'w-4 h-4' : 'w-6 h-6'} rounded-full bg-white transition transform ${
-          checked ? (small ? 'translate-x-4' : 'translate-x-5') : 'translate-x-0.5'
-        }`}
-      />
-    </button>
   );
 }
 
@@ -594,6 +578,7 @@ export default function SettingsPage({
               </div>
             </div>
             <ToggleSwitch
+              label={t.darkMode}
               checked={darkMode}
               onClick={() => {
                 const next = !darkMode;
@@ -611,7 +596,7 @@ export default function SettingsPage({
                 <p className="text-xs text-muted-foreground mt-0.5">{t.propertyMarketAlerts}</p>
               </div>
             </div>
-            <ToggleSwitch checked={notifications} onClick={handleNotificationsToggle} />
+            <ToggleSwitch label={t.notifications} checked={notifications} onClick={handleNotificationsToggle} />
           </div>
 
           {notifications && (
@@ -623,7 +608,7 @@ export default function SettingsPage({
                     {language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'}
                   </p>
                 </div>
-                <ToggleSwitch checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
+                <ToggleSwitch label={language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'} checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
               </div>
               <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
@@ -632,7 +617,7 @@ export default function SettingsPage({
                     {language === 'ar' ? 'عقارات جديدة' : 'New listings'}
                   </p>
                 </div>
-                <ToggleSwitch checked={newListings} onClick={handleNewListingsToggle} small />
+                <ToggleSwitch label={language === 'ar' ? 'عقارات جديدة' : 'New listings'} checked={newListings} onClick={handleNewListingsToggle} small />
               </div>
               <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
@@ -641,7 +626,7 @@ export default function SettingsPage({
                     {language === 'ar' ? 'تحديثات العقود' : 'Contract updates'}
                   </p>
                 </div>
-                <ToggleSwitch checked={contractUpdates} onClick={handleContractUpdatesToggle} small />
+                <ToggleSwitch label={language === 'ar' ? 'تحديثات العقود' : 'Contract updates'} checked={contractUpdates} onClick={handleContractUpdatesToggle} small />
               </div>
             </>
           )}
