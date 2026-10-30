@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { REPLY_MAX } from '@/lib/review-reply';
 import { adminApi, UnauthorizedError, Btn, Card, Badge } from './admin-ui';
 
-type Review = { id: string; propertyTitle: string; name: string; rating: number; comment: string; hidden: boolean; reply: string; date: string };
+type Review = { id: string; propertyTitle: string; name: string; rating: number; comment: string; hidden: boolean; reply: string; reports: number; date: string };
 
 // Admin: guest reviews of stays. A review can be hidden from the public page (and shown again); nothing is deleted.
 export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -72,6 +72,7 @@ export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () =>
             <div className="mt-2 flex items-center justify-between gap-2">
               <span className="text-gray-500">{r.name} · {r.date}</span>
               <span className="flex items-center gap-2">
+                {r.reports > 0 && <Badge>🚩 {r.reports}</Badge>}
                 {r.hidden && <Badge>مخفي</Badge>}
                 <Btn small kind="ghost" onClick={() => { setOpen(r.id); setDraft(r.reply); }} disabled={busy === r.id}>{r.reply ? 'عدّل الرد' : 'رد'}</Btn>
                 <Btn small kind="ghost" onClick={() => toggle(r)} disabled={busy === r.id}>{r.hidden ? 'اظهر' : 'اخفي'}</Btn>

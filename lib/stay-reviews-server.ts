@@ -1,10 +1,13 @@
 import 'server-only';
-import { Timestamp } from 'firebase-admin/firestore';
+import { createHash } from 'node:crypto';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { validateReply } from '@/lib/review-reply';
 import { REVIEW_LIST_MAX, canReview, maskName, summarize, validateReview } from '@/lib/stay-reviews';
 
 const okId = (id: unknown): id is string => typeof id === 'string' && !!id && !id.includes('/') && id.length <= 128;
+// A public handle for a review: the document id is the payment id, so it is never shown. A short one-way hash is.
+export const reviewRid = (id: string) => createHash('sha256').update(`rid:${id}`).digest('hex').slice(0, 16);
 const iso = (t: unknown) => ((t as { toDate?: () => Date } | null)?.toDate ? (t as { toDate: () => Date }).toDate().toISOString() : '');
 
 // A guest reviews a finished stay. The booking must be theirs, confirmed and over; one review per booking
@@ -38,9 +41,9 @@ export async function publicReviews(propertyId: string) {
   if (!okId(propertyId)) return { summary: { count: 0, avg: 0 }, reviews: [] };
   const snap = await adminDb.collection('stay_reviews').where('propertyId', '==', propertyId).limit(500).get();
   const rows = snap.docs
-    .map((x) => x.data() as Record<string, unknown>)
+    .map((x): Record<string, unknown> => ({ ...(x.data() as Record<string, unknown>), rid: reviewRid(x.id) }))
     .filter((x) => x.hidden !== true)
-    .map((x) => ({ rating: Number(x.rating) || 0, comment: String(x.comment ?? ''), name: String(x.name ?? '***'), reply: String(x.reply ?? ''), date: iso(x.createdAt).slice(0, 10) }))
+    .map((x) => ({ rid: String(x.rid), rating: Number(x.rating) || 0, comment: String(x.comment ?? ''), name: String(x.name ?? '***'), reply: String(x.reply ?? ''), date: iso(x.createdAt).slice(0, 10) }))
     .sort((a, c) => c.date.localeCompare(a.date));
   return { summary: summarize(rows), reviews: rows.slice(0, REVIEW_LIST_MAX) };
 }
@@ -50,7 +53,7 @@ export async function adminReviews() {
   const snap = await adminDb.collection('stay_reviews').orderBy('createdAt', 'desc').limit(100).get();
   return snap.docs.map((x) => {
     const d = x.data() as Record<string, unknown>;
-    return { id: x.id, propertyTitle: String(d.propertyTitle ?? ''), name: String(d.name ?? ''), rating: Number(d.rating) || 0, comment: String(d.comment ?? ''), hidden: d.hidden === true, reply: String(d.reply ?? ''), date: iso(d.createdAt).slice(0, 10) };
+    return { id: x.id, propertyTitle: String(d.propertyTitle ?? ''), name: String(d.name ?? ''), rating: Number(d.rating) || 0, comment: String(d.comment ?? ''), hidden: d.hidden === true, reply: String(d.reply ?? ''), reports: Number(d.reports) || 0, date: iso(d.createdAt).slice(0, 10) };
   });
 }
 
@@ -74,4 +77,16 @@ export async function adminSetReviewReply(id: unknown, raw: unknown) {
   if (!s.exists) return { ok: false as const, status: 404, error: 'Review not found' };
   await ref.update({ reply: v.reply, replyAt: v.reply ? Timestamp.now() : null });
   return { ok: true as const, title: String((s.data() as Record<string, unknown>).propertyTitle ?? ''), cleared: !v.reply };
+}
+
+// Anyone can flag a review (no sign-in): it only raises a counter for the admin, nothing is hidden automatically.
+// Returns first = true when this is the first report, so the admin is alerted once, not on every click.
+export async function reportReview(propertyId: unknown, rid: unknown) {
+  if (!okId(propertyId) || typeof rid !== 'string' || !/^[0-9a-f]{16}$/.test(rid)) return { ok: false as const, status: 400, error: 'Invalid review' };
+  const snap = await adminDb.collection('stay_reviews').where('propertyId', '==', propertyId).limit(500).get();
+  const hit = snap.docs.find((x) => reviewRid(x.id) === rid && (x.data() as Record<string, unknown>).hidden !== true);
+  if (!hit) return { ok: false as const, status: 404, error: 'Review not found' };
+  const d = hit.data() as Record<string, unknown>;
+  await hit.ref.update({ reports: FieldValue.increment(1), reportedAt: Timestamp.now() });
+  return { ok: true as const, first: !(Number(d.reports) > 0), title: String(d.propertyTitle ?? '') };
 }
