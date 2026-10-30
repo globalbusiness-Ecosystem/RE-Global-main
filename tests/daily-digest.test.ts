@@ -5,6 +5,8 @@ const send = vi.fn();
 let configured = true;
 vi.mock('@/lib/send-email', () => ({ sendEmail: (...a: unknown[]) => send(...a), emailConfigured: () => configured }));
 vi.mock('@/lib/rate-limit', () => ({ consumeRateLimit: async () => ({ ok: true, retryAfter: 0 }), clientIp: () => '1.2.3.4' }));
+const reminders = vi.fn();
+vi.mock('@/lib/guest-reminders-server', () => ({ sendGuestReminders: (...a: unknown[]) => reminders(...a) }));
 const gather = vi.fn();
 vi.mock('@/lib/admin-attention', () => ({ gatherAttention: (...a: unknown[]) => gather(...a) }));
 vi.mock('@/lib/firebase-admin', () => ({
@@ -21,6 +23,7 @@ const SECRET = 'a-long-random-secret-123';
 
 beforeEach(() => {
   send.mockReset(); send.mockResolvedValue(undefined); gather.mockReset(); configured = true;
+  reminders.mockReset(); reminders.mockResolvedValue({ sent: 0, skipped: 0, failed: 0 });
   process.env.CRON_SECRET = SECRET; process.env.ADMIN_ALERT_EMAIL = 'owner@example.com';
 });
 afterEach(() => { delete process.env.CRON_SECRET; delete process.env.ADMIN_ALERT_EMAIL; });
@@ -106,5 +109,26 @@ describe('daily summary reminder', () => {
     expect(buildAttention({ ...ok, env: { ...ok.env, CRON_SECRET: false } }).map((x) => x.id)).toEqual(['env-cron']);
     expect(buildAttention({ ...ok, env: { ...ok.env, CRON_SECRET: true } })).toEqual([]);
     expect(buildAttention(ok)).toEqual([]);
+  });
+});
+
+describe('guest reminders in the daily job', () => {
+  it('runs them when mail is configured, even without an owner address', async () => {
+    delete process.env.ADMIN_ALERT_EMAIL;
+    await GET(req(`Bearer ${SECRET}`));
+    expect(reminders).toHaveBeenCalledTimes(1);
+  });
+  it('does not run them for callers without the secret, or without a mail service', async () => {
+    await GET(req('Bearer nope'));
+    configured = false;
+    await GET(req(`Bearer ${SECRET}`));
+    expect(reminders).not.toHaveBeenCalled();
+  });
+  it('never blocks the owner summary when reminders fail', async () => {
+    reminders.mockRejectedValue(new Error('boom'));
+    gather.mockResolvedValue([{ id: 'x', level: 'bad', text: 'مشكلة', tab: 'payments' }]);
+    const res = await GET(req(`Bearer ${SECRET}`));
+    expect(res.status).toBe(200);
+    expect(await res.json()).toEqual({ ok: true, sent: true, items: 1 });
   });
 });

@@ -7,12 +7,22 @@ import { gatherAttention } from '@/lib/admin-attention';
 import { buildDigest, digestRecipient } from '@/lib/daily-digest';
 import { sendEmail, emailConfigured } from '@/lib/send-email';
 import { siteUrl } from '@/lib/site-url';
+import { sendGuestReminders } from '@/lib/guest-reminders-server';
 
 export const dynamic = 'force-dynamic';
 
 // Once a day (Vercel Cron): e-mails the owner what needs attention. Says nothing when everything is fine.
 export async function GET(req: NextRequest) {
   if (!isCronRequest(req)) return NextResponse.json({ ok: false }, { status: 401, headers: { 'Cache-Control': 'no-store' } });
+  // Guest reminders ride on this daily job (Vercel's free plan allows only two cron jobs). They never block the owner summary.
+  if (emailConfigured()) {
+    try {
+      const r = await sendGuestReminders();
+      if (r.sent || r.failed) console.log(`[cron/guest-reminders] sent ${r.sent}, failed ${r.failed}, skipped ${r.skipped}`);
+    } catch (err) {
+      console.error('[cron/guest-reminders] error:', err);
+    }
+  }
   const to = digestRecipient();
   if (!to || !emailConfigured()) return NextResponse.json({ ok: true, sent: false, reason: 'no-recipient' }, { headers: { 'Cache-Control': 'no-store' } });
   try {
