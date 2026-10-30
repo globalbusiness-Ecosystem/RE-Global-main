@@ -6,6 +6,7 @@ import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
 import BlockDates from './block-dates';
 import ReviewsPanel from './reviews-panel';
+import ReviewStats from './review-stats';
 import CancellationSettings from './cancellation-settings';
 import OccupancyPanel from './occupancy-panel';
 import ArrivalsPanel from './arrivals-panel';
@@ -36,6 +37,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
           id: 'policies', icon: '⭐', label: 'التقييمات والسياسات',
           render: () => (
             <>
+              <ReviewStats onUnauthorized={u} />
               <ReviewsPanel onUnauthorized={u} />
               <CancellationSettings onUnauthorized={u} />
             </>
