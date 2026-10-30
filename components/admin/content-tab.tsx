@@ -5,6 +5,7 @@ import TextsEditor from './texts-editor';
 import PricingSettings from './pricing-settings';
 import LegalSettings from './legal-settings';
 import RewardsSettings from './rewards-settings';
+import RewardsLeaderboard from './rewards-leaderboard';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
 
 type Kind = 'banners' | 'partners';
@@ -211,7 +212,7 @@ export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => v
         <Btn small kind={kind === 'legal' ? 'gold' : 'ghost'} onClick={() => setKind('legal')}>⚖️ القانون</Btn>
         <Btn small kind={kind === 'rewards' ? 'gold' : 'ghost'} onClick={() => setKind('rewards')}>🎁 المكافآت</Btn>
       </div>
-      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : kind === 'rewards' ? <RewardsSettings onUnauthorized={onUnauthorized} /> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
+      {kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : kind === 'rewards' ? <><RewardsSettings onUnauthorized={onUnauthorized} /><RewardsLeaderboard onUnauthorized={onUnauthorized} /></> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
     </div>
   );
 }
