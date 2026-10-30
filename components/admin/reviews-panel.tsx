@@ -2,15 +2,19 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { REPLY_MAX } from '@/lib/review-reply';
+import { REVIEW_FILTERS, countReviews, filterReviews, type ReviewFilter } from '@/lib/review-filters';
 import { adminApi, UnauthorizedError, Btn, Card, Badge } from './admin-ui';
 
 type Review = { id: string; propertyTitle: string; name: string; rating: number; comment: string; hidden: boolean; reply: string; reports: number; date: string };
+
+const FILTER_LABEL: Record<ReviewFilter, string> = { all: 'الكل', reported: '🚩 مُبلَّغ عنها', unanswered: 'بدون رد', hidden: 'مخفية' };
 
 // Admin: guest reviews of stays. A review can be hidden from the public page (and shown again); nothing is deleted.
 export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<Review[] | null>(null);
   const [busy, setBusy] = useState('');
   const [error, setError] = useState('');
+  const [filter, setFilter] = useState<ReviewFilter>('all');
   const [open, setOpen] = useState('');
   const [draft, setDraft] = useState('');
 
@@ -44,11 +48,21 @@ export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () =>
 
   if (!rows) return error ? <p className="text-sm text-red-300">❌ {error}</p> : null;
   if (rows.length === 0) return null;
+  const shown = filterReviews(rows, filter);
   return (
     <Card title={`⭐ تقييمات الضيوف (${rows.length})`}>
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
+      <div className="mb-3 flex flex-wrap gap-2" role="tablist" aria-label="فلتر التقييمات">
+        {REVIEW_FILTERS.map((f) => (
+          <button key={f} type="button" role="tab" aria-selected={filter === f} onClick={() => setFilter(f)}
+            className={`rounded-full border px-3 py-1 text-xs ${filter === f ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-300' : 'border-[#2a2a2a] text-gray-400'}`}>
+            {FILTER_LABEL[f]} ({countReviews(rows, f)})
+          </button>
+        ))}
+      </div>
+      {shown.length === 0 && <p className="py-4 text-center text-xs text-gray-500">مفيش تقييمات في الفلتر ده</p>}
       <div className="space-y-2">
-        {rows.map((r) => (
+        {shown.map((r) => (
           <div key={r.id} className={`rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300 ${r.hidden ? 'opacity-60' : ''}`}>
             <div className="flex items-center justify-between gap-2">
               <span className="min-w-0 truncate font-semibold text-white">{r.propertyTitle}</span>
