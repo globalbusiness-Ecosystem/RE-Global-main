@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useMemo, useState, useCallback } from 'react';
@@ -109,7 +110,7 @@ export const PropertyCard = memo(
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
 
           {/* Favorite Button */}
-          <button
+          <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
             onClick={handleFavoriteClick}
             className="absolute top-2 right-2 p-2 bg-background/80 hover:bg-accent hover:text-background rounded-full transition-all duration-200 z-10 group-hover:scale-110"
           >

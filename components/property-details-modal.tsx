@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useState, useCallback } from 'react';
@@ -71,7 +72,7 @@ export const PropertyDetailsModal = memo(
           {/* Header */}
           <div className="sticky top-0 flex items-center justify-between p-4 border-b border-border/30 bg-background/95 backdrop-blur-sm">
             <h2 className="text-xl font-bold text-foreground truncate flex-1">{title}</h2>
-            <button
+            <button aria-label={a11yLabels(language).close}
               onClick={onClose}
               className="p-2 hover:bg-secondary rounded-lg transition-colors"
             >
@@ -258,7 +259,7 @@ export const PropertyDetailsModal = memo(
               >
                 {language === 'en' ? 'Buy Now' : 'اشتري الآن'}
               </Button>
-              <button
+              <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
                 onClick={onFavoriteClick}
                 className="p-2 hover:bg-secondary rounded-lg transition-colors border border-border/30"
               >
@@ -269,7 +270,7 @@ export const PropertyDetailsModal = memo(
                   )}
                 />
               </button>
-              <button className="p-2 hover:bg-secondary rounded-lg transition-colors border border-border/30">
+              <button aria-label={a11yLabels(language).share} className="p-2 hover:bg-secondary rounded-lg transition-colors border border-border/30">
                 <Share2 className="w-5 h-5 text-muted-foreground" />
               </button>
             </div>

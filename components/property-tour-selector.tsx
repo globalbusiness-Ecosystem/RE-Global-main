@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState } from 'react';
 import { X } from 'lucide-react';
@@ -103,7 +104,7 @@ export default function PropertyTourSelector({ language, onClose }: PropertyTour
           <h2 className="text-xl font-bold text-white">
             {language === 'en' ? 'Select Property for AI Tour' : 'اختر عقار للجولة الذكية'}
           </h2>
-          <button
+          <button aria-label={a11yLabels(language).close}
             onClick={onClose}
             className="p-2 hover:bg-[#F59E0B]/10 rounded-lg transition-colors"
           >

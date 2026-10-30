@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useEffect, useRef, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -293,7 +294,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
     <div className={`w-full min-h-screen bg-background p-4 pb-24 ${isRTL ? 'rtl' : 'ltr'}`}>
       <div className="flex items-center gap-3 mb-6">
         {onBack && (
-          <button onClick={onBack} className="text-muted-foreground hover:text-foreground">
+          <button aria-label={a11yLabels(language).back} onClick={onBack} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="w-5 h-5" />
           </button>
         )}

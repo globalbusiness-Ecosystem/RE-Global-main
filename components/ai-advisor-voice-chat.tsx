@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Send, Bot, Loader, Volume2, VolumeX, Mic, MicOff, Phone, Settings, Image } from 'lucide-react';
@@ -345,7 +346,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
                 <span className="text-sm">{isListening ? labels.stopListening : labels.startListening}</span>
               </button>
               {isSpeaking && (
-                <button
+                <button aria-label={a11yLabels(language).stopSpeaking}
                   onClick={handleToggleSpeaker}
                   className="px-4 py-2 rounded-lg bg-gold/10 text-gold border border-gold/30 hover:bg-gold/20 transition"
                 >

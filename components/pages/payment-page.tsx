@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useEffect, useState } from 'react';
 import { CreditCard, TrendingUp, TrendingDown, RefreshCw, Send } from 'lucide-react';
@@ -82,7 +83,7 @@ export default function PaymentPage({ language = 'en', userId = 'user_123', onBa
           <h1 className="text-xl font-bold text-foreground">
             {t.walletAndPayments}
           </h1>
-          <button
+          <button aria-label={a11yLabels(language).refresh}
             onClick={loadWalletData}
             className="text-muted-foreground hover:text-foreground transition"
             disabled={loading}

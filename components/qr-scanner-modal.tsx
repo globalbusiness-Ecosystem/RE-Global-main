@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useEffect, useRef, useState } from 'react';
 import { X, Camera, AlertTriangle, ImageUp } from 'lucide-react';
@@ -137,7 +138,7 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
               e.target.value = '';
             }}
           />
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-white/10 text-white">
+          <button aria-label={a11yLabels(language).close} onClick={onClose} className="p-1.5 rounded-md hover:bg-white/10 text-white">
             <X className="w-5 h-5" />
           </button>
         </div>

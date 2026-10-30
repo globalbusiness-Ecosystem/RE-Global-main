@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
@@ -151,7 +152,7 @@ const PropertyCard = memo(({
         alt={language === 'en' ? property.titleEn : property.titleAr}
         className="w-full h-full object-cover hover:scale-105 transition-transform"
       />
-      <button
+      <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
         onClick={onToggleFavorite}
         className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
       >
@@ -282,7 +283,7 @@ export function FirebasePropertyModal({
         {/* Header */}
         <div className="sticky top-0 flex items-center justify-between p-4 border-b border-accent/20 bg-[#0f1923] z-10">
           <h2 className="text-lg font-bold text-white truncate flex-1">{title}</h2>
-          <button
+          <button aria-label={a11yLabels(language).close}
             onClick={onClose}
             className="p-2 hover:bg-white/10 rounded-lg ml-2 transition"
           >

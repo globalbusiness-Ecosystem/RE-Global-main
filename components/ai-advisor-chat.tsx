@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect } from 'react';
 import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload } from 'lucide-react';
@@ -717,6 +718,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
 
             <button
               type="submit"
+              aria-label={a11yLabels(language ?? 'en').send}
               disabled={isLoading || uploadingPhoto || !input.trim()}
               className="px-4 py-3 bg-gradient-to-r from-[#F59E0B] to-[#d97706] hover:from-[#d97706] hover:to-[#b45309] text-white rounded-lg transition-all disabled:opacity-50 flex items-center justify-center"
             >

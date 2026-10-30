@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Car, Footprints, Bike, Volume2, VolumeX, Navigation as NavigationIcon, Loader2 } from 'lucide-react';
@@ -182,7 +183,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
           >
             {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-50" />}
           </button>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-white/10 text-white">
+          <button onClick={onClose} aria-label={a11yLabels(language).close} className="p-2 rounded-lg hover:bg-white/10 text-white">
             <X className="w-5 h-5" />
           </button>
         </div>

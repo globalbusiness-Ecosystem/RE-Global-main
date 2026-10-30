@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { PriceUsd } from '@/components/price-usd';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -147,7 +148,7 @@ const RentPropertyCard = memo(({
         alt={language === 'en' ? property.titleEn : property.titleAr}
         className="w-full h-full object-cover hover:scale-105 transition-transform"
       />
-      <button
+      <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
         onClick={onToggleFavorite}
         className="absolute top-3 right-3 bg-black/50 hover:bg-black/70 rounded-full p-2 transition"
       >

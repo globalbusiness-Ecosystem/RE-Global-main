@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
@@ -205,7 +206,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             {onBack && (
-              <button onClick={onBack} className="p-1.5 rounded-md hover:bg-white/10">
+              <button aria-label={a11yLabels(language).back} onClick={onBack} className="p-1.5 rounded-md hover:bg-white/10">
                 <ArrowLeft className="w-5 h-5" />
               </button>
             )}

@@ -1,5 +1,6 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
@@ -63,7 +64,7 @@ export const QRCodeModal = ({
           <h2 className="text-lg font-bold text-foreground">
             {language === 'en' ? 'Property QR Code' : 'رمز الملكية'}
           </h2>
-          <button
+          <button aria-label={a11yLabels(language).close}
             onClick={onClose}
             className="p-1 hover:bg-secondary rounded-full transition-colors"
           >

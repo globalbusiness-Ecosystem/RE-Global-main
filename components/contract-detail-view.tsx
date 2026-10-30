@@ -1,5 +1,6 @@
 'use client';
 import { useState } from 'react';
+import { a11yLabels } from '@/lib/a11y-labels';
 import { ShieldCheck, Key, Link2, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
 import type { SmartContract } from '@/lib/firebase-database';
 import { Download } from 'lucide-react';
@@ -216,7 +217,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
           <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" /> Pilot · Testnet
         </span>
         {onClose && (
-          <button onClick={onClose} className="p-1.5 rounded-md hover:bg-white/10 text-stone-400">
+          <button onClick={onClose} aria-label={a11yLabels(language).close} className="p-1.5 rounded-md hover:bg-white/10 text-stone-400">
             <X size={16} />
           </button>
         )}
