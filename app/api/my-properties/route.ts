@@ -36,7 +36,9 @@ export async function GET(req: NextRequest) {
     // Which finished stays this guest already reviewed (the review id is the booking id).
     const rsnap = await adminDb.collection('stay_reviews').where('uid', '==', user.uid).get();
     const reviewedIds = new Set(rsnap.docs.map((d) => d.id));
-    const bookingsOut = bookings.map((b: any) => ({ ...b, reviewed: reviewedIds.has(b.id) }));
+    // The host's public reply to the guest's own review, so the guest sees the answer.
+    const hostReplies = new Map(rsnap.docs.map((d) => [d.id, String((d.data() as Record<string, unknown>).reply ?? '')]));
+    const bookingsOut = bookings.map((b: any) => ({ ...b, reviewed: reviewedIds.has(b.id), hostReply: hostReplies.get(b.id) || '' }));
     const hsnap = await adminDb.collection('share_holdings').where('uid', '==', user.uid).get();
     const holdings = hsnap.docs
       .map((d) => {

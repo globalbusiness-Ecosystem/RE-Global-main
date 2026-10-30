@@ -2,10 +2,11 @@
 
 import { useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { replyLabel } from '@/lib/review-reply';
 import { REVIEW_COMMENT_MAX, reviewStrings } from '@/lib/stay-reviews';
 
 // "Review this stay" for a finished booking: stars + an optional comment. One review per booking (the server enforces it).
-export function ReviewForm({ bookingId, language, reviewed }: { bookingId: string; language: string; reviewed?: boolean }) {
+export function ReviewForm({ bookingId, language, reviewed, hostReply }: { bookingId: string; language: string; reviewed?: boolean; hostReply?: string }) {
   const { accessToken } = usePiAuth();
   const t = reviewStrings(language);
   const [open, setOpen] = useState(false);
@@ -14,7 +15,19 @@ export function ReviewForm({ bookingId, language, reviewed }: { bookingId: strin
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle');
   const [msg, setMsg] = useState('');
 
-  if (reviewed || state === 'done') return <p className="text-xs text-green-400">✓ {state === 'done' ? t.thanks : t.reviewed}</p>;
+  if (reviewed || state === 'done') {
+    return (
+      <div className="space-y-1">
+        <p className="text-xs text-green-400">✓ {state === 'done' ? t.thanks : t.reviewed}</p>
+        {hostReply && (
+          <div className="rounded-md border-s-2 border-yellow-500/60 bg-white/5 ps-2 py-1 text-xs text-gray-300">
+            <p className="text-[10px] font-bold text-yellow-400">{replyLabel(language)}</p>
+            <p className="whitespace-pre-line break-words">{hostReply}</p>
+          </div>
+        )}
+      </div>
+    );
+  }
   if (!open) return <button type="button" onClick={() => setOpen(true)} className="rounded border border-accent/50 px-2 py-0.5 text-xs text-accent hover:bg-accent/10">⭐ {t.button}</button>;
 
   const send = async () => {
