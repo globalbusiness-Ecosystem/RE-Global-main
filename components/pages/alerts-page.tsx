@@ -2,12 +2,13 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
-import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2 } from 'lucide-react';
+import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2, BedDouble } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 import { useProperties } from '@/lib/useProperties';
 import { generateSmartAlerts, type SmartAlert } from '@/lib/smart-alerts';
+import { stayAlerts, type StayBooking } from '@/lib/stay-alerts';
 
 interface AlertsPageProps {
   language: NavLanguage;
@@ -19,6 +20,7 @@ const ICONS: Record<SmartAlert['type'], any> = {
   'price-down': TrendingDown,
   'contract-status': ScrollText,
   recommendation: Sparkles,
+  stay: BedDouble,
 };
 
 const COLORS: Record<SmartAlert['type'], string> = {
@@ -26,11 +28,12 @@ const COLORS: Record<SmartAlert['type'], string> = {
   'price-down': 'border-green-500/30 bg-green-500/5 text-green-400',
   'contract-status': 'border-blue-500/30 bg-blue-500/5 text-blue-400',
   recommendation: 'border-purple-500/30 bg-purple-500/5 text-purple-400',
+  stay: 'border-yellow-500/30 bg-yellow-500/5 text-yellow-400',
 };
 
 export default function AlertsPage({ language, onBack }: AlertsPageProps) {
   const isArabic = language === 'ar';
-  const { username } = usePiAuth();
+  const { username, accessToken } = usePiAuth();
   const { getFavoritesForUser, getContractsForUser } = useFirebaseDatabase();
   const { properties } = useProperties();
 
@@ -43,13 +46,21 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
       setLoading(false);
       return;
     }
-    Promise.all([getFavoritesForUser(username), getContractsForUser(username)]).then(
-      ([favorites, contracts]) => {
-        setAlerts(generateSmartAlerts(favorites, properties, contracts));
+    // Stay alerts come from the guest's own bookings; if they cannot be loaded the other alerts still show.
+    const stays: Promise<StayBooking[]> = accessToken
+      ? fetch('/api/my-properties', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => (Array.isArray(d?.bookings) ? (d.bookings as StayBooking[]) : []))
+          .catch(() => [])
+      : Promise.resolve([]);
+    Promise.all([getFavoritesForUser(username), getContractsForUser(username), stays]).then(
+      ([favorites, contracts, bookings]) => {
+        const today = new Date().toISOString().slice(0, 10);
+        setAlerts([...stayAlerts(bookings, today), ...generateSmartAlerts(favorites, properties, contracts)]);
         setLoading(false);
       }
     );
-  }, [username, properties]);
+  }, [username, accessToken, properties]);
 
   const visibleAlerts = alerts.filter((a) => !dismissed.has(a.id));
 
