@@ -24,7 +24,12 @@ vi.mock('@/lib/firebase-admin', () => ({
     }),
     batch: () => {
       const ops: { name: string; id: string }[] = [];
-      return { delete: (r: { name: string; id: string }) => { ops.push(r); }, commit: async () => { for (const r of ops) delete store[r.name]?.[r.id]; } };
+      const ups: { r: { name: string; id: string }; d: Record<string, unknown> }[] = [];
+      return {
+        delete: (r: { name: string; id: string }) => { ops.push(r); },
+        update: (r: { name: string; id: string }, d: Record<string, unknown>) => { ups.push({ r, d }); },
+        commit: async () => { for (const r of ops) delete store[r.name]?.[r.id]; for (const u of ups) Object.assign(store[u.r.name][u.r.id], u.d); },
+      };
     },
   },
 }));
@@ -58,6 +63,7 @@ beforeEach(() => {
     contracts: { c1: { buyerUsername: 'ann', sellerUsername: 'bob' }, c2: { buyerUsername: 'bob', sellerUsername: 'zed' } },
     share_transfers: { t1: { fromUid: 'u1', toUid: 'u9' }, t2: { fromUid: 'u8', toUid: 'u1' }, t3: { fromUid: 'u8', toUid: 'u9' } },
     payouts: { p1: { uid: 'u1', amount: 5 } },
+    stay_reviews: { r1: { uid: 'u1', rating: 5, name: 'an***', comment: 'Great' }, r2: { uid: 'u2', rating: 3, name: 'bo***' } },
   };
 });
 
@@ -88,6 +94,7 @@ describe('GET /api/my-data', () => {
     expect(out.data.ownerships[0].createdAt).toBe('2026-01-02T00:00:00.000Z');
     expect(out.data.contracts.map((c: { id: string }) => c.id)).toEqual(['c1']);
     expect(out.data.share_transfers.map((t: { id: string }) => t.id).sort()).toEqual(['t1', 't2']);
+    expect(out.data.stay_reviews.map((r: { id: string }) => r.id)).toEqual(['r1']);
     expect(JSON.stringify(out)).not.toContain('bob@example.com');
   });
   it('needs a login and respects the rate limit', async () => {
@@ -122,6 +129,12 @@ describe('DELETE /api/my-data', () => {
     const rec = JSON.stringify(store.erasure_requests);
     expect(rec).not.toContain('ann');
     expect(Object.keys(store.erasure_requests)[0]).toMatch(/^[0-9a-f]{64}$/);
+  });
+  it('keeps guest reviews but cuts them loose from the account', async () => {
+    const res = await DELETE(delReq({ confirm: 'DELETE' }));
+    expect((await res.json()).anonymized).toEqual(['reviews']);
+    expect(store.stay_reviews.r1).toMatchObject({ uid: '', rating: 5, comment: 'Great' });
+    expect(store.stay_reviews.r2.uid).toBe('u2');
   });
   it('needs a login and respects the rate limit', async () => {
     h.state.authed = false;

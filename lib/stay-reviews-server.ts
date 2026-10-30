@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { validateReply } from '@/lib/review-reply';
 import { REVIEW_LIST_MAX, canReview, maskName, summarize, validateReview } from '@/lib/stay-reviews';
 
 const okId = (id: unknown): id is string => typeof id === 'string' && !!id && !id.includes('/') && id.length <= 128;
@@ -39,7 +40,7 @@ export async function publicReviews(propertyId: string) {
   const rows = snap.docs
     .map((x) => x.data() as Record<string, unknown>)
     .filter((x) => x.hidden !== true)
-    .map((x) => ({ rating: Number(x.rating) || 0, comment: String(x.comment ?? ''), name: String(x.name ?? '***'), date: iso(x.createdAt).slice(0, 10) }))
+    .map((x) => ({ rating: Number(x.rating) || 0, comment: String(x.comment ?? ''), name: String(x.name ?? '***'), reply: String(x.reply ?? ''), date: iso(x.createdAt).slice(0, 10) }))
     .sort((a, c) => c.date.localeCompare(a.date));
   return { summary: summarize(rows), reviews: rows.slice(0, REVIEW_LIST_MAX) };
 }
@@ -49,7 +50,7 @@ export async function adminReviews() {
   const snap = await adminDb.collection('stay_reviews').orderBy('createdAt', 'desc').limit(100).get();
   return snap.docs.map((x) => {
     const d = x.data() as Record<string, unknown>;
-    return { id: x.id, propertyTitle: String(d.propertyTitle ?? ''), name: String(d.name ?? ''), rating: Number(d.rating) || 0, comment: String(d.comment ?? ''), hidden: d.hidden === true, date: iso(d.createdAt).slice(0, 10) };
+    return { id: x.id, propertyTitle: String(d.propertyTitle ?? ''), name: String(d.name ?? ''), rating: Number(d.rating) || 0, comment: String(d.comment ?? ''), hidden: d.hidden === true, reply: String(d.reply ?? ''), date: iso(d.createdAt).slice(0, 10) };
   });
 }
 
@@ -61,4 +62,16 @@ export async function adminSetReviewHidden(id: unknown, hidden: boolean) {
   if (!s.exists) return { ok: false as const, status: 404, error: 'Review not found' };
   await ref.update({ hidden });
   return { ok: true as const, title: String((s.data() as Record<string, unknown>).propertyTitle ?? '') };
+}
+
+// Admin: write, change or remove (empty text) the host reply shown under a review.
+export async function adminSetReviewReply(id: unknown, raw: unknown) {
+  if (!okId(id)) return { ok: false as const, status: 400, error: 'Invalid review' };
+  const v = validateReply(raw);
+  if (!v.ok) return { ok: false as const, status: 400, error: v.error };
+  const ref = adminDb.collection('stay_reviews').doc(id);
+  const s = await ref.get();
+  if (!s.exists) return { ok: false as const, status: 404, error: 'Review not found' };
+  await ref.update({ reply: v.reply, replyAt: v.reply ? Timestamp.now() : null });
+  return { ok: true as const, title: String((s.data() as Record<string, unknown>).propertyTitle ?? ''), cleared: !v.reply };
 }

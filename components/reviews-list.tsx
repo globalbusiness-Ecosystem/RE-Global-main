@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { formatDay } from '@/lib/booking-i18n';
+import { replyLabel } from '@/lib/review-reply';
 import { reviewCount, reviewStrings, starsText } from '@/lib/stay-reviews';
 
-type Data = { summary: { count: number; avg: number }; reviews: { rating: number; comment: string; name: string; date: string }[] };
+type Data = { summary: { count: number; avg: number }; reviews: { rating: number; comment: string; name: string; date: string; reply?: string }[] };
 
 // Verified guest reviews of a hotel / rental: average first, then the latest comments. Hidden when there are none.
 export function ReviewsList({ propertyId, language }: { propertyId: string; language: string }) {
@@ -34,6 +35,12 @@ export function ReviewsList({ propertyId, language }: { propertyId: string; lang
           </div>
           {r.comment && <p className="mt-1 whitespace-pre-line break-words">{r.comment}</p>}
           <p className="mt-1 text-[10px] text-green-400">✓ {t.verified}</p>
+          {r.reply && (
+            <div className="mt-2 rounded-md border-s-2 border-yellow-500/60 bg-white/5 ps-2 py-1">
+              <p className="text-[10px] font-bold text-yellow-400">{replyLabel(language)}</p>
+              <p className="whitespace-pre-line break-words">{r.reply}</p>
+            </div>
+          )}
         </div>
       ))}
     </section>

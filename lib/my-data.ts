@@ -1,5 +1,6 @@
 // "Download my data" and "delete my personal data" (GDPR / CCPA style rights). Pure helpers.
 // Personal data (profile, email, preferences, favorites, referral code) is deleted on request.
+// Guest reviews are kept but anonymized (the account link is removed).
 // Money and contract records are kept: they are accounting records and the public contract check depends on them.
 
 export const ERASE_WORD = 'DELETE';
