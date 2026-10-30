@@ -88,3 +88,26 @@ describe('adminOccupancy', () => {
     expect(r.overall).toBe(35.7);
   });
 });
+
+import { HINT_HIGH, HINT_LOW, HINT_MIN_SELLABLE, priceHint } from '@/lib/occupancy';
+
+describe('priceHint', () => {
+  it('suggests raising the price when almost full and lowering it when almost empty', () => {
+    expect(priceHint(HINT_HIGH, 30)).toBe('raise');
+    expect(priceHint(100, 30)).toBe('raise');
+    expect(priceHint(HINT_LOW, 30)).toBe('lower');
+    expect(priceHint(0, 30)).toBe('lower');
+  });
+  it('stays quiet in the middle', () => {
+    expect(priceHint(HINT_HIGH - 0.1, 30)).toBeNull();
+    expect(priceHint(HINT_LOW + 0.1, 30)).toBeNull();
+    expect(priceHint(60, 30)).toBeNull();
+  });
+  it('stays quiet when there is too little data', () => {
+    expect(priceHint(100, HINT_MIN_SELLABLE - 1)).toBeNull();
+    expect(priceHint(0, 0)).toBeNull();
+    expect(priceHint(null, 30)).toBeNull();
+    expect(priceHint(Number.NaN, 30)).toBeNull();
+    expect(priceHint(100, HINT_MIN_SELLABLE)).toBe('raise');
+  });
+});

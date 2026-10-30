@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { downloadCsv } from '@/lib/csv-download';
-import { WINDOWS } from '@/lib/occupancy';
+import { WINDOWS, priceHint } from '@/lib/occupancy';
 import { adminApi, UnauthorizedError, Btn, Card, Stat } from './admin-ui';
 
 type Row = { id: string; title: string; type: string; booked: number; blocked: number; free: number; sellable: number; rate: number | null; nextFree: string | null };
@@ -60,6 +60,8 @@ export default function OccupancyPanel({ onUnauthorized }: { onUnauthorized: () 
               <span>فاضي {r.free}</span>
               <span dir="ltr">أول ليلة فاضية: {r.nextFree ?? '—'}</span>
             </div>
+            {priceHint(r.rate, r.sellable) === 'raise' && <p className="mt-2 text-[11px] text-green-300">📈 الطلب عالي: فكّر ترفع السعر</p>}
+            {priceHint(r.rate, r.sellable) === 'lower' && <p className="mt-2 text-[11px] text-yellow-300">📉 الإشغال ضعيف: فكّر تعمل عرض أو تخفّض السعر</p>}
           </div>
         ))}
       </div>

@@ -48,3 +48,17 @@ export function overallRate(rows: { booked: number; sellable: number }[]): numbe
   if (sellable <= 0) return null;
   return Math.round((rows.reduce((n, r) => n + r.booked, 0) / sellable) * 1000) / 10;
 }
+
+// A plain-words pricing hint from the occupancy rate. Advice for the admin only: nothing changes a price by itself.
+// It needs enough sellable nights to mean something (a 7-night window with 2 nights is noise).
+export const HINT_MIN_SELLABLE = 7;
+export const HINT_HIGH = 85;
+export const HINT_LOW = 25;
+export type PriceHint = 'raise' | 'lower' | null;
+
+export function priceHint(rate: number | null, sellable: number): PriceHint {
+  if (rate === null || !Number.isFinite(rate) || sellable < HINT_MIN_SELLABLE) return null;
+  if (rate >= HINT_HIGH) return 'raise';
+  if (rate <= HINT_LOW) return 'lower';
+  return null;
+}
