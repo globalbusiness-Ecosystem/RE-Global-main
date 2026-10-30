@@ -89,3 +89,15 @@ describe('strings', () => {
     expect(reviewReportStrings('xx').report).toBe('Report');
   });
 });
+
+describe('public summary response rate', () => {
+  it('is null for few reviews', async () => {
+    const out = await publicReviews('p1');
+    expect(out.summary.responseRate).toBeNull();
+  });
+  it('is the share of visible reviews with a reply once there are enough', async () => {
+    h.store = Object.fromEntries(Array.from({ length: 5 }, (_, i) => [`x${i}`, { propertyId: 'p2', propertyTitle: 'T', rating: 5, comment: '', name: 'a***', hidden: false, reply: i < 2 ? 'ok' : '' }]));
+    const out = await publicReviews('p2');
+    expect(out.summary.responseRate).toBe(40);
+  });
+});

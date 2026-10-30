@@ -2,11 +2,11 @@
 
 import { useEffect, useState } from 'react';
 import { formatDay } from '@/lib/booking-i18n';
-import { replyLabel } from '@/lib/review-reply';
+import { rateLabel, replyLabel } from '@/lib/review-reply';
 import { reviewReportStrings } from '@/lib/review-report';
 import { reviewCount, reviewStrings, starsText } from '@/lib/stay-reviews';
 
-type Data = { summary: { count: number; avg: number }; reviews: { rid?: string; rating: number; comment: string; name: string; date: string; reply?: string }[] };
+type Data = { summary: { count: number; avg: number; responseRate?: number | null }; reviews: { rid?: string; rating: number; comment: string; name: string; date: string; reply?: string }[] };
 
 // Verified guest reviews of a hotel / rental: average first, then the latest comments. Hidden when there are none.
 function ReportButton({ propertyId, rid, language }: { propertyId: string; rid: string; language: string }) {
@@ -46,6 +46,7 @@ export function ReviewsList({ propertyId, language }: { propertyId: string; lang
         <h3 className="text-sm font-bold text-white">{t.title}</h3>
         <p className="text-xs text-gray-300"><span className="text-yellow-400" aria-hidden>★</span> <span className="font-bold text-white">{data.summary.avg.toFixed(1)}</span> · {reviewCount(language, data.summary.count)}</p>
       </div>
+      {typeof data.summary.responseRate === 'number' && <p className="text-[11px] text-gray-400">↩ {rateLabel(language, data.summary.responseRate)}</p>}
       {data.reviews.map((r, i) => (
         <div key={i} className="rounded-md bg-white/5 p-2 text-xs text-gray-300">
           <div className="flex items-center justify-between gap-2">

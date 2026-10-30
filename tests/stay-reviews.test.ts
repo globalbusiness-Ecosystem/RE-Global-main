@@ -120,7 +120,7 @@ describe('publicReviews / hiding', () => {
   });
   it('lists visible reviews of one listing, newest first, with no user ids', async () => {
     const r = await publicReviews('h1');
-    expect(r.summary).toEqual({ count: 2, avg: 4 });
+    expect(r.summary).toEqual({ count: 2, avg: 4, responseRate: null });
     expect(r.reviews.map((x) => x.comment)).toEqual(['Ok', 'Great']);
     expect(JSON.stringify(r)).not.toMatch(/u1|u2|uid/);
   });

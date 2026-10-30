@@ -2,7 +2,7 @@ import 'server-only';
 import { createHash } from 'node:crypto';
 import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { validateReply } from '@/lib/review-reply';
+import { responseRate, validateReply } from '@/lib/review-reply';
 import { REVIEW_LIST_MAX, canReview, maskName, summarize, validateReview } from '@/lib/stay-reviews';
 
 const okId = (id: unknown): id is string => typeof id === 'string' && !!id && !id.includes('/') && id.length <= 128;
@@ -38,14 +38,14 @@ export async function submitReview(uid: string, username: string, bookingId: unk
 
 // Public: the average and the latest visible reviews of one listing (masked name, no ids).
 export async function publicReviews(propertyId: string) {
-  if (!okId(propertyId)) return { summary: { count: 0, avg: 0 }, reviews: [] };
+  if (!okId(propertyId)) return { summary: { count: 0, avg: 0, responseRate: null as number | null }, reviews: [] };
   const snap = await adminDb.collection('stay_reviews').where('propertyId', '==', propertyId).limit(500).get();
   const rows = snap.docs
     .map((x): Record<string, unknown> => ({ ...(x.data() as Record<string, unknown>), rid: reviewRid(x.id) }))
     .filter((x) => x.hidden !== true)
     .map((x) => ({ rid: String(x.rid), rating: Number(x.rating) || 0, comment: String(x.comment ?? ''), name: String(x.name ?? '***'), reply: String(x.reply ?? ''), date: iso(x.createdAt).slice(0, 10) }))
     .sort((a, c) => c.date.localeCompare(a.date));
-  return { summary: summarize(rows), reviews: rows.slice(0, REVIEW_LIST_MAX) };
+  return { summary: { ...summarize(rows), responseRate: responseRate(rows) }, reviews: rows.slice(0, REVIEW_LIST_MAX) };
 }
 
 // Admin: the latest reviews, hidden ones included.
