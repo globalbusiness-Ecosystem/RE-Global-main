@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { a11yLabels } from '@/lib/a11y-labels';
 import { ShieldCheck, Key, Link2, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
 import type { SmartContract } from '@/lib/firebase-database';
+import { contractKind, KIND_ICON, KIND_LABELS, KIND_TITLE, KIND_PARTY } from '@/lib/contract-kind';
 import { Download } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
@@ -122,15 +123,15 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
       });
     };
 
-    writeLine('RE GLOBAL — PROPERTY TRANSACTION CONTRACT', 14, true);
+    writeLine(KIND_TITLE[contractKind(contract)].toUpperCase(), 14, true);
     writeLine('Status: PILOT / TESTNET — Pending UAE Legal Review', 9);
     y += 6;
     writeLine(contract.propertyTitle, 13, true);
     writeLine(`Contract No: ${contract.id}`);
-    writeLine(`Type: ${contract.type}   Amount: ${contract.amount} ${contract.currency}   Status: ${contract.status}`);
+    writeLine(`Type: ${KIND_LABELS.en[contractKind(contract)]}   Amount: ${contract.amount} ${contract.currency}   Status: ${contract.status}`);
     y += 10;
     writeLine('SIGNATURES', 11, true);
-    writeLine(`Buyer: @${contract.buyerUsername}`);
+    writeLine(`${KIND_PARTY[contractKind(contract)]}: @${contract.buyerUsername}`);
     if (contract.paymentId) writeLine(`Payment ID: ${contract.paymentId}`);
     if (contract.txid) writeLine(`Transaction ID: ${contract.txid}`);
     y += 6;
@@ -230,7 +231,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
         <div className="px-6 pt-6 pb-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] tracking-[0.2em] uppercase text-amber-400/90 mb-1.5">RE Global — Property Transaction Contract</p>
+              <p className="text-[11px] tracking-[0.2em] uppercase text-amber-400/90 mb-1.5">{KIND_TITLE[contractKind(contract)]}</p>
               <h1 className="text-[22px] leading-tight text-stone-50 font-semibold">{contract.propertyTitle}</h1>
               <p className="mt-1 text-[12.5px] text-stone-500">Contract № <span className="font-mono text-stone-400">{contract.id}</span></p>
             </div>
@@ -247,7 +248,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
           <div className="mt-5 grid grid-cols-3 gap-2.5">
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
               <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">Type</p>
-              <p className="text-[13px] text-stone-200 capitalize">{contract.type}</p>
+              <p className="text-[13px] text-stone-200">{KIND_ICON[contractKind(contract)]} {(KIND_LABELS[language] ?? KIND_LABELS.en)[contractKind(contract)]}</p>
             </div>
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
               <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">Amount</p>
@@ -266,7 +267,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
           <div className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] p-3.5">
             <div className="flex items-center justify-between mb-2.5">
               <div>
-                <p className="text-[10.5px] text-stone-500">Party A · Buyer</p>
+                <p className="text-[10.5px] text-stone-500">Party A · {KIND_PARTY[contractKind(contract)]}</p>
                 <p className="text-[14px] text-stone-100 font-medium">@{contract.buyerUsername}</p>
               </div>
               {contract.paymentId && (

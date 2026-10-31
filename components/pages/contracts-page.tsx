@@ -12,6 +12,7 @@ import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { CONTRACTS_I18N } from '@/lib/contracts-i18n';
 import { MyProperties } from '@/components/my-properties';
+import { contractKind, CONTRACT_KINDS, KIND_ICON, KIND_STYLE, KIND_LABELS, type ContractKind } from '@/lib/contract-kind';
 import { TAB_LABELS, NO_ASSETS, visibleTabs, safeTab, type ContractsTab, type AssetCounts } from '@/lib/contracts-tabs';
 
 interface ContractsPageProps {
@@ -107,7 +108,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [pinError, setPinError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | SmartContract['status']>('all');
-  const [typeFilter, setTypeFilter] = useState<'all' | SmartContract['type']>('all');
+  const [typeFilter, setTypeFilter] = useState<'all' | ContractKind>('all');
   const [showFilters, setShowFilters] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedContract, setSelectedContract] = useState<SmartContract | null>(null);
@@ -115,6 +116,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [counts, setCounts] = useState<AssetCounts>(NO_ASSETS);
   const activeTab = safeTab(tab, counts);
   const tabNames = TAB_LABELS[language] ?? TAB_LABELS.en;
+  const kindNames = KIND_LABELS[language] ?? KIND_LABELS.en;
 
   const load = async (asAdmin: boolean) => {
     setLoading(true);
@@ -183,7 +185,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
 
   const filteredContracts = contracts.filter((c) => {
     if (statusFilter !== 'all' && c.status !== statusFilter) return false;
-    if (typeFilter !== 'all' && c.type !== typeFilter) return false;
+    if (typeFilter !== 'all' && contractKind(c) !== typeFilter) return false;
     if (searchQuery.trim()) {
       const q = searchQuery.trim().toLowerCase();
       const haystack = [
@@ -374,7 +376,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               <div>
                 <p className="text-xs text-muted-foreground mb-1.5">{t.type}</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {(['all', 'buy', 'rent', 'invest', 'tokenized'] as const).map((ty) => (
+                  {(['all', ...CONTRACT_KINDS] as const).map((ty) => (
                     <button
                       key={ty}
                       onClick={() => setTypeFilter(ty)}
@@ -384,7 +386,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                           : 'border-border text-muted-foreground'
                       }`}
                     >
-                      {ty === 'all' ? t.all : t.typeLabels[ty]}
+                      {ty === 'all' ? t.all : `${KIND_ICON[ty]} ${kindNames[ty]}`}
                     </button>
                   ))}
                 </div>
@@ -428,8 +430,11 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <p className="font-medium">{c.propertyTitle}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">
-                      {(t.typeLabels as Record<string, string>)[c.type] ?? c.type} · {formatNumber(c.amount, language)} {c.currency}
+                    <p className="text-xs text-muted-foreground mt-1 flex flex-wrap items-center gap-1.5">
+                      <span className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[11px] font-medium ${KIND_STYLE[contractKind(c)]}`}>
+                        <span aria-hidden="true">{KIND_ICON[contractKind(c)]}</span>{kindNames[contractKind(c)]}
+                      </span>
+                      <span>{formatNumber(c.amount, language)} {c.currency}</span>
                     </p>
                   </div>
                   <span className={`shrink-0 text-xs px-2 py-1 rounded-full border ${statusStyles[c.status]}`}>
