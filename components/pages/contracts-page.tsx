@@ -12,6 +12,7 @@ import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { CONTRACTS_I18N } from '@/lib/contracts-i18n';
 import { MyProperties } from '@/components/my-properties';
+import { TAB_LABELS, NO_ASSETS, visibleTabs, safeTab, type ContractsTab, type AssetCounts } from '@/lib/contracts-tabs';
 
 interface ContractsPageProps {
   language: NavLanguage;
@@ -110,6 +111,10 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const [showFilters, setShowFilters] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [selectedContract, setSelectedContract] = useState<SmartContract | null>(null);
+  const [tab, setTab] = useState<ContractsTab>('contracts');
+  const [counts, setCounts] = useState<AssetCounts>(NO_ASSETS);
+  const activeTab = safeTab(tab, counts);
+  const tabNames = TAB_LABELS[language] ?? TAB_LABELS.en;
 
   const load = async (asAdmin: boolean) => {
     setLoading(true);
@@ -234,7 +239,30 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           </button>
         </div>
 
-        <MyProperties language={language} />
+        {visibleTabs(counts).length > 1 && (
+          <div role="tablist" className="-mx-1 flex gap-1.5 overflow-x-auto px-1 pb-1">
+            {visibleTabs(counts).map((id) => {
+              const on = id === activeTab;
+              const n = id === 'contracts' ? 0 : counts[id];
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  role="tab"
+                  aria-selected={on}
+                  onClick={() => setTab(id)}
+                  className={`shrink-0 rounded-full border px-3.5 py-1.5 text-sm font-medium transition ${
+                    on ? 'border-accent bg-accent text-accent-foreground' : 'border-border text-muted-foreground hover:text-foreground'
+                  }`}
+                >
+                  {tabNames[id]}{n > 0 ? ` (${n})` : ''}
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        <MyProperties language={language} section={activeTab === 'contracts' ? null : activeTab} onCounts={setCounts} />
 
         {showPinPrompt && (
           <div className="bg-card border border-border rounded-lg p-4 space-y-3">
@@ -277,6 +305,8 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
           </div>
         )}
 
+        {activeTab === 'contracts' && (
+        <>
         {/* Search + Filters */}
         <div className="space-y-2">
           <div className="flex items-center gap-2">
@@ -448,6 +478,8 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
             ))}
           </div>
         )}
+        </>
+        )}
       </div>
 
       {showScanner && (
@@ -467,6 +499,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               }
               return;
             }
+            setTab('contracts');
             setSearchQuery(value);
           }}
         />

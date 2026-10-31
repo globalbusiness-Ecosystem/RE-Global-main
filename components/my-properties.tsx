@@ -7,6 +7,7 @@ import { formatPropertyPrice } from '@/lib/price-format';
 import { formatDate } from '@/lib/format';
 import { pendingOwed } from '@/lib/market-rules';
 import { MyBookingsList, type Booked } from '@/components/my-bookings-list';
+import type { AssetSection, AssetCounts } from '@/lib/contracts-tabs';
 import { saveOfflineBookings, loadOfflineBookings, browserStore } from '@/lib/offline-bookings';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
@@ -17,7 +18,8 @@ type Payout = { id: string; kind: string; amount: number; status: string };
 
 type Holding = { id: string; propertyTitle: string; shares: number; totalShares: number; amount: number; status: string };
 
-export function MyProperties({ language }: { language: string }) {
+// `section` picks what to show: one section, nothing (null, only loads and reports counts), or everything (undefined).
+export function MyProperties({ language, section, onCounts }: { language: string; section?: AssetSection | null; onCounts?: (c: AssetCounts) => void }) {
   const { accessToken, user } = usePiAuth();
   const uid = user?.uid ?? '';
   const [offlineAt, setOfflineAt] = useState<number | null>(null);
@@ -26,6 +28,7 @@ export function MyProperties({ language }: { language: string }) {
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
   const ar = language === 'ar';
+  const show = (s: AssetSection) => section === undefined || section === s;
 
   useEffect(() => {
     if (!accessToken) { setItems(null); setBookings([]); setHoldings([]); setPayouts([]); setOfflineAt(null); return; }
@@ -44,15 +47,20 @@ export function MyProperties({ language }: { language: string }) {
     return () => { alive = false; };
   }, [accessToken, uid]);
 
+  useEffect(() => {
+    onCounts?.({ bookings: bookings.length, properties: items?.length ?? 0, shares: holdings.length, owed: payouts.length });
+  }, [items, bookings, holdings, payouts, onCounts]);
+
+  if (section === null) return null;
   if (!items || (items.length === 0 && bookings.length === 0 && holdings.length === 0 && payouts.length === 0)) return null;
   return (
     <>
-    {offlineAt !== null && (
+    {offlineAt !== null && show('bookings') && (
       <p role="status" className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-xs text-yellow-300">
         {ar ? `مفيش اتصال بالإنترنت. دي آخر نسخة من حجوزاتك (${formatDate(new Date(offlineAt).toISOString(), language)}).` : `You are offline. This is the last saved copy of your bookings (${formatDate(new Date(offlineAt).toISOString(), language)}).`}
       </p>
     )}
-    {items.length > 0 && (
+    {show('properties') && items.length > 0 && (
     <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
       <h2 className="text-sm font-bold text-accent flex items-center gap-2">
         <Home className="w-4 h-4" /> {ar ? 'ممتلكاتي' : 'My properties'} ({items.length})
@@ -74,8 +82,8 @@ export function MyProperties({ language }: { language: string }) {
       ))}
     </section>
     )}
-    {bookings.length > 0 && <MyBookingsList bookings={bookings} language={language} />}
-    {holdings.length > 0 && (
+    {show('bookings') && bookings.length > 0 && <MyBookingsList bookings={bookings} language={language} />}
+    {show('shares') && holdings.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
         <h2 className="text-sm font-bold text-accent flex items-center justify-between">
           <span>📈 {ar ? 'حصصي' : 'My shares'} ({holdings.length})</span>
@@ -97,7 +105,7 @@ export function MyProperties({ language }: { language: string }) {
         ))}
       </section>
     )}
-    {payouts.length > 0 && (
+    {show('owed') && payouts.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
         <h2 className="text-sm font-bold text-accent flex items-center justify-between">
           <span>💸 {ar ? 'مستحقاتي' : 'Owed to me'}</span>
