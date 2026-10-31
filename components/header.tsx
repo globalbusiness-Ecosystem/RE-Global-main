@@ -3,6 +3,8 @@
 import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard, Settings as SettingsIcon, Moon, Sun, Globe2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { UserAvatar } from '@/components/user-avatar';
+import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { useLanguage } from '@/contexts/language-context';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, NAV_DICTIONARY, type NavLanguage } from '@/lib/nav-i18n';
@@ -21,6 +23,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const { username, isAuthenticated } = usePiAuth();
+  const { avatar } = useMyAvatar();
   const { language: navLang } = useLanguage();
 
   useEffect(() => {
@@ -109,7 +112,11 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           onClick={onSettingsClick}
           title={language === 'en' ? 'Settings' : 'الإعدادات'}
         >
-          <Circle className="w-4 h-4" style={{ color: 'rgb(212, 175, 55)', strokeWidth: 1.5 }} />
+          {avatar ? (
+            <UserAvatar avatar={avatar} username={username} size={24} />
+          ) : (
+            <Circle className="w-4 h-4" style={{ color: 'rgb(212, 175, 55)', strokeWidth: 1.5 }} />
+          )}
         </button>
       </div>
 
@@ -131,9 +138,13 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
                 </button>
               </div>
               <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
-                  <User className="w-4 h-4 text-accent" />
-                </div>
+                {avatar ? (
+                  <UserAvatar avatar={avatar} username={username} size={36} />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
+                    <User className="w-4 h-4 text-accent" />
+                  </div>
+                )}
                 <div className="min-w-0">
                   <p className="text-[11px] text-gray-500">
                     {isAuthenticated ? t.signedInAs : t.notSignedIn}

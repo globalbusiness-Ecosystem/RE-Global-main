@@ -6,6 +6,10 @@ import type { AvatarState } from '@/components/user-avatar';
 
 type Result = 'ok' | 'failed';
 
+// Lets every place that shows the picture (settings, header, menu) update together.
+export const AVATAR_EVENT = 're-avatar-changed';
+const announce = (a: AvatarState | null) => { try { window.dispatchEvent(new CustomEvent(AVATAR_EVENT, { detail: a })); } catch { /* ignore */ } };
+
 // Loads and saves the signed-in user's private profile picture.
 export function useMyAvatar() {
   const { accessToken } = usePiAuth();
@@ -21,13 +25,21 @@ export function useMyAvatar() {
     return () => { live = false; };
   }, [accessToken]);
 
+  useEffect(() => {
+    const on = (e: Event) => setAvatar((e as CustomEvent<AvatarState | null>).detail ?? null);
+    window.addEventListener(AVATAR_EVENT, on);
+    return () => window.removeEventListener(AVATAR_EVENT, on);
+  }, []);
+
   const save = useCallback(async (payload: { preset: string } | { photo: string }): Promise<Result> => {
     if (!accessToken) return 'failed';
     try {
       const r = await fetch('/api/my-avatar', { method: 'PUT', headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
       if (!r.ok) return 'failed';
       const j = await r.json();
-      setAvatar(j.avatar || payload);
+      const next = j.avatar || payload;
+      setAvatar(next);
+      announce(next);
       return 'ok';
     } catch { return 'failed'; }
   }, [accessToken]);
@@ -38,6 +50,7 @@ export function useMyAvatar() {
       const r = await fetch('/api/my-avatar', { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
       if (!r.ok) return 'failed';
       setAvatar(null);
+      announce(null);
       return 'ok';
     } catch { return 'failed'; }
   }, [accessToken]);
