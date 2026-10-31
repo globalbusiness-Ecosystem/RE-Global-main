@@ -24,6 +24,7 @@ import {
   Gift,
   Download,
   Trash2,
+  Camera,
   type LucideIcon,
 } from 'lucide-react';
 import { CurrencyPicker } from '@/components/currency-picker';
@@ -32,6 +33,10 @@ import { RewardsPanel } from '@/components/rewards-panel';
 import { IconBadge, RowChevron } from '@/components/ui/icon-badge';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { Button } from '@/components/ui/button';
+import { UserAvatar } from '@/components/user-avatar';
+import { AvatarPicker } from '@/components/avatar-picker';
+import { useMyAvatar } from '@/hooks/use-my-avatar';
+import { AVATAR_I18N } from '@/lib/avatar';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
@@ -109,6 +114,8 @@ export default function SettingsPage({
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
+  const { avatar, save: saveAvatar, remove: removeAvatar, signedIn: avatarSignedIn } = useMyAvatar();
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -234,45 +241,65 @@ export default function SettingsPage({
         <div className="w-6" />
       </div>
 
-      <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-4">
-        <button
-          onClick={handleLogoTap}
-          className="w-14 h-14 rounded-xl bg-accent/15 flex items-center justify-center shrink-0"
-        >
-          <User className="w-7 h-7 text-accent" />
-        </button>
-        <div className="min-w-0 flex-1">
-          <p className="font-bold text-foreground text-lg truncate">
-            {username ? `@${username}` : (language === 'ar' ? 'زائر' : 'Guest')}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {isPiVerified
-              ? (language === 'ar' ? 'متصل عبر Pi Network' : 'Connected via Pi Network')
-              : (language === 'ar' ? 'غير متصل' : 'Not connected')}
-          </p>
+      <div className="bg-card border border-border rounded-xl p-5">
+        <div className="flex flex-col items-center text-center gap-3">
+          <div className="relative">
+            <button onClick={handleLogoTap} className="block rounded-full" aria-label={username ? `@${username}` : 'Profile'}>
+              <UserAvatar avatar={avatar} username={username} size={88} />
+            </button>
+            <button
+              type="button"
+              onClick={() => setPickerOpen(true)}
+              aria-label={(AVATAR_I18N[language] ?? AVATAR_I18N.en).change}
+              className="absolute -bottom-1 -end-1 w-8 h-8 rounded-full bg-accent text-accent-foreground border-2 border-card flex items-center justify-center"
+            >
+              <Camera className="w-4 h-4" aria-hidden />
+            </button>
+          </div>
+          <div className="min-w-0 max-w-full">
+            <p className="font-bold text-foreground text-lg truncate">
+              {username ? `@${username}` : (language === 'ar' ? 'زائر' : 'Guest')}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {isPiVerified
+                ? (language === 'ar' ? 'متصل عبر Pi Network' : 'Connected via Pi Network')
+                : (language === 'ar' ? 'غير متصل' : 'Not connected')}
+            </p>
+          </div>
         </div>
-      </div>
-
-      <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-3">
-        <div
-          className="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
-          style={{ backgroundColor: `${securityColor}20` }}
-        >
-          <ShieldCheck className="w-5 h-5" style={{ color: securityColor }} />
-        </div>
-        <div className="flex-1 min-w-0">
-          <p className="text-sm text-foreground">
-            {language === 'ar' ? 'مستوى أمان الحساب: ' : 'Account security: '}
-            <span className="font-semibold" style={{ color: securityColor }}>{securityLabel}</span>
-          </p>
-          <div className="w-full h-1.5 bg-muted rounded-full mt-1.5 overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all"
-              style={{ width: `${securityScore}%`, backgroundColor: securityColor }}
-            />
+        <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
+          <div
+            className="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
+            style={{ backgroundColor: `${securityColor}20` }}
+          >
+            <ShieldCheck className="w-4 h-4" style={{ color: securityColor }} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm text-foreground">
+              {language === 'ar' ? 'مستوى أمان الحساب: ' : 'Account security: '}
+              <span className="font-semibold" style={{ color: securityColor }}>{securityLabel}</span>
+            </p>
+            <div className="w-full h-1.5 bg-muted rounded-full mt-1.5 overflow-hidden">
+              <div
+                className="h-full rounded-full transition-all"
+                style={{ width: `${securityScore}%`, backgroundColor: securityColor }}
+              />
+            </div>
           </div>
         </div>
       </div>
+
+      {pickerOpen && (
+        <AvatarPicker
+          language={language}
+          username={username}
+          avatar={avatar}
+          signedIn={avatarSignedIn}
+          onSave={saveAvatar}
+          onRemove={removeAvatar}
+          onClose={() => setPickerOpen(false)}
+        />
+      )}
 
       <div role="tablist" className="flex gap-1 bg-muted rounded-lg p-1">
         {(['profile', 'rewards', 'security', 'notifications'] as SettingsTab[]).map((tab) => {

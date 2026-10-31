@@ -58,6 +58,7 @@ beforeEach(() => {
     profiles: { ann: { email: 'ann@example.com', emailVerified: true }, bob: { email: 'bob@example.com' } },
     preferences: { ann: { theme: 'dark' } },
     referrals: { ann: { code: 'ANN1' } },
+    avatars: { ann: { preset: 'home' }, bob: { preset: 'sun' } },
     favorites: { f1: { username: 'ann', propertyId: 'p1' }, f2: { username: 'bob', propertyId: 'p2' } },
     ownerships: { o1: { uid: 'u1', amount: 10, createdAt: new Date('2026-01-02T00:00:00Z') }, o2: { uid: 'u2', amount: 99 } },
     contracts: { c1: { buyerUsername: 'ann', sellerUsername: 'bob' }, c2: { buyerUsername: 'bob', sellerUsername: 'zed' } },
@@ -120,6 +121,8 @@ describe('DELETE /api/my-data', () => {
     expect(store.profiles.ann).toBeUndefined();
     expect(store.preferences.ann).toBeUndefined();
     expect(store.referrals.ann).toBeUndefined();
+    expect(store.avatars.ann).toBeUndefined();
+    expect(store.avatars.bob).toBeDefined();
     expect(store.favorites.f1).toBeUndefined();
     expect(store.profiles.bob).toBeDefined();
     expect(store.favorites.f2).toBeDefined();

@@ -37,8 +37,8 @@ export async function GET(req: NextRequest) {
       const d = await adminDb.collection(col).doc(user.username).get();
       return d.exists ? serializeValue(d.data()) : null;
     };
-    const [profile, preferences, referral, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews] = await Promise.all([
-      one('profiles'), one('preferences'), one('referrals'),
+    const [profile, preferences, referral, avatar, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews] = await Promise.all([
+      one('profiles'), one('preferences'), one('referrals'), one('avatars'),
       by('favorites', 'username', user.username),
       by('ownerships', 'uid', user.uid), by('bookings', 'uid', user.uid), by('share_holdings', 'uid', user.uid), by('payouts', 'uid', user.uid),
       by('share_transfers', 'fromUid', user.uid), by('share_transfers', 'toUid', user.uid), by('share_transfers', 'buyerUid', user.uid),
@@ -50,7 +50,7 @@ export async function GET(req: NextRequest) {
     const contracts = new Map<string, Record<string, unknown>>();
     for (const r of [...rows(cBuy), ...rows(cSell)]) contracts.set(r.id, r);
     const body = buildExport(user, {
-      profile, preferences, referral,
+      profile, preferences, referral, avatar,
       favorites: rows(favorites), ownerships: rows(ownerships), bookings: rows(bookings), share_holdings: rows(holdings),
       payouts: rows(payouts), stay_reviews: rows(reviews), share_transfers: [...transfers.values()], contracts: [...contracts.values()],
     });
@@ -77,7 +77,7 @@ export async function DELETE(req: NextRequest) {
   try {
     const favs = await adminDb.collection('favorites').where('username', '==', user.username).limit(EXPORT_LIMIT).get();
     const batch = adminDb.batch();
-    for (const col of ['profiles', 'preferences', 'referrals']) batch.delete(adminDb.collection(col).doc(user.username));
+    for (const col of ['profiles', 'preferences', 'referrals', 'avatars']) batch.delete(adminDb.collection(col).doc(user.username));
     for (const d of favs.docs) batch.delete(d.ref);
     await batch.commit();
     // Guest reviews stay on the listing (they are masked already) but are cut loose from the account.
@@ -89,7 +89,7 @@ export async function DELETE(req: NextRequest) {
     }
     // A record that an erasure happened (for compliance), without the name: only a one-way hash of the user id.
     await adminDb.collection('erasure_requests').doc(createHash('sha256').update(user.uid).digest('hex')).set({ at: new Date().toISOString(), favorites: favs.docs.length, reviews: revs.docs.length });
-    return NextResponse.json({ ok: true, deleted: ['profile', 'preferences', 'referral', 'favorites'], anonymized: ['reviews'], kept: KEPT_NOTE }, { headers: HEADERS });
+    return NextResponse.json({ ok: true, deleted: ['profile', 'preferences', 'referral', 'avatar', 'favorites'], anonymized: ['reviews'], kept: KEPT_NOTE }, { headers: HEADERS });
   } catch (err) {
     console.error('[my-data] erase error:', err);
     return NextResponse.json({ error: 'Server error' }, { status: 500, headers: HEADERS });
