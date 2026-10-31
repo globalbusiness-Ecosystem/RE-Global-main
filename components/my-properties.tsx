@@ -7,6 +7,7 @@ import { formatPropertyPrice } from '@/lib/price-format';
 import { formatDate } from '@/lib/format';
 import { pendingOwed } from '@/lib/market-rules';
 import { MyBookingsList, type Booked } from '@/components/my-bookings-list';
+import { saveOfflineBookings, loadOfflineBookings, browserStore } from '@/lib/offline-bookings';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
 
@@ -17,7 +18,9 @@ type Payout = { id: string; kind: string; amount: number; status: string };
 type Holding = { id: string; propertyTitle: string; shares: number; totalShares: number; amount: number; status: string };
 
 export function MyProperties({ language }: { language: string }) {
-  const { accessToken } = usePiAuth();
+  const { accessToken, user } = usePiAuth();
+  const uid = user?.uid ?? '';
+  const [offlineAt, setOfflineAt] = useState<number | null>(null);
   const [items, setItems] = useState<Owned[] | null>(null);
   const [bookings, setBookings] = useState<Booked[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
@@ -25,18 +28,30 @@ export function MyProperties({ language }: { language: string }) {
   const ar = language === 'ar';
 
   useEffect(() => {
-    if (!accessToken) { setItems(null); setBookings([]); setHoldings([]); setPayouts([]); return; }
+    if (!accessToken) { setItems(null); setBookings([]); setHoldings([]); setPayouts([]); setOfflineAt(null); return; }
     let alive = true;
     fetch('/api/my-properties', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { items: [] }))
-      .then((d) => { if (alive) { setItems(Array.isArray(d.items) ? d.items : []); setBookings(Array.isArray(d.bookings) ? d.bookings : []); setHoldings(Array.isArray(d.holdings) ? d.holdings : []); setPayouts(Array.isArray(d.payouts) ? d.payouts : []); } })
-      .catch(() => { if (alive) setItems([]); });
+      .then((d) => { if (alive) { setOfflineAt(null); setItems(Array.isArray(d.items) ? d.items : []); setBookings(Array.isArray(d.bookings) ? d.bookings : []); { const st = browserStore(); if (st && uid && Array.isArray(d.bookings)) saveOfflineBookings(st, uid, d.bookings, Date.now()); } setHoldings(Array.isArray(d.holdings) ? d.holdings : []); setPayouts(Array.isArray(d.payouts) ? d.payouts : []); } })
+      .catch(() => {
+        if (!alive) return;
+        // The network is down: show the last copy of this user's own bookings, clearly marked as old.
+        const st = browserStore();
+        const saved = st && uid ? loadOfflineBookings(st, uid, Date.now()) : null;
+        setItems([]);
+        if (saved) { setBookings(saved.bookings); setOfflineAt(saved.at); }
+      });
     return () => { alive = false; };
-  }, [accessToken]);
+  }, [accessToken, uid]);
 
   if (!items || (items.length === 0 && bookings.length === 0 && holdings.length === 0 && payouts.length === 0)) return null;
   return (
     <>
+    {offlineAt !== null && (
+      <p role="status" className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-xs text-yellow-300">
+        {ar ? `مفيش اتصال بالإنترنت. دي آخر نسخة من حجوزاتك (${formatDate(new Date(offlineAt).toISOString(), language)}).` : `You are offline. This is the last saved copy of your bookings (${formatDate(new Date(offlineAt).toISOString(), language)}).`}
+      </p>
+    )}
     {items.length > 0 && (
     <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
       <h2 className="text-sm font-bold text-accent flex items-center gap-2">
