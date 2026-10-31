@@ -44,8 +44,8 @@ export default function PaymentsList({ onUnauthorized }: { onUnauthorized: () =>
       </div>
       <Card title="المدفوعات والعقود الموقّعة" right={<Btn small kind="ghost" onClick={exportCsv} disabled={!filtered.length}>⬇️ تصدير CSV</Btn>}>
         <div className="grid gap-2 sm:grid-cols-2">
-          <input className={inputCls} placeholder="🔍 عقار / مشتري / رقم عقد / txid" value={q} onChange={(e) => { setQ(e.target.value); setShown(30); }} />
-          <select className={inputCls} value={type} onChange={(e) => { setType(e.target.value); setShown(30); }}>
+          <input className={inputCls} placeholder="🔍 عقار / مشتري / رقم عقد / txid" aria-label="عقار / مشتري / رقم عقد / txid" value={q} onChange={(e) => { setQ(e.target.value); setShown(30); }} />
+          <select aria-label="نوع العملية" className={inputCls} value={type} onChange={(e) => { setType(e.target.value); setShown(30); }}>
             <option value="all">كل الأنواع</option>
             {types.map((t) => <option key={t} value={t}>{TYPE_LABELS[t] || t}</option>)}
           </select>

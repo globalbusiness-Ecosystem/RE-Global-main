@@ -708,6 +708,7 @@ export const PanormicViewer = ({
               <div className="flex items-center gap-2">
                 <span className="text-xs text-muted-foreground">Speed:</span>
                 <input
+                  aria-label="Speed"
                   type="range"
                   min="0"
                   max="2"

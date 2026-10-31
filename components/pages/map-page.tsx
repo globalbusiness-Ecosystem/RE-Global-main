@@ -656,7 +656,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 <Search className="absolute left-2 top-2 w-4 h-4 text-gray-400" />
                 <input
                   type="text"
-                  placeholder={t.searchPlaceholder}
+                  placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-accent"
@@ -752,6 +752,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           <div>
             <label className="text-xs text-gray-400 mb-2 block">Price Range: {priceRange[0]} - {priceRange[1]}π</label>
             <input
+              aria-label="Price Range"
               type="range"
               min="0"
               max="10000"

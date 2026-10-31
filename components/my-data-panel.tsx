@@ -64,7 +64,7 @@ export function MyDataPanel() {
           ) : (
             <div className="space-y-2 border border-red-500/40 rounded-lg p-3">
               <p className="text-xs text-red-300">{t.eraseInfo}</p>
-              <input value={word} onChange={(e) => setWord(e.target.value)} placeholder={t.typeWord} dir="ltr" autoComplete="off"
+              <input value={word} onChange={(e) => setWord(e.target.value)} placeholder={t.typeWord} aria-label={t.typeWord} dir="ltr" autoComplete="off"
                 className="w-full rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground focus:outline-none" />
               <div className="flex gap-2">
                 <button onClick={erase} disabled={busy || word !== ERASE_WORD}

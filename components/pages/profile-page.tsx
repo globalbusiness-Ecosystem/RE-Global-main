@@ -412,6 +412,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
               </label>
               <div className="flex gap-2">
                 <select
+                  aria-label={t.phone}
                   value={dialCode}
                   onChange={(e) => handleDialCodeChange(e.target.value)}
                   className="bg-background border border-border text-foreground rounded-md px-2 text-sm w-24 shrink-0"

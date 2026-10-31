@@ -59,7 +59,7 @@ export default function BlockDates({ onUnauthorized }: { onUnauthorized: () => v
         <div className="mb-3 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300">
           <p className="mb-1">رابط التقويم (iCal) — حطه في Google Calendar أو Airbnb أو Booking عشان الأيام المحجوزة تتزامن:</p>
           <div className="flex items-center gap-2">
-            <input readOnly dir="ltr" className={inputCls} value={feedUrl(pid)} onFocus={(e) => e.currentTarget.select()} />
+            <input readOnly aria-label="رابط التقويم (iCal)" dir="ltr" className={inputCls} value={feedUrl(pid)} onFocus={(e) => e.currentTarget.select()} />
             <Btn small kind="ghost" onClick={() => { try { navigator.clipboard.writeText(feedUrl(pid)); setMsg('✅ الرابط اتنسخ'); } catch { /* ignore */ } }}>انسخ</Btn>
           </div>
         </div>

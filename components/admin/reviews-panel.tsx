@@ -74,7 +74,7 @@ export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () =>
             )}
             {open === r.id && (
               <div className="mt-2 space-y-2">
-                <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={REPLY_MAX} rows={3} placeholder="اكتب ردك العلني على التقييم"
+                <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={REPLY_MAX} rows={3} placeholder="اكتب ردك العلني على التقييم" aria-label="اكتب ردك العلني على التقييم"
                   className="w-full rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-2 text-xs text-white outline-none focus:border-yellow-500/60" />
                 <div className="flex flex-wrap items-center gap-2">
                   <Btn small onClick={() => saveReply(r, draft)} disabled={busy === r.id}>{draft.trim() ? 'انشر الرد' : 'احذف الرد'}</Btn>

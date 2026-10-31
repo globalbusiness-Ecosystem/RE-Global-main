@@ -57,8 +57,8 @@ export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => voi
       </div>
       <Card title="المستخدمون">
         <div className="grid gap-2 sm:grid-cols-2">
-          <input className={inputCls} placeholder="🔍 اسم المستخدم أو الإيميل" value={q} onChange={(e) => { setQ(e.target.value); setShown(30); }} />
-          <select className={inputCls} value={filter} onChange={(e) => { setFilter(e.target.value); setShown(30); }}>
+          <input className={inputCls} placeholder="🔍 اسم المستخدم أو الإيميل" aria-label="اسم المستخدم أو الإيميل" value={q} onChange={(e) => { setQ(e.target.value); setShown(30); }} />
+          <select aria-label="تصفية المستخدمين" className={inputCls} value={filter} onChange={(e) => { setFilter(e.target.value); setShown(30); }}>
             <option value="all">الكل</option><option value="buyers">لديهم عقود</option><option value="verified">إيميل موثّق</option><option value="banned">محظورون</option>
           </select>
         </div>

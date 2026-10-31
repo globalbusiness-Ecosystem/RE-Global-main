@@ -48,7 +48,7 @@ export function ReviewForm({ bookingId, language, reviewed, hostReply }: { booki
           <button key={n} type="button" role="radio" aria-checked={rating === n} aria-label={`${n}/5`} onClick={() => setRating(n)} className={`text-2xl leading-none ${n <= rating ? 'text-yellow-400' : 'text-gray-600'}`}>★</button>
         ))}
       </div>
-      <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={REVIEW_COMMENT_MAX} rows={3} placeholder={t.placeholder} className="w-full rounded border border-white/10 bg-black/30 p-2 text-xs text-white" />
+      <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={REVIEW_COMMENT_MAX} rows={3} placeholder={t.placeholder} aria-label={t.placeholder} className="w-full rounded border border-white/10 bg-black/30 p-2 text-xs text-white" />
       {msg && <p className="text-xs text-red-400">{msg}</p>}
       <button type="button" onClick={send} disabled={rating < 1 || state === 'sending'} className="rounded bg-accent px-3 py-1 text-xs font-bold text-black disabled:opacity-50">{state === 'sending' ? t.sending : t.submit}</button>
     </div>

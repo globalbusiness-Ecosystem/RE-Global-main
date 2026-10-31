@@ -231,9 +231,9 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
             <details key={l.code} className="rounded-lg bg-[#0d0d0d] p-2">
               <summary className="cursor-pointer text-sm" style={{ color: GOLD }}>{l.label} {tr[l.code]?.title ? '✅' : ''}</summary>
               <div dir={l.code === 'ar' || l.code === 'ur' ? 'rtl' : 'ltr'} className="mt-2 space-y-2">
-                <input className={inputCls} placeholder={`title (${l.code})`} value={tr[l.code]?.title || ''} onChange={(e) => setTrField(l.code, 'title', e.target.value)} />
-                <input className={inputCls} placeholder={`location (${l.code})`} value={tr[l.code]?.location || ''} onChange={(e) => setTrField(l.code, 'location', e.target.value)} />
-                <textarea rows={3} className={inputCls} placeholder={`description (${l.code})`} value={tr[l.code]?.description || ''} onChange={(e) => setTrField(l.code, 'description', e.target.value)} />
+                <input className={inputCls} placeholder={`title (${l.code})`} aria-label={`title (${l.code})`} value={tr[l.code]?.title || ''} onChange={(e) => setTrField(l.code, 'title', e.target.value)} />
+                <input className={inputCls} placeholder={`location (${l.code})`} aria-label={`location (${l.code})`} value={tr[l.code]?.location || ''} onChange={(e) => setTrField(l.code, 'location', e.target.value)} />
+                <textarea rows={3} className={inputCls} placeholder={`description (${l.code})`} aria-label={`description (${l.code})`} value={tr[l.code]?.description || ''} onChange={(e) => setTrField(l.code, 'description', e.target.value)} />
               </div>
             </details>
           ))}
@@ -271,8 +271,8 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <details className="text-sm text-gray-400">
           <summary className="cursor-pointer">روابط يدوية (اختياري)</summary>
           <div className="mt-2 space-y-2">
-            <input className={inputCls} placeholder="رابط الصورة الرئيسية" value={form.image} onChange={(e) => set({ image: e.target.value })} />
-            <input className={inputCls} placeholder="رابط جولة VR" value={form.vrUrl} onChange={(e) => set({ vrUrl: e.target.value })} />
+            <input className={inputCls} placeholder="رابط الصورة الرئيسية" aria-label="رابط الصورة الرئيسية" value={form.image} onChange={(e) => set({ image: e.target.value })} />
+            <input className={inputCls} placeholder="رابط جولة VR" aria-label="رابط جولة VR" value={form.vrUrl} onChange={(e) => set({ vrUrl: e.target.value })} />
           </div>
         </details>
       </div>

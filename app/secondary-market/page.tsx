@@ -58,7 +58,7 @@ export default function SecondaryMarketPage() {
 
         <input
           type="number"
-          placeholder={direction === 'buy' ? 'الكمية بالـ Pi' : 'الكمية بالـ RE'}
+          placeholder={direction === 'buy' ? 'الكمية بالـ Pi' : 'الكمية بالـ RE'} aria-label={direction === 'buy' ? 'الكمية بالـ Pi' : 'الكمية بالـ RE'}
           value={amountIn}
           onChange={(e) => setAmountIn(e.target.value)}
           className="w-full bg-slate-900 border border-slate-700 rounded px-4 py-2"

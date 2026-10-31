@@ -539,7 +539,7 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
               }}
               onKeyPress={handleKeyPress}
               className="w-full bg-background border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-widest text-foreground focus:outline-none focus:border-accent"
-              placeholder="••••••"
+              placeholder="••••••" aria-label={language === 'en' ? 'Enter PIN code' : 'أدخل رمز PIN'}
               autoFocus
             />
 

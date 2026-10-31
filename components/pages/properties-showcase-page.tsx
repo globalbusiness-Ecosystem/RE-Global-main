@@ -40,7 +40,7 @@ export default function PropertiesPage({ language }: PropertiesPageProps) {
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <input
             type="text"
-            placeholder={language === 'en' ? 'Search properties...' : 'ابحث عن العقارات...'}
+            placeholder={language === 'en' ? 'Search properties...' : 'ابحث عن العقارات...'} aria-label={language === 'en' ? 'Search properties...' : 'ابحث عن العقارات...'}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-secondary/20 border border-border/30 rounded-lg text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/50"

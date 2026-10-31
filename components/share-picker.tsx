@@ -36,6 +36,7 @@ export function SharePicker({ totalShares, sharesSold, totalPi, language, onChan
       <p className="text-sm font-semibold text-white">{ar ? 'عدد الحصص' : 'Number of shares'}</p>
       <p className="text-xs text-gray-400">{ar ? `المتاح ${left} من ${totalShares} حصة` : `${left} of ${totalShares} shares available`}</p>
       <input
+        aria-label={ar ? 'عدد الحصص' : 'Number of shares'}
         type="number" min={1} max={left} step={1} value={count}
         onChange={(e) => setCount(e.target.value)}
         className="w-full rounded-lg bg-black/30 border border-white/10 p-2 text-sm text-white"

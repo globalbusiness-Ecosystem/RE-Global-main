@@ -363,7 +363,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-              placeholder={labels.placeholder}
+              placeholder={labels.placeholder} aria-label={labels.placeholder}
               disabled={isLoading}
               className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gold/50 disabled:opacity-50"
             />

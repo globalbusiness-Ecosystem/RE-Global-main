@@ -179,7 +179,7 @@ export default function RETokenPage({ language = 'en', onBack }: RETokenPageProp
               step="1"
               value={customAmount}
               onChange={(e) => setCustomAmount(e.target.value)}
-              placeholder={t.orEnterAmount(MIN_RE)}
+              placeholder={t.orEnterAmount(MIN_RE)} aria-label={t.orEnterAmount(MIN_RE)}
               className="w-full py-2 px-3 rounded-lg text-sm bg-background text-foreground border border-border focus:border-accent focus:outline-none"
             />
             {customAmount !== '' && !isAmountValid && (

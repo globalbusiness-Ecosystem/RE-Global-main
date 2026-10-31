@@ -65,7 +65,7 @@ export default function TextsEditor({ onUnauthorized }: { onUnauthorized: () => 
           <Btn small kind={lang === 'ar' ? 'gold' : 'ghost'} onClick={() => setLang('ar')}>عربي</Btn>
           <Btn small kind={lang === 'en' ? 'gold' : 'ghost'} onClick={() => setLang('en')}>English</Btn>
         </div>
-        <input className={`${inputCls} mt-3`} placeholder="🔎 دوّر في النصوص..." value={q} onChange={(e) => setQ(e.target.value)} />
+        <input className={`${inputCls} mt-3`} placeholder="🔎 دوّر في النصوص..." aria-label="دوّر في النصوص..." value={q} onChange={(e) => setQ(e.target.value)} />
         <p className="mt-2 text-[11px]" style={{ color: GOLD }}>{changedCount} نص معدّل من {Object.keys(defaults).length}</p>
         {msg && <p className="mt-1 text-xs text-gray-200">{msg}</p>}
       </Card>
@@ -79,9 +79,9 @@ export default function TextsEditor({ onUnauthorized }: { onUnauthorized: () => 
             <p className="text-[10px] text-gray-500" dir="ltr">{k}</p>
             <p className="mb-2 text-xs text-gray-400" dir={lang === 'ar' ? 'rtl' : 'ltr'}>{defaults[k]}</p>
             {long ? (
-              <textarea rows={3} className={inputCls} dir={lang === 'ar' ? 'rtl' : 'ltr'} placeholder="النص الجديد (اختياري)" value={edits[k] || ''} onChange={(e) => setEdits((s) => ({ ...s, [k]: e.target.value }))} />
+              <textarea rows={3} className={inputCls} dir={lang === 'ar' ? 'rtl' : 'ltr'} placeholder="النص الجديد (اختياري)" aria-label="النص الجديد (اختياري)" value={edits[k] || ''} onChange={(e) => setEdits((s) => ({ ...s, [k]: e.target.value }))} />
             ) : (
-              <input className={inputCls} dir={lang === 'ar' ? 'rtl' : 'ltr'} placeholder="النص الجديد (اختياري)" value={edits[k] || ''} onChange={(e) => setEdits((s) => ({ ...s, [k]: e.target.value }))} />
+              <input className={inputCls} dir={lang === 'ar' ? 'rtl' : 'ltr'} placeholder="النص الجديد (اختياري)" aria-label="النص الجديد (اختياري)" value={edits[k] || ''} onChange={(e) => setEdits((s) => ({ ...s, [k]: e.target.value }))} />
             )}
           </div>
         );

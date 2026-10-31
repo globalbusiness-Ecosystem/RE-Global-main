@@ -72,10 +72,10 @@ export default function AdminDashboard() {
       <div dir="rtl" className="flex min-h-screen items-center justify-center bg-[#0a0a0a] p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} className="w-full max-w-sm rounded-2xl border border-[#d4af37] bg-[#141414] p-8 text-center">
           <h1 className="mb-5 text-xl font-bold text-[#d4af37]">🔐 لوحة تحكم RE Global</h1>
-          <input type="password" autoComplete="current-password" placeholder="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
+          <input type="password" autoComplete="current-password" placeholder="PIN" aria-label="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
             className="mb-3 w-full rounded-lg border border-[#d4af37] bg-[#0a0a0a] px-3 py-3 text-center text-white focus:outline-none" />
           {twoFactor && (
-            <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="كود التحقق (6 أرقام)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+            <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="كود التحقق (6 أرقام)" aria-label="كود التحقق (6 أرقام)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               className="mb-3 w-full rounded-lg border border-[#d4af37] bg-[#0a0a0a] px-3 py-3 text-center tracking-widest text-white focus:outline-none" />
           )}
           {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}

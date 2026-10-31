@@ -66,12 +66,12 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
             <>
       <Card title={`العقارات (${items?.length ?? '…'})`} right={<Btn small onClick={() => setEditing(null)}>➕ عقار جديد</Btn>}>
         <div className="grid gap-2 sm:grid-cols-3">
-          <input className={inputCls} placeholder="🔍 بحث بالعنوان أو الموقع أو المعرّف" value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} />
-          <select className={inputCls} value={type} onChange={(e) => { setType(e.target.value); setShown(PAGE); }}>
+          <input className={inputCls} placeholder="🔍 بحث بالعنوان أو الموقع أو المعرّف" aria-label="بحث بالعنوان أو الموقع أو المعرّف" value={q} onChange={(e) => { setQ(e.target.value); setShown(PAGE); }} />
+          <select aria-label="نوع العقار" className={inputCls} value={type} onChange={(e) => { setType(e.target.value); setShown(PAGE); }}>
             <option value="all">كل الأنواع</option>
             {Object.entries(TYPE_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
-          <select className={inputCls} value={view} onChange={(e) => { setView(e.target.value); setShown(PAGE); }}>
+          <select aria-label="حالة العقار" className={inputCls} value={view} onChange={(e) => { setView(e.target.value); setShown(PAGE); }}>
             <option value="all">الكل</option><option value="visible">ظاهر للزوار</option><option value="hidden">مخفي</option>
             <option value="featured">مميز</option><option value="sold">مباع</option><option value="incomplete">ناقصة البيانات</option>
           </select>

@@ -112,6 +112,7 @@ export const QRCodeModal = ({
           </p>
           <div className="flex gap-2">
             <input
+              aria-label={language === 'en' ? 'Share Link' : 'رابط المشاركة'}
               type="text"
               value={propertyShareUrl}
               readOnly

@@ -57,7 +57,7 @@ export const SearchFilter = memo(
         <div className="relative">
           <input
             type="text"
-            placeholder={language === 'en' ? 'Search properties...' : 'ابحث عن عقارات...'}
+            placeholder={language === 'en' ? 'Search properties...' : 'ابحث عن عقارات...'} aria-label={language === 'en' ? 'Search properties...' : 'ابحث عن عقارات...'}
             value={searchQuery}
             onChange={handleSearchChange}
             className="w-full px-4 py-2 bg-card border border-border rounded-lg text-foreground placeholder-muted-foreground focus:outline-none focus:border-accent transition-colors"
@@ -97,7 +97,7 @@ export const SearchFilter = memo(
               <div className="flex gap-2">
                 <input
                   type="number"
-                  placeholder="Min"
+                  placeholder="Min" aria-label="Min"
                   onChange={(e) =>
                     handleFilterUpdate({
                       ...activeFilters,
@@ -108,7 +108,7 @@ export const SearchFilter = memo(
                 />
                 <input
                   type="number"
-                  placeholder="Max"
+                  placeholder="Max" aria-label="Max"
                   onChange={(e) =>
                     handleFilterUpdate({
                       ...activeFilters,
@@ -153,7 +153,7 @@ export const SearchFilter = memo(
                 <label className="block text-sm font-medium text-foreground mb-2">
                   {language === 'en' ? 'City' : 'المدينة'}
                 </label>
-                <select
+                <select aria-label={language === 'en' ? 'City' : 'المدينة'}
                   onChange={(e) =>
                     handleFilterUpdate({
                       ...activeFilters,
@@ -177,7 +177,7 @@ export const SearchFilter = memo(
               <label className="block text-sm font-medium text-foreground mb-2">
                 {language === 'en' ? 'Sort By' : 'ترتيب حسب'}
               </label>
-              <select
+              <select aria-label={language === 'en' ? 'Sort By' : 'ترتيب حسب'}
                 onChange={(e) =>
                   handleFilterUpdate({
                     ...activeFilters,

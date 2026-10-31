@@ -37,6 +37,7 @@ export function OTPInput({ length = 6, onComplete, disabled = false }: OTPInputP
           <input
             key={i}
             data-index={i}
+            aria-label={`${i + 1} / ${length}`}
             type="text"
             inputMode="numeric"
             maxLength={1}
@@ -85,7 +86,7 @@ export function PasswordInput({
           type={showPassword ? 'text' : 'password'}
           value={value}
           onChange={e => onChange(e.target.value)}
-          placeholder={placeholder}
+          placeholder={placeholder} aria-label={placeholder}
           className="input-field w-full pr-10"
         />
         <button
@@ -189,14 +190,14 @@ export function UserProfileSetup({ onComplete }: UserProfileSetupProps) {
       <div className="grid grid-cols-2 gap-3">
         <input
           type="text"
-          placeholder="الاسم الأول"
+          placeholder="الاسم الأول" aria-label="الاسم الأول"
           value={profile.firstName}
           onChange={e => handleChange('firstName', e.target.value)}
           className="input-field"
         />
         <input
           type="text"
-          placeholder="الاسم الأخير"
+          placeholder="الاسم الأخير" aria-label="الاسم الأخير"
           value={profile.lastName}
           onChange={e => handleChange('lastName', e.target.value)}
           className="input-field"
@@ -205,7 +206,7 @@ export function UserProfileSetup({ onComplete }: UserProfileSetupProps) {
 
       <input
         type="email"
-        placeholder="البريد الإلكتروني"
+        placeholder="البريد الإلكتروني" aria-label="البريد الإلكتروني"
         value={profile.email}
         onChange={e => handleChange('email', e.target.value)}
         className="input-field w-full"
@@ -213,7 +214,7 @@ export function UserProfileSetup({ onComplete }: UserProfileSetupProps) {
 
       <input
         type="tel"
-        placeholder="رقم الهاتف"
+        placeholder="رقم الهاتف" aria-label="رقم الهاتف"
         value={profile.phone}
         onChange={e => handleChange('phone', e.target.value)}
         className="input-field w-full"

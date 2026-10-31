@@ -251,7 +251,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               }}
               onKeyDown={(e) => e.key === 'Enter' && submitPin()}
               className="w-full bg-background border border-border rounded-md py-2 px-3 text-center tracking-widest"
-              placeholder="••••••"
+              placeholder="••••••" aria-label={t.enterAdminPin}
               autoFocus
             />
             {pinError && (
@@ -285,7 +285,7 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
               <input
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t.searchPlaceholder}
+                placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder}
                 className="w-full bg-card border border-border rounded-lg py-2.5 pl-9 pr-9 text-sm outline-none focus:border-accent"
               />
               {searchQuery && (

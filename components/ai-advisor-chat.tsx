@@ -658,6 +658,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               {language !== 'ar' ? 'Analyze for:' : 'تحليل ل:'}
             </span>
             <select 
+              aria-label={language !== 'ar' ? 'Analyze for:' : 'تحليل ل:'}
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               className="text-xs bg-[#2a1f15] border border-[#F59E0B]/30 text-white rounded px-2 py-1 focus:outline-none focus:border-[#F59E0B]"
@@ -683,6 +684,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={
+                language !== 'ar'
+                  ? 'Ask about properties, trends, or Pi payments...'
+                  : 'اسأل عن العقارات والاتجاهات أو دفعات Pi...'
+              } aria-label={
                 language !== 'ar'
                   ? 'Ask about properties, trends, or Pi payments...'
                   : 'اسأل عن العقارات والاتجاهات أو دفعات Pi...'

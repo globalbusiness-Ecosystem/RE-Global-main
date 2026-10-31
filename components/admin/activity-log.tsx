@@ -33,7 +33,7 @@ export default function ActivityLog({ onUnauthorized }: { onUnauthorized: () => 
       title={`📜 سجل النشاط (${shown.length})`}
       right={<Btn small kind="ghost" disabled={!shown.length} onClick={() => downloadCsv('admin-activity', ['date', 'action', 'details'], shown.map((r) => [r.at ?? '', auditLabel(r.action), auditSummary(r.action, r.detail)]))}>⬇️ CSV</Btn>}
     >
-      <select className={inputCls} value={action} onChange={(e) => setAction(e.target.value)}>
+      <select aria-label="نوع العملية" className={inputCls} value={action} onChange={(e) => setAction(e.target.value)}>
         <option value="all">كل العمليات</option>
         {used.map((a) => <option key={a} value={a}>{AUDIT_LABELS[a] ?? a}</option>)}
       </select>
