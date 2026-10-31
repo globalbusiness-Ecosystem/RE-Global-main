@@ -8,6 +8,9 @@ import { X, MapPin, Bed, Maximize2, Heart, Share2, Phone, Mail, Download } from 
 import { PropertyImagesCarousel, PropertyImage } from './property-images-carousel';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { shareUrl } from '@/lib/share';
+import { shareListingLink, browserShareEnv } from '@/lib/share-action';
+import { SHARE_I18N } from '@/lib/share-i18n';
 
 interface PropertyDetailsModalProps {
   isOpen: boolean;
@@ -51,6 +54,16 @@ export const PropertyDetailsModal = memo(
     onBuyClick
   }: PropertyDetailsModalProps) => {
     const [selectedImageIndex, setSelectedImageIndex] = useState(0);
+    const [shareNote, setShareNote] = useState('');
+    const shareText = SHARE_I18N[language] ?? SHARE_I18N.en;
+
+    const handleShare = useCallback(async () => {
+      setShareNote('');
+      const title = language === 'ar' ? property.titleAr || property.titleEn : property.titleEn || property.titleAr;
+      const r = await shareListingLink(browserShareEnv(), title, shareUrl(window.location.origin, property.id, language));
+      if (r === 'copied') setShareNote(shareText.copied);
+      else if (r === 'failed') setShareNote(shareText.copyFailed);
+    }, [language, property.id, property.titleAr, property.titleEn, shareText]);
 
     const handleImageClick = useCallback((index: number) => {
       setSelectedImageIndex(index);
@@ -270,9 +283,10 @@ export const PropertyDetailsModal = memo(
                   )}
                 />
               </button>
-              <button aria-label={a11yLabels(language).share} className="p-2 hover:bg-secondary rounded-lg transition-colors border border-border/30">
+              <button type="button" onClick={handleShare} aria-label={a11yLabels(language).share} className="p-2 hover:bg-secondary rounded-lg transition-colors border border-border/30">
                 <Share2 className="w-5 h-5 text-muted-foreground" />
               </button>
+              {shareNote && <span role="status" className="text-xs text-muted-foreground self-center">{shareNote}</span>}
             </div>
           </div>
         </div>

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Share2 } from 'lucide-react';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { shareUrl } from '@/lib/share';
+import { shareListingLink, browserShareEnv } from '@/lib/share-action';
 import { SHARE_I18N } from '@/lib/share-i18n';
 
 // Share button: the phone's share sheet when there is one, otherwise copies the public link.
@@ -14,22 +15,9 @@ export function ShareListing({ id, title, language }: { id: string; title: strin
   const go = async () => {
     const url = shareUrl(window.location.origin, id, language);
     setNote('');
-    try {
-      if (typeof navigator.share === 'function') {
-        await navigator.share({ title, url });
-        return;
-      }
-      await navigator.clipboard.writeText(url);
-      setNote(t.copied);
-    } catch (e) {
-      if ((e as { name?: string })?.name === 'AbortError') return; // the visitor closed the share sheet
-      try {
-        await navigator.clipboard.writeText(url);
-        setNote(t.copied);
-      } catch {
-        setNote(t.copyFailed);
-      }
-    }
+    const r = await shareListingLink(browserShareEnv(), title, url);
+    if (r === 'copied') setNote(t.copied);
+    else if (r === 'failed') setNote(t.copyFailed);
   };
 
   return (
