@@ -3,7 +3,7 @@
 export const AUDIT_LABELS: Record<string, string> = {
   'property.create': 'إضافة عقار', 'property.edit': 'تعديل عقار', 'property.toggle': 'تغيير حالة عقار', 'property.delete': 'حذف عقار',
   'user.ban': 'حظر مستخدم', 'user.unban': 'إلغاء حظر مستخدم',
-  'rewards.rules': 'تعديل برنامج المكافآت', 'booking.cancel': 'إلغاء حجز', 'booking.block': 'إغلاق أيام على عقار', 'booking.unblock': 'فتح أيام كانت مغلقة', 'booking.policy': 'تعديل سياسة الإلغاء', 'review.reply': 'رد على تقييم ضيف', 'review.reply.clear': 'حذف رد على تقييم', 'review.hide': 'إخفاء تقييم ضيف', 'review.show': 'إظهار تقييم ضيف', 'shares.cancel': 'إلغاء حصص مستثمر', 'market.listing.cancel': 'إلغاء عرض في سوق الحصص',
+  'rewards.rules': 'تعديل برنامج المكافآت', 'booking.cancel': 'إلغاء حجز', 'booking.block': 'إغلاق أيام على عقار', 'booking.unblock': 'فتح أيام كانت مغلقة', 'booking.policy': 'تعديل سياسة الإلغاء', 'notify.test': 'إرسال إيميل تجريبي', 'review.reply': 'رد على تقييم ضيف', 'review.reply.clear': 'حذف رد على تقييم', 'review.hide': 'إخفاء تقييم ضيف', 'review.show': 'إظهار تقييم ضيف', 'shares.cancel': 'إلغاء حصص مستثمر', 'market.listing.cancel': 'إلغاء عرض في سوق الحصص',
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
   'admin.login': 'تسجيل دخول الأدمن', 'admin.revoke': 'خروج من كل جلسات الأدمن', 'admin.backup': 'تصدير نسخة احتياطية',
