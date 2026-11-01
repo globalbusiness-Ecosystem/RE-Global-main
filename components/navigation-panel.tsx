@@ -5,6 +5,7 @@ import { a11yLabels } from '@/lib/a11y-labels';
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { X, Car, Footprints, Bike, Volume2, VolumeX, Navigation as NavigationIcon, Loader2 } from 'lucide-react';
 import { fetchRoute, haversineMeters, type Route, type TravelMode } from '@/lib/routing';
+import { np, speechLang, routeTextLang, type NavPanelKey } from '@/lib/nav-panel-labels';
 
 interface NavigationPanelProps {
   language: NavLanguage;
@@ -14,11 +15,9 @@ interface NavigationPanelProps {
 }
 
 const MODE_ICON: Record<TravelMode, any> = { driving: Car, walking: Footprints, cycling: Bike };
-const MODE_LABEL_EN: Record<TravelMode, string> = { driving: 'Drive', walking: 'Walk', cycling: 'Bike' };
-const MODE_LABEL_AR: Record<TravelMode, string> = { driving: 'سيارة', walking: 'مشي', cycling: 'دراجة' };
+const MODE_KEY: Record<TravelMode, NavPanelKey> = { driving: 'modeDrive', walking: 'modeWalk', cycling: 'modeBike' };
 
 export function NavigationPanel({ language, destination, onClose, L }: NavigationPanelProps) {
-  const isArabic = language === 'ar';
   const mapDivRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const routeLineRef = useRef<any>(null);
@@ -36,18 +35,18 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
   const [remainingMeters, setRemainingMeters] = useState<number | null>(null);
 
   const speak = useCallback(
-    (text: string) => {
+    (text: string, spokenIn?: string) => {
       if (!voiceOn || !window.speechSynthesis) return;
       try {
         window.speechSynthesis.cancel();
         const utter = new SpeechSynthesisUtterance(text);
-        utter.lang = isArabic ? 'ar-SA' : 'en-US';
+        utter.lang = speechLang(spokenIn ?? language);
         window.speechSynthesis.speak(utter);
       } catch (e) {
         console.error('[Navigation] speech error:', e);
       }
     },
-    [voiceOn, isArabic]
+    [voiceOn, language]
   );
 
   useEffect(() => {
@@ -66,9 +65,9 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
     async (from: { lat: number; lng: number }) => {
       setLoading(true);
       setError(null);
-      const r = await fetchRoute(mode, from, destination, (language === 'ar' ? 'ar' : 'en'));
+      const r = await fetchRoute(mode, from, destination, routeTextLang(language));
       if (!r) {
-        setError(isArabic ? 'تعذر جلب المسار' : 'Could not fetch route');
+        setError(np('routeFail', language));
         setLoading(false);
         return;
       }
@@ -83,14 +82,14 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
         mapRef.current.fitBounds(routeLineRef.current.getBounds(), { padding: [40, 40] });
       }
 
-      if (r.steps[0]) speak(r.steps[0].instruction);
+      if (r.steps[0]) speak(r.steps[0].instruction, routeTextLang(language));
     },
-    [mode, destination, language, isArabic, L, speak]
+    [mode, destination, language, L, speak]
   );
 
   useEffect(() => {
     if (!navigator.geolocation) {
-      setError(isArabic ? 'المتصفح لا يدعم تحديد الموقع' : 'Geolocation not supported');
+      setError(np('noGeo', language));
       return;
     }
     watchIdRef.current = navigator.geolocation.watchPosition(
@@ -100,7 +99,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
       },
       (err) => {
         console.error('[Navigation] geolocation error:', err);
-        setError(isArabic ? 'تعذر تتبع موقعك' : 'Could not track your location');
+        setError(np('trackFail', language));
       },
       { enableHighAccuracy: true, maximumAge: 2000, timeout: 10000 }
     );
@@ -108,7 +107,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
       if (watchIdRef.current !== null) navigator.geolocation.clearWatch(watchIdRef.current);
       window.speechSynthesis?.cancel();
     };
-  }, [isArabic]);
+  }, [language]);
 
   useEffect(() => {
     if (livePosition && !route) loadRoute(livePosition);
@@ -143,7 +142,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
     setRemainingMeters(remaining);
 
     if (remaining < 30) {
-      speak(isArabic ? 'لقد وصلت إلى وجهتك' : 'You have arrived at your destination');
+      speak(np('arrived', language));
     }
 
     if (route) {
@@ -152,7 +151,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
         const d = haversineMeters(livePosition, { lat: step.location[0], lng: step.location[1] });
         if (d < 40) {
           announcedStepsRef.current.add(idx);
-          speak(step.instruction);
+          speak(step.instruction, routeTextLang(language));
         }
       });
     }
@@ -172,14 +171,14 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
           <h2 className="font-bold text-white truncate">{destination.title}</h2>
           <p className="text-xs text-gray-400 flex items-center gap-1.5">
             <NavigationIcon className="w-3 h-3 text-accent" />
-            {isArabic ? 'ملاحة حية' : 'Live navigation'}
+            {np('live', language)}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <button
             onClick={() => setVoiceOn((v) => !v)}
             className="p-2 rounded-lg hover:bg-white/10 text-white"
-            title={isArabic ? 'الصوت' : 'Voice'}
+            title={np('voice', language)}
           >
             {voiceOn ? <Volume2 className="w-4 h-4" /> : <VolumeX className="w-4 h-4 opacity-50" />}
           </button>
@@ -201,7 +200,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
               }`}
             >
               <Icon className="w-4 h-4" />
-              {isArabic ? MODE_LABEL_AR[m] : MODE_LABEL_EN[m]}
+              {np(MODE_KEY[m], language)}
             </button>
           );
         })}
@@ -211,7 +210,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
         {loading ? (
           <span className="flex items-center gap-2 text-sm text-gray-400">
             <Loader2 className="w-4 h-4 animate-spin" />
-            {isArabic ? 'جاري حساب المسار...' : 'Calculating route...'}
+            {np('calculating', language)}
           </span>
         ) : error ? (
           <span className="text-sm text-red-400">{error}</span>
@@ -225,11 +224,11 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
                     : `${remainingKm.toFixed(1)} km`
                   : '—'}
               </p>
-              <p className="text-xs text-gray-400">{isArabic ? 'المسافة المتبقية' : 'Remaining'}</p>
+              <p className="text-xs text-gray-400">{np('remaining', language)}</p>
             </div>
             <div className="text-right">
-              <p className="text-2xl font-bold text-white">{remainingMinutes ?? '—'} {isArabic ? 'د' : 'min'}</p>
-              <p className="text-xs text-gray-400">{isArabic ? 'الوقت المتوقع' : 'ETA'}</p>
+              <p className="text-2xl font-bold text-white">{remainingMinutes ?? '—'} {np('min', language)}</p>
+              <p className="text-xs text-gray-400">{np('eta', language)}</p>
             </div>
           </>
         )}
@@ -239,7 +238,7 @@ export function NavigationPanel({ language, destination, onClose, L }: Navigatio
 
       {route && route.steps.length > 0 && (
         <div className="p-4 bg-black/90 border-t border-accent/20">
-          <p className="text-xs text-gray-400 mb-1">{isArabic ? 'التالي' : 'Next'}</p>
+          <p className="text-xs text-gray-400 mb-1">{np('next', language)}</p>
           <p className="text-white font-medium">
             {route.steps.find((_, i) => !announcedStepsRef.current.has(i))?.instruction || route.steps[0].instruction}
           </p>
