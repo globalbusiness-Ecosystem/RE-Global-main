@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 import { PROFILE_I18N } from '@/lib/profile-i18n';
+import { pl } from '@/lib/profile-labels';
 
 interface ProfilePageProps {
   language: NavLanguage;
@@ -186,12 +187,12 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       const data = await res.json();
       if (data.ok) {
         setOtpStage('sent');
-        toast.success(language === 'ar' ? 'تم إرسال كود التحقق لبريدك' : 'Verification code sent to your email');
+        toast.success(pl('codeSent', language));
       } else {
-        setOtpNote(data.error || (language === 'ar' ? 'فشل إرسال الكود' : 'Failed to send code'));
+        setOtpNote(data.error || pl('sendFailed', language));
       }
     } catch {
-      setOtpNote(language === 'ar' ? 'خطأ في الاتصال' : 'Connection error');
+      setOtpNote(pl('connError', language));
     } finally {
       setOtpSending(false);
     }
@@ -216,12 +217,12 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
         setVerifiedEmail(profile.email);
         setOtpStage('idle');
         setOtpCode('');
-        toast.success(language === 'ar' ? 'تم توثيق بريدك الإلكتروني' : 'Email verified');
+        toast.success(pl('emailVerified', language));
       } else {
-        setOtpNote(data.error || (language === 'ar' ? 'كود غير صحيح' : 'Incorrect code'));
+        setOtpNote(data.error || pl('wrongCode', language));
       }
     } catch {
-      setOtpNote(language === 'ar' ? 'خطأ في الاتصال' : 'Connection error');
+      setOtpNote(pl('connError', language));
     } finally {
       setOtpVerifying(false);
     }
@@ -360,7 +361,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                 emailVerified && profile.email === verifiedEmail ? (
                   <p className="mt-1.5 text-xs text-emerald-500 flex items-center gap-1">
                     <CheckCircle2 className="w-3.5 h-3.5" />
-                    {language === 'ar' ? 'موثّق' : 'Verified'}
+                    {pl('verified', language)}
                   </p>
                 ) : otpStage === 'idle' ? (
                   <button
@@ -371,15 +372,15 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                   >
                     <ShieldCheck className="w-3.5 h-3.5" />
                     {otpSending
-                      ? (language === 'ar' ? 'جاري الإرسال...' : 'Sending...')
-                      : (language === 'ar' ? 'إرسال كود التحقق' : 'Send verification code')}
+                      ? pl('sending', language)
+                      : pl('sendCode', language)}
                   </button>
                 ) : (
                   <div className="mt-2 flex items-center gap-2">
                     <Input
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                      placeholder={language === 'ar' ? 'الكود المكوّن من 6 أرقام' : '6-digit code'}
+                      placeholder={pl('codePlaceholder', language)}
                       className="bg-background border-border text-foreground text-sm h-9"
                       inputMode="numeric"
                     />
@@ -390,8 +391,8 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                       className="shrink-0 text-xs font-medium bg-accent text-accent-foreground px-3 h-9 rounded-lg disabled:opacity-50"
                     >
                       {otpVerifying
-                        ? (language === 'ar' ? '...' : '...')
-                        : (language === 'ar' ? 'تأكيد' : 'Verify')}
+                        ? '...'
+                        : pl('verify', language)}
                     </button>
                     <button
                       type="button"
@@ -399,7 +400,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                       disabled={otpSending}
                       className="shrink-0 text-xs text-muted-foreground hover:text-foreground"
                     >
-                      {language === 'ar' ? 'إعادة إرسال' : 'Resend'}
+                      {pl('resend', language)}
                     </button>
                   </div>
                 )
@@ -449,13 +450,13 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                 type="button"
                 onClick={handleUseCurrentLocation}
                 disabled={locating}
-                title={language === 'ar' ? 'استخدم موقعي الحالي' : 'Use my current location'}
+                title={pl('useMyLocation', language)}
                 className="shrink-0 flex items-center gap-1 text-xs font-medium bg-muted border border-border text-foreground px-3 rounded-md hover:border-accent transition disabled:opacity-50"
               >
                 {locating
                   ? <Loader2 className="w-3.5 h-3.5 animate-spin" />
                   : <Crosshair className="w-3.5 h-3.5" />}
-                {language === 'ar' ? 'موقعي الحالي' : 'Current location'}
+                {pl('currentLocation', language)}
               </button>
             </div>
           </div>
