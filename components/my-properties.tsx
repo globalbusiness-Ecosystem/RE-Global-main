@@ -11,6 +11,7 @@ import type { AssetSection, AssetCounts } from '@/lib/contracts-tabs';
 import { saveOfflineBookings, loadOfflineBookings, browserStore } from '@/lib/offline-bookings';
 import { saveOfflineAssets, loadOfflineAssets, OFFLINE_COPY_I18N } from '@/lib/offline-assets';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { al } from '@/lib/asset-labels';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
 
@@ -29,7 +30,6 @@ export function MyProperties({ language, section, onCounts }: { language: string
   const [bookings, setBookings] = useState<Booked[]>([]);
   const [holdings, setHoldings] = useState<Holding[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
-  const ar = language === 'ar';
   const show = (s: AssetSection) => section === undefined || section === s;
 
   useEffect(() => {
@@ -67,7 +67,7 @@ export function MyProperties({ language, section, onCounts }: { language: string
     {show('properties') && items.length > 0 && (
     <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
       <h2 className="text-sm font-bold text-accent flex items-center gap-2">
-        <Home className="w-4 h-4" /> {ar ? 'ممتلكاتي' : 'My properties'} ({items.length})
+        <Home className="w-4 h-4" /> {al('myProperties', language)} ({items.length})
       </h2>
       {items.map((o) => (
         <div key={o.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 p-3">
@@ -79,7 +79,7 @@ export function MyProperties({ language, section, onCounts }: { language: string
           <div className="text-right shrink-0">
             <p className="text-accent text-sm font-bold">{formatPropertyPrice({ price: o.amount, currency: o.currency }, language)}</p>
             <p className={`text-[11px] ${o.status === 'review' ? 'text-yellow-400' : 'text-green-400'}`}>
-              {o.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : (ar ? 'مؤكد' : 'Confirmed')}
+              {o.status === 'review' ? al('underReview', language) : al('confirmed', language)}
             </p>
           </div>
         </div>
@@ -90,19 +90,19 @@ export function MyProperties({ language, section, onCounts }: { language: string
     {show('shares') && holdings.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
         <h2 className="text-sm font-bold text-accent flex items-center justify-between">
-          <span>📈 {ar ? 'حصصي' : 'My shares'} ({holdings.length})</span>
-          <a href="/market" className="text-xs underline">{ar ? 'سوق الحصص' : 'Shares market'}</a>
+          <span>📈 {al('myShares', language)} ({holdings.length})</span>
+          <a href="/market" className="text-xs underline">{al('sharesMarket', language)}</a>
         </h2>
         {holdings.map((h) => (
           <div key={h.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 p-3">
             <div className="min-w-0">
               <p className="text-white text-sm font-semibold truncate">{h.propertyTitle}</p>
-              <p className="text-xs text-gray-400">{h.shares} / {h.totalShares} {ar ? 'حصة' : 'shares'} ({Math.round((h.shares / h.totalShares) * 10000) / 100}%)</p>
+              <p className="text-xs text-gray-400">{h.shares} / {h.totalShares} {al('sharesWord', language)} ({Math.round((h.shares / h.totalShares) * 10000) / 100}%)</p>
             </div>
             <div className="text-right shrink-0">
               <p className="text-accent text-sm font-bold">{h.amount} π</p>
               <p className={`text-[11px] ${h.status === 'review' ? 'text-yellow-400' : h.status === 'cancelled' ? 'text-red-400' : 'text-green-400'}`}>
-                {h.status === 'review' ? (ar ? 'قيد المراجعة' : 'Under review') : h.status === 'cancelled' ? (ar ? 'ملغي واتسجل استرداد' : 'Cancelled, refund queued') : (ar ? 'مؤكد' : 'Confirmed')}
+                {h.status === 'review' ? al('underReview', language) : h.status === 'cancelled' ? al('cancelledRefund', language) : al('confirmed', language)}
               </p>
             </div>
           </div>
@@ -112,19 +112,19 @@ export function MyProperties({ language, section, onCounts }: { language: string
     {show('owed') && payouts.length > 0 && (
       <section className="rounded-lg border border-accent/40 p-4 space-y-3" style={{ backgroundColor: '#1a2332' }}>
         <h2 className="text-sm font-bold text-accent flex items-center justify-between">
-          <span>💸 {ar ? 'مستحقاتي' : 'Owed to me'}</span>
-          {pendingOwed(payouts) > 0 && <span className="text-xs text-yellow-400">{ar ? 'قيد التحويل' : 'Pending'}: {pendingOwed(payouts)} π</span>}
+          <span>💸 {al('owedToMe', language)}</span>
+          {pendingOwed(payouts) > 0 && <span className="text-xs text-yellow-400">{al('pending', language)}: {pendingOwed(payouts)} π</span>}
         </h2>
         {payouts.map((p) => (
           <div key={p.id} className="flex items-center justify-between gap-3 rounded-md border border-white/10 p-3">
-            <p className="text-white text-sm">{p.kind === 'refund' ? (ar ? 'استرداد' : 'Refund') : (ar ? 'حصيلة بيع حصص' : 'Share sale proceeds')}</p>
+            <p className="text-white text-sm">{p.kind === 'refund' ? al('refund', language) : al('shareProceeds', language)}</p>
             <div className="text-right shrink-0">
               <p className="text-accent text-sm font-bold">{p.amount} π</p>
-              <p className={`text-[11px] ${p.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>{p.status === 'paid' ? (ar ? 'اتحوّلت' : 'Paid') : (ar ? 'قيد التحويل' : 'Pending')}</p>
+              <p className={`text-[11px] ${p.status === 'paid' ? 'text-green-400' : 'text-yellow-400'}`}>{p.status === 'paid' ? al('paid', language) : al('pending', language)}</p>
             </div>
           </div>
         ))}
-        <p className="text-[11px] text-gray-500">{ar ? 'التحويل بيتم يدويًا من فريق المنصة.' : 'The platform team sends these by hand.'}</p>
+        <p className="text-[11px] text-gray-500">{al('manualNote', language)}</p>
       </section>
     )}
     </>
