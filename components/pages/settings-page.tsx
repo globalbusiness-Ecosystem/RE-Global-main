@@ -37,6 +37,8 @@ import { UserAvatar } from '@/components/user-avatar';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { AVATAR_I18N } from '@/lib/avatar';
+import { ProfileChecklist } from '@/components/profile-checklist';
+import { profileSteps, type ProfileStepId } from '@/lib/profile-steps';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
@@ -325,6 +327,16 @@ export default function SettingsPage({
 
       {activeTab === 'profile' && (
         <div className="space-y-4">
+          <ProfileChecklist
+            language={language}
+            steps={profileSteps({ hasPicture: Boolean(avatar), piVerified: isPiVerified, emailVerified: profileVerified, invitedSomeone: referralCount > 0 })}
+            onStep={(id: ProfileStepId) => {
+              if (id === 'picture') setPickerOpen(true);
+              else if (id === 'email') setActiveTab('security');
+              else if (id === 'invite') handleCopyReferral();
+            }}
+          />
+
           <div className="bg-card border border-border rounded-lg p-4">
             <SectionLabel icon={Users}>
               {language === 'ar' ? 'كود الإحالة' : 'Referral Code'}
