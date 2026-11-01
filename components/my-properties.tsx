@@ -9,6 +9,8 @@ import { pendingOwed } from '@/lib/market-rules';
 import { MyBookingsList, type Booked } from '@/components/my-bookings-list';
 import type { AssetSection, AssetCounts } from '@/lib/contracts-tabs';
 import { saveOfflineBookings, loadOfflineBookings, browserStore } from '@/lib/offline-bookings';
+import { saveOfflineAssets, loadOfflineAssets, OFFLINE_COPY_I18N } from '@/lib/offline-assets';
+import type { NavLanguage } from '@/lib/nav-i18n';
 
 type Owned = { id: string; propertyTitle: string; location?: string | null; amount: number; currency: string; status: string; createdAt: string | null; paymentId: string };
 
@@ -35,14 +37,16 @@ export function MyProperties({ language, section, onCounts }: { language: string
     let alive = true;
     fetch('/api/my-properties', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : { items: [] }))
-      .then((d) => { if (alive) { setOfflineAt(null); setItems(Array.isArray(d.items) ? d.items : []); setBookings(Array.isArray(d.bookings) ? d.bookings : []); { const st = browserStore(); if (st && uid && Array.isArray(d.bookings)) saveOfflineBookings(st, uid, d.bookings, Date.now()); } setHoldings(Array.isArray(d.holdings) ? d.holdings : []); setPayouts(Array.isArray(d.payouts) ? d.payouts : []); } })
+      .then((d) => { if (alive) { setOfflineAt(null); setItems(Array.isArray(d.items) ? d.items : []); setBookings(Array.isArray(d.bookings) ? d.bookings : []); { const st = browserStore(); if (st && uid && Array.isArray(d.bookings)) saveOfflineBookings(st, uid, d.bookings, Date.now()); } setHoldings(Array.isArray(d.holdings) ? d.holdings : []); setPayouts(Array.isArray(d.payouts) ? d.payouts : []); { const st = browserStore(); if (st && uid && Array.isArray(d.holdings) && Array.isArray(d.payouts)) saveOfflineAssets(st, uid, { holdings: d.holdings, payouts: d.payouts }, Date.now()); } } })
       .catch(() => {
         if (!alive) return;
         // The network is down: show the last copy of this user's own bookings, clearly marked as old.
         const st = browserStore();
         const saved = st && uid ? loadOfflineBookings(st, uid, Date.now()) : null;
         setItems([]);
+        const savedAssets = st && uid ? loadOfflineAssets(st, uid, Date.now()) : null;
         if (saved) { setBookings(saved.bookings); setOfflineAt(saved.at); }
+        if (savedAssets) { setHoldings(savedAssets.holdings as Holding[]); setPayouts(savedAssets.payouts); setOfflineAt((prev) => Math.max(prev ?? 0, savedAssets.at)); }
       });
     return () => { alive = false; };
   }, [accessToken, uid]);
@@ -55,9 +59,9 @@ export function MyProperties({ language, section, onCounts }: { language: string
   if (!items || (items.length === 0 && bookings.length === 0 && holdings.length === 0 && payouts.length === 0)) return null;
   return (
     <>
-    {offlineAt !== null && show('bookings') && (
+    {offlineAt !== null && (
       <p role="status" className="rounded-md border border-yellow-500/40 bg-yellow-500/10 p-2 text-xs text-yellow-300">
-        {ar ? `مفيش اتصال بالإنترنت. دي آخر نسخة من حجوزاتك (${formatDate(new Date(offlineAt).toISOString(), language)}).` : `You are offline. This is the last saved copy of your bookings (${formatDate(new Date(offlineAt).toISOString(), language)}).`}
+        {(OFFLINE_COPY_I18N[language as NavLanguage] ?? OFFLINE_COPY_I18N.en).replace('{date}', formatDate(new Date(offlineAt).toISOString(), language))}
       </p>
     )}
     {show('properties') && items.length > 0 && (
