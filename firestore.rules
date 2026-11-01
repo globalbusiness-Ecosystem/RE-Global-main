@@ -15,7 +15,8 @@ rules_version = '2';
 //   bookings, booking_calendars, property_reservations,
 //   share_holdings, share_holds, share_locks, share_listings, share_transfers,
 //   ownerships, payouts (refunds and resale proceeds the admin pays by hand),
-//   csp_reports (counters from the report-only content security policy)
+//   csp_reports (counters from the report-only content security policy),
+//   avatars (private profile pictures; only /api/my-avatar reads and writes them, only for their owner)
 // Money and share state must never be client-writable: every change goes
 // through an API route that checks the Pi payment first.
 
