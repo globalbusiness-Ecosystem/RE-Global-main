@@ -37,6 +37,7 @@ import { UserAvatar } from '@/components/user-avatar';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { AVATAR_I18N } from '@/lib/avatar';
+import { sl, type SettingsLabelKey } from '@/lib/settings-labels';
 import { ProfileChecklist } from '@/components/profile-checklist';
 import { profileSteps, type ProfileStepId } from '@/lib/profile-steps';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
@@ -73,15 +74,10 @@ type SettingsTab = 'profile' | 'rewards' | 'security' | 'notifications';
 
 const TAB_ICONS: Record<SettingsTab, LucideIcon> = { profile: User, rewards: Gift, security: ShieldCheck, notifications: Bell };
 
-const TAB_LABELS: Record<SettingsTab, { en: string; ar: string }> = {
-  profile: { en: 'Profile', ar: 'الملف الشخصي' },
-  rewards: { en: 'Rewards', ar: 'المكافآت' },
-  security: { en: 'Security', ar: 'الأمان' },
-  notifications: { en: 'Notifications', ar: 'الإشعارات' },
-};
+const TAB_KEYS: Record<SettingsTab, SettingsLabelKey> = { profile: 'tabProfile', rewards: 'tabRewards', security: 'tabSecurity', notifications: 'tabNotifications' };
 
 function tabLabel(tab: SettingsTab, language: NavLanguage) {
-  return language === 'ar' ? TAB_LABELS[tab].ar : TAB_LABELS[tab].en;
+  return sl(TAB_KEYS[tab], language);
 }
 
 function SectionLabel({ children, icon }: { children: React.ReactNode; icon?: LucideIcon }) {
@@ -221,10 +217,10 @@ export default function SettingsPage({
 
   const securityScore = !isPiVerified ? 30 : profileVerified ? 95 : 65;
   const securityLabel = !isPiVerified
-    ? (language === 'ar' ? 'أساسي' : 'Basic')
+    ? sl('secBasic', language)
     : profileVerified
-      ? (language === 'ar' ? 'ممتاز' : 'Excellent')
-      : (language === 'ar' ? 'جيد' : 'Good');
+      ? sl('secExcellent', language)
+      : sl('secGood', language);
   const securityColor = !isPiVerified ? '#f59e0b' : profileVerified ? '#22c55e' : '#3b82f6';
 
   return (
@@ -260,12 +256,12 @@ export default function SettingsPage({
           </div>
           <div className="min-w-0 max-w-full">
             <p className="font-bold text-foreground text-lg truncate">
-              {username ? `@${username}` : (language === 'ar' ? 'زائر' : 'Guest')}
+              {username ? `@${username}` : sl('guest', language)}
             </p>
             <p className="text-xs text-muted-foreground">
               {isPiVerified
-                ? (language === 'ar' ? 'متصل عبر Pi Network' : 'Connected via Pi Network')
-                : (language === 'ar' ? 'غير متصل' : 'Not connected')}
+                ? sl('connectedPi', language)
+                : sl('notConnected', language)}
             </p>
           </div>
         </div>
@@ -278,7 +274,7 @@ export default function SettingsPage({
           </div>
           <div className="flex-1 min-w-0">
             <p className="text-sm text-foreground">
-              {language === 'ar' ? 'مستوى أمان الحساب: ' : 'Account security: '}
+              {sl('securityLevel', language)}
               <span className="font-semibold" style={{ color: securityColor }}>{securityLabel}</span>
             </p>
             <div className="w-full h-1.5 bg-muted rounded-full mt-1.5 overflow-hidden">
@@ -339,7 +335,7 @@ export default function SettingsPage({
 
           <div className="bg-card border border-border rounded-lg p-4">
             <SectionLabel icon={Users}>
-              {language === 'ar' ? 'كود الإحالة' : 'Referral Code'}
+              {sl('referralCode', language)}
             </SectionLabel>
             <div className="flex items-center justify-between bg-muted rounded-lg px-3 py-2.5">
               <span className="font-mono text-sm text-foreground">
@@ -350,13 +346,11 @@ export default function SettingsPage({
                 className="flex items-center gap-1 text-xs text-accent font-medium"
               >
                 <Copy className="w-3.5 h-3.5" />
-                {copied ? (language === 'ar' ? 'تم النسخ' : 'Copied') : (language === 'ar' ? 'نسخ' : 'Copy')}
+                {copied ? sl('copied', language) : sl('copy', language)}
               </button>
             </div>
             <p className="text-xs text-muted-foreground mt-2">
-              {language === 'ar'
-                ? `عدد الأشخاص الذين استخدموا كودك: ${referralCount}`
-                : `People who used your code: ${referralCount}`}
+              {sl('referralCount', language, referralCount)}
             </p>
           </div>
 
@@ -364,7 +358,7 @@ export default function SettingsPage({
             <div className="divide-y divide-border">
               <div className="flex items-center justify-between px-4 py-3.5">
                 <span className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'اسم المستخدم' : 'Username'}
+                  {sl('username', language)}
                 </span>
                 <span className="text-sm font-medium text-foreground">
                   {username ? `@${username}` : '—'}
@@ -372,7 +366,7 @@ export default function SettingsPage({
               </div>
               <div className="flex items-center justify-between px-4 py-3.5">
                 <span className="text-sm text-muted-foreground">
-                  {language === 'ar' ? 'حالة التحقق' : 'Verification'}
+                  {sl('verification', language)}
                 </span>
                 <span
                   className={`text-sm font-medium ${
@@ -384,10 +378,10 @@ export default function SettingsPage({
                   }`}
                 >
                   {!isPiVerified
-                    ? (language === 'ar' ? 'غير موثّق' : 'Unverified')
+                    ? sl('unverified', language)
                     : profileVerified
-                      ? (language === 'ar' ? 'موثّق بالكامل' : 'Fully verified')
-                      : (language === 'ar' ? 'موثّق عبر Pi' : 'Verified via Pi')}
+                      ? sl('fullyVerified', language)
+                      : sl('verifiedPi', language)}
                 </span>
               </div>
               <button
@@ -396,7 +390,7 @@ export default function SettingsPage({
               >
                 <span className="flex items-center gap-3 text-sm font-medium text-foreground">
                   <IconBadge icon={Users} size="sm" />
-                  {language === 'ar' ? 'المجتمع' : 'Community'}
+                  {sl('community', language)}
                 </span>
                 <RowChevron />
               </button>
@@ -488,7 +482,7 @@ export default function SettingsPage({
 
           <div className="bg-card border border-border rounded-lg p-4">
             <SectionLabel icon={ShieldCheck}>
-              {language === 'ar' ? 'البيانات والخصوصية' : 'Data & Privacy'}
+              {sl('dataPrivacy', language)}
             </SectionLabel>
             <div className="space-y-2">
               <a
@@ -497,7 +491,7 @@ export default function SettingsPage({
                 rel="noopener noreferrer"
                 className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
               >
-                <span className="flex items-center gap-3"><IconBadge icon={Lock} size="sm" />{language === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy'}</span>
+                <span className="flex items-center gap-3"><IconBadge icon={Lock} size="sm" />{sl('privacyPolicy', language)}</span>
                 <RowChevron />
               </a>
               <a
@@ -548,27 +542,27 @@ export default function SettingsPage({
         <div className="space-y-4">
           <div className="bg-card border border-border rounded-lg p-4">
             <SectionLabel icon={ShieldCheck}>
-              {language === 'ar' ? 'حالة الحساب' : 'Account Status'}
+              {sl('accountStatus', language)}
             </SectionLabel>
             <div className="space-y-2 text-sm">
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-muted-foreground">
-                  {language === 'ar' ? 'التحقق عبر Pi Network' : 'Pi Network Verification'}
+                  {sl('piVerification', language)}
                 </span>
                 <span className={isPiVerified ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
                   {isPiVerified
-                    ? (language === 'ar' ? 'مفعّل' : 'Active')
-                    : (language === 'ar' ? 'غير مفعّل' : 'Not connected')}
+                    ? sl('active', language)
+                    : sl('notConnected', language)}
                 </span>
               </div>
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-muted-foreground">
-                  {language === 'ar' ? 'توثيق البريد الإلكتروني' : 'Email verification'}
+                  {sl('emailVerification', language)}
                 </span>
                 <span className={profileVerified ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
                   {profileVerified
-                    ? (language === 'ar' ? 'موثّق' : 'Verified')
-                    : (language === 'ar' ? 'غير موثّق' : 'Not verified')}
+                    ? sl('verified', language)
+                    : sl('notVerified', language)}
                 </span>
               </div>
             </div>
@@ -577,9 +571,7 @@ export default function SettingsPage({
                 onClick={() => onNavigate?.('profile')}
                 className="w-full mt-3 text-xs font-medium text-accent hover:opacity-80 transition text-left rtl:text-right"
               >
-                {language === 'ar'
-                  ? '+ وثّق بريدك الإلكتروني في الملف الشخصي لرفع مستوى الأمان'
-                  : '+ Verify your email in your profile to raise your security level'}
+                {sl('verifyEmailHint', language)}
               </button>
             )}
           </div>
@@ -644,28 +636,28 @@ export default function SettingsPage({
                 <div className="flex items-center gap-3">
                   <TrendingUp className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
-                    {language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'}
+                    {sl('priceAlerts', language)}
                   </p>
                 </div>
-                <ToggleSwitch label={language === 'ar' ? 'تنبيهات الأسعار' : 'Price alerts'} checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
+                <ToggleSwitch label={sl('priceAlerts', language)} checked={priceAlerts} onClick={handlePriceAlertsToggle} small />
               </div>
               <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
                   <Home className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
-                    {language === 'ar' ? 'عقارات جديدة' : 'New listings'}
+                    {sl('newListings', language)}
                   </p>
                 </div>
-                <ToggleSwitch label={language === 'ar' ? 'عقارات جديدة' : 'New listings'} checked={newListings} onClick={handleNewListingsToggle} small />
+                <ToggleSwitch label={sl('newListings', language)} checked={newListings} onClick={handleNewListingsToggle} small />
               </div>
               <div className="flex items-center justify-between px-4 py-3 ps-11">
                 <div className="flex items-center gap-3">
                   <FileCheck2 className="w-4 h-4 text-accent shrink-0" />
                   <p className="text-sm text-foreground">
-                    {language === 'ar' ? 'تحديثات العقود' : 'Contract updates'}
+                    {sl('contractUpdates', language)}
                   </p>
                 </div>
-                <ToggleSwitch label={language === 'ar' ? 'تحديثات العقود' : 'Contract updates'} checked={contractUpdates} onClick={handleContractUpdatesToggle} small />
+                <ToggleSwitch label={sl('contractUpdates', language)} checked={contractUpdates} onClick={handleContractUpdatesToggle} small />
               </div>
             </>
           )}
