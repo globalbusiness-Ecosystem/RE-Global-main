@@ -6,6 +6,7 @@ import { Loader2, CheckCircle, AlertCircle, QrCode } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { PRODUCT_CONFIG } from '@/lib/product-config';
 import type { Product } from '@/lib/sdklite-types';
+import { qp, qrMessages } from '@/lib/qr-payment-labels';
 
 interface QRPaymentButtonProps {
   propertyId: string;
@@ -19,32 +20,6 @@ interface PaymentState {
   status: 'idle' | 'processing' | 'success' | 'error';
   message?: string;
 }
-
-// Memoized error messages object to avoid recreating on each render
-const ERROR_MESSAGES = {
-  en: {
-    notAvailable: 'Payment system not available',
-    success: 'QR Code generated successfully!',
-    productNotFound: 'Product not found',
-    purchaseCancelled: 'Purchase cancelled',
-    purchaseError: 'Purchase error',
-    paymentFailed: 'Payment failed',
-    retry: 'Retry',
-    generateQR: 'Generate QR',
-    qrGenerated: 'QR Generated',
-  },
-  ar: {
-    notAvailable: 'نظام الدفع غير متاح',
-    success: 'تم إنشاء رمز QR بنجاح!',
-    productNotFound: 'المنتج غير موجود',
-    purchaseCancelled: 'تم إلغاء الشراء',
-    purchaseError: 'خطأ في الشراء',
-    paymentFailed: 'فشل الدفع',
-    retry: 'إعادة محاولة',
-    generateQR: 'إنشاء QR',
-    qrGenerated: 'تم إنشاء QR',
-  },
-};
 
 function QRPaymentButtonComponent({
   propertyId,
@@ -83,7 +58,7 @@ function QRPaymentButtonComponent({
   }, [productData, purchaseQuantity, product, quantity]);
 
   // Memoize message lookup
-  const messages = useMemo(() => ERROR_MESSAGES[language === 'ar' ? 'ar' : 'en'], [language]);
+  const messages = useMemo(() => qrMessages(language), [language]);
 
   // Memoize purchase handler with useCallback
   const handlePurchase = useCallback(async () => {
@@ -158,17 +133,12 @@ function QRPaymentButtonComponent({
   // Memoize button label
   const buttonLabel = useMemo(() => {
     if (!product) return messages.generateQR;
-    return language !== 'ar'
-      ? `Generate QR - ${priceLabel}`
-      : `إنشاء QR - ${priceLabel}`;
+    return qp('generateQRPrice', language, priceLabel);
   }, [product, priceLabel, language, messages]);
 
   // Memoize button title
   const buttonTitle = useMemo(
-    () =>
-      language !== 'ar'
-        ? `Generate QR Code - ${priceLabel}`
-        : `إنشاء رمز QR - ${priceLabel}`,
+    () => qp('generateQRTitle', language, priceLabel),
     [language, priceLabel]
   );
 
@@ -179,7 +149,7 @@ function QRPaymentButtonComponent({
         className={`w-full py-2 px-3 rounded-lg text-xs font-medium opacity-50 cursor-not-allowed flex items-center justify-center gap-2 bg-accent/20 text-accent ${className}`}
       >
         <QrCode className="w-3 h-3" />
-        {language !== 'ar' ? 'QR System' : 'نظام QR'}
+        {qp('qrSystem', language)}
       </button>
     );
   }
