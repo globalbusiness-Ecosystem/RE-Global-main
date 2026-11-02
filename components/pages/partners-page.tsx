@@ -3,6 +3,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Users, Building2, Mail, Phone } from 'lucide-react';
 import { useSiteContent } from '@/lib/useSiteContent';
+import { qs } from '@/lib/scanner-labels';
 
 interface PartnersPageProps {
   language: NavLanguage;
@@ -25,18 +26,16 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
         )}
         <div>
           <h1 className="text-3xl font-bold text-accent">
-            {language === 'en' ? 'Our Partners' : 'شركاؤنا'}
+            {qs('ourPartners', language)}
           </h1>
         </div>
       </div>
       <p className="text-gray-300 mb-6">
-        {language === 'en'
-          ? 'Trusted real estate partners worldwide'
-          : 'شركاء العقارات الموثوقين في جميع أنحاء العالم'}
+        {qs('partnersTagline', language)}
       </p>
 
       {!loading && partners.length === 0 && (
-        <p className="text-gray-400 text-center py-8">{language === 'ar' ? 'الشركاء قريباً' : 'Partners coming soon'}</p>
+        <p className="text-gray-400 text-center py-8">{qs('partnersSoon', language)}</p>
       )}
 
       <div className="space-y-4">
@@ -75,7 +74,7 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
                     href={partner.contact.includes('@') ? `mailto:${partner.contact}` : `tel:${partner.contact}`}
                     className="flex-1 bg-accent text-accent-foreground rounded-lg py-2 font-medium hover:opacity-90 transition text-sm text-center"
                   >
-                    {language === 'en' ? 'Contact' : 'اتصل'}
+                    {qs('contact', language)}
                   </a>
                 )}
                 {partner.website && (
@@ -85,7 +84,7 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
                     rel="noopener noreferrer"
                     className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm text-center"
                   >
-                    {language === 'en' ? 'Visit' : 'زيارة'}
+                    {qs('visit', language)}
                   </a>
                 )}
               </div>
@@ -96,15 +95,13 @@ export default function PartnersPage({ language, onBack, showBackButton }: Partn
 
       <div className="mt-8 bg-card border border-border rounded-lg p-6 mb-4">
         <h3 className="text-lg font-semibold text-accent mb-4">
-          {language === 'en' ? 'Become a Partner' : 'كن شريكًا'}
+          {qs('becomePartner', language)}
         </h3>
         <p className="text-sm text-muted-foreground mb-4">
-          {language === 'en'
-            ? 'Join RE Platform and grow your real estate business'
-            : 'انضم إلى منصة RE وطور أعمالك العقارية'}
+          {qs('joinPlatform', language)}
         </p>
         <button className="w-full bg-accent text-accent-foreground rounded-lg py-3 font-medium hover:opacity-90 transition">
-          {language === 'en' ? 'Apply Now' : 'تقديم الطلب الآن'}
+          {qs('applyNow', language)}
         </button>
       </div>
     </main>

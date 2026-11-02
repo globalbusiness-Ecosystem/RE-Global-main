@@ -1,6 +1,7 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { a11yLabels } from '@/lib/a11y-labels';
+import { qs } from '@/lib/scanner-labels';
 
 import { useEffect, useRef, useState } from 'react';
 import { X, Camera, AlertTriangle, ImageUp } from 'lucide-react';
@@ -13,7 +14,6 @@ interface QRScannerModalProps {
 }
 
 export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProps) {
-  const isArabic = language === 'ar';
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -39,7 +39,7 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
       if (code && code.data) {
         onScan(code.data);
       } else {
-        setError(isArabic ? 'لم يتم العثور على QR في هذه الصورة' : 'No QR code found in this image');
+        setError(qs('noQr', language));
       }
     };
     img.src = url;
@@ -65,11 +65,7 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
         scanLoop();
       } catch (e) {
         console.error('[QRScanner] Camera error:', e);
-        setError(
-          isArabic
-            ? 'تعذر الوصول للكاميرا. تأكد من إعطاء الإذن.'
-            : 'Could not access the camera. Please grant permission.'
-        );
+        setError(qs('noCamera', language));
       }
     };
 
@@ -116,7 +112,7 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
         <div className="flex items-center gap-2 text-white">
           <Camera className="w-5 h-5" />
           <span className="text-sm font-medium">
-            {isArabic ? 'وجّه الكاميرا نحو الـ QR' : 'Point the camera at the QR code'}
+            {qs('pointCamera', language)}
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -125,7 +121,7 @@ export function QRScannerModal({ language, onScan, onClose }: QRScannerModalProp
             className="flex items-center gap-1.5 text-xs text-white/80 hover:text-white px-2.5 py-1.5 rounded-md hover:bg-white/10"
           >
             <ImageUp className="w-4 h-4" />
-            {isArabic ? 'رفع صورة' : 'Upload image'}
+            {qs('uploadImage', language)}
           </button>
           <input
             ref={fileInputRef}
