@@ -52,7 +52,7 @@ export async function GET(req: NextRequest) {
     const payouts = psnap.docs
       .map((d) => {
         const x = d.data() as Record<string, any>;
-        return { id: d.id, kind: x.kind, amount: Number(x.amount) || 0, status: x.status, createdAt: x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : null };
+        return { id: d.id, kind: x.kind, amount: Number(x.amount) || 0, status: x.status, createdAt: x.createdAt?.toDate ? x.createdAt.toDate().toISOString() : null, paidAt: x.paidAt?.toDate ? x.paidAt.toDate().toISOString() : null };
       })
       .sort((a: any, b: any) => String(b.createdAt).localeCompare(String(a.createdAt)));
     return NextResponse.json({ items, bookings: bookingsOut, holdings, payouts }, { headers: { 'Cache-Control': 'no-store' } });

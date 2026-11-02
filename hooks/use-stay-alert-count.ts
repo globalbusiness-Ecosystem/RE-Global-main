@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { stayAlerts, type StayBooking } from '@/lib/stay-alerts';
+import { payoutAlerts, type PayoutRow } from '@/lib/payout-alerts';
 import { unseenCount, loadSeen, ALERTS_SEEN_EVENT } from '@/lib/alert-badge';
 import { browserStore } from '@/lib/offline-bookings';
 
@@ -22,7 +23,8 @@ export function useStayAlertCount(currentPage: string): number {
       .then((d) => {
         if (!alive) return;
         const bookings = Array.isArray(d?.bookings) ? (d.bookings as StayBooking[]) : [];
-        setIds(stayAlerts(bookings, new Date().toISOString().slice(0, 10)).map((a) => a.id));
+        const payouts = Array.isArray(d?.payouts) ? (d.payouts as PayoutRow[]) : [];
+        setIds([...stayAlerts(bookings, new Date().toISOString().slice(0, 10)), ...payoutAlerts(payouts, Date.now())].map((a) => a.id));
       })
       .catch(() => { if (alive) setIds([]); });
     return () => { alive = false; };

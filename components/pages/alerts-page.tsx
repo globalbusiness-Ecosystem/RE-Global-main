@@ -2,13 +2,14 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
-import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2, BedDouble } from 'lucide-react';
+import { Bell, X, TrendingUp, TrendingDown, ScrollText, Sparkles, Loader2, BedDouble, Coins } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 import { useProperties } from '@/lib/useProperties';
 import { generateSmartAlerts, type SmartAlert } from '@/lib/smart-alerts';
 import { stayAlerts, type StayBooking } from '@/lib/stay-alerts';
+import { payoutAlerts, type PayoutRow } from '@/lib/payout-alerts';
 import { markSeen, ALERTS_SEEN_EVENT } from '@/lib/alert-badge';
 import { browserStore } from '@/lib/offline-bookings';
 
@@ -23,6 +24,7 @@ const ICONS: Record<SmartAlert['type'], any> = {
   'contract-status': ScrollText,
   recommendation: Sparkles,
   stay: BedDouble,
+  payout: Coins,
 };
 
 const COLORS: Record<SmartAlert['type'], string> = {
@@ -31,6 +33,7 @@ const COLORS: Record<SmartAlert['type'], string> = {
   'contract-status': 'border-blue-500/30 bg-blue-500/5 text-blue-400',
   recommendation: 'border-purple-500/30 bg-purple-500/5 text-purple-400',
   stay: 'border-yellow-500/30 bg-yellow-500/5 text-yellow-400',
+  payout: 'border-emerald-500/30 bg-emerald-500/5 text-emerald-400',
 };
 
 export default function AlertsPage({ language, onBack }: AlertsPageProps) {
@@ -48,21 +51,21 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
       setLoading(false);
       return;
     }
-    // Stay alerts come from the guest's own bookings; if they cannot be loaded the other alerts still show.
-    const stays: Promise<StayBooking[]> = accessToken
+    // Stay and payout alerts come from the user's own records; if they cannot be loaded the other alerts still show.
+    const own: Promise<{ bookings: StayBooking[]; payouts: PayoutRow[] }> = accessToken
       ? fetch('/api/my-properties', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
           .then((r) => (r.ok ? r.json() : null))
-          .then((d) => (Array.isArray(d?.bookings) ? (d.bookings as StayBooking[]) : []))
-          .catch(() => [])
-      : Promise.resolve([]);
-    Promise.all([getFavoritesForUser(username), getContractsForUser(username), stays]).then(
-      ([favorites, contracts, bookings]) => {
+          .then((d) => ({ bookings: Array.isArray(d?.bookings) ? (d.bookings as StayBooking[]) : [], payouts: Array.isArray(d?.payouts) ? (d.payouts as PayoutRow[]) : [] }))
+          .catch(() => ({ bookings: [], payouts: [] }))
+      : Promise.resolve({ bookings: [], payouts: [] });
+    Promise.all([getFavoritesForUser(username), getContractsForUser(username), own]).then(
+      ([favorites, contracts, mine]) => {
         const today = new Date().toISOString().slice(0, 10);
-        const stay = stayAlerts(bookings, today);
-        // Opening the tab counts as seeing the stay alerts: the red dot on the tab clears.
-        markSeen(browserStore(), user?.uid ?? '', stay.map((a) => a.id));
+        const personal = [...stayAlerts(mine.bookings, today), ...payoutAlerts(mine.payouts, Date.now())];
+        // Opening the tab counts as seeing these alerts: the red dot on the tab clears.
+        markSeen(browserStore(), user?.uid ?? '', personal.map((a) => a.id));
         window.dispatchEvent(new Event(ALERTS_SEEN_EVENT));
-        setAlerts([...stay, ...generateSmartAlerts(favorites, properties, contracts)]);
+        setAlerts([...personal, ...generateSmartAlerts(favorites, properties, contracts)]);
         setLoading(false);
       }
     );

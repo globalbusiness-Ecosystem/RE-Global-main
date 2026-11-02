@@ -3,7 +3,7 @@ import type { Property } from './useProperties';
 
 export interface SmartAlert {
   id: string;
-  type: 'price-up' | 'price-down' | 'contract-status' | 'recommendation' | 'stay';
+  type: 'price-up' | 'price-down' | 'contract-status' | 'recommendation' | 'stay' | 'payout';
   titleEn: string;
   titleAr: string;
   descriptionEn: string;
