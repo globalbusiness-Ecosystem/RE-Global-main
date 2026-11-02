@@ -5,6 +5,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Camera, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { deviceMediaService, type CapturedMedia } from '@/lib/device-media-service';
 import { Button } from '@/components/ui/button';
+import { mediaLabels } from '@/lib/media-capture-labels';
 
 export type { CapturedMedia } from '@/lib/device-media-service';
 
@@ -27,38 +28,8 @@ export function MediaCapture({
   const [preview, setPreview] = useState<CapturedMedia | null>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
-  const isArabic = language === 'ar';
-
-  const labels = {
-    en: {
-      takPhoto: 'Take Photo',
-      selectGallery: 'Select from Gallery',
-      capture: 'Capture',
-      cancel: 'Cancel',
-      upload: 'Upload to Aladdin',
-      remove: 'Remove',
-      uploading: 'Uploading...',
-      analyzing: 'Analyzing property...',
-      error: 'Error',
-      permissionDenied: 'Camera permission denied',
-      noCamera: 'No camera found',
-    },
-    ar: {
-      takPhoto: 'التقط صورة',
-      selectGallery: 'اختر من الصور',
-      capture: 'التقط',
-      cancel: 'إلغاء',
-      upload: 'رفع إلى علاء الدين',
-      remove: 'إزالة',
-      uploading: 'جاري الرفع...',
-      analyzing: 'جاري تحليل العقار...',
-      error: 'خطأ',
-      permissionDenied: 'تم رفض الوصول للكاميرا',
-      noCamera: 'لا توجد كاميرا متاحة',
-    },
-  };
-
-  const t = labels[isArabic ? 'ar' : 'en'];
+  const isRTL = language === 'ar' || language === 'ur';
+  const t = mediaLabels(language);
 
   // Initialize camera
   const handleOpenCamera = async () => {
@@ -146,7 +117,7 @@ export function MediaCapture({
   };
 
   return (
-    <div className={`flex flex-col gap-4 p-4 rounded-lg border border-slate-700 bg-slate-950 ${isArabic ? 'rtl' : 'ltr'}`}>
+    <div className={`flex flex-col gap-4 p-4 rounded-lg border border-slate-700 bg-slate-950 ${isRTL ? 'rtl' : 'ltr'}`}>
       {/* Camera View */}
       {isCameraOpen && (
         <div className="relative rounded-lg overflow-hidden bg-black">
