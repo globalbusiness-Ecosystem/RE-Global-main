@@ -1,5 +1,6 @@
 import type { Favorite, SmartContract } from './firebase-database';
 import type { Property } from './useProperties';
+import type { AlertI18n } from './alert-labels';
 
 export interface SmartAlert {
   id: string;
@@ -10,6 +11,8 @@ export interface SmartAlert {
   descriptionAr: string;
   createdAt: Date;
   propertyId?: string;
+  // Same texts in all 7 languages; the page shows these and falls back to the En/Ar pair when absent.
+  i18n?: AlertI18n;
 }
 
 export function generateSmartAlerts(
@@ -37,6 +40,7 @@ export function generateSmartAlerts(
       descriptionAr: `${current.titleAr || current.title}: ${fav.priceAtFavorite.toLocaleString()} ← ${current.price.toLocaleString()} (${pct > 0 ? '+' : ''}${pct}%)`,
       createdAt: new Date(),
       propertyId: current.id,
+      i18n: { title: diff < 0 ? 'priceDrop' : 'priceUp', description: 'priceChangeD', vars: { title: current.title, titleAr: current.titleAr, from: fav.priceAtFavorite.toLocaleString(), to: current.price.toLocaleString(), pct: `${pct > 0 ? '+' : ''}${pct}` } },
     });
   }
 
@@ -51,6 +55,7 @@ export function generateSmartAlerts(
       descriptionAr: `${c.propertyTitle} — ${c.amount.toLocaleString()} ${c.currency}`,
       createdAt: c.updatedAt,
       propertyId: c.propertyId,
+      i18n: { title: c.status === 'active' ? 'contractActive' : 'contractDone', description: 'contractD', vars: { title: c.propertyTitle, amount: c.amount.toLocaleString(), currency: c.currency } },
     });
   }
 
@@ -78,6 +83,7 @@ export function generateSmartAlerts(
       descriptionAr: `${rec.titleAr || rec.title} — ${rec.price.toLocaleString()} ${rec.currency || 'π'}`,
       createdAt: new Date(),
       propertyId: rec.id,
+      i18n: { title: 'recT', description: 'recD', vars: { title: rec.title, titleAr: rec.titleAr, price: rec.price.toLocaleString(), currency: rec.currency || 'π' } },
     });
   }
 

@@ -12,6 +12,7 @@ import { stayAlerts, type StayBooking } from '@/lib/stay-alerts';
 import { payoutAlerts, type PayoutRow } from '@/lib/payout-alerts';
 import { markSeen, ALERTS_SEEN_EVENT } from '@/lib/alert-badge';
 import { browserStore } from '@/lib/offline-bookings';
+import { alertText, alertLabel } from '@/lib/alert-labels';
 
 interface AlertsPageProps {
   language: NavLanguage;
@@ -37,7 +38,6 @@ const COLORS: Record<SmartAlert['type'], string> = {
 };
 
 export default function AlertsPage({ language, onBack }: AlertsPageProps) {
-  const isArabic = language === 'ar';
   const { username, accessToken, user } = usePiAuth();
   const { getFavoritesForUser, getContractsForUser } = useFirebaseDatabase();
   const { properties } = useProperties();
@@ -80,12 +80,10 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-accent">
-                {isArabic ? 'التنبيهات الذكية' : 'Smart Alerts'}
+                {alertLabel('pageTitle', language)}
               </h1>
               <p className="text-sm text-muted-foreground mt-1">
-                {isArabic
-                  ? 'مبنية على مفضلاتك وعقودك الفعلية'
-                  : 'Based on your real favorites and contracts'}
+                {alertLabel('pageSub', language)}
               </p>
             </div>
             <div className="relative">
@@ -109,24 +107,23 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
           <Card className="bg-card border border-border p-12 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <p className="text-muted-foreground text-sm">
-              {isArabic ? 'سجّل الدخول عبر Pi لرؤية تنبيهاتك' : 'Sign in with Pi to see your alerts'}
+              {alertLabel('pageSignIn', language)}
             </p>
           </Card>
         ) : visibleAlerts.length === 0 ? (
           <Card className="bg-card border border-border p-12 text-center">
             <Bell className="w-12 h-12 text-muted-foreground mx-auto mb-4 opacity-50" />
             <p className="text-muted-foreground">
-              {isArabic ? 'لا توجد تنبيهات في الوقت الحالي' : 'No alerts at this time'}
+              {alertLabel('pageNone', language)}
             </p>
             <p className="text-xs text-muted-foreground/70 mt-2">
-              {isArabic
-                ? 'حفظ عقارات في المفضلة يساعدنا نبعتلك تنبيهات تغيّر السعر والتوصيات'
-                : 'Saving properties to favorites helps us send you price-change and recommendation alerts'}
+              {alertLabel('pageHint', language)}
             </p>
           </Card>
         ) : (
           visibleAlerts.map((alert) => {
             const AlertIcon = ICONS[alert.type];
+            const text = alertText(alert, language);
             return (
               <Card key={alert.id} className={`border transition-all ${COLORS[alert.type]} p-4`}>
                 <div className="flex gap-3">
@@ -135,10 +132,10 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
                   </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="font-semibold text-foreground text-sm">
-                      {isArabic ? alert.titleAr : alert.titleEn}
+                      {text.title}
                     </h3>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {isArabic ? alert.descriptionAr : alert.descriptionEn}
+                      {text.description}
                     </p>
                   </div>
                   <button

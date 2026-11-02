@@ -26,21 +26,21 @@ export function stayAlerts(bookings: StayBooking[], today: string): SmartAlert[]
     const at = new Date(Math.max(start, end) * DAY_MS);
     const base = { type: 'stay' as const, createdAt: at };
     if (b.status === 'review') {
-      out.push({ ...base, id: `stay-review-${b.id}`, titleEn: 'Booking under review', titleAr: 'حجزك تحت المراجعة', descriptionEn: `${title}: we are checking your payment and will confirm soon.`, descriptionAr: `${title}: بنراجع الدفع وهنأكد الحجز قريب.` });
+      out.push({ ...base, id: `stay-review-${b.id}`, titleEn: 'Booking under review', titleAr: 'حجزك تحت المراجعة', descriptionEn: `${title}: we are checking your payment and will confirm soon.`, descriptionAr: `${title}: بنراجع الدفع وهنأكد الحجز قريب.`, i18n: { title: 'stayReviewT', description: 'stayReviewD', vars: { title } } });
       continue;
     }
     if (b.status !== 'confirmed') continue;
     const until = start - now;
     if (until >= 0 && until <= CHECKIN_SOON_DAYS) {
       const when = until === 0 ? { en: 'today', ar: 'النهارده' } : until === 1 ? { en: 'tomorrow', ar: 'بكرة' } : { en: `in ${until} days`, ar: `بعد ${until} أيام` };
-      out.push({ ...base, id: `stay-soon-${b.id}`, titleEn: `Check-in ${when.en}`, titleAr: `تسجيل الوصول ${when.ar}`, descriptionEn: `${title}: ${b.start} → ${b.end}`, descriptionAr: `${title}: ${b.start} ← ${b.end}` });
+      out.push({ ...base, id: `stay-soon-${b.id}`, titleEn: `Check-in ${when.en}`, titleAr: `تسجيل الوصول ${when.ar}`, descriptionEn: `${title}: ${b.start} → ${b.end}`, descriptionAr: `${title}: ${b.start} ← ${b.end}`, i18n: { title: until === 0 ? 'checkinToday' : until === 1 ? 'checkinTomorrow' : 'checkinDays', description: 'stayDatesD', vars: { title, n: until, start: b.start, end: b.end } } });
     }
     const since = now - end;
     if (since >= 0 && since <= REVIEW_WINDOW_DAYS && !b.reviewed) {
-      out.push({ ...base, id: `stay-rate-${b.id}`, titleEn: 'How was your stay?', titleAr: 'إقامتك كانت إزاي؟', descriptionEn: `${title}: rate your stay from My bookings and earn reward points.`, descriptionAr: `${title}: قيّم إقامتك من "حجوزاتي" واكسب نقاط مكافآت.` });
+      out.push({ ...base, id: `stay-rate-${b.id}`, titleEn: 'How was your stay?', titleAr: 'إقامتك كانت إزاي؟', descriptionEn: `${title}: rate your stay from My bookings and earn reward points.`, descriptionAr: `${title}: قيّم إقامتك من "حجوزاتي" واكسب نقاط مكافآت.`, i18n: { title: 'rateT', description: 'rateD', vars: { title } } });
     }
     if (b.reviewed && b.hostReply?.trim() && since >= 0 && since <= REPLY_WINDOW_DAYS) {
-      out.push({ ...base, id: `stay-reply-${b.id}`, titleEn: 'The host replied to your review', titleAr: 'الإدارة ردّت على تقييمك', descriptionEn: `${title}: see the reply under your stay in My bookings.`, descriptionAr: `${title}: شوف الرد تحت إقامتك في "حجوزاتي".` });
+      out.push({ ...base, id: `stay-reply-${b.id}`, titleEn: 'The host replied to your review', titleAr: 'الإدارة ردّت على تقييمك', descriptionEn: `${title}: see the reply under your stay in My bookings.`, descriptionAr: `${title}: شوف الرد تحت إقامتك في "حجوزاتي".`, i18n: { title: 'replyT', description: 'replyD', vars: { title } } });
     }
   }
   // Most recent first.

@@ -27,6 +27,7 @@ export function payoutAlerts(payouts: PayoutRow[], nowMs: number): SmartAlert[] 
         titleAr: refund ? 'تم تحويل الاسترداد' : 'تم تحويل حصيلة البيع',
         descriptionEn: `${amount} π was transferred to your Pi wallet. Check your wallet.`,
         descriptionAr: `${amount} π اتحوّلت لمحفظتك على Pi. راجع محفظتك.`,
+        i18n: { title: refund ? 'refundSentT' : 'saleSentT', description: 'paidD', vars: { amount } },
       });
     } else if (p.status === 'pending') {
       out.push({
@@ -35,6 +36,7 @@ export function payoutAlerts(payouts: PayoutRow[], nowMs: number): SmartAlert[] 
         titleAr: refund ? 'الاسترداد في الطريق' : 'حصيلة البيع في الطريق',
         descriptionEn: `${amount} π is waiting for the manual transfer from the team.`,
         descriptionAr: `${amount} π مستنية التحويل اليدوي من الفريق.`,
+        i18n: { title: refund ? 'refundPendT' : 'salePendT', description: 'pendD', vars: { amount } },
       });
     }
   }
