@@ -9,6 +9,8 @@ import { useFirebaseDatabase } from '@/lib/firebase-database';
 import { useProperties } from '@/lib/useProperties';
 import { generateSmartAlerts, type SmartAlert } from '@/lib/smart-alerts';
 import { stayAlerts, type StayBooking } from '@/lib/stay-alerts';
+import { markSeen, ALERTS_SEEN_EVENT } from '@/lib/alert-badge';
+import { browserStore } from '@/lib/offline-bookings';
 
 interface AlertsPageProps {
   language: NavLanguage;
@@ -33,7 +35,7 @@ const COLORS: Record<SmartAlert['type'], string> = {
 
 export default function AlertsPage({ language, onBack }: AlertsPageProps) {
   const isArabic = language === 'ar';
-  const { username, accessToken } = usePiAuth();
+  const { username, accessToken, user } = usePiAuth();
   const { getFavoritesForUser, getContractsForUser } = useFirebaseDatabase();
   const { properties } = useProperties();
 
@@ -56,11 +58,15 @@ export default function AlertsPage({ language, onBack }: AlertsPageProps) {
     Promise.all([getFavoritesForUser(username), getContractsForUser(username), stays]).then(
       ([favorites, contracts, bookings]) => {
         const today = new Date().toISOString().slice(0, 10);
-        setAlerts([...stayAlerts(bookings, today), ...generateSmartAlerts(favorites, properties, contracts)]);
+        const stay = stayAlerts(bookings, today);
+        // Opening the tab counts as seeing the stay alerts: the red dot on the tab clears.
+        markSeen(browserStore(), user?.uid ?? '', stay.map((a) => a.id));
+        window.dispatchEvent(new Event(ALERTS_SEEN_EVENT));
+        setAlerts([...stay, ...generateSmartAlerts(favorites, properties, contracts)]);
         setLoading(false);
       }
     );
-  }, [username, accessToken, properties]);
+  }, [username, accessToken, properties, user?.uid]);
 
   const visibleAlerts = alerts.filter((a) => !dismissed.has(a.id));
 

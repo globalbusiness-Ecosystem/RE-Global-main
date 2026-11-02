@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic';
 import { toast } from 'sonner';
 import Header from '@/components/header';
 import BottomNav from '@/components/bottom-nav';
+import { useStayAlertCount } from '@/hooks/use-stay-alert-count';
 import HomePage from '@/components/pages/home-page';
 import BuyPage from '@/components/pages/buy-page';
 import RentPage from '@/components/pages/rent-page';
@@ -78,6 +79,7 @@ export default function App() {
   const { language, setLanguage } = useLanguage();
   const { getFavoritesForUser, addFavorite, removeFavorite } = useFirebaseDatabase();
   const [currentPage, setCurrentPage] = useState('home');
+  const alertCount = useStayAlertCount(currentPage);
   const [previousPage, setPreviousPage] = useState('home');
   const [currency, setCurrency] = useState<'PI' | 'USD'>('PI');
   const [favorites, setFavorites] = useState<string[]>([]);
@@ -459,7 +461,7 @@ export default function App() {
           {renderedPage}
         </Suspense>
       </div>
-      <BottomNav currentPage={currentPage} setCurrentPage={handlePageChange} language={language} />
+      <BottomNav currentPage={currentPage} setCurrentPage={handlePageChange} language={language} alertCount={alertCount} />
 
       {/* Admin PIN Modal */}
       {showAdminPin && (
