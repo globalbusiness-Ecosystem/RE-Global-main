@@ -496,28 +496,24 @@ export default function SettingsPage({
               </a>
               <a
                 href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
-                  language === 'ar' ? 'طلب بيانات الحساب' : 'Account Data Request'
+                  sl('reqDataSubject', language)
                 )}&body=${encodeURIComponent(
-                  (language === 'ar'
-                    ? 'اسم المستخدم: '
-                    : 'Username: ') + (username || (language === 'ar' ? 'غير مسجل دخول' : 'not signed in'))
+                  `${sl('usernameLabel', language)} ${username || sl('notSignedIn', language)}`
                 )}`}
                 className="flex items-center justify-between py-2 text-sm text-foreground hover:text-accent transition"
               >
-                <span className="flex items-center gap-3"><IconBadge icon={Download} size="sm" />{language === 'ar' ? 'طلب نسخة من بياناتي' : 'Request a copy of my data'}</span>
+                <span className="flex items-center gap-3"><IconBadge icon={Download} size="sm" />{sl('reqDataRow', language)}</span>
                 <RowChevron />
               </a>
               <a
                 href={`mailto:globalbusiness435@gmail.com?subject=${encodeURIComponent(
-                  language === 'ar' ? 'طلب حذف الحساب' : 'Account Deletion Request'
+                  sl('reqDeleteSubject', language)
                 )}&body=${encodeURIComponent(
-                  (language === 'ar'
-                    ? 'اسم المستخدم: '
-                    : 'Username: ') + (username || (language === 'ar' ? 'غير مسجل دخول' : 'not signed in'))
+                  `${sl('usernameLabel', language)} ${username || sl('notSignedIn', language)}`
                 )}`}
                 className="flex items-center justify-between py-2 text-sm text-red-400 hover:text-red-300 transition"
               >
-                <span className="flex items-center gap-3"><IconBadge icon={Trash2} tone="red" size="sm" />{language === 'ar' ? 'طلب حذف الحساب' : 'Request account deletion'}</span>
+                <span className="flex items-center gap-3"><IconBadge icon={Trash2} tone="red" size="sm" />{sl('reqDeleteRow', language)}</span>
                 <RowChevron className="text-red-400" />
               </a>
             </div>

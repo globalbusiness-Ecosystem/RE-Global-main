@@ -28,6 +28,13 @@ describe('settings labels', () => {
     expect(src).toContain("sl('copy'");
     for (const old of ["'Referral Code'", "'Price alerts'", "'Account Status'", "'Community'"]) expect(src).not.toContain(old);
   });
+  it('the data and deletion request rows are localized and keep the username in the email', () => {
+    const src = readFileSync('components/pages/settings-page.tsx', 'utf8');
+    expect(src).not.toMatch(/language === 'ar'/);
+    expect(src).toContain("sl('reqDeleteSubject', language)");
+    expect(sl('reqDataRow', 'es')).toBe('Solicitar una copia de mis datos');
+    expect(sl('usernameLabel', 'fr')).toBe('Nom d\'utilisateur :');
+  });
   it('every key used by the page exists', () => {
     const src = readFileSync('components/pages/settings-page.tsx', 'utf8');
     const used = [...src.matchAll(/sl\('([A-Za-z]+)'/g)].map((m) => m[1]);

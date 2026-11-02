@@ -37,6 +37,12 @@ export const SETTINGS_LABELS = {
   priceAlerts: { en: 'Price alerts', ar: 'تنبيهات الأسعار', fr: 'Alertes de prix', es: 'Alertas de precio', pt: 'Alertas de preço', ur: 'قیمت کے الرٹس', zh: '价格提醒' },
   newListings: { en: 'New listings', ar: 'عقارات جديدة', fr: 'Nouvelles annonces', es: 'Nuevos anuncios', pt: 'Novos anúncios', ur: 'نئی لسٹنگز', zh: '新房源' },
   contractUpdates: { en: 'Contract updates', ar: 'تحديثات العقود', fr: 'Mises à jour des contrats', es: 'Actualizaciones de contratos', pt: 'Atualizações de contratos', ur: 'معاہدوں کی اپ ڈیٹس', zh: '合同更新' },
+  reqDataSubject: { en: 'Account Data Request', ar: 'طلب بيانات الحساب', fr: 'Demande de données du compte', es: 'Solicitud de datos de la cuenta', pt: 'Solicitação de dados da conta', ur: 'اکاؤنٹ ڈیٹا کی درخواست', zh: '账户数据请求' },
+  reqDeleteSubject: { en: 'Account Deletion Request', ar: 'طلب حذف الحساب', fr: 'Demande de suppression du compte', es: 'Solicitud de eliminación de cuenta', pt: 'Solicitação de exclusão de conta', ur: 'اکاؤنٹ حذف کرنے کی درخواست', zh: '账户删除请求' },
+  usernameLabel: { en: 'Username:', ar: 'اسم المستخدم:', fr: 'Nom d\'utilisateur :', es: 'Nombre de usuario:', pt: 'Nome de usuário:', ur: 'صارف نام:', zh: '用户名：' },
+  notSignedIn: { en: 'not signed in', ar: 'غير مسجل دخول', fr: 'non connecté', es: 'sin iniciar sesión', pt: 'não conectado', ur: 'سائن اِن نہیں', zh: '未登录' },
+  reqDataRow: { en: 'Request a copy of my data', ar: 'طلب نسخة من بياناتي', fr: 'Demander une copie de mes données', es: 'Solicitar una copia de mis datos', pt: 'Solicitar uma cópia dos meus dados', ur: 'میرے ڈیٹا کی کاپی کی درخواست', zh: '申请我的数据副本' },
+  reqDeleteRow: { en: 'Request account deletion', ar: 'طلب حذف الحساب', fr: 'Demander la suppression du compte', es: 'Solicitar eliminar la cuenta', pt: 'Solicitar exclusão da conta', ur: 'اکاؤنٹ حذف کرنے کی درخواست کریں', zh: '申请删除账户' },
 } satisfies Record<string, Row>;
 
 export type SettingsLabelKey = keyof typeof SETTINGS_LABELS;

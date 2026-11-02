@@ -127,7 +127,6 @@ function SubScoreRow({
 
 export default function InspectionsPage({ language, onBack, onNavigate }: InspectionsPageProps) {
   const t = useTexts('inspections', language, INSPECTIONS_I18N[language]);
-  const isArabic = language === 'ar';
   const isRTL = language === 'ar' || language === 'ur';
   const demo = DEMO_INSPECTION;
 
@@ -184,9 +183,8 @@ export default function InspectionsPage({ language, onBack, onNavigate }: Inspec
       <div className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto space-y-8">
         {/* How the scan actually happens — per-property drone + robot simulation */}
         <InspectionSimulationScene
-          propertyTitleEn={demo.propertyTitleEn}
-          propertyTitleAr={demo.propertyTitleAr}
-          isArabic={isArabic}
+          propertyTitle={getDemoPropertyTitle(language)}
+          language={language}
         />
 
         {/* Hero: live health score demo */}

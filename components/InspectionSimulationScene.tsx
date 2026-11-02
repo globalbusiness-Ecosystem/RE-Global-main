@@ -8,26 +8,26 @@
 
 import { useEffect, useState } from 'react';
 import { Plane, Bot as RobotIcon, Sparkles, Link2 } from 'lucide-react';
+import type { NavLanguage } from '@/lib/nav-i18n';
+import { sim } from '@/lib/inspection-sim-labels';
 
 interface InspectionSimulationSceneProps {
-  propertyTitleEn: string;
-  propertyTitleAr: string;
-  isArabic: boolean;
+  propertyTitle: string;
+  language: NavLanguage;
 }
 
 const STAGES = [
-  { key: 'exterior', icon: Plane, labelEn: 'Drone — exterior scan', labelAr: 'الدرون — مسح خارجي' },
-  { key: 'interior', icon: RobotIcon, labelEn: 'Robot — interior scan', labelAr: 'الروبوت — مسح داخلي' },
-  { key: 'analysis', icon: Sparkles, labelEn: 'Aladdin AI — analyzing', labelAr: 'علاء الدين — تحليل' },
-  { key: 'certify', icon: Link2, labelEn: 'Certifying on-chain', labelAr: 'توثيق على البلوكتشين' },
+  { key: 'exterior', icon: Plane },
+  { key: 'interior', icon: RobotIcon },
+  { key: 'analysis', icon: Sparkles },
+  { key: 'certify', icon: Link2 },
 ] as const;
 
 const STAGE_MS = 3200;
 
 export default function InspectionSimulationScene({
-  propertyTitleEn,
-  propertyTitleAr,
-  isArabic,
+  propertyTitle,
+  language,
 }: InspectionSimulationSceneProps) {
   const [stageIdx, setStageIdx] = useState(0);
 
@@ -77,10 +77,10 @@ export default function InspectionSimulationScene({
 
       <div className="px-5 pt-5">
         <p className="text-[11px] uppercase tracking-wide text-muted-foreground mb-0.5">
-          {isArabic ? 'محاكاة حية' : 'Live simulation'}
+          {sim('live', language)}
         </p>
         <p className="text-sm font-medium text-foreground">
-          {isArabic ? propertyTitleAr : propertyTitleEn}
+          {propertyTitle}
         </p>
       </div>
 
@@ -134,7 +134,7 @@ export default function InspectionSimulationScene({
             return <Icon className="w-3.5 h-3.5 text-accent" />;
           })()}
           <span className="text-[11px] text-foreground">
-            {isArabic ? STAGES[stageIdx].labelAr : STAGES[stageIdx].labelEn}
+            {sim(STAGES[stageIdx].key, language)}
           </span>
         </div>
       </div>
@@ -154,7 +154,7 @@ export default function InspectionSimulationScene({
             >
               <Icon className="w-4 h-4" />
               <span className="text-[10px] leading-tight text-center px-1">
-                {isArabic ? s.labelAr : s.labelEn}
+                {sim(s.key, language)}
               </span>
             </button>
           );
