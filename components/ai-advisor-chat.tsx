@@ -26,6 +26,7 @@ interface AIAdvisorChatProps {
 
 import { SUGGESTED_QUESTIONS, LEGAL_FRAMEWORK, PROPERTY_DATABASE, MARKET_TRENDS, PI_PAYMENTS_GUIDE, GENERAL_ADVICE } from '@/lib/aladdin-chat-data';
 import { speakMessage, stopSpeech } from '@/lib/speech-utils';
+import { advisorText } from '@/lib/advisor-i18n';
 
 
 export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps) {
@@ -42,13 +43,9 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
 
   // Initialize with greeting message
   useEffect(() => {
-    const greeting = userContext?.username 
-      ? (language !== 'ar' 
-        ? `Hi ${userContext.username}! I'm Aladdin, your world-class real estate advisor on Pi Network. With your Pi balance of ${userContext.balance || 0} π, I can guide you through global property markets in UAE, Egypt, Saudi Arabia, USA, UK, Europe, and Asia. I specialize in investment strategies, ROI analysis, Golden Visa programs, off-plan risks, Pi payments, mortgages, market trends, and legal advice by country. What property insights do you need today?`
-        : `مرحبا ${userContext.username}! أنا علاء الدين، مستشارك العقاري العالمي على شبكة Pi. برصيدك من ${userContext.balance || 0} π، يمكنني إرشادك عبر الأسواق العقارية العالمية في الإمارات ومصر والسعودية وأمريكا والمملكة المتحدة وأوروبا وآسيا. أتخصص في استراتيجيات الاستثمار وتحليل العوائد والتأشيرات الذهبية والمخاطر والدفع بـ Pi والرهن العقاري والاتجاهات والقوانين. ما البصائر العقارية التي تحتاجها؟`)
-      : (language !== 'ar'
-        ? 'Hi! I\'m Aladdin, your world-class real estate advisor. I answer ANY question about global property markets, investments, ROI, legal advice, Pi payments, mortgages, and market trends. What can I help with?'
-        : 'مرحبا! أنا علاء الدين، مستشارك العقاري العالمي. أجيب على ANY سؤال عن الأسواق العقارية والاستثمارات والعوائد والقانون والدفع بـ Pi والرهن والاتجاهات. كيف يمكنني مساعدتك؟');
+    const greeting = userContext?.username
+      ? advisorText('greetingNamed', language, { name: userContext.username, balance: userContext.balance || 0 })
+      : advisorText('greetingPlain', language);
 
     setMessages([{
       role: 'assistant',

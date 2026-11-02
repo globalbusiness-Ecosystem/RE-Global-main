@@ -1,5 +1,6 @@
 import { guardApi } from '@/lib/api-guard';
 import { readJsonLimited, cleanString } from '@/lib/ai-input';
+import { advisorText, isAdvisorLanguage, languageInstruction } from '@/lib/advisor-i18n';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { 
   aladdinConfig, 
@@ -180,11 +181,13 @@ export async function POST(req: Request) {
 
     // Auto-detect language from message if not provided
     const detectedLanguage = providedLanguage || detectLanguage(message);
-    const isArabic = detectedLanguage === 'ar';
+    // The app's language when it is one of the 7 we support; otherwise Arabic or English from the message.
+    const replyLanguage = isAdvisorLanguage(detectedLanguage) ? detectedLanguage : detectLanguage(message);
+    const isArabic = replyLanguage === 'ar';
 
     const client = new Anthropic();
 
-    const systemPrompt = generateSystemPrompt(isArabic ? 'ar' : 'en');
+    const systemPrompt = generateSystemPrompt(isArabic ? 'ar' : 'en') + languageInstruction(replyLanguage);
 
     const enhancedMessage = `Context: ${isArabic ? 'الأسواق المرجعية' : 'Reference Markets'}: ${JSON.stringify(KNOWLEDGE_BASE.markets, null, 2)}\n\nUser Question: ${message}`;
 
@@ -204,18 +207,17 @@ export async function POST(req: Request) {
     let text = textContent && textContent.type === 'text' ? textContent.text : 'Unable to generate response';
 
     // Ensure Pi tip is included
-    if (!text.includes('💡 Pi')) {
+    // The fallback tips are written in English and Arabic only; for the other languages the AI's own closing tip stays.
+    if (!text.includes('💡') && (replyLanguage === 'en' || replyLanguage === 'ar')) {
       const randomTip = KNOWLEDGE_BASE.piNetworkTips[Math.floor(Math.random() * KNOWLEDGE_BASE.piNetworkTips.length)];
-      text += isArabic 
-        ? `\n\n💡 نصيحة استثمار Pi: ${randomTip}`
-        : `\n\n💡 Pi Investment Tip: ${randomTip}`;
+      text += `\n\n${advisorText('tipHeading', replyLanguage)} ${randomTip}`;
     }
 
     return Response.json({
       success: true,
       response: text,
       powered: true,
-      language: isArabic ? 'ar' : 'en',
+      language: replyLanguage,
     });
   } catch (error) {
     console.error('[v0] Claude API error:', error);
