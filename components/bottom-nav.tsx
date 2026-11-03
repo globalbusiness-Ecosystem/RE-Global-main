@@ -3,6 +3,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Home, LayoutDashboard, AlertCircle, MapPin, User, Users } from 'lucide-react';
 import { toast } from 'sonner';
+import { bn, type BottomNavKey } from '@/lib/bottom-nav-labels';
 
 interface BottomNavProps {
   currentPage: string;
@@ -11,13 +12,13 @@ interface BottomNavProps {
   alertCount?: number;
 }
 
-const navItems = [
-  { id: 'home', labelEn: 'Home', labelAr: 'الرئيسية', icon: Home },
-  { id: 'dashboard', labelEn: 'Dashboard', labelAr: 'لوحة التحكم', icon: LayoutDashboard },
-  { id: 'alerts', labelEn: 'Alerts', labelAr: 'التنبيهات', icon: AlertCircle },
-  { id: 'map', labelEn: 'Map', labelAr: 'الخريطة', icon: MapPin },
-  { id: 'profile', labelEn: 'Profile', labelAr: 'الملف الشخصي', icon: User },
-  { id: 'partners', labelEn: 'Partners', labelAr: 'الشركاء', icon: Users },
+const navItems: { id: BottomNavKey; icon: typeof Home }[] = [
+  { id: 'home', icon: Home },
+  { id: 'dashboard', icon: LayoutDashboard },
+  { id: 'alerts', icon: AlertCircle },
+  { id: 'map', icon: MapPin },
+  { id: 'profile', icon: User },
+  { id: 'partners', icon: Users },
 ];
 
 export default function BottomNav({ currentPage, setCurrentPage, language = 'en', alertCount = 0 }: BottomNavProps) {
@@ -26,7 +27,7 @@ export default function BottomNav({ currentPage, setCurrentPage, language = 'en'
       {navItems.map((item) => {
         const Icon = item.icon;
         const isActive = currentPage === item.id;
-        const label = language === 'ar' ? item.labelAr : item.labelEn;
+        const label = bn(item.id, language);
         const badge = item.id === 'alerts' && alertCount > 0 ? alertCount : 0;
         return (
           <button
@@ -36,7 +37,7 @@ export default function BottomNav({ currentPage, setCurrentPage, language = 'en'
                 setCurrentPage(item.id);
               } catch (error) {
                 console.error('Navigation error:', error);
-                toast.error('Something went wrong, please try again');
+                toast.error(bn('error', language));
               }
             }}
             className={`flex flex-col items-center gap-0.5 p-2 rounded-lg transition duration-200 flex-1 ${
