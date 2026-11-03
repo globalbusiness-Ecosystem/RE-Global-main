@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { estimateLabels, conditionLabel } from '@/lib/estimate-labels';
 
 import { memo } from 'react';
 import { 
@@ -38,37 +39,6 @@ interface PropertyPhotoAnalysisCardProps {
   onInvest?: () => void;
 }
 
-const labels = {
-  en: {
-    detected: 'Property Detected',
-    roomType: 'Room Type',
-    condition: 'Condition',
-    amenities: 'Amenities Found',
-    features: 'Key Features',
-    priceUSD: 'Estimated Price (USD)',
-    pricePI: 'In Pi Network',
-    investmentGrade: 'Investment Grade',
-    recommendations: 'Smart Recommendations',
-    marketInsight: 'Market Insight',
-    perSqm: 'per m²',
-    investNow: 'Invest Now',
-  },
-  ar: {
-    detected: 'تم اكتشاف العقار',
-    roomType: 'نوع الغرفة',
-    condition: 'الحالة',
-    amenities: 'المرافق المكتشفة',
-    features: 'الميزات الرئيسية',
-    priceUSD: 'السعر المقدر (دولار)',
-    pricePI: 'في شبكة Pi',
-    investmentGrade: 'درجة الاستثمار',
-    recommendations: 'التوصيات الذكية',
-    marketInsight: 'ملاحظة السوق',
-    perSqm: 'لكل م²',
-    investNow: 'استثمر الآن',
-  },
-};
-
 const conditionColors = {
   'Excellent': { bg: 'bg-emerald-500/20', border: 'border-emerald-500/50', text: 'text-emerald-400' },
   'Good': { bg: 'bg-blue-500/20', border: 'border-blue-500/50', text: 'text-blue-400' },
@@ -88,7 +58,7 @@ export default memo(function PropertyPhotoAnalysisCard({
   language = 'en',
   onInvest,
 }: PropertyPhotoAnalysisCardProps) {
-  const currentLabels = labels[language === 'ar' ? 'ar' : 'en'];
+  const currentLabels = estimateLabels(language);
   const conditionStyle = conditionColors[analysis.condition];
 
   return (
@@ -118,7 +88,7 @@ export default memo(function PropertyPhotoAnalysisCard({
         )}
         <div>
           <p className={`text-xs font-medium ${conditionStyle.text}`}>{currentLabels.condition}</p>
-          <p className={`text-sm font-semibold ${conditionStyle.text}`}>{analysis.condition}</p>
+          <p className={`text-sm font-semibold ${conditionStyle.text}`}>{conditionLabel(analysis.condition, language)}</p>
         </div>
       </div>
 

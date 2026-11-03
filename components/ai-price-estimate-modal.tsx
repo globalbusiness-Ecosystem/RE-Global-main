@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { estimateLabels } from '@/lib/estimate-labels';
 
 import { useState, useMemo, memo, useCallback } from 'react';
 import { X, Zap, TrendingUp, AlertCircle } from 'lucide-react';
@@ -68,42 +69,7 @@ export default memo(function AIPriceEstimate({
     }, 800);
   }, []);
 
-  const labels = {
-    en: {
-      title: 'AI Price Estimate',
-      fair: 'Fair Market Value',
-      listed: 'Listed Price',
-      estimate: 'AI Estimate',
-      difference: 'Price Difference',
-      recommendation: 'AI Recommendation',
-      underpriced: 'Property is underpriced - Good buying opportunity!',
-      overpriced: 'Property is overpriced - Consider negotiating',
-      market: 'Based on market data:',
-      factors: 'Factors considered:',
-      location: 'Location premium',
-      type: 'Property type',
-      trend: 'Market trend',
-      disclaimer: 'Estimates are AI-generated based on historical data. Always consult with professionals before investing.',
-    },
-    ar: {
-      title: 'تقدير سعر الذكاء الاصطناعي',
-      fair: 'القيمة العادلة للسوق',
-      listed: 'السعر المدرج',
-      estimate: 'تقدير الذكاء الاصطناعي',
-      difference: 'فرق السعر',
-      recommendation: 'توصية الذكاء الاصطناعي',
-      underpriced: 'العقار مقيم بأقل من قيمته - فرصة شراء جيدة!',
-      overpriced: 'العقار مقيم بأكثر من قيمته - فكر في التفاوض',
-      market: 'بناءً على بيانات السوق:',
-      factors: 'العوامل المأخوذة في الاعتبار:',
-      location: 'علاوة الموقع',
-      type: 'نوع العقار',
-      trend: 'اتجاه السوق',
-      disclaimer: 'التقديرات يتم إنشاؤها بواسطة الذكاء الاصطناعي بناءً على البيانات التاريخية. استشر المحترفين دائماً قبل الاستثمار.',
-    },
-  };
-
-  const currentLabels = labels[language === 'ar' ? 'ar' : 'en'];
+  const currentLabels = estimateLabels(language);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -119,7 +85,7 @@ export default memo(function AIPriceEstimate({
         <div className="space-y-4">
           {/* Property Info */}
           <div className="bg-background/50 rounded-lg p-3 border border-border/50">
-            <p className="text-xs text-muted-foreground mb-1">{language !== 'ar' ? 'Property' : 'العقار'}</p>
+            <p className="text-xs text-muted-foreground mb-1">{currentLabels.property}</p>
             <p className="font-semibold text-foreground line-clamp-2">{propertyTitle}</p>
             <p className="text-xs text-muted-foreground mt-1">{city}</p>
           </div>
@@ -140,7 +106,7 @@ export default memo(function AIPriceEstimate({
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-accent rounded-full animate-pulse"></div>
                   <p className="text-sm text-muted-foreground">
-                    {language !== 'ar' ? 'Calculating...' : 'جاري الحساب...'}
+                    {currentLabels.calculating}
                   </p>
                 </div>
               ) : (
@@ -208,8 +174,8 @@ export default memo(function AIPriceEstimate({
             className="w-full py-2 bg-accent hover:bg-accent/80 text-accent-foreground rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
           >
             {isCalculating 
-              ? (language !== 'ar' ? 'Calculating...' : 'جاري الحساب...')
-              : (language !== 'ar' ? 'Refresh Estimate' : 'تحديث التقدير')}
+              ? currentLabels.calculating
+              : currentLabels.refresh}
           </button>
 
           {/* Disclaimer */}
