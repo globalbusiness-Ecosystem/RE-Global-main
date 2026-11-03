@@ -1,4 +1,5 @@
 'use client';
+import { pay } from '@/lib/payment-labels';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
@@ -50,22 +51,14 @@ export function UnifiedPaymentButton({
   const isPiAvailable = true; // Check at payment time, not load time
 
   const getTransactionLabel = () => {
-    const labels = {
-      buy: language === 'en' ? 'Buy' : 'شراء',
-      rent: language === 'en' ? 'Rent' : 'استئجر',
-      hotel: language === 'en' ? 'Book' : 'احجز',
-      invest: language === 'en' ? 'Invest' : 'استثمر',
-      tokenized: language === 'en' ? 'Tokenize' : 'رمز',
-      resale: language === 'en' ? 'Buy shares' : 'اشتري الحصص',
-    };
-    return labels[transactionType];
+    return pay(transactionType, language);
   };
 
   const handlePayment = async () => {
     if (!window.Pi || typeof window.Pi.createPayment !== 'function') {
       setPaymentState({
         status: 'error',
-        message: language === 'en' ? 'Pi Network not available' : 'شبكة Pi غير متاحة',
+        message: pay('piUnavailable', language),
       });
       return;
     }
@@ -207,14 +200,10 @@ export function UnifiedPaymentButton({
       console.log('[v0] Payment result:', paymentResult);
 
       // Format success message based on transaction type
-      let successMessage = language === 'en' 
-        ? `Payment of ${paymentAmount} Pi processed successfully!`
-        : `تم معالجة دفع ${paymentAmount} Pi بنجاح!`;
+      let successMessage = pay('paidOk', language, paymentAmount);
 
       if (transactionType === 'buy') {
-        successMessage = language === 'en'
-          ? 'Property purchase payment completed successfully!'
-          : 'تم إتمام دفع شراء العقار بنجاح!';
+        successMessage = pay('purchaseOk', language);
       }
 
       setPaymentState({
@@ -235,7 +224,7 @@ export function UnifiedPaymentButton({
       const errorMessage = error instanceof Error ? error.message : 'Payment failed';
       setPaymentState({
         status: 'error',
-        message: language === 'en' ? errorMessage : `خطأ: ${errorMessage}`,
+        message: language === 'en' ? errorMessage : `${pay('errorPrefix', language)}: ${errorMessage}`,
       });
 
       if (onError && error instanceof Error) {
@@ -246,10 +235,10 @@ export function UnifiedPaymentButton({
 
   const getButtonText = () => {
     if (paymentState.status === 'processing') {
-      return language === 'en' ? 'Processing...' : 'جاري المعالجة...';
+      return pay('processing', language);
     }
     if (paymentState.status === 'success') {
-      return language === 'en' ? 'Success!' : 'نجح!';
+      return pay('success', language);
     }
     return `${getTransactionLabel()} π${price}`;
   };
@@ -285,17 +274,17 @@ export function UnifiedPaymentButton({
           <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full space-y-4 animate-in fade-in">
             <div className="space-y-2">
               <h2 className="text-2xl font-bold text-accent">
-                {language === 'en' ? 'Confirm Transaction' : 'تأكيد العملية'}
+                {pay('confirmTitle', language)}
               </h2>
               <p className="text-muted-foreground text-sm">
-                {language === 'en' ? 'Review and confirm your purchase' : 'راجع وأكد عملية الشراء'}
+                {pay('confirmSub', language)}
               </p>
             </div>
 
             <div className="bg-background/50 rounded-lg p-4 space-y-3 border border-border">
               <div className="flex justify-between items-start">
                 <span className="text-muted-foreground text-sm">
-                  {language === 'en' ? 'Property' : 'العقار'}
+                  {pay('property', language)}
                 </span>
                 <span className="font-semibold text-right line-clamp-2 ml-2">
                   {propertyTitle}
@@ -304,16 +293,16 @@ export function UnifiedPaymentButton({
 
               <div className="flex justify-between items-center border-t border-border pt-3">
                 <span className="text-muted-foreground text-sm">
-                  {language === 'en' ? 'Transaction Type' : 'نوع العملية'}
+                  {pay('txType', language)}
                 </span>
                 <span className="font-semibold text-accent capitalize">
-                  {transactionType}
+                  {getTransactionLabel()}
                 </span>
               </div>
 
               <div className="flex justify-between items-center border-t border-border pt-3">
                 <span className="text-muted-foreground text-sm">
-                  {language === 'en' ? 'Amount' : 'المبلغ'}
+                  {pay('amount', language)}
                 </span>
                 <span className="font-bold text-xl text-accent">
                   {formatNumber(price, language)} {currency}
@@ -340,7 +329,7 @@ export function UnifiedPaymentButton({
               <div className="bg-accent/10 border border-accent/30 rounded-lg p-3 flex gap-2 items-center justify-center">
                 <Loader2 className="w-5 h-5 text-accent animate-spin" />
                 <p className="text-sm text-accent">
-                  {language === 'en' ? 'Processing payment...' : 'جاري معالجة الدفع...'}
+                  {pay('processingPayment', language)}
                 </p>
               </div>
             )}
@@ -351,7 +340,7 @@ export function UnifiedPaymentButton({
                 disabled={paymentState.status === 'processing'}
                 className="border border-border text-foreground py-2 rounded-lg font-semibold hover:bg-background/50 transition disabled:opacity-50"
               >
-                {language === 'en' ? 'Cancel' : 'إلغاء'}
+                {pay('cancel', language)}
               </button>
               <button
                 onClick={handlePayment}
@@ -364,21 +353,19 @@ export function UnifiedPaymentButton({
                 {paymentState.status === 'success' ? (
                   <>
                     <CheckCircle className="w-4 h-4" />
-                    <span>{language === 'en' ? 'Done' : 'تم'}</span>
+                    <span>{pay('done', language)}</span>
                   </>
                 ) : (
                   <>
                     <ShoppingCart className="w-4 h-4" />
-                    <span>{getTransactionLabel()} {language === 'en' ? 'Now' : 'الآن'}</span>
+                    <span>{getTransactionLabel()} {pay('now', language)}</span>
                   </>
                 )}
               </button>
             </div>
 
             <p className="text-xs text-muted-foreground text-center">
-              {language === 'en' 
-                ? 'Your transaction is secured by Pi Network'
-                : 'تم تأمين المعاملة بواسطة شبكة Pi'}
+              {pay('secured', language)}
             </p>
           </div>
         </div>
