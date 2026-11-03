@@ -2,7 +2,7 @@
 // - Caches the offline fallback page and map tiles only.
 // - Never caches /api/* or Firestore traffic: those responses are per-user
 //   (authenticated) and must not be replayed stale or to another user.
-const CACHE_NAME = 're-platform-v3';
+const CACHE_NAME = 're-platform-v4';
 const TILE_CACHE = 're-tiles-v1';
 const OFFLINE_URL = '/offline.html';
 const TILE_PATTERN = /^https:\/\/[a-z0-9.-]*tile\.openstreetmap\.(org|de)\//;

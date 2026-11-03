@@ -14,10 +14,39 @@
 </head>
 <body>
   <main>
-    <h1>You're offline · لا يوجد اتصال</h1>
-    <p>Check your internet connection and try again.</p>
-    <p dir="rtl">تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.</p>
-    <button onclick="location.reload()">Retry · إعادة المحاولة</button>
+    <h1 id="t">You're offline · لا يوجد اتصال</h1>
+    <p id="m">Check your internet connection and try again.</p>
+    <p id="m2" dir="rtl">تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.</p>
+    <button id="b" onclick="location.reload()">Retry · إعادة المحاولة</button>
   </main>
+  <script>
+  // Shows the page in the language chosen in the app (same key the app uses), else the browser's language.
+  // Without JavaScript the English + Arabic text above stays as it is.
+  (function () {
+    var T = {
+      en: { t: "You're offline", m: 'Check your internet connection and try again.', b: 'Retry' },
+      ar: { t: 'لا يوجد اتصال', m: 'تحقق من اتصالك بالإنترنت ثم حاول مرة أخرى.', b: 'إعادة المحاولة' },
+      fr: { t: 'Vous êtes hors ligne', m: 'Vérifiez votre connexion Internet et réessayez.', b: 'Réessayer' },
+      es: { t: 'Sin conexión', m: 'Comprueba tu conexión a internet e inténtalo de nuevo.', b: 'Reintentar' },
+      pt: { t: 'Você está offline', m: 'Verifique sua conexão com a internet e tente novamente.', b: 'Tentar novamente' },
+      ur: { t: 'آپ آف لائن ہیں', m: 'اپنا انٹرنیٹ کنکشن چیک کریں اور دوبارہ کوشش کریں۔', b: 'دوبارہ کوشش کریں' },
+      zh: { t: '您已离线', m: '请检查网络连接后重试。', b: '重试' }
+    };
+    var has = function (k) { return Object.prototype.hasOwnProperty.call(T, k); };
+    var lang = '';
+    try { lang = localStorage.getItem('re_nav_language') || ''; } catch (e) {}
+    if (!has(lang)) lang = String(navigator.language || 'en').slice(0, 2).toLowerCase();
+    if (!has(lang)) return;
+    var s = T[lang];
+    var el = function (id) { return document.getElementById(id); };
+    el('t').textContent = s.t;
+    el('m').textContent = s.m;
+    el('m2').style.display = 'none';
+    el('b').textContent = s.b;
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' || lang === 'ur' ? 'rtl' : 'ltr';
+    document.title = 'RE Platform — ' + s.t;
+  })();
+  </script>
 </body>
 </html>
