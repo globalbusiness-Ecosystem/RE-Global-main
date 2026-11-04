@@ -1,0 +1,31 @@
+import type { NavLanguage } from './nav-i18n';
+
+// The fixed texts around Aladdin's chat (title, buttons, placeholder, notices, error messages), in all 7 languages.
+// {room}, {city} and {condition} are filled in for the photo-analysis result.
+type Row = Record<NavLanguage, string>;
+const LANGS: NavLanguage[] = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'];
+
+export const ADVISOR_CHROME = {
+  title: { en: 'Aladdin AI', ar: 'علاء الدين', fr: 'Aladdin IA', es: 'Aladdin IA', pt: 'Aladdin IA', ur: 'علاء الدین AI', zh: 'Aladdin AI' },
+  subtitle: { en: 'World-Class Real Estate Advisor', ar: 'مستشار عقاري عالمي', fr: 'Conseiller immobilier de classe mondiale', es: 'Asesor inmobiliario de clase mundial', pt: 'Consultor imobiliário de classe mundial', ur: 'عالمی معیار کا رئیل اسٹیٹ مشیر', zh: '世界级房地产顾问' },
+  listen: { en: 'Listen', ar: 'استمع', fr: 'Écouter', es: 'Escuchar', pt: 'Ouvir', ur: 'سنیں', zh: '朗读' },
+  stop: { en: 'Stop', ar: 'إيقاف', fr: 'Arrêter', es: 'Detener', pt: 'Parar', ur: 'روکیں', zh: '停止' },
+  listenTitle: { en: 'Listen to response', ar: 'استمع للإجابة', fr: 'Écouter la réponse', es: 'Escuchar la respuesta', pt: 'Ouvir a resposta', ur: 'جواب سنیں', zh: '朗读回复' },
+  analyzeFor: { en: 'Analyze for:', ar: 'تحليل ل:', fr: 'Analyser pour :', es: 'Analizar para:', pt: 'Analisar para:', ur: 'تجزیہ برائے:', zh: '分析城市：' },
+  placeholder: { en: 'Ask about properties, trends, or Pi payments...', ar: 'اسأل عن العقارات والاتجاهات أو دفعات Pi...', fr: 'Posez une question sur les biens, les tendances ou les paiements Pi...', es: 'Pregunta sobre propiedades, tendencias o pagos con Pi...', pt: 'Pergunte sobre imóveis, tendências ou pagamentos em Pi...', ur: 'جائیداد، رجحانات یا Pi ادائیگیوں کے بارے میں پوچھیں...', zh: '询问房产、趋势或 Pi 支付...' },
+  uploadPhoto: { en: 'Upload property photo for AI analysis', ar: 'تحميل صورة عقار للتحليل', fr: 'Téléverser une photo du bien pour analyse par l’IA', es: 'Subir una foto de la propiedad para el análisis de IA', pt: 'Enviar foto do imóvel para análise da IA', ur: 'AI تجزیے کے لیے جائیداد کی تصویر اپ لوڈ کریں', zh: '上传房产照片进行 AI 分析' },
+  disclaimer: { en: 'General information only, not financial or legal advice. Figures are illustrative estimates, not live data.', ar: 'معلومات عامة فقط وليست نصيحة مالية أو قانونية. الأرقام تقديرية توضيحية وليست بيانات حية.', fr: 'Informations générales uniquement, pas un conseil financier ou juridique. Les chiffres sont des estimations indicatives, pas des données en direct.', es: 'Solo información general, no asesoramiento financiero ni legal. Las cifras son estimaciones ilustrativas, no datos en vivo.', pt: 'Apenas informações gerais, não aconselhamento financeiro ou jurídico. Os valores são estimativas ilustrativas, não dados em tempo real.', ur: 'صرف عمومی معلومات، مالی یا قانونی مشورہ نہیں۔ اعداد و شمار مثالی اندازے ہیں، لائیو ڈیٹا نہیں۔', zh: '仅为一般信息，不构成财务或法律建议。数字为示意性估算，并非实时数据。' },
+  error: { en: 'I encountered an issue processing your question. Please try again.', ar: 'واجهت مشكلة في معالجة سؤالك. يرجى المحاولة مرة أخرى.', fr: 'J’ai rencontré un problème pour traiter votre question. Veuillez réessayer.', es: 'Tuve un problema al procesar tu pregunta. Inténtalo de nuevo.', pt: 'Tive um problema ao processar a sua pergunta. Tente novamente.', ur: 'آپ کے سوال پر کارروائی میں مسئلہ پیش آیا۔ براہ کرم دوبارہ کوشش کریں۔', zh: '处理您的问题时出现问题，请重试。' },
+  photoAnalyzing: { en: '📸 Analyzing property photo...', ar: '📸 جاري تحليل صورة العقار...', fr: '📸 Analyse de la photo du bien...', es: '📸 Analizando la foto de la propiedad...', pt: '📸 Analisando a foto do imóvel...', ur: '📸 جائیداد کی تصویر کا تجزیہ جاری ہے...', zh: '📸 正在分析房产照片...' },
+  photoError: { en: 'I encountered an issue analyzing the photo. Please ensure it shows a clear property view and try again.', ar: 'واجهت مشكلة في تحليل الصورة. يرجى التأكد من أن الصورة تعرض منظر عقار واضح والمحاولة مرة أخرى.', fr: 'J’ai rencontré un problème pour analyser la photo. Vérifiez qu’elle montre clairement le bien et réessayez.', es: 'Tuve un problema al analizar la foto. Asegúrate de que muestre claramente la propiedad e inténtalo de nuevo.', pt: 'Tive um problema ao analisar a foto. Verifique se ela mostra claramente o imóvel e tente novamente.', ur: 'تصویر کے تجزیے میں مسئلہ پیش آیا۔ براہ کرم یقینی بنائیں کہ تصویر میں جائیداد واضح ہے اور دوبارہ کوشش کریں۔', zh: '分析照片时出现问题。请确认照片清晰展示了房产后重试。' },
+  photoDone: { en: "✅ Property analysis complete! I've detected a {room} in {city}. The property appears to be in {condition} condition with excellent investment potential.", ar: '✅ اكتمل تحليل العقار! اكتشفت {room} في {city}. يبدو أن العقار في حالة {condition} مع إمكانات استثمار ممتازة.', fr: '✅ Analyse du bien terminée ! J’ai détecté : {room} à {city}. Le bien semble en état « {condition} », avec un excellent potentiel d’investissement.', es: '✅ ¡Análisis de la propiedad completado! Detecté: {room} en {city}. La propiedad parece estar en estado «{condition}», con un excelente potencial de inversión.', pt: '✅ Análise do imóvel concluída! Detectei: {room} em {city}. O imóvel parece estar em estado «{condition}», com excelente potencial de investimento.', ur: '✅ جائیداد کا تجزیہ مکمل! میں نے {city} میں {room} کی شناخت کی۔ جائیداد کی حالت «{condition}» لگتی ہے اور سرمایہ کاری کی بہترین صلاحیت ہے۔', zh: '✅ 房产分析完成！在 {city} 识别到：{room}。房产状况看起来为“{condition}”，投资潜力出色。' },
+} satisfies Record<string, Row>;
+
+export type AdvisorChromeKey = keyof typeof ADVISOR_CHROME;
+
+export function ac(key: AdvisorChromeKey, language: string | undefined, vars: Record<string, string | number> = {}): string {
+  const known = LANGS.find((l) => l === language) ?? 'en';
+  let text = (ADVISOR_CHROME[key] as Row)[known];
+  for (const [name, value] of Object.entries(vars)) text = text.split(`{${name}}`).join(String(value));
+  return text;
+}

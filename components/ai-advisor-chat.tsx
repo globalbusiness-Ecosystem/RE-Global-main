@@ -11,6 +11,7 @@ import ContractPanel, { type ContractResult } from '@/components/contract-panel'
 import MiniMarkdown from '@/components/mini-markdown';
 import { cu } from '@/lib/contract-ui-labels';
 import { hasContractContext, toHistory } from '@/lib/advisor-history';
+import { ac } from '@/lib/advisor-chrome-labels';
 import { suggestHeading, contractHeading, startQuestions, contractQuestions } from '@/lib/advisor-suggest-labels';
 
 interface Message {
@@ -393,9 +394,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             // If Claude fails, still show an error message but not a refusal
             const errorMessage: Message = {
               role: 'assistant',
-              content: language !== 'ar'
-                ? 'I encountered an issue processing your question. Please try again.'
-                : 'واجهت مشكلة في معالجة سؤالك. يرجى المحاولة مرة أخرى.',
+              content: ac('error', language),
               id: 'assistant-' + Date.now(),
             };
             setMessages((prev) => [...prev, errorMessage]);
@@ -405,9 +404,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           // Still show a helpful message, not a refusal
           const errorMessage: Message = {
             role: 'assistant',
-            content: language !== 'ar'
-              ? 'I encountered an issue processing your question. Please try again.'
-              : 'واجهت مشكلة في معالجة سؤالك. يرجى المحاولة مرة أخرى.',
+            content: ac('error', language),
             id: 'assistant-' + Date.now(),
           };
           setMessages((prev) => [...prev, errorMessage]);
@@ -456,7 +453,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         // Add user message with photo
         const userMessage: Message = {
           role: 'user',
-          content: language !== 'ar' ? '📸 Analyzing property photo...' : '📸 جاري تحليل صورة العقار...',
+          content: ac('photoAnalyzing', language),
           id: 'user-photo-' + Date.now(),
           photoUrl: imageData,
         };
@@ -481,9 +478,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             // Add analysis message
             const analysisMessage: Message = {
               role: 'assistant',
-              content: language !== 'ar' 
-                ? `✅ Property analysis complete! I've detected a ${data.analysis.roomType} in ${selectedCity}. The property appears to be in ${data.analysis.condition.toLowerCase()} condition with excellent investment potential.`
-                : `✅ اكتمل تحليل العقار! اكتشفت ${data.analysis.roomType} في ${selectedCity}. يبدو أن العقار في حالة ${data.analysis.condition} مع إمكانات استثمار ممتازة.`,
+              content: ac('photoDone', language, { room: String(data.analysis.roomType), city: selectedCity, condition: String(data.analysis.condition).toLowerCase() }),
               id: 'assistant-analysis-' + Date.now(),
               photoAnalysis: data.analysis,
             };
@@ -496,9 +491,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           console.error('[v0] Photo analysis error:', error);
           const errorMessage: Message = {
             role: 'assistant',
-            content: language !== 'ar' 
-              ? 'I encountered an issue analyzing the photo. Please ensure it shows a clear property view and try again.'
-              : 'واجهت مشكلة في تحليل الصورة. يرجى التأكد من أن الصورة تعرض منظر عقار واضح والمحاولة مرة أخرى.',
+            content: ac('photoError', language),
             id: 'assistant-error-' + Date.now(),
           };
           setMessages((prev) => [...prev, errorMessage]);
@@ -530,12 +523,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             </div>
             <div>
               <h2 className="text-sm font-bold text-white">
-                {language !== 'ar'
-                  ? 'Aladdin AI'
-                  : 'علاء الدين'}
+                {ac('title', language)}
               </h2>
               <p className="text-xs text-gray-400">
-                {language !== 'ar' ? 'World-Class Real Estate Advisor' : 'مستشار عقاري عالمي'}
+                {ac('subtitle', language)}
               </p>
             </div>
           </div>
@@ -607,17 +598,17 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                     <button
                       onClick={() => handlePlayVoice(message.id, message.content)}
                       className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded bg-[#F59E0B]/20 hover:bg-[#F59E0B]/30 text-[#F59E0B] transition-colors"
-                      title={language !== 'ar' ? 'Listen to response' : 'استمع للإجابة'}
+                      title={ac('listenTitle', language)}
                     >
                       {playingMessageId === message.id ? (
                         <>
                           <VolumeX className="w-3 h-3" />
-                          <span>{language !== 'ar' ? 'Stop' : 'إيقاف'}</span>
+                          <span>{ac('stop', language)}</span>
                         </>
                       ) : (
                         <>
                           <Volume2 className="w-3 h-3" />
-                          <span>{language !== 'ar' ? 'Listen' : 'استمع'}</span>
+                          <span>{ac('listen', language)}</span>
                         </>
                       )}
                     </button>
@@ -694,10 +685,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {/* City Selector for Photo Analysis */}
           <div className="flex items-center gap-2 px-2">
             <span className="text-xs text-gray-400">
-              {language !== 'ar' ? 'Analyze for:' : 'تحليل ل:'}
+              {ac('analyzeFor', language)}
             </span>
             <select 
-              aria-label={language !== 'ar' ? 'Analyze for:' : 'تحليل ل:'}
+              aria-label={ac('analyzeFor', language)}
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
               className="text-xs bg-[#2a1f15] border border-[#F59E0B]/30 text-white rounded px-2 py-1 focus:outline-none focus:border-[#F59E0B]"
@@ -726,15 +717,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder={
-                language !== 'ar'
-                  ? 'Ask about properties, trends, or Pi payments...'
-                  : 'اسأل عن العقارات والاتجاهات أو دفعات Pi...'
-              } aria-label={
-                language !== 'ar'
-                  ? 'Ask about properties, trends, or Pi payments...'
-                  : 'اسأل عن العقارات والاتجاهات أو دفعات Pi...'
-              }
+              placeholder={ac('placeholder', language)} aria-label={ac('placeholder', language)}
               disabled={isLoading || uploadingPhoto}
               className="flex-1 bg-[#2a1f15] border border-[#F59E0B]/30 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] disabled:opacity-50"
             />
@@ -744,7 +727,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               type="button"
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading || uploadingPhoto}
-              title={language !== 'ar' ? 'Upload property photo for AI analysis' : 'تحميل صورة عقار للتحليل'}
+              title={ac('uploadPhoto', language)}
               className="px-3 py-3 bg-[#2a1f15] border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 text-[#F59E0B] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-[#3a2f25]"
             >
               {uploadingPhoto ? (
@@ -787,9 +770,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             </button>
           </form>
           <p className="mt-2 text-[10px] leading-snug text-gray-500 text-center">
-            {language !== 'ar'
-              ? 'General information only, not financial or legal advice. Figures are illustrative estimates, not live data.'
-              : 'معلومات عامة فقط وليست نصيحة مالية أو قانونية. الأرقام تقديرية توضيحية وليست بيانات حية.'}
+            {ac('disclaimer', language)}
           </p>
         </div>
       </div>
