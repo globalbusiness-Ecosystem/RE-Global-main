@@ -12,6 +12,7 @@ import MiniMarkdown from '@/components/mini-markdown';
 import { cu } from '@/lib/contract-ui-labels';
 import { hasContractContext, toHistory } from '@/lib/advisor-history';
 import { ac } from '@/lib/advisor-chrome-labels';
+import { hasLocalAnswers } from '@/lib/advisor-local';
 import { suggestHeading, contractHeading, startQuestions, contractQuestions } from '@/lib/advisor-suggest-labels';
 
 interface Message {
@@ -162,6 +163,8 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
 
   // Generate response based on hybrid smart logic
   const generateResponse = (userMessage: string): string | null => {
+    // The built-in answers exist in Arabic and English only; every other language is answered by the AI.
+    if (!hasLocalAnswers(language)) return null;
     const lowerMessage = userMessage.toLowerCase();
     const tier = getBudgetTier();
 ;
