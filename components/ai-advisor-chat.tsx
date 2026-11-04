@@ -3,10 +3,13 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload } from 'lucide-react';
+import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload, FileText } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import PropertyPhotoAnalysisCard from '@/components/property-photo-analysis-card';
 import { authHeaders } from '@/lib/api-token';
+import ContractPanel, { type ContractResult } from '@/components/contract-panel';
+import MiniMarkdown from '@/components/mini-markdown';
+import { cu } from '@/lib/contract-ui-labels';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -17,6 +20,8 @@ interface Message {
   isPlaying?: boolean;
   photoAnalysis?: any;
   photoUrl?: string;
+  rich?: boolean;
+  disclaimer?: string;
 }
 
 interface AIAdvisorChatProps {
@@ -37,6 +42,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
   const [playingMessageId, setPlayingMessageId] = useState<string | null>(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
   const [selectedCity, setSelectedCity] = useState('Dubai');
+  const [showContract, setShowContract] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { sdk, isAuthenticated } = usePiAuth();
@@ -414,6 +420,15 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
     }, 1500);
   };
 
+  const handleContractAnalyzed = (result: ContractResult) => {
+    const stamp = Date.now();
+    setMessages((prev) => [
+      ...prev,
+      { role: 'user', content: result.userNote, id: 'user-contract-' + stamp },
+      { role: 'assistant', content: result.analysis, id: 'assistant-contract-' + stamp, poweredByAI: true, rich: true, disclaimer: result.disclaimer },
+    ]);
+  };
+
   const handleSuggestedQuestion = (question: string) => {
     handleSendMessage(question);
   };
@@ -574,7 +589,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                       : 'bg-[#2a1f15] border border-[#F59E0B]/30 text-gray-100'
                   }`}
                 >
-                  <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+                  {message.rich ? <MiniMarkdown text={message.content} /> : <p className="text-sm whitespace-pre-wrap">{message.content}</p>}
+                  {message.disclaimer && (
+                    <p dir="auto" className="mt-3 border-t border-[#F59E0B]/20 pt-2 text-[11px] leading-snug text-gray-400">{message.disclaimer}</p>
+                  )}
                   
                   {/* Voice button for assistant messages */}
                   {message.role === 'assistant' && (
@@ -669,6 +687,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             </select>
           </div>
 
+          {showContract && (
+            <ContractPanel language={language} onClose={() => setShowContract(false)} onAnalyzed={handleContractAnalyzed} />
+          )}
+
           <form
             onSubmit={(e) => {
               e.preventDefault();
@@ -706,6 +728,19 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               ) : (
                 <Camera className="w-4 h-4" />
               )}
+            </button>
+
+            {/* Contract analysis button */}
+            <button
+              type="button"
+              onClick={() => setShowContract((v) => !v)}
+              disabled={isLoading || uploadingPhoto}
+              title={cu('openTitle', language)}
+              aria-label={cu('openTitle', language)}
+              aria-expanded={showContract}
+              className="px-3 py-3 bg-[#2a1f15] border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 text-[#F59E0B] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-[#3a2f25]"
+            >
+              <FileText className="w-4 h-4" />
             </button>
 
             {/* Hidden File Input */}
