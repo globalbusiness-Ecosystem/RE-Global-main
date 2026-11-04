@@ -1,5 +1,9 @@
 'use client';
 import { formatNumber } from '@/lib/format';
+import { lpl } from '@/lib/listing-pages-labels';
+import { rp } from '@/lib/rent-page-labels';
+import { bp } from '@/lib/buy-page-labels';
+import { pickListingText } from '@/lib/property-details-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
@@ -319,7 +323,7 @@ function FirebaseAbroadModal({
               {prop.bedrooms && (
                 <div className="flex items-center gap-1">
                   <Bed className="w-4 h-4 text-accent" />
-                  <span>{prop.bedrooms} {language === 'en' ? 'Beds' : 'غرف'}</span>
+                  <span>{prop.bedrooms} {rp('beds', language)}</span>
                 </div>
               )}
               {prop.area && (
@@ -348,7 +352,7 @@ function FirebaseAbroadModal({
           {prop.lat && prop.lng ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
               <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
-                📍 {language === 'en' ? 'Property Location' : 'موقع العقار'}
+                📍 {rp('propertyLocation', language)}
               </p>
               <iframe
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${prop.lng - 0.01},${prop.lat - 0.01},${prop.lng + 0.01},${prop.lat + 0.01}&layer=mapnik&marker=${prop.lat},${prop.lng}`}
@@ -397,19 +401,19 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
           </button>
         )}
         <h1 className="text-3xl font-bold text-accent">
-          {language === 'en' ? 'International Properties' : 'العقارات الدولية'}
+          {lpl('abroadTitle', language)}
         </h1>
       </div>
 
       {/* Firebase Properties (dynamic, added via Admin) */}
       {propertiesLoading ? (
         <div className="text-center text-gray-400 py-4">
-          {language === 'en' ? 'Loading...' : 'جاري التحميل...'}
+          {rp('loading', language)}
         </div>
       ) : firebaseProperties.length > 0 ? (
         <div className="space-y-4 mb-6">
           <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
-            {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
+            {rp('available', language)}
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {firebaseProperties.map((prop) => (
@@ -422,7 +426,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
       <div className="space-y-4">
         {firebaseProperties.length === 0 && (
           <h2 className="text-lg font-semibold text-white border-b border-gray-700 pb-2 mb-2">
-            {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
+            {rp('featured', language)}
           </h2>
         )}
         <DemoOnly>
@@ -454,7 +458,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
                   {property.countryFlag} {property.city}, {property.country}
                 </p>
                 <h3 className="font-semibold text-foreground line-clamp-2">
-                  {language === 'en' ? property.titleEn : property.titleAr}
+                  {pickListingText(language, property.titleEn, property.titleAr)}
                 </h3>
               </div>
 
@@ -472,7 +476,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-muted-foreground text-xs">
-                    {language === 'en' ? 'Price' : 'السعر'}
+                    {bp('price', language)}
                   </p>
                   <p className="text-lg font-bold text-accent">
                     {formatNumber(property.price, language)} {currency}
@@ -487,7 +491,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
               <div className="flex gap-2 pt-2">
                 <UnifiedPaymentButton
                   propertyId={property.id}
-                  propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
+                  propertyTitle={pickListingText(language, property.titleEn, property.titleAr)}
                   price={property.price}
                   transactionType="buy"
                   language={language}
@@ -499,7 +503,7 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
                     sessionStorage.setItem('focusProperty', JSON.stringify({
                       lat: 0,
                       lng: 0,
-                      title: language === 'en' ? property.titleEn : property.titleAr,
+                      title: pickListingText(language, property.titleEn, property.titleAr),
                       price: property.price,
                       category: 'abroad',
                       id: property.id,
@@ -513,17 +517,17 @@ export default function AbroadPage({ language, currency, favorites, toggleFavori
                     window.dispatchEvent(new CustomEvent('navigateToPage', { detail: 'map' }));
                   }}
                   className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm"
-                  title={language === 'en' ? 'View on Map' : 'اعرض على الخريطة'}
+                  title={rp('viewOnMap', language)}
                 >
                   📍
                 </button>
                 <button 
                   onClick={() => setActiveTourId(property.id)}
                   className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm"
-                  title={language === 'en' ? 'Virtual Tour' : 'جولة افتراضية'}
+                  title={rp('virtualTour', language)}
                 >
                   <Video className="w-4 h-4 inline mr-1" />
-                  {language === 'en' ? 'Tour' : 'جولة'}
+                  {lpl('tour', language)}
                 </button>
               </div>
             </div>
