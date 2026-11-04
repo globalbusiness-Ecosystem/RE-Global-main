@@ -10,6 +10,7 @@ import { authHeaders } from '@/lib/api-token';
 import ContractPanel, { type ContractResult } from '@/components/contract-panel';
 import MiniMarkdown from '@/components/mini-markdown';
 import { cu } from '@/lib/contract-ui-labels';
+import { hasContractContext, toHistory } from '@/lib/advisor-history';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -351,13 +352,18 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
       id: 'user-' + Date.now(),
     };
 
+    // What was said before this question: the AI gets it as its memory of the chat.
+    const history = toHistory(messages);
+    const contractChat = hasContractContext(messages);
+
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
     // Simulate 1.5 second typing delay
     setTimeout(async () => {
-      const response = generateResponse(text);
+      // Once a contract has been analysed, follow-up questions go to the AI (it has the analysis), not to the local rules.
+      const response = contractChat ? null : generateResponse(text);
       
       // If response is null, use Claude API
       if (response === null) {
@@ -368,6 +374,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             body: JSON.stringify({
               message: text,
               language: language,
+              history,
             }),
           });
 

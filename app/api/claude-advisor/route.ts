@@ -1,6 +1,7 @@
 import { guardApi } from '@/lib/api-guard';
 import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { advisorText, isAdvisorLanguage, languageInstruction } from '@/lib/advisor-i18n';
+import { buildAdvisorMessages, MEMORY_INSTRUCTIONS } from '@/lib/advisor-history';
 import { Anthropic } from '@anthropic-ai/sdk';
 import { 
   aladdinConfig, 
@@ -126,7 +127,7 @@ function generateSystemPrompt(language: string): string {
 🎯 يجب أن تختم كل رد بـ:
 "💡 نصيحة استثمار Pi: [نصيحة محددة وعملية من قائمة نصائح Pi]"
 
-كن ودوداً، مهنياً، وشاملاً. لا تخف من تقديم تحليلات معمقة. لا تقل "آسف لا أستطيع" - قدم إجابة مفيدة بدلاً من ذلك.`
+كن ودوداً، مهنياً، وشاملاً. لا تخف من تقديم تحليلات معمقة. لا تقل "آسف لا أستطيع" - قدم إجابة مفيدة بدلاً من ذلك. لا تخترع بيانات: إذا لم تكن متأكداً أو لا تملك أرقاماً حديثة فقل ذلك بوضوح وقدم أفضل إرشاد عام. اعتبر كل الأرقام تقديرات توضيحية وليست ضمانات، وذكّر المستخدم أن هذه معلومات عامة وليست نصيحة مالية أو قانونية.`
     : `You are Aladdin, the world-class real estate advisor on Pi Network. You are an expert in:
 
 🌍 Global Real Estate Markets:
@@ -173,7 +174,7 @@ export async function POST(req: Request) {
   const guard = await guardApi(req, { scope: 'claude-advisor', limit: 30 });
   if (guard instanceof Response) return guard;
   try {
-    const parsed = await readJsonLimited(req, 20_000);
+    const parsed = await readJsonLimited(req, 60_000);
     if (parsed instanceof Response) return parsed;
     const message = cleanString(parsed.message, 2000);
     if (!message) return Response.json({ error: 'Invalid message' }, { status: 400 });
@@ -187,7 +188,7 @@ export async function POST(req: Request) {
 
     const client = new Anthropic();
 
-    const systemPrompt = generateSystemPrompt(isArabic ? 'ar' : 'en') + languageInstruction(replyLanguage);
+    const systemPrompt = generateSystemPrompt(isArabic ? 'ar' : 'en') + languageInstruction(replyLanguage) + MEMORY_INSTRUCTIONS;
 
     const enhancedMessage = `Context: ${isArabic ? 'الأسواق المرجعية' : 'Reference Markets'}: ${JSON.stringify(KNOWLEDGE_BASE.markets, null, 2)}\n\nUser Question: ${message}`;
 
@@ -195,12 +196,7 @@ export async function POST(req: Request) {
       model: 'claude-sonnet-5-5',
       max_tokens: 1500,
       system: systemPrompt,
-      messages: [
-        {
-          role: 'user',
-          content: enhancedMessage,
-        },
-      ],
+      messages: buildAdvisorMessages(parsed.history, enhancedMessage),
     });
 
     const textContent = response.content.find((block) => block.type === 'text');
