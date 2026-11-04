@@ -1,6 +1,7 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import { a11yLabels } from '@/lib/a11y-labels';
+import { pd, pickListingText } from '@/lib/property-details-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { memo, useState, useCallback } from 'react';
@@ -59,7 +60,7 @@ export const PropertyDetailsModal = memo(
 
     const handleShare = useCallback(async () => {
       setShareNote('');
-      const title = language === 'ar' ? property.titleAr || property.titleEn : property.titleEn || property.titleAr;
+      const title = pickListingText(language, property.titleEn, property.titleAr);
       const r = await shareListingLink(browserShareEnv(), title, shareUrl(window.location.origin, property.id, language));
       if (r === 'copied') setShareNote(shareText.copied);
       else if (r === 'failed') setShareNote(shareText.copyFailed);
@@ -71,10 +72,8 @@ export const PropertyDetailsModal = memo(
 
     if (!isOpen) return null;
 
-    const title = language === 'en' ? property.titleEn : property.titleAr;
-    const description = language === 'en' 
-      ? property.descriptionEn 
-      : property.descriptionAr;
+    const title = pickListingText(language, property.titleEn, property.titleAr);
+    const description = pickListingText(language, property.descriptionEn, property.descriptionAr);
     const formattedPrice = formatNumber(property.price, language);
 
     const currentImage = property.images[selectedImageIndex];
@@ -164,7 +163,7 @@ export const PropertyDetailsModal = memo(
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Bedrooms' : 'غرف النوم'}
+                      {pd('bedrooms', language)}
                     </p>
                     <p className="text-sm font-semibold">{property.bedrooms}</p>
                   </div>
@@ -178,7 +177,7 @@ export const PropertyDetailsModal = memo(
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Bathrooms' : 'الحمامات'}
+                      {pd('bathrooms', language)}
                     </p>
                     <p className="text-sm font-semibold">{property.bathrooms}</p>
                   </div>
@@ -192,7 +191,7 @@ export const PropertyDetailsModal = memo(
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Area' : 'المساحة'}
+                      {pd('area', language)}
                     </p>
                     <p className="text-sm font-semibold">{property.area}m²</p>
                   </div>
@@ -206,7 +205,7 @@ export const PropertyDetailsModal = memo(
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Year Built' : 'سنة البناء'}
+                      {pd('yearBuilt', language)}
                     </p>
                     <p className="text-sm font-semibold">{property.yearBuilt}</p>
                   </div>
@@ -218,7 +217,7 @@ export const PropertyDetailsModal = memo(
             {property.amenities && property.amenities.length > 0 && (
               <div className="pt-4 border-t border-border/30">
                 <p className="text-sm font-semibold mb-2">
-                  {language === 'en' ? 'Amenities' : 'المرافق'}
+                  {pd('amenities', language)}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {property.amenities.map((amenity, idx) => (
@@ -238,7 +237,7 @@ export const PropertyDetailsModal = memo(
               <div className="pt-4 border-t border-border/30 space-y-2">
                 {property.contact.name && (
                   <p className="text-sm text-muted-foreground">
-                    <span className="font-semibold">{language === 'en' ? 'Agent' : 'الوكيل'}:</span> {property.contact.name}
+                    <span className="font-semibold">{pd('agent', language)}:</span> {property.contact.name}
                   </p>
                 )}
                 <div className="flex gap-2">
@@ -248,7 +247,7 @@ export const PropertyDetailsModal = memo(
                       className="flex-1 flex items-center justify-center gap-2 py-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg transition-colors text-sm font-medium"
                     >
                       <Phone className="w-4 h-4" />
-                      {language === 'en' ? 'Call' : 'اتصل'}
+                      {pd('call', language)}
                     </a>
                   )}
                   {property.contact.email && (
@@ -257,7 +256,7 @@ export const PropertyDetailsModal = memo(
                       className="flex-1 flex items-center justify-center gap-2 py-2 bg-accent/10 hover:bg-accent/20 text-accent rounded-lg transition-colors text-sm font-medium"
                     >
                       <Mail className="w-4 h-4" />
-                      {language === 'en' ? 'Email' : 'بريد'}
+                      {pd('email', language)}
                     </a>
                   )}
                 </div>
@@ -270,7 +269,7 @@ export const PropertyDetailsModal = memo(
                 onClick={onBuyClick}
                 className="flex-1 bg-accent hover:bg-accent/90 text-black font-semibold"
               >
-                {language === 'en' ? 'Buy Now' : 'اشتري الآن'}
+                {pd('buyNow', language)}
               </Button>
               <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
                 onClick={onFavoriteClick}
