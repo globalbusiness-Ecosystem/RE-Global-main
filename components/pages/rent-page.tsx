@@ -1,6 +1,8 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import { a11yLabels } from '@/lib/a11y-labels';
+import { rp } from '@/lib/rent-page-labels';
+import { pickListingText } from '@/lib/property-details-labels';
 import { formatPropertyPrice } from '@/lib/price-format';
 import { PriceUsd } from '@/components/price-usd';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -145,7 +147,7 @@ const RentPropertyCard = memo(({
       <img
         loading="lazy"
         src={property.image}
-        alt={language === 'en' ? property.titleEn : property.titleAr}
+        alt={pickListingText(language, property.titleEn, property.titleAr)}
         className="w-full h-full object-cover hover:scale-105 transition-transform"
       />
       <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
@@ -166,7 +168,7 @@ const RentPropertyCard = memo(({
     <div className="p-4 space-y-3">
       <div>
         <h3 className="font-bold text-lg line-clamp-1">
-          {language === 'en' ? property.titleEn : property.titleAr}
+          {pickListingText(language, property.titleEn, property.titleAr)}
         </h3>
         <div className="flex items-center gap-1 text-muted-foreground text-sm">
           <MapPin className="w-4 h-4" />
@@ -190,7 +192,7 @@ const RentPropertyCard = memo(({
       <div className="border-t border-border pt-3 flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">
-            {language === 'en' ? 'Monthly' : 'شهري'}
+            {rp('monthly', language)}
           </p>
           <p className="text-xl font-bold text-accent">
             {formatNumber(property.price, language)} {currency}
@@ -205,7 +207,7 @@ const RentPropertyCard = memo(({
       <div className="grid grid-cols-3 gap-2 pt-2">
         <UnifiedPaymentButton
           propertyId={property.id}
-          propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
+          propertyTitle={pickListingText(language, property.titleEn, property.titleAr)}
           price={property.price}
           transactionType="rent"
           language={language}
@@ -217,7 +219,7 @@ const RentPropertyCard = memo(({
             sessionStorage.setItem('focusProperty', JSON.stringify({
               lat: 0,
               lng: 0,
-              title: language === 'en' ? property.titleEn : property.titleAr,
+              title: pickListingText(language, property.titleEn, property.titleAr),
               price: property.price,
               category: 'rent',
               id: property.id,
@@ -231,14 +233,14 @@ const RentPropertyCard = memo(({
             window.dispatchEvent(new CustomEvent('navigateToPage', { detail: 'map' }));
           }}
           className="border border-accent text-accent py-2 rounded-lg font-semibold hover:bg-accent/10 transition text-sm"
-          title={language === 'en' ? 'View on Map' : 'اعرض على الخريطة'}
+          title={rp('viewOnMap', language)}
         >
           📍
         </button>
         <button 
           onClick={onTourClick}
           className="border border-accent text-accent py-2 rounded-lg font-semibold hover:bg-accent/10 transition text-sm"
-          title={language === 'en' ? 'Virtual Tour' : 'جولة افتراضية'}
+          title={rp('virtualTour', language)}
         >
           <Video className="w-4 h-4 mx-auto" />
         </button>
@@ -280,7 +282,7 @@ function FirebaseRentModal({
           )}
           <div>
             <p className="text-3xl font-bold text-accent">
-              {formatPropertyPrice(prop, language)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm text-gray-400">/ {language === 'en' ? 'month' : 'شهريًا'}</span>
+              {formatPropertyPrice(prop, language)}<PriceUsd prop={prop} className="ml-2 text-sm font-normal text-gray-400" /> <span className="text-sm text-gray-400">/ {rp('perMonth', language)}</span>
             </p>
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
               <MapPin className="w-4 h-4" /> {location}
@@ -291,7 +293,7 @@ function FirebaseRentModal({
               {prop.bedrooms && (
                 <div className="flex items-center gap-1">
                   <Bed className="w-4 h-4 text-accent" />
-                  <span>{prop.bedrooms} {language === 'en' ? 'Beds' : 'غرف'}</span>
+                  <span>{prop.bedrooms} {rp('beds', language)}</span>
                 </div>
               )}
               {prop.area && (
@@ -320,7 +322,7 @@ function FirebaseRentModal({
           {prop.lat && prop.lng ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
               <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
-                📍 {language === 'en' ? 'Property Location' : 'موقع العقار'}
+                📍 {rp('propertyLocation', language)}
               </p>
               <iframe
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${prop.lng - 0.01},${prop.lat - 0.01},${prop.lng + 0.01},${prop.lat + 0.01}&layer=mapnik&marker=${prop.lat},${prop.lng}`}
@@ -399,22 +401,22 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
     <div className="px-4 py-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-accent mb-2">
-          {language === 'en' ? 'Rent Properties' : 'استئجار العقارات'}
+          {rp('pageTitle', language)}
         </h1>
         <p className="text-muted-foreground">
-          {language === 'en' ? 'Find your perfect rental home' : 'ابحث عن منزل الإيجار المثالي'}
+          {rp('pageSubtitle', language)}
         </p>
       </div>
 
       {/* Firebase Properties (dynamic, added via Admin) */}
       {propertiesLoading ? (
         <div className="text-center text-gray-400 py-4">
-          {language === 'en' ? 'Loading...' : 'جاري التحميل...'}
+          {rp('loading', language)}
         </div>
       ) : firebaseProperties.length > 0 ? (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
-            {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
+            {rp('available', language)}
           </h2>
           <ListingFilters value={filters} onChange={setFilters} language={language} shown={shownProperties.length} total={firebaseProperties.length} />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -429,7 +431,7 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
       <div className="space-y-4">
         {firebaseProperties.length === 0 && (
           <h2 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">
-            {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
+            {rp('featured', language)}
           </h2>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
