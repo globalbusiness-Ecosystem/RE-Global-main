@@ -1,6 +1,9 @@
 'use client';
 import { formatNumber } from '@/lib/format';
 import { a11yLabels } from '@/lib/a11y-labels';
+import { bp } from '@/lib/buy-page-labels';
+import { rp } from '@/lib/rent-page-labels';
+import { pickListingText } from '@/lib/property-details-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
@@ -149,7 +152,7 @@ const PropertyCard = memo(({
       <img
         loading="lazy"
         src={property.image}
-        alt={language === 'en' ? property.titleEn : property.titleAr}
+        alt={pickListingText(language, property.titleEn, property.titleAr)}
         className="w-full h-full object-cover hover:scale-105 transition-transform"
       />
       <button aria-label={isFavorite ? a11yLabels(language).removeFavorite : a11yLabels(language).addFavorite}
@@ -170,7 +173,7 @@ const PropertyCard = memo(({
     <div className="p-4 space-y-3">
       <div>
         <h3 className="font-bold text-lg line-clamp-1">
-          {language === 'en' ? property.titleEn : property.titleAr}
+          {pickListingText(language, property.titleEn, property.titleAr)}
         </h3>
         <div className="flex items-center gap-1 text-muted-foreground text-sm">
           <MapPin className="w-4 h-4" />
@@ -192,7 +195,7 @@ const PropertyCard = memo(({
       <div className="border-t border-border pt-3 flex items-center justify-between">
         <div>
           <p className="text-xs text-muted-foreground">
-            {language === 'en' ? 'Price' : 'السعر'}
+            {bp('price', language)}
           </p>
           <p className="text-xl font-bold text-accent">
             {formatNumber(property.price, language)} {currency}
@@ -207,7 +210,7 @@ const PropertyCard = memo(({
       <div className="grid grid-cols-3 gap-2 pt-2">
         <UnifiedPaymentButton
           propertyId={property.id}
-          propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
+          propertyTitle={pickListingText(language, property.titleEn, property.titleAr)}
           price={1}
           transactionType="buy"
           language={language}
@@ -219,7 +222,7 @@ const PropertyCard = memo(({
             sessionStorage.setItem('focusProperty', JSON.stringify({
               lat: 0,
               lng: 0,
-              title: language === 'en' ? property.titleEn : property.titleAr,
+              title: pickListingText(language, property.titleEn, property.titleAr),
               price: property.price,
               category: 'buy',
               id: property.id,
@@ -233,14 +236,14 @@ const PropertyCard = memo(({
             window.dispatchEvent(new CustomEvent('navigateToPage', { detail: 'map' }));
           }}
           className="border border-accent text-accent py-2 rounded-lg font-semibold hover:bg-accent/10 transition text-sm"
-          title={language === 'en' ? 'View on Map' : 'اعرض على الخريطة'}
+          title={rp('viewOnMap', language)}
         >
           📍
         </button>
         <button
           onClick={onTourClick}
           className="border border-accent text-accent py-2 rounded-lg font-semibold hover:bg-accent/10 transition text-sm"
-          title={language === 'en' ? 'Virtual Tour' : 'جولة افتراضية'}
+          title={rp('virtualTour', language)}
         >
           <Video className="w-4 h-4 mx-auto" />
         </button>
@@ -308,8 +311,8 @@ export function FirebasePropertyModal({
             {isUsdPegged(prop.currency) && (
               <p className="text-sm text-gray-400 mt-1">
                 {payPi
-                  ? (language === 'en' ? `You pay ≈ ${payPi} π` : `هتدفع ≈ ${payPi} π`)
-                  : (language === 'en' ? 'Payment in π is not available yet' : 'الدفع بالـ π مش متاح لسه')}
+                  ? bp('youPay', language, { pi: payPi })
+                  : (bp('piUnavailable', language))}
               </p>
             )}
             <p className="text-gray-400 text-sm mt-1 flex items-center gap-1">
@@ -323,13 +326,13 @@ export function FirebasePropertyModal({
               {!!prop.bedrooms && (
                 <div className="flex items-center gap-1">
                   <Bed className="w-4 h-4 text-accent" />
-                  <span>{prop.bedrooms} {language === 'en' ? 'Beds' : 'غرف'}</span>
+                  <span>{prop.bedrooms} {rp('beds', language)}</span>
                 </div>
               )}
               {!!prop.bathrooms && (
                 <div className="flex items-center gap-1">
                   <Maximize2 className="w-4 h-4 text-accent" />
-                  <span>{prop.bathrooms} {language === 'en' ? 'Baths' : 'حمام'}</span>
+                  <span>{prop.bathrooms} {bp('baths', language)}</span>
                 </div>
               )}
               {!!prop.area && (
@@ -362,7 +365,7 @@ export function FirebasePropertyModal({
           {prop.lat && prop.lng ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
               <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
-                📍 {language === 'en' ? 'Property Location' : 'موقع العقار'}
+                📍 {rp('propertyLocation', language)}
               </p>
               <iframe
                 src={`https://www.openstreetmap.org/export/embed.html?bbox=${prop.lng - 0.01},${prop.lat - 0.01},${prop.lng + 0.01},${prop.lat + 0.01}&layer=mapnik&marker=${prop.lat},${prop.lng}`}
@@ -374,7 +377,7 @@ export function FirebasePropertyModal({
             </div>
           ) : (
             <div className="rounded-xl border border-white/10 p-4 text-center text-gray-500 text-sm">
-              📍 {language === 'en' ? 'Map location not available' : 'الموقع على الخريطة غير متاح'}
+              📍 {bp('mapNA', language)}
             </div>
           )}
 
@@ -382,7 +385,7 @@ export function FirebasePropertyModal({
           {prop.vrUrl ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
               <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
-                🎥 {language === 'en' ? '360° Virtual Tour' : 'جولة افتراضية 360°'}
+                🎥 {bp('tour360', language)}
               </p>
               <iframe
                 src={`https://pannellum.org/api/viewer/?panorama=${encodeURIComponent(prop.vrUrl)}&autoLoad=true`}
@@ -395,7 +398,7 @@ export function FirebasePropertyModal({
             </div>
           ) : (
             <div className="rounded-xl border border-white/10 p-4 text-center text-gray-500 text-sm">
-              🎥 {language === 'en' ? '360° tour not available' : 'الجولة الافتراضية غير متاحة'}
+              🎥 {bp('tour360NA', language)}
             </div>
           )}
 
@@ -410,7 +413,7 @@ export function FirebasePropertyModal({
 
           {isSold ? (
             <div className="w-full rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-center text-sm text-red-300">
-              {language === 'en' ? 'This property has been sold' : 'العقار ده اتباع'}
+              {bp('sold', language)}
             </div>
           ) : (
 <UnifiedPaymentButton
@@ -463,22 +466,22 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
     <div className="px-4 py-6 space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-accent mb-2">
-          {language === 'en' ? 'Buy Properties' : 'شراء العقارات'}
+          {bp('pageTitle', language)}
         </h1>
         <p className="text-muted-foreground">
-          {language === 'en' ? 'Discover premium properties worldwide' : 'اكتشف العقارات الفاخرة في جميع أنحاء العالم'}
+          {bp('pageSubtitle', language)}
         </p>
       </div>
 
       {/* Firebase Properties */}
       {propertiesLoading ? (
         <div className="text-center text-gray-400 py-4">
-          {language === 'en' ? 'Loading...' : 'جاري التحميل...'}
+          {rp('loading', language)}
         </div>
       ) : firebaseProperties.length > 0 ? (
         <div className="space-y-4">
           <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
-            {language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة'}
+            {rp('available', language)}
           </h2>
           {firebaseProperties.map((prop) => (
             <ListingCard key={prop.id} prop={prop} language={language} isFavorite={favorites.includes(prop.id)} onToggleFavorite={() => toggleFavorite(prop.id)} onOpenDetails={() => setSelectedProp(prop)} />
@@ -490,7 +493,7 @@ export default function BuyPage({ language, currency, favorites, toggleFavorite 
       <div className="space-y-4">
         {firebaseProperties.length === 0 && (
           <h2 className="text-lg font-semibold text-white border-b border-gray-700 pb-2">
-            {language === 'en' ? 'Featured Listings' : 'قوائم مميزة'}
+            {rp('featured', language)}
           </h2>
         )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
