@@ -11,6 +11,7 @@ import ContractPanel, { type ContractResult } from '@/components/contract-panel'
 import MiniMarkdown from '@/components/mini-markdown';
 import { cu } from '@/lib/contract-ui-labels';
 import { hasContractContext, toHistory } from '@/lib/advisor-history';
+import { suggestHeading, contractHeading, startQuestions, contractQuestions } from '@/lib/advisor-suggest-labels';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -30,7 +31,7 @@ interface AIAdvisorChatProps {
   onClose: () => void;
 }
 
-import { SUGGESTED_QUESTIONS, LEGAL_FRAMEWORK, PROPERTY_DATABASE, MARKET_TRENDS, PI_PAYMENTS_GUIDE, GENERAL_ADVICE } from '@/lib/aladdin-chat-data';
+import { LEGAL_FRAMEWORK, PROPERTY_DATABASE, MARKET_TRENDS, PI_PAYMENTS_GUIDE, GENERAL_ADVICE } from '@/lib/aladdin-chat-data';
 import { speakMessage, stopSpeech } from '@/lib/speech-utils';
 import { advisorText } from '@/lib/advisor-i18n';
 
@@ -650,17 +651,33 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {messages.length === 1 && !isLoading && (
             <div className="mt-8 space-y-2">
               <p className="text-xs text-gray-400 px-2">
-                {language !== 'ar'
-                  ? 'Suggested questions:'
-                  : 'الأسئلة المقترحة:'}
+                {suggestHeading(language)}
               </p>
               <div className="space-y-2">
-                {SUGGESTED_QUESTIONS[language === 'ar' ? 'ar' : 'en'].map((question, idx) => (
+                {startQuestions(language).map((question, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSuggestedQuestion(question)}
                     disabled={isLoading}
                     className="w-full text-left p-3 bg-[#2a1f15] border border-[#F59E0B]/30 rounded-lg hover:bg-[#3a2f25] hover:border-[#F59E0B]/50 transition-colors disabled:opacity-50 text-sm text-gray-200"
+                  >
+                    {question}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* After a contract analysis: questions people usually ask next */}
+          {hasContractContext(messages) && messages[messages.length - 1]?.role === 'assistant' && !isLoading && (
+            <div className="mt-6 space-y-2">
+              <p className="text-xs text-gray-400 px-2">{contractHeading(language)}</p>
+              <div className="space-y-2">
+                {contractQuestions(language).map((question, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => handleSuggestedQuestion(question)}
+                    className="w-full text-left p-3 bg-[#2a1f15] border border-[#F59E0B]/30 rounded-lg hover:bg-[#3a2f25] hover:border-[#F59E0B]/50 transition-colors text-sm text-gray-200"
                   >
                     {question}
                   </button>
