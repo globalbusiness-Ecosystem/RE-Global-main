@@ -8,6 +8,7 @@ export const HOME_CATEGORIES: Record<string, Lang7> = {
   hotel: { en: 'Hotel', ar: 'فندق', fr: 'Hôtel', es: 'Hotel', pt: 'Hotel', ur: 'ہوٹل', zh: '酒店' },
   invest: { en: 'Invest', ar: 'استثمر', fr: 'Investir', es: 'Invertir', pt: 'Investir', ur: 'سرمایہ کاری', zh: '投资' },
   tokenized: { en: 'Tokenized', ar: 'رمزية', fr: 'Tokenisé', es: 'Tokenizado', pt: 'Tokenizado', ur: 'ٹوکنائزڈ', zh: '代币化' },
+  'share-market': { en: 'Shares Market', ar: 'سوق الحصص', fr: 'Marché des parts', es: 'Mercado de participaciones', pt: 'Mercado de frações', ur: 'حصص کی مارکیٹ', zh: '份额市场' },
   abroad: { en: 'Abroad', ar: 'بالخارج', fr: "À l'étranger", es: 'En el extranjero', pt: 'No exterior', ur: 'بیرون ملک', zh: '海外' },
   offplan: { en: 'Off-Plan', ar: 'قيد الإنشاء', fr: 'Sur plan', es: 'Sobre plano', pt: 'Na planta', ur: 'زیر تعمیر', zh: '期房' },
   map: { en: 'Map', ar: 'الخريطة', fr: 'Carte', es: 'Mapa', pt: 'Mapa', ur: 'نقشہ', zh: '地图' },

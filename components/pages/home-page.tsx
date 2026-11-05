@@ -29,6 +29,7 @@ const categories = [
   { id: 'hotel', titleEn: 'Hotel', titleAr: 'فندق', icon: Hotel },
   { id: 'invest', titleEn: 'Invest', titleAr: 'استثمر', icon: TrendingUp },
   { id: 'tokenized', titleEn: 'Tokenized', titleAr: 'رمزية', icon: Zap },
+  { id: 'share-market', titleEn: 'Shares Market', titleAr: 'سوق الحصص', icon: ArrowLeftRight },
   { id: 'abroad', titleEn: 'Abroad', titleAr: 'بالخارج', icon: Globe },
   { id: 'offplan', titleEn: 'Off-Plan', titleAr: 'قيد الإنشاء', icon: FileText },
   { id: 'map', titleEn: 'Map', titleAr: 'الخريطة', icon: MapPin },
@@ -110,6 +111,8 @@ export default function HomePage({
                     setShowVRTour(true);
                   } else if (cat.id === 'ai-advisor') {
                     setShowAdvisor(true);
+                  } else if (cat.id === 'share-market') {
+                    router.push('/market');
                   } else {
                     onCategoryClick?.(cat.id);
                   }
