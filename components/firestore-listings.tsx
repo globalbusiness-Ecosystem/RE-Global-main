@@ -1,4 +1,6 @@
 'use client';
+import { rp } from '@/lib/rent-page-labels';
+import { mpl } from '@/lib/more-pages-labels';
 import { useMemo, useState } from 'react';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { useProperties, type Property } from '@/lib/useProperties';
@@ -18,7 +20,7 @@ export function FirestoreListings({ listingType, featuredOnly, language, favorit
 
   if (loading) {
     return (
-      <div className="text-center text-gray-400 py-4">{language === 'en' ? 'Loading...' : 'جاري التحميل...'}</div>
+      <div className="text-center text-gray-400 py-4">{rp('loading', language)}</div>
     );
   }
   if (items.length === 0) return null;
@@ -27,8 +29,8 @@ export function FirestoreListings({ listingType, featuredOnly, language, favorit
     <div className="space-y-4 mb-6">
       <h2 className="text-lg font-semibold text-accent border-b border-accent/30 pb-2">
         {featuredOnly
-          ? (language === 'en' ? '⭐ Featured Properties' : '⭐ عقارات مميزة')
-          : (language === 'en' ? '⭐ Available Properties' : '⭐ العقارات المتاحة')}
+          ? (mpl('featuredProperties', language))
+          : (rp('available', language))}
       </h2>
       {items.map((prop) => (
         <ListingCard

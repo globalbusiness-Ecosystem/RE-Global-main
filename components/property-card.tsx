@@ -1,4 +1,6 @@
 'use client';
+import { mpl } from '@/lib/more-pages-labels';
+import { pickListingText } from '@/lib/property-details-labels';
 import { formatNumber } from '@/lib/format';
 import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -56,7 +58,7 @@ export const PropertyCard = memo(
     const hasImages = images && images.length > 0;
 
     const displayTitle = useMemo(
-      () => (language === 'en' ? titleEn : titleAr),
+      () => pickListingText(language, titleEn, titleAr),
       [language, titleEn, titleAr]
     );
 
@@ -188,7 +190,7 @@ export const PropertyCard = memo(
             className="w-full mt-2 flex items-center justify-center gap-2 py-2 bg-secondary/20 hover:bg-secondary/40 text-secondary-foreground border border-secondary/30 hover:border-secondary/60 rounded-lg transition-all duration-200 text-xs font-medium"
           >
             <Zap className="w-3 h-3" />
-            {language === 'en' ? 'AI Price' : 'سعر ذكي'}
+            {mpl('aiPrice', language)}
           </button>
 
           {/* QR Payment Button and View QR Code Button */}
@@ -207,10 +209,10 @@ export const PropertyCard = memo(
             <button
               onClick={() => setQrCodeOpen(true)}
               className="col-span-1 flex items-center justify-center gap-2 py-2 bg-accent/20 hover:bg-accent/40 text-accent border border-accent/30 hover:border-accent/60 rounded-lg transition-all duration-200 text-xs font-medium"
-              title={language === 'en' ? 'View QR Code' : 'عرض رمز QR'}
+              title={mpl('viewQrCode', language)}
             >
               <QrCode className="w-3 h-3" />
-              {language === 'en' ? 'View QR' : 'عرض QR'}
+              {mpl('viewQr', language)}
             </button>
           </div>
         </div>

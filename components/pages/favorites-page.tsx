@@ -1,4 +1,7 @@
 'use client';
+import { rp } from '@/lib/rent-page-labels';
+import { lpl } from '@/lib/listing-pages-labels';
+import { mpl } from '@/lib/more-pages-labels';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
@@ -42,12 +45,12 @@ export default function FavoritesPage({
   return (
     <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto pb-24">
       <h2 className="text-2xl font-bold text-accent mb-6">
-        {language === 'en' ? 'Favorites' : 'المفضلات'}
+        {mpl('favoritesTitle', language)}
       </h2>
 
       {loading ? (
         <p className="text-center text-muted-foreground py-12">
-          {language === 'en' ? 'Loading...' : 'جاري التحميل...'}
+          {rp('loading', language)}
         </p>
       ) : favoriteProperties.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-12">
@@ -74,7 +77,7 @@ export default function FavoritesPage({
                   />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-muted-foreground text-xs">
-                    {language === 'en' ? 'No image' : 'لا توجد صورة'}
+                    {mpl('noImage', language)}
                   </div>
                 )}
                 <button
@@ -128,10 +131,10 @@ export default function FavoritesPage({
                   <button
                     className="bg-card border border-border text-foreground py-2 rounded-lg font-medium text-sm hover:border-accent transition flex items-center justify-center gap-1"
                     onClick={() => setActiveTourId(prop.id)}
-                    title={language === 'en' ? 'Virtual Tour' : 'جولة افتراضية'}
+                    title={rp('virtualTour', language)}
                   >
                     <Video className="w-4 h-4" />
-                    {language === 'en' ? 'Tour' : 'جولة'}
+                    {lpl('tour', language)}
                   </button>
                 </div>
               </div>

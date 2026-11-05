@@ -1,4 +1,8 @@
 'use client';
+import { rp } from '@/lib/rent-page-labels';
+import { lpl } from '@/lib/listing-pages-labels';
+import { mpl } from '@/lib/more-pages-labels';
+import { pickListingText } from '@/lib/property-details-labels';
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
@@ -130,7 +134,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
           </button>
         )}
         <h1 className="text-3xl font-bold text-accent">
-          {language === 'en' ? 'Off-Plan Properties' : 'العقارات قيد الإنشاء'}
+          {mpl('offplanTitle', language)}
         </h1>
       </div>
 
@@ -169,7 +173,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
                   {property.countryFlag} {property.city}, {property.country}
                 </p>
                 <h3 className="font-semibold text-foreground line-clamp-2">
-                  {language === 'en' ? property.titleEn : property.titleAr}
+                  {pickListingText(language, property.titleEn, property.titleAr)}
                 </h3>
               </div>
 
@@ -187,7 +191,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-muted-foreground text-xs">
-                    {language === 'en' ? 'Starting Price' : 'السعر الابتدائي'}
+                    {mpl('startingPrice', language)}
                   </p>
                   <p className="text-lg font-bold text-accent">
                     {formatNumber(property.price, language)} {currency}
@@ -202,7 +206,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
               <div className="flex gap-2 pt-2">
                 <UnifiedPaymentButton
                   propertyId={property.id}
-                  propertyTitle={language === 'en' ? property.titleEn : property.titleAr}
+                  propertyTitle={pickListingText(language, property.titleEn, property.titleAr)}
                   price={property.price}
                   transactionType="invest"
                   language={language}
@@ -214,7 +218,7 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
                     sessionStorage.setItem('focusProperty', JSON.stringify({
                       lat: 0,
                       lng: 0,
-                      title: language === 'en' ? property.titleEn : property.titleAr,
+                      title: pickListingText(language, property.titleEn, property.titleAr),
                       price: property.price,
                       category: 'offplan',
                       id: property.id,
@@ -228,17 +232,17 @@ export default function OffPlanPage({ language, currency, favorites, toggleFavor
                     window.dispatchEvent(new CustomEvent('navigateToPage', { detail: 'map' }));
                   }}
                   className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm"
-                  title={language === 'en' ? 'View on Map' : 'اعرض على الخريطة'}
+                  title={rp('viewOnMap', language)}
                 >
                   📍
                 </button>
                 <button 
                   onClick={() => setActiveTourId(property.id)}
                   className="flex-1 border border-accent text-accent rounded-lg py-2 font-medium hover:bg-accent/10 transition text-sm"
-                  title={language === 'en' ? 'Virtual Tour' : 'جولة افتراضية'}
+                  title={rp('virtualTour', language)}
                 >
                   <Video className="w-4 h-4 inline mr-1" />
-                  {language === 'en' ? 'Tour' : 'جولة'}
+                  {lpl('tour', language)}
                 </button>
               </div>
             </div>
