@@ -1,5 +1,6 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { hm } from '@/lib/home-labels';
 
 import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useProperties } from '@/lib/useProperties';
@@ -376,11 +377,11 @@ export default function App() {
                 <span className="text-gray-400 text-lg">←</span>
               </button>
               <h1 className="text-3xl font-bold text-accent">
-                {language === 'en' ? 'Sell Your Property' : 'بيع العقار'}
+                {hm('sellTitle', language)}
               </h1>
             </div>
             <p className="text-gray-300">
-              {language === 'en' ? 'List your property on RE Platform' : 'ضع قائمة بعقارك على منصة RE'}
+              {hm('sellSub', language)}
             </p>
           </div>
         );
@@ -395,11 +396,11 @@ export default function App() {
                 <span className="text-gray-400 text-lg">←</span>
               </button>
               <h1 className="text-3xl font-bold text-accent">
-                {language === 'en' ? 'Help & Support' : 'المساعدة والدعم'}
+                {hm('helpTitle', language)}
               </h1>
             </div>
             <p className="text-gray-300">
-              {language === 'en' ? 'Get help with your account and properties' : 'احصل على المساعدة في حسابك والعقارات'}
+              {hm('helpSub', language)}
             </p>
             <div className="bg-card border border-border rounded-lg overflow-hidden">
               <div className="divide-y divide-border">
@@ -410,7 +411,7 @@ export default function App() {
                   <span className="text-accent text-lg shrink-0">✉️</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'Email' : 'البريد الإلكتروني'}
+                      {hm('email', language)}
                     </p>
                     <p className="text-sm font-medium text-foreground truncate">globalbusiness435@gmail.com</p>
                   </div>
@@ -425,7 +426,7 @@ export default function App() {
                   <span className="text-green-500 text-lg shrink-0">📱</span>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-muted-foreground">
-                      {language === 'en' ? 'WhatsApp' : 'واتساب'}
+                      {hm('whatsapp', language)}
                     </p>
                     <p className="text-sm font-medium text-foreground">+20 10 1081 0558</p>
                   </div>
@@ -500,14 +501,14 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
         return;
       }
       if (res.status === 429) {
-        setPinError(language === 'en' ? 'Too many attempts. Try again later.' : 'محاولات كثيرة. حاول لاحقاً.');
+        setPinError(hm('pinTooMany', language));
       } else if (res.status === 500) {
-        setPinError(language === 'en' ? 'Admin access is not configured' : 'الوصول الإداري غير مفعّل');
+        setPinError(hm('pinNotConfigured', language));
       } else {
-        setPinError(language === 'en' ? 'Invalid PIN' : 'رمز PIN غير صحيح');
+        setPinError(hm('pinInvalid', language));
       }
     } catch {
-      setPinError(language === 'en' ? 'Connection error' : 'خطأ في الاتصال');
+      setPinError(hm('pinConnection', language));
     }
     setPinInput('');
   };
@@ -522,13 +523,13 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
       <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full space-y-4 animate-in fade-in">
         <h2 className="text-2xl font-bold text-accent text-center">
-          {language === 'en' ? 'Admin Access' : 'الوصول الإداري'}
+          {hm('adminAccess', language)}
         </h2>
 
         {!showSuccess ? (
           <>
             <p className="text-muted-foreground text-sm text-center">
-              {language === 'en' ? 'Enter PIN code' : 'أدخل رمز PIN'}
+              {hm('enterPin', language)}
             </p>
 
             <input
@@ -541,7 +542,7 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
               }}
               onKeyPress={handleKeyPress}
               className="w-full bg-background border border-border rounded-lg px-4 py-3 text-center text-2xl tracking-widest text-foreground focus:outline-none focus:border-accent"
-              placeholder="••••••" aria-label={language === 'en' ? 'Enter PIN code' : 'أدخل رمز PIN'}
+              placeholder="••••••" aria-label={hm('enterPin', language)}
               autoFocus
             />
 
@@ -554,23 +555,23 @@ function AdminPinModal({ language, onClose }: AdminPinModalProps) {
                 onClick={onClose}
                 className="border border-border text-foreground py-2 rounded-lg font-semibold hover:bg-background/50 transition"
               >
-                {language === 'en' ? 'Cancel' : 'إلغاء'}
+                {hm('cancel', language)}
               </button>
               <button
                 onClick={handlePinSubmit}
                 className="bg-accent hover:bg-accent/90 text-accent-foreground py-2 rounded-lg font-semibold transition"
               >
-                {language === 'en' ? 'Submit' : 'إرسال'}
+                {hm('submit', language)}
               </button>
             </div>
           </>
         ) : (
           <div className="text-center space-y-3 py-4">
             <p className="text-green-500 text-lg font-semibold">
-              {language === 'en' ? 'Access Granted' : 'تم منح الوصول'}
+              {hm('accessGranted', language)}
             </p>
             <p className="text-sm text-muted-foreground">
-              {language === 'en' ? 'Welcome to Admin Panel' : 'مرحبا بك في لوحة التحكم'}
+              {hm('welcomeAdmin', language)}
             </p>
           </div>
         )}
