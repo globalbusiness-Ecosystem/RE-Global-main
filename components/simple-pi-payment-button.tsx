@@ -1,4 +1,6 @@
 'use client';
+import { qrp } from '@/lib/qr-pay-labels';
+import { pay } from '@/lib/payment-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
@@ -27,7 +29,7 @@ export function SimplePiPaymentButton({
 
   const handlePayment = async () => {
     if (!window.Pi || typeof window.Pi.createPayment !== 'function') {
-      setErrorMessage(language === 'en' ? 'Pi Network not available' : 'شبكة Pi غير متاحة');
+      setErrorMessage(pay('piUnavailable', language));
       return;
     }
 
@@ -114,7 +116,7 @@ export function SimplePiPaymentButton({
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : 'Payment failed';
       console.log('[v0] Payment error caught:', errorMsg);
-      setErrorMessage(language === 'en' ? errorMsg : `خطأ: ${errorMsg}`);
+      setErrorMessage(language === 'en' ? errorMsg : `${pay('errorPrefix', language)}: ${errorMsg}`);
       setIsProcessing(false);
       if (onError && error instanceof Error) onError(error);
     }
@@ -126,7 +128,7 @@ export function SimplePiPaymentButton({
         disabled
         className={`w-full py-3 px-4 rounded-lg font-semibold bg-green-500/20 text-green-400 border border-green-500/50 ${className}`}
       >
-        {language === 'en' ? '✓ Payment Successful' : '✓ تمت العملية بنجاح'}
+        {qrp('paySuccess', language)}
       </button>
     );
   }
@@ -144,9 +146,9 @@ export function SimplePiPaymentButton({
       >
         <ShoppingCart className="w-4 h-4" />
         {isProcessing ? (
-          <span>{language === 'en' ? 'Processing...' : 'جاري المعالجة...'}</span>
+          <span>{pay('processing', language)}</span>
         ) : (
-          <span>{language === 'en' ? 'Pay with Pi' : 'ادفع بـ Pi'}</span>
+          <span>{qrp('payWithPi', language)}</span>
         )}
       </button>
       {errorMessage && (

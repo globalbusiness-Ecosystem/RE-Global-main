@@ -1,4 +1,7 @@
 'use client';
+import { qrp } from '@/lib/qr-pay-labels';
+import { bp } from '@/lib/buy-page-labels';
+import { pd } from '@/lib/property-details-labels';
 import { formatNumber } from '@/lib/format';
 import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
@@ -62,7 +65,7 @@ export const QRCodeModal = ({
         {/* Header */}
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold text-foreground">
-            {language === 'en' ? 'Property QR Code' : 'رمز الملكية'}
+            {qrp('qrTitle', language)}
           </h2>
           <button aria-label={a11yLabels(language).close}
             onClick={onClose}
@@ -87,19 +90,19 @@ export const QRCodeModal = ({
           <p className="font-semibold text-foreground">{propertyName}</p>
           <div className="grid grid-cols-2 gap-2 text-muted-foreground">
             <div>
-              <span className="text-xs">{language === 'en' ? 'Location' : 'الموقع'}:</span>
+              <span className="text-xs">{qrp('location', language)}:</span>
               <p className="font-medium text-foreground">{city}</p>
             </div>
             <div>
-              <span className="text-xs">{language === 'en' ? 'Price' : 'السعر'}:</span>
+              <span className="text-xs">{bp('price', language)}:</span>
               <p className="font-medium text-foreground">{formatNumber(price, language)}π</p>
             </div>
             <div>
-              <span className="text-xs">{language === 'en' ? 'Bedrooms' : 'الغرف'}:</span>
+              <span className="text-xs">{qrp('bedrooms', language)}:</span>
               <p className="font-medium text-foreground">{bedrooms}</p>
             </div>
             <div>
-              <span className="text-xs">{language === 'en' ? 'Area' : 'المساحة'}:</span>
+              <span className="text-xs">{pd('area', language)}:</span>
               <p className="font-medium text-foreground">{area}m²</p>
             </div>
           </div>
@@ -108,11 +111,11 @@ export const QRCodeModal = ({
         {/* Share Link */}
         <div className="bg-secondary/10 rounded-lg p-3 space-y-2">
           <p className="text-xs text-muted-foreground">
-            {language === 'en' ? 'Share Link' : 'رابط المشاركة'}
+            {qrp('shareLink', language)}
           </p>
           <div className="flex gap-2">
             <input
-              aria-label={language === 'en' ? 'Share Link' : 'رابط المشاركة'}
+              aria-label={qrp('shareLink', language)}
               type="text"
               value={propertyShareUrl}
               readOnly
@@ -127,12 +130,12 @@ export const QRCodeModal = ({
               {copied ? (
                 <>
                   <Check className="w-3 h-3 text-green-600" />
-                  {language === 'en' ? 'Copied' : 'تم'}
+                  {qrp('copied', language)}
                 </>
               ) : (
                 <>
                   <Copy className="w-3 h-3" />
-                  {language === 'en' ? 'Copy' : 'نسخ'}
+                  {qrp('copy', language)}
                 </>
               )}
             </Button>
@@ -145,17 +148,17 @@ export const QRCodeModal = ({
             variant="outline"
             className="flex-1 flex items-center justify-center gap-2"
             onClick={handlePrint}
-            title={language === 'en' ? 'Print QR Code' : 'طباعة رمز QR'}
+            title={qrp('printTitle', language)}
           >
             <Printer className="w-4 h-4" />
-            {language === 'en' ? 'Print' : 'طباعة'}
+            {qrp('print', language)}
           </Button>
           <Button
             variant="default"
             className="flex-1"
             onClick={onClose}
           >
-            {language === 'en' ? 'Close' : 'إغلاق'}
+            {qrp('close', language)}
           </Button>
         </div>
       </div>

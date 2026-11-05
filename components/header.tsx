@@ -110,7 +110,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
         <button
           className="p-1 hover:opacity-70 transition flex-shrink-0"
           onClick={onSettingsClick}
-          title={language === 'en' ? 'Settings' : 'الإعدادات'}
+          title={t.settings}
         >
           {avatar ? (
             <UserAvatar avatar={avatar} username={username} size={24} />
