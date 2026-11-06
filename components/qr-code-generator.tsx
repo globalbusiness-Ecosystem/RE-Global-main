@@ -3,12 +3,14 @@
 import { useEffect, useRef, useState } from 'react';
 import { Download, Copy, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { qrp } from '@/lib/qr-pay-labels';
 
 interface QRCodeGeneratorProps {
   propertyId: string;
   propertyName: string;
   propertyUrl?: string;
   size?: number;
+  language?: string;
 }
 
 export const QRCodeGenerator = ({
@@ -16,6 +18,7 @@ export const QRCodeGenerator = ({
   propertyName,
   propertyUrl,
   size = 256,
+  language = 'en',
 }: QRCodeGeneratorProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [copied, setCopied] = useState(false);
@@ -89,14 +92,14 @@ export const QRCodeGenerator = ({
         {qrDataUrl ? (
           <img
             src={qrDataUrl}
-            alt={`QR Code for ${propertyName}`}
+            alt={`${qrp('qrAlt', language)}: ${propertyName}`}
             width={size}
             height={size}
             className="border-2 border-gray-200"
           />
         ) : (
           <div className="w-64 h-64 bg-gray-100 flex items-center justify-center rounded">
-            <p className="text-gray-400">Generating QR Code...</p>
+            <p className="text-gray-400">{qrp('generating', language)}</p>
           </div>
         )}
       </div>
@@ -113,27 +116,27 @@ export const QRCodeGenerator = ({
           variant="outline"
           onClick={handleDownload}
           className="flex items-center gap-2"
-          title="Download QR Code"
+          title={qrp('downloadTitle', language)}
         >
           <Download className="w-4 h-4" />
-          Download
+          {qrp('download', language)}
         </Button>
         <Button
           size="sm"
           variant="outline"
           onClick={handleCopy}
           className="flex items-center gap-2"
-          title="Copy QR Code to clipboard"
+          title={qrp('copyTitle', language)}
         >
           {copied ? (
             <>
               <Check className="w-4 h-4 text-green-600" />
-              Copied
+              {qrp('copied', language)}
             </>
           ) : (
             <>
               <Copy className="w-4 h-4" />
-              Copy
+              {qrp('copy', language)}
             </>
           )}
         </Button>

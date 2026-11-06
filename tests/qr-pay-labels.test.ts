@@ -37,3 +37,14 @@ describe('QR window and simple Pi button labels in 7 languages', () => {
     expect(src).not.toContain("'الإعدادات'");
   });
 });
+
+describe('the QR picture and its buttons are translated too', () => {
+  const src = readFileSync('components/qr-code-generator.tsx', 'utf8');
+  it('use the labels instead of fixed English', () => {
+    for (const k of ['qrAlt', 'generating', 'downloadTitle', 'download', 'copyTitle', 'copied', 'copy']) expect(src).toContain(`qrp('${k}', language)`);
+    for (const old of ['>Generating QR Code...<', 'title="Download QR Code"', 'title="Copy QR Code to clipboard"']) expect(src).not.toContain(old);
+  });
+  it('the window passes its language down', () => {
+    expect(readFileSync('components/qr-code-modal.tsx', 'utf8')).toContain('language={language}');
+  });
+});

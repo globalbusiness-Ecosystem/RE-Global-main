@@ -82,6 +82,7 @@ export const QRCodeModal = ({
             propertyName={propertyName}
             propertyUrl={propertyShareUrl}
             size={300}
+            language={language}
           />
         </div>
 

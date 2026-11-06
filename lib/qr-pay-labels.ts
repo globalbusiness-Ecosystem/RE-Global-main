@@ -17,6 +17,11 @@ export const QR_PAY_LABELS = {
   close: { en: 'Close', ar: 'إغلاق', fr: 'Fermer', es: 'Cerrar', pt: 'Fechar', ur: 'بند کریں', zh: '关闭' },
   paySuccess: { en: '✓ Payment Successful', ar: '✓ تمت العملية بنجاح', fr: '✓ Paiement réussi', es: '✓ Pago exitoso', pt: '✓ Pagamento concluído', ur: '✓ ادائیگی کامیاب', zh: '✓ 支付成功' },
   payWithPi: { en: 'Pay with Pi', ar: 'ادفع بـ Pi', fr: 'Payer avec Pi', es: 'Pagar con Pi', pt: 'Pagar com Pi', ur: 'Pi سے ادائیگی کریں', zh: '使用 Pi 支付' },
+  generating: { en: 'Generating QR Code...', ar: 'جارٍ إنشاء رمز QR...', fr: 'Génération du code QR…', es: 'Generando código QR…', pt: 'A gerar código QR…', ur: 'QR کوڈ بن رہا ہے…', zh: '正在生成二维码…' },
+  download: { en: 'Download', ar: 'تحميل', fr: 'Télécharger', es: 'Descargar', pt: 'Baixar', ur: 'ڈاؤن لوڈ', zh: '下载' },
+  downloadTitle: { en: 'Download QR Code', ar: 'تحميل رمز QR', fr: 'Télécharger le code QR', es: 'Descargar código QR', pt: 'Baixar código QR', ur: 'QR کوڈ ڈاؤن لوڈ کریں', zh: '下载二维码' },
+  copyTitle: { en: 'Copy QR Code to clipboard', ar: 'نسخ رمز QR إلى الحافظة', fr: 'Copier le code QR dans le presse-papiers', es: 'Copiar código QR al portapapeles', pt: 'Copiar código QR para a área de transferência', ur: 'QR کوڈ کلپ بورڈ پر کاپی کریں', zh: '将二维码复制到剪贴板' },
+  qrAlt: { en: 'QR Code', ar: 'رمز QR', fr: 'Code QR', es: 'Código QR', pt: 'Código QR', ur: 'QR کوڈ', zh: '二维码' },
 } satisfies Record<string, Row>;
 
 export type QrPayLabelKey = keyof typeof QR_PAY_LABELS;
