@@ -7,10 +7,11 @@ import { useLanguage } from '@/contexts/language-context';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { feeSplit, listingTotal } from '@/lib/market-rules';
 import { mk } from '@/lib/market-labels';
+import { pickMarketTitle, type MarketTitles } from '@/lib/market-titles';
 
 type Listing = { id: string; propertyId: string; propertyTitle: string; shares: number; pricePerShare: number; total: number | null; reserved: boolean };
 type Position = { propertyId: string; title: string; owned: number; listed: number; available: number };
-type Mine = { id: string; propertyTitle: string; shares: number; pricePerShare: number; status: string };
+type Mine = { id: string; propertyId: string; propertyTitle: string; shares: number; pricePerShare: number; status: string };
 type Payout = { id: string; kind: string; amount: number; status: string };
 type Tab = 'market' | 'shares' | 'listings' | 'payouts';
 
@@ -52,12 +53,14 @@ export default function SharesMarketPage() {
   const [msg, setMsg] = useState('');
   const [feePct, setFeePct] = useState(2);
   const [tab, setTab] = useState<Tab>('market');
+  const [titles, setTitles] = useState<MarketTitles>({});
+  const tt = (propertyId: string, stored: string) => pickMarketTitle(titles, propertyId, language, stored);
 
   const load = useCallback(async () => {
-    fetch('/api/market/listings', { cache: 'no-store' }).then((r) => r.json()).then((d) => { setListings(Array.isArray(d.listings) ? d.listings : []); if (typeof d.feePct === 'number') setFeePct(d.feePct); }).catch(() => undefined);
+    fetch('/api/market/listings', { cache: 'no-store' }).then((r) => r.json()).then((d) => { setListings(Array.isArray(d.listings) ? d.listings : []); if (typeof d.feePct === 'number') setFeePct(d.feePct); if (d.titles && typeof d.titles === 'object') setTitles((prev) => ({ ...prev, ...d.titles })); }).catch(() => undefined);
     if (!accessToken) { setMe(null); return; }
     fetch('/api/market/me', { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' })
-      .then((r) => (r.ok ? r.json() : null)).then((d) => setMe(d && Array.isArray(d.positions) ? d : null)).catch(() => undefined);
+      .then((r) => (r.ok ? r.json() : null)).then((d) => { setMe(d && Array.isArray(d.positions) ? d : null); if (d?.titles && typeof d.titles === 'object') setTitles((prev) => ({ ...prev, ...d.titles })); }).catch(() => undefined);
   }, [accessToken]);
   useEffect(() => { load(); }, [load]);
 
@@ -127,7 +130,7 @@ export default function SharesMarketPage() {
             {listings.length === 0 && <p className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-gray-400">{mk('nothingForSale', language)}</p>}
             {listings.map((l) => (
               <article key={l.id} className={card}>
-                <PropertyHead title={l.propertyTitle}>
+                <PropertyHead title={tt(l.propertyId, l.propertyTitle)}>
                   {l.reserved && <p className="mt-1 text-xs text-yellow-400">{mk('someonePaying', language)}</p>}
                 </PropertyHead>
                 <dl className={tiles}>
@@ -137,7 +140,7 @@ export default function SharesMarketPage() {
                 </dl>
                 {!l.reserved && l.total !== null && (
                   <UnifiedPaymentButton
-                    propertyId={l.propertyId} propertyTitle={l.propertyTitle} price={l.total} amountPi={l.total}
+                    propertyId={l.propertyId} propertyTitle={tt(l.propertyId, l.propertyTitle)} price={l.total} amountPi={l.total}
                     listingId={l.id} transactionType="resale" language={language} currency="PI"
                     className="!py-3 !text-base"
                     disabled={!accessToken} onSuccess={() => setTimeout(load, 1500)}
@@ -153,7 +156,7 @@ export default function SharesMarketPage() {
             {me.positions.length === 0 && <p className="rounded-2xl border border-dashed border-white/10 p-6 text-center text-sm text-gray-400">{mk('noShares', language)}</p>}
             {me.positions.map((p) => (
               <article key={p.propertyId} className={card}>
-                <PropertyHead title={p.title || p.propertyId} />
+                <PropertyHead title={tt(p.propertyId, p.title || p.propertyId)} />
                 <dl className={tiles}>
                   <Stat label={mk('owned', language)}><Num value={p.owned} /></Stat>
                   <Stat label={mk('listed', language)}><Num value={p.listed} /></Stat>
@@ -198,7 +201,7 @@ export default function SharesMarketPage() {
           <section className="space-y-3">
             {me.listings.map((l) => (
               <article key={l.id} className={card}>
-                <PropertyHead title={l.propertyTitle}>
+                <PropertyHead title={tt(l.propertyId, l.propertyTitle)}>
                   <span className={`mt-1 inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold ${l.status === 'open' ? 'bg-emerald-500/15 text-emerald-400' : l.status === 'sold' ? 'bg-amber-500/15 text-amber-400' : 'bg-white/10 text-gray-400'}`}>{statusText(l.status)}</span>
                 </PropertyHead>
                 <dl className={tiles}>
