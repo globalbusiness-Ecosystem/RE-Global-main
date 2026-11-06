@@ -9,6 +9,7 @@ import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { translateContract, contractDir, CONTRACT_LANGS } from '@/lib/contract-translations';
+import { cv, kindPartyLabel, kindTitleLabel, contractStatusLabel } from '@/lib/contract-view-labels';
 
 function CopyField({ label, value }: { label: string; value: string }) {
   const [copied, setCopied] = useState(false);
@@ -231,9 +232,9 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
         <div className="px-6 pt-6 pb-5">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <p className="text-[11px] tracking-[0.2em] uppercase text-amber-400/90 mb-1.5">{KIND_TITLE[contractKind(contract)]}</p>
+              <p className="text-[11px] tracking-[0.2em] uppercase text-amber-400/90 mb-1.5">{kindTitleLabel(contractKind(contract), language)}</p>
               <h1 className="text-[22px] leading-tight text-stone-50 font-semibold">{contract.propertyTitle}</h1>
-              <p className="mt-1 text-[12.5px] text-stone-500">Contract № <span className="font-mono text-stone-400">{contract.id}</span></p>
+              <p className="mt-1 text-[12.5px] text-stone-500">{cv('contractNo', language)} <span className="font-mono text-stone-400">{contract.id}</span></p>
             </div>
             <Seal />
           </div>
@@ -242,62 +243,62 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
             onClick={downloadPdf}
             className="mt-4 w-full inline-flex items-center justify-center gap-2 text-[12.5px] text-stone-950 bg-amber-400 hover:bg-amber-300 transition-colors rounded-[3px] py-2.5 font-medium"
           >
-            <Download size={14} /> Download as PDF
+            <Download size={14} /> {cv('downloadPdf', language)}
           </button>
 
           <div className="mt-5 grid grid-cols-3 gap-2.5">
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
-              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">Type</p>
+              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">{cv('type', language)}</p>
               <p className="text-[13px] text-stone-200">{KIND_ICON[contractKind(contract)]} {(KIND_LABELS[language] ?? KIND_LABELS.en)[contractKind(contract)]}</p>
             </div>
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
-              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">Amount</p>
+              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">{cv('amount', language)}</p>
               <p className="text-[13px] text-amber-300 font-medium">{contract.amount} {contract.currency}</p>
             </div>
             <div className="rounded-[3px] bg-white/[0.03] border border-white/[0.06] px-2.5 py-2">
-              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">Status</p>
-              <p className="text-[13px] text-emerald-400 capitalize">{contract.status}</p>
+              <p className="text-[9.5px] uppercase tracking-wider text-stone-500 mb-0.5">{cv('status', language)}</p>
+              <p className="text-[13px] text-emerald-400 capitalize">{contractStatusLabel(contract.status, language)}</p>
             </div>
           </div>
         </div>
 
         <div className="px-6 py-5 space-y-4">
-          <p className="text-[10.5px] uppercase tracking-[0.14em] text-stone-500">Signatures</p>
+          <p className="text-[10.5px] uppercase tracking-[0.14em] text-stone-500">{cv('signatures', language)}</p>
 
           <div className="rounded-[4px] border border-white/[0.06] bg-white/[0.02] p-3.5">
             <div className="flex items-center justify-between mb-2.5">
               <div>
-                <p className="text-[10.5px] text-stone-500">Party A · {KIND_PARTY[contractKind(contract)]}</p>
+                <p className="text-[10.5px] text-stone-500">{cv('partyA', language, { role: kindPartyLabel(contractKind(contract), language) })}</p>
                 <p className="text-[14px] text-stone-100 font-medium">@{contract.buyerUsername}</p>
               </div>
               {contract.paymentId && (
                 <span className="inline-flex items-center gap-1 text-[10.5px] text-emerald-400 bg-emerald-400/10 rounded-full px-2 py-0.5">
-                  <Check size={10} /> Verified via Pi payment
+                  <Check size={10} /> {cv('verifiedPi', language)}
                 </span>
               )}
             </div>
-            {contract.paymentId && <CopyField label="Payment ID" value={contract.paymentId} />}
-            {contract.txid && <CopyField label="Transaction ID" value={contract.txid} />}
+            {contract.paymentId && <CopyField label={cv('paymentId', language)} value={contract.paymentId} />}
+            {contract.txid && <CopyField label={cv('transactionId', language)} value={contract.txid} />}
           </div>
 
           <div className="rounded-[4px] border border-amber-500/15 bg-amber-500/[0.03] p-3.5">
             <div className="flex items-center justify-between mb-2.5">
               <div>
-                <p className="text-[10.5px] text-stone-500">Party B · RE Global Platform</p>
+                <p className="text-[10.5px] text-stone-500">{cv('partyB', language)}</p>
                 <p className="text-[14px] text-stone-100 font-medium">{contract.sellerUsername}</p>
               </div>
               {isSigned ? (
                 <span className="inline-flex items-center gap-1 text-[10.5px] text-amber-300 bg-amber-400/10 rounded-full px-2 py-0.5">
-                  <ShieldCheck size={10} /> Ed25519 signed
+                  <ShieldCheck size={10} /> {cv('edSigned', language)}
                 </span>
               ) : (
                 <span className="inline-flex items-center gap-1 text-[10.5px] text-stone-500 bg-white/5 rounded-full px-2 py-0.5">
-                  Not yet signed
+                  {cv('notSigned', language)}
                 </span>
               )}
             </div>
-            {contract.platformPublicKey && <CopyField label="Public key" value={contract.platformPublicKey} />}
-            {contract.contractHash && <CopyField label="Document hash" value={contract.contractHash} />}
+            {contract.platformPublicKey && <CopyField label={cv('publicKey', language)} value={contract.platformPublicKey} />}
+            {contract.contractHash && <CopyField label={cv('documentHash', language)} value={contract.contractHash} />}
           </div>
         </div>
 
@@ -306,12 +307,12 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
             <VerifyQR contractId={contract.id} size={70} />
           </div>
           <div className="min-w-0">
-            <p className="text-[10.5px] uppercase tracking-[0.12em] text-amber-300 mb-1">Linked verification</p>
+            <p className="text-[10.5px] uppercase tracking-[0.12em] text-amber-300 mb-1">{cv('linkedVerification', language)}</p>
             <p className="text-[11.5px] text-stone-300 leading-snug">
-              Scan to open the public, no-login record for <span className="text-stone-100">{contract.propertyTitle}</span> — this contract and its property.
+              {cv('scanBefore', language)}<span className="text-stone-100">{contract.propertyTitle}</span>{cv('scanAfter', language)}
             </p>
             {contract.inspectionCertHash && (
-              <p className="mt-1 text-[10.5px] text-emerald-400">✓ Linked inspection certificate on record</p>
+              <p className="mt-1 text-[10.5px] text-emerald-400">{cv('certOnRecord', language)}</p>
             )}
           </div>
         </div>
@@ -323,7 +324,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
               className="w-full flex items-center justify-between text-left rounded-[4px] border border-white/[0.06] px-3.5 py-2.5 hover:bg-white/[0.02] transition-colors"
             >
               <span className="inline-flex items-center gap-2 text-[12.5px] text-stone-300">
-                <FileText size={13} className="text-amber-400/80" /> Full contract text
+                <FileText size={13} className="text-amber-400/80" /> {cv('fullText', language)}
               </span>
               <ChevronDown size={14} className={`text-stone-500 transition-transform ${showFullText ? 'rotate-180' : ''}`} />
             </button>
