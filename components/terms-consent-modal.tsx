@@ -2,10 +2,13 @@
 
 import { useEffect, useState } from 'react';
 import { FileText, ScrollText } from 'lucide-react';
+import { useLanguage } from '@/contexts/language-context';
+import { cl } from '@/lib/consent-labels';
 
 const CONSENT_KEY = 're_terms_privacy_accepted_v1';
 
 export function TermsConsentModal() {
+  const { language } = useLanguage();
   const [visible, setVisible] = useState(false);
   const [checked, setChecked] = useState(false);
 
@@ -36,10 +39,11 @@ export function TermsConsentModal() {
     <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-[100] p-4">
       <div className="bg-card border border-border rounded-xl p-6 max-w-sm w-full space-y-4">
         <div className="space-y-1.5">
-          <h2 className="text-xl font-bold text-accent">Before you continue</h2>
+          <h2 className="text-xl font-bold text-accent">{cl('title', language)}</h2>
           <p className="text-sm text-muted-foreground">
-            Please review our Privacy Policy and Terms of Service before using RE.
+            {cl('intro', language)}
           </p>
+          {language !== 'en' && <p className="text-xs text-muted-foreground">{cl('docsNote', language)}</p>}
         </div>
 
         <div className="flex flex-col gap-2">
@@ -50,7 +54,7 @@ export function TermsConsentModal() {
             className="flex items-center gap-2 text-sm text-accent underline"
           >
             <FileText className="w-4 h-4" />
-            Privacy Policy
+            {cl('privacy', language)}
           </a>
           <a
             href="/terms"
@@ -59,7 +63,7 @@ export function TermsConsentModal() {
             className="flex items-center gap-2 text-sm text-accent underline"
           >
             <ScrollText className="w-4 h-4" />
-            Terms of Service
+            {cl('terms', language)}
           </a>
         </div>
 
@@ -70,7 +74,7 @@ export function TermsConsentModal() {
             onChange={(e) => setChecked(e.target.checked)}
             className="mt-0.5 w-4 h-4 accent-accent shrink-0"
           />
-          <span>I have read and agree to the Privacy Policy and Terms of Service.</span>
+          <span>{cl('agree', language)}</span>
         </label>
 
         <button
@@ -82,7 +86,7 @@ export function TermsConsentModal() {
               : 'bg-accent/30 text-accent-foreground/50 cursor-not-allowed'
           }`}
         >
-          Accept & Continue
+          {cl('accept', language)}
         </button>
       </div>
     </div>
