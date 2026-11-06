@@ -31,7 +31,7 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(
     {
       status: healthy ? 'healthy' : 'degraded',
-      checks: { api: true, database, payments },
+      checks: { api: true, database, payments, ai: Boolean(process.env.ANTHROPIC_API_KEY) },
       timestamp: new Date().toISOString(),
     },
     { status: healthy ? 200 : 503, headers: { 'Cache-Control': 'no-store' } }
