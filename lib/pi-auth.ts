@@ -1,6 +1,7 @@
 import 'server-only';
 import crypto from 'crypto';
 import { isBanned } from '@/lib/ban-list';
+import { verifyWebToken } from '@/lib/web-auth';
 
 const BRAND: unique symbol = Symbol('AuthenticatedPiUser');
 
@@ -37,6 +38,14 @@ export function _clearPiAuthCache(): void { cache.clear(); }
 export async function verifyPiAccessToken(accessToken: unknown): Promise<AuthenticatedPiUser> {
   if (typeof accessToken !== 'string' || accessToken.trim().length === 0) {
     throw new AuthError('Missing or malformed Pi access token');
+  }
+
+  // Outside the Pi Browser people sign in with Google / e-mail / phone (Firebase). Those tokens are checked first,
+  // and anything that is not one of them goes on to Pi exactly as before.
+  const web = await verifyWebToken(accessToken.trim());
+  if (web) {
+    if (await isBanned(web.username)) throw new AuthError('This account has been suspended', 403);
+    return { [BRAND]: true, uid: web.uid, username: web.username } as AuthenticatedPiUser;
   }
 
   const key = cacheKey(accessToken);
