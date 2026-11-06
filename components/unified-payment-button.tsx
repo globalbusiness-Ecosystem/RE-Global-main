@@ -240,7 +240,7 @@ export function UnifiedPaymentButton({
     if (paymentState.status === 'success') {
       return pay('success', language);
     }
-    return `${getTransactionLabel()} π${price}`;
+    return <>{getTransactionLabel()} <bdi dir="ltr" className="tabular-nums">π{price}</bdi></>;
   };
 
   const getButtonColor = () => {
