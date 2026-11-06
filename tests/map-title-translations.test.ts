@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { getMapPropertyTitle } from '@/lib/map-i18n';
+import { getMapPropertyTitle, getMapPropertyCity } from '@/lib/map-i18n';
 
 const base = { title: 'Villa', titleAr: 'فيلا' };
 
@@ -24,5 +24,24 @@ describe('map titles use the admin translation of the listing', () => {
     const src = readFileSync('components/pages/map-page.tsx', 'utf8');
     expect(src).toContain('translations?: Record<string');
     expect(src).toContain('...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p,');
+  });
+});
+
+describe('map place names use the admin translation too', () => {
+  const p = { city: 'Cairo', translations: { fr: { location: 'Le Caire' }, ar: { location: 'القاهرة' }, zh: { location: ' ' } } };
+  it('translated when available, stored name otherwise', () => {
+    expect(getMapPropertyCity(p, 'fr')).toBe('Le Caire');
+    expect(getMapPropertyCity(p, 'ar')).toBe('القاهرة');
+    expect(getMapPropertyCity(p, 'zh')).toBe('Cairo');
+    expect(getMapPropertyCity(p, 'pt')).toBe('Cairo');
+    expect(getMapPropertyCity({ city: 'Cairo' }, 'fr')).toBe('Cairo');
+  });
+  it('is safe against hostile language codes', () => {
+    expect(getMapPropertyCity(p, '__proto__' as never)).toBe('Cairo');
+  });
+  it('the map page shows the place name through the helper', () => {
+    const src = readFileSync('components/pages/map-page.tsx', 'utf8');
+    expect(src.match(/getMapPropertyCity\(/g)?.length).toBeGreaterThanOrEqual(4);
+    expect(src).not.toContain('{selectedProperty.city}');
   });
 });

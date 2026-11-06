@@ -301,6 +301,15 @@ export const MAP_I18N: Record<NavLanguage, MapStrings> = {
 };
 
 /** Map page's local Property has only title/titleAr; other languages fall back to the English title (place names don't need translation). */
+/** The place name shown for a listing: the admin's translation for the language when there is one, else the stored name. */
+export function getMapPropertyCity(
+  prop: { city: string; translations?: Record<string, { location?: string } | undefined> },
+  language: NavLanguage,
+): string {
+  const tr = prop.translations && Object.prototype.hasOwnProperty.call(prop.translations, language) ? prop.translations[language]?.location : undefined;
+  return typeof tr === 'string' && tr.trim() ? tr : prop.city;
+}
+
 export function getMapPropertyTitle(
   prop: { title: string; titleAr: string; translations?: Record<string, { title?: string } | undefined> },
   language: NavLanguage,

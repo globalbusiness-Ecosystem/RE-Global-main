@@ -16,7 +16,7 @@ import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
-import { MAP_I18N, getMapPropertyTitle } from '@/lib/map-i18n';
+import { MAP_I18N, getMapPropertyTitle, getMapPropertyCity } from '@/lib/map-i18n';
 import { PanoramaModal } from '@/components/panorama-modal';
 import { FOCUS_KEY, parseFocus, type MapFocus } from '@/lib/map-focus';
 import { CARD_I18N } from '@/lib/card-i18n';
@@ -966,7 +966,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   {getMapPropertyTitle(selectedProperty, language)}
                 </h3>
                 <p className="text-sm text-gray-300 mb-3">
-                  {selectedProperty.city}, {selectedProperty.country}
+                  {getMapPropertyCity(selectedProperty, language)}, {selectedProperty.country}
                 </p>
                 <div className="flex items-center gap-2 mb-4">
                   <span className="text-2xl font-bold text-[#F59E0B]">{selectedProperty.price}π</span>
@@ -1017,7 +1017,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
             <div className="min-w-0 flex-1">
               <p className="text-xs text-accent">📍 {tc.here}</p>
               <p className="truncate text-sm font-semibold text-white">{focusProp ? getMapPropertyTitle(focusProp, language) : (focus.title ?? '')}</p>
-              {focusProp && <p className="truncate text-xs text-gray-400">{focusProp.city}</p>}
+              {focusProp && <p className="truncate text-xs text-gray-400">{getMapPropertyCity(focusProp, language)}</p>}
             </div>
             {focusProp && (
               <button type="button" onClick={() => { setSelectedProperty(focusProp); setShowDetailPanel(true); }} className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-black">{tc.details}</button>
@@ -1150,7 +1150,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     <MapPin className="w-5 h-5 text-accent mt-1 flex-shrink-0" />
                     <div>
                       <div className="text-sm text-gray-400">{t.location}</div>
-                      <div className="font-semibold">{selectedProperty.city}, {selectedProperty.country}</div>
+                      <div className="font-semibold">{getMapPropertyCity(selectedProperty, language)}, {selectedProperty.country}</div>
                       <div className="text-xs text-gray-500">{selectedProperty.countryFlag}</div>
                     </div>
                   </div>
@@ -1322,7 +1322,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   </span>
                   <span className="flex items-center gap-1">
                     <MapPin className="w-4 h-4 text-accent" />
-                    {selectedProperty.city}
+                    {getMapPropertyCity(selectedProperty, language)}
                   </span>
                 </div>
               </div>
