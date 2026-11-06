@@ -53,6 +53,8 @@ interface Property {
   currency?: string;
   payAmountPi?: number;
   status?: string;
+  /** The admin's translations of the listing text, by language. */
+  translations?: Record<string, { title?: string; location?: string; description?: string }>;
 }
 
 // Property data - same as before
