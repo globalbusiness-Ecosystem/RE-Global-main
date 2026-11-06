@@ -216,7 +216,7 @@ export async function POST(req: Request) {
       language: replyLanguage,
     });
   } catch (error) {
-    console.error('[v0] Claude API error:', error);
+    console.error('[advisor] AI call failed:', (error as { name?: string })?.name, (error as { status?: number })?.status);
     return Response.json(
       { success: false, error: 'Failed to process request' },
       { status: 500 }

@@ -394,10 +394,10 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
             };
             setMessages((prev) => [...prev, assistantMessage]);
           } else {
-            // If Claude fails, still show an error message but not a refusal
+            // If Claude fails, still show an error message but not a refusal (say what is wrong when it is the sign-in or the rate limit)
             const errorMessage: Message = {
               role: 'assistant',
-              content: ac('error', language),
+              content: apiResponse.status === 401 || apiResponse.status === 403 ? ac('authError', language) : apiResponse.status === 429 ? ac('rateLimit', language) : ac('error', language),
               id: 'assistant-' + Date.now(),
             };
             setMessages((prev) => [...prev, errorMessage]);
