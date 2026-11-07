@@ -5,13 +5,14 @@ import React, {
   useContext,
   useState,
   useEffect,
+  useRef,
   type ReactNode,
 } from "react";
 import { recoverIncompletePayment } from "@/lib/payment-recovery";
 import { flushSync } from "react-dom";
 import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { auth as firebaseAuth, trackFirebaseSignIn } from "@/lib/firebase";
-import { signInWithCustomToken } from "firebase/auth";
+import { signInWithCustomToken, onIdTokenChanged } from "firebase/auth";
 import { setApiToken } from "@/lib/api-token";
 import type {
   Product,
@@ -150,6 +151,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<PiUser | null>(null);
   const [location, setLocation] = useState<UserLocation | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const webUnsub = useRef<(() => void) | null>(null);
 
   useEffect(() => {
     console.log("[PiAuthProvider] Mounted, initializing...");
@@ -207,6 +209,28 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         setIsAuthenticated(true);
         setAuthMessage("App loaded successfully");
         setIsInitialized(true);
+      });
+      // Web sign-in (Google / e-mail link): follow the Firebase session, never the Pi-minted "custom" one.
+      webUnsub.current?.();
+      webUnsub.current = onIdTokenChanged(firebaseAuth, async (u) => {
+        if (!u) {
+          setAccessToken(null);
+          setApiToken(null);
+          setUser(null);
+          setUsername(null);
+          return;
+        }
+        try {
+          const res = await u.getIdTokenResult();
+          if (res.signInProvider === "custom") return;
+          const name = `web_${u.uid.slice(0, 10)}`;
+          setAccessToken(res.token);
+          setApiToken(res.token);
+          setUser({ uid: `web_${u.uid}`, username: name });
+          setUsername(u.email ?? name);
+        } catch (e) {
+          console.warn("[PiAuth] Web token unavailable:", e);
+        }
       });
       return;
     }
@@ -336,6 +360,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     initialize();
+    return () => webUnsub.current?.();
   }, []);
 
   const value: PiAuthContextType = {

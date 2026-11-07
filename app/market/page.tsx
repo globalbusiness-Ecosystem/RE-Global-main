@@ -6,6 +6,8 @@ import { usePiAuth } from '@/contexts/pi-auth-context';
 import { useLanguage } from '@/contexts/language-context';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { feeSplit, listingTotal } from '@/lib/market-rules';
+import Link from 'next/link';
+import { ll } from '@/lib/login-labels';
 import { mk } from '@/lib/market-labels';
 import { pickMarketTitle, type MarketTitles } from '@/lib/market-titles';
 
@@ -230,7 +232,7 @@ export default function SharesMarketPage() {
           </section>
         )}
 
-        {!accessToken && <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300">{mk('signIn', language)}</p>}
+        {!accessToken && <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300">{mk('signIn', language)} <Link href="/login" className="underline">{ll('title', language)}</Link></p>}
       </div>
     </main>
   );
