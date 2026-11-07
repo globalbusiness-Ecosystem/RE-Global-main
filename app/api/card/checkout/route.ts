@@ -7,6 +7,8 @@ import { planCheckout } from '@/lib/card-pay/checkout';
 import { createOrder, setProviderRef, deleteOrder } from '@/lib/card-pay/store';
 import { reserveForPayment, releaseReservation } from '@/lib/property-reserve';
 import { RESERVE_ERRORS } from '@/lib/property-lifecycle';
+import { getKyc } from '@/lib/kyc-store';
+import { needsKyc } from '@/lib/kyc-rules';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -16,6 +18,12 @@ const H = { 'Cache-Control': 'no-store' };
 export async function POST(req: NextRequest) {
   const user = await guardApi(req, { scope: 'card-checkout', limit: 10, windowMs: 10 * 60 * 1000 });
   if (user instanceof NextResponse) return user;
+  // People who signed in outside the Pi Browser must have their identity verified before paying (fails closed).
+  if (needsKyc(user.uid)) {
+    let k;
+    try { k = await getKyc(user.uid); } catch { return NextResponse.json({ error: 'Try again' }, { status: 503, headers: H }); }
+    if (k.status !== 'approved') return NextResponse.json({ error: 'Identity verification required', code: 'kyc_required', kyc: k.status }, { status: 403, headers: H });
+  }
   const body = await req.json().catch(() => ({}));
   const propertyId = typeof body?.propertyId === 'string' ? body.propertyId : '';
   if (!propertyId || propertyId.includes('/') || propertyId.length > 128) return NextResponse.json({ error: 'Invalid property' }, { status: 400, headers: H });
