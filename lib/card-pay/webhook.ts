@@ -7,6 +7,8 @@ export interface WebhookDeps {
   applyToOrder: (orderId: string, fn: (o: CardOrder) => ApplyResult) => Promise<ApplyResult | 'missing'>;
   /** Called once, only when a notification really moved the order to paid. */
   onPaid?: (o: CardOrder) => Promise<void>;
+  /** Called once, only when a notification really moved the order to failed (the property hold can be freed). */
+  onFailed?: (o: CardOrder) => Promise<void>;
 }
 
 export interface WebhookReply { status: number; body: { ok: boolean; error?: string } }
@@ -26,6 +28,9 @@ export async function handleCardWebhook(providerId: string, rawBody: string, hea
   if (!r.ok) return { status: r.reason === 'mismatch' ? 400 : 409, body: { ok: false, error: r.reason } };
   if (r.changed && r.order.status === 'paid' && deps.onPaid) {
     try { await deps.onPaid(r.order); } catch { return { status: 503, body: { ok: false, error: 'try again' } }; }
+  }
+  if (r.changed && r.order.status === 'failed' && deps.onFailed) {
+    try { await deps.onFailed(r.order); } catch { return { status: 503, body: { ok: false, error: 'try again' } }; }
   }
   return { status: 200, body: { ok: true } };
 }

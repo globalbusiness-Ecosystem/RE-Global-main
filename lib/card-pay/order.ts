@@ -5,6 +5,7 @@ export type OrderStatus = 'pending' | 'paid' | 'failed' | 'refunded';
 export interface CardOrder {
   id: string;
   uid: string;
+  propertyId?: string;
   amountMinor: number;
   currency: Currency;
   status: OrderStatus;

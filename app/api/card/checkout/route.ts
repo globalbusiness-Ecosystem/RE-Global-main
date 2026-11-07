@@ -4,7 +4,9 @@ import { guardApi } from '@/lib/api-guard';
 import { ensureProviders } from '@/lib/card-pay/registry';
 import { providerFor } from '@/lib/card-pay/provider';
 import { planCheckout } from '@/lib/card-pay/checkout';
-import { createOrder, setProviderRef } from '@/lib/card-pay/store';
+import { createOrder, setProviderRef, deleteOrder } from '@/lib/card-pay/store';
+import { reserveForPayment, releaseReservation } from '@/lib/property-reserve';
+import { RESERVE_ERRORS } from '@/lib/property-lifecycle';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -29,8 +31,17 @@ export async function POST(req: NextRequest) {
   const plan = planCheckout(property, providerFor);
   if (!plan.ok) return NextResponse.json({ error: plan.error }, { status: plan.status, headers: H });
 
+  let orderId = '';
+  let held = false;
   try {
-    const orderId = await createOrder({ uid: user.uid, propertyId, amountMinor: plan.quote.amountMinor, currency: plan.quote.currency, providerId: plan.provider.id });
+    orderId = await createOrder({ uid: user.uid, propertyId, amountMinor: plan.quote.amountMinor, currency: plan.quote.currency, providerId: plan.provider.id });
+    // Hold the property for this buyer (15 minutes), or refuse when it is sold or held by someone else, exactly like Pi payments.
+    const v = await reserveForPayment(propertyId, user.uid, user.username, orderId);
+    if (!v.ok) {
+      await deleteOrder(orderId).catch(() => {});
+      return NextResponse.json({ error: RESERVE_ERRORS[v.code] }, { status: 409, headers: H });
+    }
+    held = true;
     const origin = req.nextUrl.origin;
     const session = await plan.provider.createCheckout({
       orderId, amountMinor: plan.quote.amountMinor, currency: plan.quote.currency,
@@ -39,6 +50,8 @@ export async function POST(req: NextRequest) {
     await setProviderRef(orderId, session.providerRef);
     return NextResponse.json({ orderId, redirectUrl: session.redirectUrl }, { headers: H });
   } catch {
+    if (held) await releaseReservation(propertyId, user.uid).catch(() => {});
+    if (orderId) await deleteOrder(orderId).catch(() => {});
     return NextResponse.json({ error: 'Could not start the payment, try again' }, { status: 503, headers: H });
   }
 }

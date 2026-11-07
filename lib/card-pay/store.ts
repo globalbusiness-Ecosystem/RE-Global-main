@@ -14,7 +14,7 @@ export async function applyToOrder(orderId: string, fn: (o: CardOrder) => ApplyR
     if (!snap.exists) return 'missing' as const;
     const d = snap.data() as Partial<CardOrder>;
     const order: CardOrder = {
-      id: orderId, uid: String(d.uid ?? ''), amountMinor: Number(d.amountMinor), currency: d.currency as CardOrder['currency'],
+      id: orderId, uid: String(d.uid ?? ''), propertyId: typeof d.propertyId === 'string' ? d.propertyId : undefined, amountMinor: Number(d.amountMinor), currency: d.currency as CardOrder['currency'],
       status: d.status as CardOrder['status'], providerRef: d.providerRef, seenEvents: Array.isArray(d.seenEvents) ? d.seenEvents.map(String).slice(-50) : [],
     };
     const r = fn(order);
@@ -37,4 +37,9 @@ export async function createOrder(a: { uid: string; propertyId: string; amountMi
 
 export async function setProviderRef(orderId: string, providerRef: string): Promise<void> {
   await adminDb.collection('card_orders').doc(orderId).update({ providerRef });
+}
+
+// Removes an order that never reached the payment company (for example when the property could not be held).
+export async function deleteOrder(orderId: string): Promise<void> {
+  await adminDb.collection('card_orders').doc(orderId).delete();
 }
