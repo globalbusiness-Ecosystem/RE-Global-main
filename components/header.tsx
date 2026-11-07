@@ -2,6 +2,8 @@
 
 import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard, Settings as SettingsIcon, Moon, Sun, Globe2 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { ll } from '@/lib/login-labels';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
@@ -22,7 +24,7 @@ const NAV_LANG_KEY = 're_nav_language';
 export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
-  const { username, isAuthenticated } = usePiAuth();
+  const { username, isAuthenticated, accessToken, isInitialized } = usePiAuth();
   const { avatar } = useMyAvatar();
   const { language: navLang } = useLanguage();
 
@@ -106,6 +108,16 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           <h1 className="text-lg font-bold text-white tracking-wider">RE</h1>
           <div className="h-0.5 w-10 bg-gradient-to-r from-accent to-yellow-500"></div>
         </div>
+
+        {isInitialized && !accessToken && typeof window !== 'undefined' && typeof (window as any).Pi === 'undefined' && (
+          <Link
+            href="/login"
+            className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+            style={{ color: 'rgb(212, 175, 55)', borderColor: 'rgb(212, 175, 55)' }}
+          >
+            {ll('title', navLang)}
+          </Link>
+        )}
 
         <button
           className="p-1 hover:opacity-70 transition flex-shrink-0"

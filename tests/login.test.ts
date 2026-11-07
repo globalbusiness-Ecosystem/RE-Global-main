@@ -20,7 +20,7 @@ describe('login labels', () => {
     for (const l of LANGS) { expect(LOGIN_LABELS.linkSent[l]).toContain('{email}'); expect(LOGIN_LABELS.signedInAs[l]).toContain('{email}'); }
   });
   it('every key is used by the login page or the market link', () => {
-    const page = src('app/login/page.tsx') + src('app/market/page.tsx');
+    const page = src('app/login/page.tsx') + src('app/market/page.tsx') + src('components/header.tsx');
     for (const k of keys) expect(page, k).toContain(`ll('${k}'`);
   });
 });
