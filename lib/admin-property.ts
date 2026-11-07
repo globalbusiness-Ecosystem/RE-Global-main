@@ -104,6 +104,10 @@ export function parsePropertyInput(b: any): ParsedProperty {
   const pay = num(b.payAmountPi, 0, 1e9);
   if (pay === null) return fail('Invalid payment amount');
   if (pay > 0) doc.payAmountPi = pay;
+  // Price for card payments, in the currency of the listing's country.
+  const card = num(b.cardPrice, 0, 1e9);
+  if (card === null) return fail('Invalid card price');
+  if (card > 0) doc.cardPrice = card;
   const shares = num(b.totalShares, 0, 1_000_000);
   if (shares === null || !Number.isInteger(shares)) return fail('Total shares must be a whole number');
   if (shares > 0) doc.totalShares = shares;

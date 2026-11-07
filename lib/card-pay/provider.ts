@@ -2,8 +2,9 @@
 // adapter with the same small interface, so the rest of the platform never depends on one of them.
 // The customer pays on the provider's own hosted page, so card numbers never touch our servers.
 
-export type Currency = 'EGP' | 'AED' | 'USD' | 'EUR' | 'SAR';
-export const CURRENCIES: readonly Currency[] = ['EGP', 'AED', 'USD', 'EUR', 'SAR'];
+// Two-decimal currencies only (KWD and JOD use three, so they are left out until a provider needs them).
+export type Currency = 'EGP' | 'AED' | 'SAR' | 'QAR' | 'TRY' | 'GBP' | 'USD' | 'CAD' | 'EUR' | 'AUD';
+export const CURRENCIES: readonly Currency[] = ['EGP', 'AED', 'SAR', 'QAR', 'TRY', 'GBP', 'USD', 'CAD', 'EUR', 'AUD'];
 
 export interface CheckoutRequest {
   orderId: string;
