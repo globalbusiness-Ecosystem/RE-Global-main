@@ -1,4 +1,5 @@
 import 'server-only';
+import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import type { ApplyResult, CardOrder } from './order';
 
@@ -22,4 +23,18 @@ export async function applyToOrder(orderId: string, fn: (o: CardOrder) => ApplyR
     }
     return r;
   });
+}
+
+// Creates a pending order for a person and a listing, at the price the server worked out.
+export async function createOrder(a: { uid: string; propertyId: string; amountMinor: number; currency: string; providerId: string }): Promise<string> {
+  const ref = adminDb.collection('card_orders').doc();
+  await ref.set({
+    uid: a.uid, propertyId: a.propertyId, amountMinor: a.amountMinor, currency: a.currency, providerId: a.providerId,
+    status: 'pending', seenEvents: [], createdAt: Timestamp.now(),
+  });
+  return ref.id;
+}
+
+export async function setProviderRef(orderId: string, providerRef: string): Promise<void> {
+  await adminDb.collection('card_orders').doc(orderId).update({ providerRef });
 }
