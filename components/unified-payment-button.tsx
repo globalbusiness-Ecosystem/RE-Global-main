@@ -8,6 +8,7 @@ import Link from 'next/link';
 import { isPiBrowser } from '@/lib/pi-env';
 import { payMethod } from '@/lib/pay-method';
 import { pm } from '@/lib/pay-method-labels';
+import { CardPayButton } from '@/components/card-pay-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { ShoppingCart, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -262,12 +263,7 @@ export function UnifiedPaymentButton({
     );
   }
   if (method === 'card-soon' || method === 'card') {
-    return (
-      <div className={`border border-border text-muted-foreground py-2 px-3 rounded-lg text-center text-xs w-full ${className}`}>
-        <div className="font-semibold text-sm">{pm('cardSoon', language)}</div>
-        <div className="mt-0.5">{pm('cardSoonNote', language)}</div>
-      </div>
-    );
+    return <CardPayButton propertyId={propertyId} transactionType={transactionType} language={language} className={className} />;
   }
 
   return (

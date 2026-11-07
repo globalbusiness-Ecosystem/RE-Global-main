@@ -30,7 +30,7 @@ describe('pay method labels', () => {
     for (const bad of ['__proto__', 'constructor', 'xx', undefined]) expect(pm('cardSoon', bad)).toBe('Card payment coming soon');
   });
   it('the payment button uses the decision and every label', () => {
-    const s = readFileSync('components/unified-payment-button.tsx', 'utf8');
+    const s = readFileSync('components/unified-payment-button.tsx', 'utf8') + readFileSync('components/card-pay-button.tsx', 'utf8');
     expect(s).toContain('payMethod(');
     for (const k of keys) expect(s, k).toContain(`pm('${k}'`);
   });
