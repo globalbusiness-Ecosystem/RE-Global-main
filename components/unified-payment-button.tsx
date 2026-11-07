@@ -4,6 +4,10 @@ import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useState } from 'react';
+import Link from 'next/link';
+import { isPiBrowser } from '@/lib/pi-env';
+import { payMethod } from '@/lib/pay-method';
+import { pm } from '@/lib/pay-method-labels';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { ShoppingCart, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
@@ -45,7 +49,7 @@ export function UnifiedPaymentButton({
   onSuccess,
   onError,
 }: UnifiedPaymentButtonProps) {
-  const { sdk, isAuthenticated, username, accessToken } = usePiAuth();
+  const { sdk, isAuthenticated, username, accessToken, isInitialized } = usePiAuth();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPiAvailable = true; // Check at payment time, not load time
@@ -248,6 +252,23 @@ export function UnifiedPaymentButton({
     if (paymentState.status === 'error') return 'bg-red-600 hover:bg-red-700';
     return 'bg-accent hover:bg-accent/90';
   };
+
+  const method = isInitialized ? payMethod({ inPiBrowser: isPiBrowser(), signedIn: Boolean(accessToken) }) : 'pi';
+  if (method === 'signin') {
+    return (
+      <Link href="/login" className={`border border-accent text-accent py-2 px-3 rounded-lg font-semibold flex items-center justify-center text-sm w-full ${className}`}>
+        {pm('signInToPay', language)}
+      </Link>
+    );
+  }
+  if (method === 'card-soon' || method === 'card') {
+    return (
+      <div className={`border border-border text-muted-foreground py-2 px-3 rounded-lg text-center text-xs w-full ${className}`}>
+        <div className="font-semibold text-sm">{pm('cardSoon', language)}</div>
+        <div className="mt-0.5">{pm('cardSoonNote', language)}</div>
+      </div>
+    );
+  }
 
   return (
     <>
