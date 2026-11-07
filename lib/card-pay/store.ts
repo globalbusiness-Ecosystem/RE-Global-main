@@ -43,3 +43,15 @@ export async function setProviderRef(orderId: string, providerRef: string): Prom
 export async function deleteOrder(orderId: string): Promise<void> {
   await adminDb.collection('card_orders').doc(orderId).delete();
 }
+
+export async function getOrder(orderId: string): Promise<CardOrder | null> {
+  if (!okId(orderId)) return null;
+  const snap = await adminDb.collection('card_orders').doc(orderId).get();
+  if (!snap.exists) return null;
+  const d = snap.data() as Partial<CardOrder>;
+  return {
+    id: orderId, uid: String(d.uid ?? ''), propertyId: typeof d.propertyId === 'string' ? d.propertyId : undefined,
+    amountMinor: Number(d.amountMinor), currency: d.currency as CardOrder['currency'], status: d.status as CardOrder['status'],
+    providerRef: d.providerRef, seenEvents: [],
+  };
+}

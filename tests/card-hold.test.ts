@@ -59,7 +59,7 @@ describe('routes use the same hold and sale rules as Pi payments', () => {
     expect(s.indexOf('reserveForPayment(')).toBeLessThan(s.indexOf('createCheckout('));
   });
   it('the notification marks the property sold when paid and frees it when failed', () => {
-    const s = readFileSync('app/api/card/webhook/[provider]/route.ts', 'utf8');
+    const s = readFileSync('lib/card-pay/deps.ts', 'utf8');
     expect(s).toContain('finalizeSale(');
     expect(s).toContain('releaseReservation(');
   });

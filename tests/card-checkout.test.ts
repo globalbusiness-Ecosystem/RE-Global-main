@@ -62,7 +62,7 @@ describe('sandbox provider', () => {
 describe('routes', () => {
   it('checkout is signed-in only and rate limited, and tells the team when an order is paid', () => {
     expect(readFileSync('app/api/card/checkout/route.ts', 'utf8')).toContain("guardApi(req, { scope: 'card-checkout'");
-    expect(readFileSync('app/api/card/webhook/[provider]/route.ts', 'utf8')).toContain('alertReview(');
+    expect(readFileSync('lib/card-pay/deps.ts', 'utf8')).toContain('alertReview(');
   });
   it('the sandbox provider is only connected when its secret is set', () => {
     const s = readFileSync('lib/card-pay/registry.ts', 'utf8');

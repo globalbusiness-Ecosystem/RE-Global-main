@@ -78,6 +78,7 @@ describe('card webhook', () => {
   it('the route is rate limited by IP and wired to the real store', () => {
     const s = readFileSync('app/api/card/webhook/[provider]/route.ts', 'utf8');
     expect(s).toContain('ipLimited(');
-    expect(s).toContain('applyToOrder');
+    expect(s).toContain('cardWebhookDeps');
+    expect(readFileSync('lib/card-pay/deps.ts', 'utf8')).toContain('applyToOrder');
   });
 });
