@@ -1,8 +1,10 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import Link from 'next/link';
 import { authHeaders } from '@/lib/api-token';
 import { pm } from '@/lib/pay-method-labels';
+import { kl } from '@/lib/kyc-labels';
 
 // Outside the Pi Browser, for a signed-in person: a "Pay by card" button when this listing can be paid by card,
 // otherwise the "coming soon" note. The person is sent to the payment company's own page; no card data is handled here.
@@ -10,6 +12,7 @@ export function CardPayButton({ propertyId, transactionType, language, className
   const [available, setAvailable] = useState(false);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
+  const [needKyc, setNeedKyc] = useState(false);
   const eligible = transactionType === 'buy';
 
   useEffect(() => {
@@ -37,6 +40,7 @@ export function CardPayButton({ propertyId, transactionType, language, className
     try {
       const r = await fetch('/api/card/checkout', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ propertyId }) });
       const j = await r.json().catch(() => ({}));
+      if (r.status === 403 && j?.code === 'kyc_required') { setNeedKyc(true); setBusy(false); return; }
       if (!r.ok || typeof j?.redirectUrl !== 'string') throw new Error('checkout');
       window.location.href = j.redirectUrl;
     } catch {
@@ -50,6 +54,12 @@ export function CardPayButton({ propertyId, transactionType, language, className
       <button type="button" onClick={start} disabled={busy} className="w-full rounded-lg bg-accent px-3 py-2 text-sm font-semibold text-accent-foreground disabled:opacity-50">
         {pm('payByCard', language)}
       </button>
+      {needKyc && (
+        <div role="alert" className="mt-2 text-center text-xs text-amber-300">
+          <p>{kl('required', language)}</p>
+          <Link href="/kyc" className="mt-1 inline-block rounded-lg border border-amber-300/60 px-3 py-1 font-semibold">{kl('verifyCta', language)}</Link>
+        </div>
+      )}
       {failed && <p role="alert" className="mt-1 text-center text-xs text-red-400">{pm('cardFailed', language)}</p>}
     </div>
   );

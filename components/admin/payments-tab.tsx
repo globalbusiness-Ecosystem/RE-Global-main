@@ -2,6 +2,7 @@
 
 import PayoutsPanel from './payouts-panel';
 import CardOrdersPanel from './card-orders-panel';
+import KycPanel from './kyc-panel';
 import MarketFeeSettings from './market-fee-settings';
 import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
@@ -24,6 +25,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
       tabs={[
         { id: 'payments', icon: '💳', label: 'المدفوعات', render: () => <PaymentsList onUnauthorized={u} /> },
         { id: 'card-orders', icon: '🧾', label: 'طلبات البطاقة', render: () => <CardOrdersPanel onUnauthorized={u} /> },
+        { id: 'kyc', icon: '🪪', label: 'التحقق من الهوية', render: () => <KycPanel onUnauthorized={u} /> },
         { id: 'payouts', icon: '💸', label: 'التحويلات والاستردادات', render: () => <PayoutsPanel onUnauthorized={u} /> },
         {
           id: 'bookings', icon: '🛏️', label: 'الحجوزات',
