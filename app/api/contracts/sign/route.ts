@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { rateLimited } from '@/lib/rate-guard';
+import { kycBlock } from '@/lib/kyc-gate';
 import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
 import { confirmBooking } from '@/lib/booking-calendar';
 import { confirmShares } from '@/lib/share-inventory';
@@ -32,6 +33,8 @@ export async function POST(req: NextRequest) {
   }
   const limited = await rateLimited('sign', user.uid, 30, 10 * 60 * 1000);
   if (limited) return limited;
+  const blocked = await kycBlock(user.uid);
+  if (blocked) return blocked;
 
   let body: Record<string, unknown>;
   try {

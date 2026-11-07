@@ -1,6 +1,7 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
+import { kycBlock } from '@/lib/kyc-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -18,6 +19,8 @@ function cleanStr(v: unknown, max: number): string {
 export async function POST(req: NextRequest) {
   const guard = await guardApi(req, { scope: 'payments', limit: 20 });
   if (guard instanceof Response) return guard;
+  const blocked = await kycBlock(guard.uid);
+  if (blocked) return blocked;
 
   // Server-side variable first; NEXT_PUBLIC_API_URL kept only as a fallback.
   const backend = process.env.BACKEND_API_URL || process.env.NEXT_PUBLIC_API_URL;

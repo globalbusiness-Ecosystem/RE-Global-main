@@ -4,6 +4,7 @@ import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard,
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ll } from '@/lib/login-labels';
+import { kl } from '@/lib/kyc-labels';
 import { isPiBrowser } from '@/lib/pi-env';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
@@ -117,6 +118,16 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
             style={{ color: 'rgb(212, 175, 55)', borderColor: 'rgb(212, 175, 55)' }}
           >
             {ll('title', navLang)}
+          </Link>
+        )}
+
+        {isInitialized && accessToken && !isPiBrowser() && (
+          <Link
+            href="/kyc"
+            className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+            style={{ color: 'rgb(212, 175, 55)', borderColor: 'rgb(212, 175, 55)' }}
+          >
+            {kl('verifyCta', navLang)}
           </Link>
         )}
 
