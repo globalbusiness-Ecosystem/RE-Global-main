@@ -14,6 +14,7 @@ import { PI_NETWORK_CONFIG } from "@/lib/system-config";
 import { auth as firebaseAuth, trackFirebaseSignIn } from "@/lib/firebase";
 import { signInWithCustomToken, onIdTokenChanged } from "firebase/auth";
 import { setApiToken } from "@/lib/api-token";
+import { isPiBrowser as detectPiBrowser } from "@/lib/pi-env";
 import type {
   Product,
   SDKLiteInstance,
@@ -196,9 +197,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
 
   const initialize = async () => {
     console.log("[PiAuth] Initialize called");
-    const isPiBrowser =
-      typeof window !== "undefined" &&
-      typeof (window as any).Pi !== "undefined";
+    const isPiBrowser = detectPiBrowser();
 
     console.log("[PiAuth] isPiBrowser:", isPiBrowser);
 

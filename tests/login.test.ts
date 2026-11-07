@@ -37,3 +37,12 @@ describe('web sign-in wiring', () => {
     expect(c).toContain("frame-ancestors 'self' https://sandbox.minepi.com");
   });
 });
+
+describe('Pi Browser detection', () => {
+  it('does not rely on window.Pi, which the layout script defines in every browser', () => {
+    expect(src('app/layout.tsx')).toContain('sdk.minepi.com/pi-sdk.js');
+    expect(src('lib/pi-env.ts')).toContain('PiBrowser');
+    expect(src('contexts/pi-auth-context.tsx')).toContain('detectPiBrowser()');
+    expect(src('components/header.tsx')).toContain('!isPiBrowser()');
+  });
+});

@@ -4,6 +4,7 @@ import { Menu, Circle, X, ChevronRight, User, ScrollText, Star, LayoutDashboard,
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { ll } from '@/lib/login-labels';
+import { isPiBrowser } from '@/lib/pi-env';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
@@ -109,7 +110,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           <div className="h-0.5 w-10 bg-gradient-to-r from-accent to-yellow-500"></div>
         </div>
 
-        {isInitialized && !accessToken && typeof window !== 'undefined' && typeof (window as any).Pi === 'undefined' && (
+        {isInitialized && !accessToken && !isPiBrowser() && (
           <Link
             href="/login"
             className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
