@@ -63,3 +63,14 @@ describe('wiring', () => {
     expect(a.some((x) => x.id === 'card-contracts')).toBe(true);
   });
 });
+
+describe('paid card orders without a contract', () => {
+  it('raise a blocking alert and the admin button creates them', () => {
+    const base = { env: { PI_API_KEY: true, PI_ISSUER_SECRET_KEY: true, PI_ISSUER_PUBLIC_KEY: true, ADMIN_SESSION_SECRET: true }, usdProperties: 0, piRateSet: false, pendingPayouts: { count: 0, amount: 0 }, review: { bookings: 0, holdings: 0, transfers: 0 } };
+    const a = buildAttention({ ...base, cardOrdersWithoutContract: 3 });
+    expect(a[0]).toMatchObject({ id: 'card-no-contract', level: 'bad' });
+    expect(buildAttention({ ...base, cardOrdersWithoutContract: 0 })).toEqual([]);
+    expect(src('app/api/admin/contracts/anchor/route.ts')).toContain('createMissingCardContracts');
+    expect(src('lib/card-contract.ts')).toContain('ordersWithoutContract');
+  });
+});

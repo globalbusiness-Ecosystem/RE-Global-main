@@ -1,6 +1,7 @@
 import 'server-only';
 import { adminDb } from '@/lib/firebase-admin';
 import { getPiUsdRate } from '@/lib/pricing';
+import { ordersWithoutContract } from '@/lib/card-contract';
 import { isUsdPegged } from '@/lib/payment-rules';
 import { buildAttention, type AttentionInput } from '@/lib/attention-rules';
 import { shareMismatches } from '@/lib/share-rules';
@@ -27,6 +28,7 @@ export async function gatherAttention() {
   const kycPending = kycDocs.docs.length;
   const oldest = kycDocs.docs.map((d) => d.data().submittedAt?.toMillis?.() as number | undefined).filter((n): n is number => typeof n === 'number').sort((a, b) => a - b)[0];
   const kycOldestHours = oldest ? Math.max(0, (Date.now() - oldest) / 3_600_000) : 0;
+  const cardOrdersWithoutContract = await ordersWithoutContract().then((x) => x.length).catch(() => 0);
   const cardContractsUnanchored = (await Promise.all([
     count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('txid', '==', '')).catch(() => 0),
     count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('registryPending', '==', true)).catch(() => 0),
@@ -44,6 +46,7 @@ export async function gatherAttention() {
     cardOrdersToHandOver: cardOrders.docs.filter((d) => !d.data().handedOverAt && !d.data().booking).length,
     kycPending,
     cardContractsUnanchored,
+    cardOrdersWithoutContract,
     kycOldestHours,
     cardSandboxOn: (process.env.CARD_SANDBOX_SECRET ?? '').length >= 16,
     review: { bookings: rb, holdings: rh, transfers: rt },

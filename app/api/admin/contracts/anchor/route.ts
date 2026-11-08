@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { adminDb } from '@/lib/firebase-admin';
-import { anchorContract, recordContract } from '@/lib/card-contract';
+import { anchorContract, createMissingCardContracts, recordContract } from '@/lib/card-contract';
 
 export const dynamic = 'force-dynamic';
 
@@ -11,13 +11,15 @@ export const dynamic = 'force-dynamic';
 export async function POST(req: NextRequest) {
   if (!(await isAdminRequest(req))) return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   try {
+    // Paid card orders that never got a contract come first (paid before contracts existed, or while signing was off).
+    const made = await createMissingCardContracts(10);
     const col = adminDb.collection('signed_contracts');
     const [a, b] = await Promise.all([
       col.where('paymentMethod', '==', 'card').where('txid', '==', '').limit(10).get(),
       col.where('paymentMethod', '==', 'card').where('registryPending', '==', true).limit(10).get(),
     ]);
     const ids = [...new Set([...a.docs, ...b.docs].map((d) => d.id))].slice(0, 10);
-    const out = { anchored: 0, recorded: 0, failed: 0, total: ids.length };
+    const out = { created: made.created, createdFailed: made.failed, anchored: 0, recorded: 0, failed: 0, total: ids.length };
     for (const id of ids) {
       const r = await anchorContract(id);
       if (r === 'anchored') out.anchored++; else if (r === 'failed' || r === 'not_configured') out.failed++;

@@ -7,6 +7,7 @@ import { anchorHash } from '@/lib/chain-anchor';
 import { buyerRef, recordOnRegistry, registryKind } from '@/lib/registry-client';
 import { webUsername } from '@/lib/web-auth';
 import type { CardOrder } from '@/lib/card-pay/order';
+import { getOrder } from '@/lib/card-pay/store';
 
 // A card payment gets the same signed contract a Pi payment gets (same collections, same /verify page), and the
 // contract's fingerprint is anchored on the Pi blockchain. The contract is saved first; anchoring is best effort and
@@ -20,6 +21,7 @@ const keys = () => {
 /** Creates (once) the contract of a paid card order and tries to anchor it. Returns the contract id, or null when signing is not configured. */
 export async function createCardContract(o: CardOrder): Promise<string | null> {
   const k = keys();
+  if (!k) console.error('[card-contract] PI_ISSUER_SECRET_KEY / PI_ISSUER_PUBLIC_KEY are not set: no contract was created');
   if (!k || !o.propertyId || !o.uid.startsWith('web_')) return null;
   const [prop, kyc] = await Promise.all([adminDb.collection('properties').doc(o.propertyId).get(), adminDb.collection('kyc').doc(o.uid).get()]);
   const p = prop.data() ?? {};
@@ -102,4 +104,25 @@ export async function recordContract(orderId: string): Promise<'recorded' | 'alr
   const done = { registry: { status: 'recorded', entryId: r.entryId, txid: r.txid, contractId: registryId, at: new Date().toISOString() } };
   await Promise.all([ref.update({ ...done, registryPending: false }), publicRef.update({ ...done, updatedAt: Timestamp.now() })]);
   return 'recorded';
+}
+
+/** Paid card orders (web buyers, with a property) that have no signed contract yet. */
+export async function ordersWithoutContract(limit = 200): Promise<string[]> {
+  const paid = await adminDb.collection('card_orders').where('status', '==', 'paid').limit(limit).get();
+  const ids = paid.docs.filter((d) => typeof d.data().propertyId === 'string' && String(d.data().uid ?? '').startsWith('web_')).map((d) => d.id);
+  if (ids.length === 0) return [];
+  const have = await adminDb.getAll(...ids.map((id) => adminDb.collection('signed_contracts').doc(id)));
+  return ids.filter((_, i) => !have[i].exists);
+}
+
+/** Creates the contracts of paid card orders that never got one (paid before contracts existed, or while signing was not configured). */
+export async function createMissingCardContracts(max = 10): Promise<{ created: number; failed: number; remaining: number }> {
+  const missing = await ordersWithoutContract();
+  let created = 0, failed = 0;
+  for (const id of missing.slice(0, max)) {
+    const o = await getOrder(id);
+    const ok = o ? await createCardContract(o).catch(() => null) : null;
+    if (ok) created++; else failed++;
+  }
+  return { created, failed, remaining: Math.max(0, missing.length - created) };
 }
