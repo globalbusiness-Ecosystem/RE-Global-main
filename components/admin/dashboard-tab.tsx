@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Card, Stat, Empty, Badge, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 import AttentionPanel from './attention-panel';
+import ReadinessPanel from './readiness-panel';
 import ActivityLog from './activity-log';
 import CspPanel from './csp-panel';
 import ClientErrorsPanel from './client-errors-panel';
@@ -29,6 +30,7 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
   return (
     <div className="space-y-4">
       <AttentionPanel onUnauthorized={onUnauthorized} goto={goto} />
+      <ReadinessPanel onUnauthorized={onUnauthorized} />
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="العقارات" value={data.properties.total} sub={`${data.properties.hidden} مخفي · ${data.properties.featured} مميز`} />
         <Stat label="العقود الموقّعة" value={data.contracts.total} sub={`آخر 7 أيام: ${data.contracts.last7.count}`} />
