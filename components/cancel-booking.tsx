@@ -3,9 +3,9 @@
 import { useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { cancelStrings, refundText } from '@/lib/cancellation';
-import { formatNumber } from '@/lib/format';
+import { formatMoney, formatNumber } from '@/lib/format';
 
-type Quote = { pct: number; refund: number };
+type Quote = { pct: number; refund: number; currency: string };
 
 // "Cancel booking" for an upcoming stay: shows exactly what comes back under the policy, then asks to confirm.
 export function CancelBooking({ bookingId, language, onDone }: { bookingId: string; language: string; onDone: () => void }) {
@@ -23,7 +23,7 @@ export function CancelBooking({ bookingId, language, onDone }: { bookingId: stri
       const r = await fetch(`/api/bookings/cancel?bookingId=${encodeURIComponent(bookingId)}`, { headers: { Authorization: `Bearer ${accessToken}` }, cache: 'no-store' });
       const d = await r.json().catch(() => null);
       if (!r.ok || !d?.allowed) { setState('error'); return; }
-      setQuote({ pct: Number(d.pct) || 0, refund: Number(d.refund) || 0 });
+      setQuote({ pct: Number(d.pct) || 0, refund: Number(d.refund) || 0, currency: typeof d.currency === 'string' ? d.currency : 'Pi' });
       setState('confirm');
     } catch { setState('error'); }
   };
@@ -42,7 +42,7 @@ export function CancelBooking({ bookingId, language, onDone }: { bookingId: stri
   if (state === 'confirm' && quote) {
     return (
       <div className="space-y-2 rounded-md border border-red-500/30 bg-red-500/10 p-2">
-        <p className="text-xs text-gray-200">{refundText(language, quote, formatNumber(quote.refund, language, 2))}</p>
+        <p className="text-xs text-gray-200">{refundText(language, quote, formatNumber(quote.refund, language, 2), quote.currency === 'Pi' ? undefined : formatMoney(quote.refund, quote.currency, language))}</p>
         <div className="flex gap-2">
           <button type="button" onClick={confirm} className="rounded bg-red-600 px-3 py-1 text-xs font-bold text-white">{t.confirm}</button>
           <button type="button" onClick={() => setState('idle')} className="rounded border border-white/20 px-3 py-1 text-xs text-gray-300">{t.keep}</button>

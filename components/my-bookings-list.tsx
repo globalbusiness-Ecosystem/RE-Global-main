@@ -2,7 +2,7 @@
 
 import { bookingPhase, buildIcs, countdownText, daysUntil, myBookingStrings } from '@/lib/my-bookings';
 import { formatDay, nightsLabel } from '@/lib/booking-i18n';
-import { formatNumber } from '@/lib/format';
+import { formatMoney } from '@/lib/format';
 import { guestsText } from '@/lib/guests';
 import { canReview } from '@/lib/stay-reviews';
 import { ReviewForm } from '@/components/review-form';
@@ -12,7 +12,7 @@ import { canEditRequest } from '@/lib/guest-requests';
 import { CancelBooking } from '@/components/cancel-booking';
 import { useState } from 'react';
 
-export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; reviewed?: boolean; hostReply?: string; guestNote?: string };
+export type Booked = { id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; currency?: string; status: string; guests?: number; reviewed?: boolean; hostReply?: string; guestNote?: string };
 
 function download(b: Booked) {
   const ics = buildIcs(b, new Date().toISOString());
@@ -48,7 +48,7 @@ export function MyBookingsList({ bookings, language }: { bookings: Booked[]; lan
                 <p className="text-xs text-gray-400">{formatDay(b.start, language)} → {formatDay(b.end, language)} · {nightsLabel(language, b.nights)}{b.guests ? ` · ${guestsText(language, b.guests)}` : ''}</p>
               </div>
               <div className="text-right shrink-0">
-                <p className="text-accent text-sm font-bold">{formatNumber(b.amount, language, 2)} π</p>
+                <p className="text-accent text-sm font-bold">{formatMoney(b.amount, b.currency ?? 'Pi', language)}</p>
                 <p className={`text-[11px] ${b.status === 'review' ? 'text-yellow-400' : cancelled ? 'text-red-400' : 'text-green-400'}`}>
                   {b.status === 'review' ? t.review : cancelled ? t.cancelled : t.confirmed}
                 </p>

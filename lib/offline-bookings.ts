@@ -6,7 +6,7 @@ const PREFIX = 're_offline_bookings_v1:';
 
 export interface StorageLike { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem(k: string): void }
 export interface OfflineBooking {
-  id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; status: string;
+  id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; currency?: string; status: string;
   guests?: number; reviewed?: boolean; hostReply?: string; guestNote?: string;
 }
 
@@ -21,7 +21,7 @@ export function pickBooking(raw: unknown): OfflineBooking | null {
   if (!id) return null;
   const b: OfflineBooking = {
     id, propertyTitle: str(r.propertyTitle, 200), propertyType: str(r.propertyType, 40), start: str(r.start, 10), end: str(r.end, 10),
-    nights: num(r.nights), amount: num(r.amount), status: str(r.status, 30),
+    nights: num(r.nights), amount: num(r.amount), ...(typeof r.currency === 'string' && /^[A-Za-z]{2,5}$/.test(r.currency) ? { currency: r.currency } : {}), status: str(r.status, 30),
   };
   if (typeof r.guests === 'number') b.guests = num(r.guests);
   if (typeof r.reviewed === 'boolean') b.reviewed = r.reviewed;

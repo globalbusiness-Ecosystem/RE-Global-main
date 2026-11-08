@@ -73,9 +73,12 @@ export function policyText(lang: string, p: CancellationPolicy): string {
 }
 
 // What the guest is told before confirming, from the server's quote.
-export function refundText(lang: string, q: { pct: number; refund: number }, formatted: string): string {
+// `formatted` is the plain number. For a stay paid by card pass `unit` (the amount with its currency, e.g. "EGP 450.00"): it replaces the Pi sign.
+export function refundText(lang: string, q: { pct: number; refund: number }, formatted: string, unit?: string): string {
   const t = cancelStrings(lang);
-  if (q.pct >= 100) return fill(t.refundFull, { amount: formatted });
-  if (q.pct > 0) return fill(t.refundPart, { amount: formatted, pct: q.pct });
+  const own = (s: string) => (unit ? s.replace(/\{amount\}\s*π/g, '{amount}') : s);
+  const shown = unit ?? formatted;
+  if (q.pct >= 100) return fill(own(t.refundFull), { amount: shown });
+  if (q.pct > 0) return fill(own(t.refundPart), { amount: shown, pct: q.pct });
   return t.refundNone;
 }

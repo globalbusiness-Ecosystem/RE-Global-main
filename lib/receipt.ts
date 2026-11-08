@@ -24,7 +24,7 @@ export const esc = (v: unknown): string =>
 
 export interface ReceiptData {
   bookingId: string; paymentId: string; title: string; start: string; end: string; nights: number; guests?: number;
-  amount: number; checkInTime?: string; checkOutTime?: string; username: string; issuedAt: string; policy?: string;
+  amount: number; currency?: string; checkInTime?: string; checkOutTime?: string; username: string; issuedAt: string; policy?: string;
 }
 
 const RTL = ['ar', 'ur'];
@@ -69,7 +69,7 @@ th{color:#555;font-weight:600;width:40%}
 <h1>${esc(t.title)}</h1>
 <p class="ref">${esc(t.reference)}: ${esc(d.bookingId)}<br>${esc(t.payment)}: ${esc(d.paymentId)}</p>
 <table>${body}</table>
-<p class="total">${esc(t.total)}: ${esc(d.amount.toFixed(2))} π</p>
+<p class="total">${esc(t.total)}: ${esc(d.amount.toFixed(2))} ${esc(d.currency && d.currency !== 'Pi' ? d.currency : 'π')}</p>
 ${d.policy ? `<p class="note"><strong>${esc(t.policy)}:</strong> ${esc(d.policy)}</p>` : ''}
 <p class="note">${esc(t.issued)}: ${esc(d.issuedAt.slice(0, 10))}</p>
 <p class="note hint">${esc(t.saveHint)}</p>

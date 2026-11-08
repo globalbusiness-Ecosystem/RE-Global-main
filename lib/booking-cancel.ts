@@ -23,7 +23,7 @@ export async function guestCancelQuote(uid: string, bookingId: unknown) {
   const [b, policy] = await Promise.all([adminDb.collection('bookings').doc(bookingId).get(), getCancellationPolicy()]);
   const d = b.exists ? (b.data() as Record<string, unknown>) : null;
   if (!d || d.uid !== uid) return { ok: false as const, status: 404, error: 'Booking not found' };
-  return { ok: true as const, ...refundQuote(policy, { status: d.status, start: String(d.start ?? ''), amount: Number(d.amount) || 0 }, todayUtc()) };
+  return { ok: true as const, ...refundQuote(policy, { status: d.status, start: String(d.start ?? ''), amount: Number(d.amount) || 0 }, todayUtc()), currency: String(d.currency ?? 'Pi') };
 }
 
 // The guest cancels their own stay: the dates go back on the calendar and the refund the policy allows is queued

@@ -27,7 +27,7 @@ export async function guestReceiptData(uid: string, bookingId: unknown, lang: st
   }
   const data: ReceiptData = {
     bookingId, paymentId: String(d.paymentId ?? bookingId), title: String(d.propertyTitle ?? ''), start: String(d.start ?? ''), end: String(d.end ?? ''),
-    nights: Number(d.nights) || 0, ...(Number(d.guests) > 0 ? { guests: Number(d.guests) } : {}), amount: Number(d.amount) || 0,
+    nights: Number(d.nights) || 0, ...(Number(d.guests) > 0 ? { guests: Number(d.guests) } : {}), amount: Number(d.amount) || 0, ...(typeof d.currency === 'string' && d.currency !== 'Pi' ? { currency: d.currency } : {}),
     ...(checkInTime ? { checkInTime } : {}), ...(checkOutTime ? { checkOutTime } : {}),
     username: String(d.username ?? ''), issuedAt: new Date().toISOString(), policy: policyText(lang, await getCancellationPolicy()),
   };
