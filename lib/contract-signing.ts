@@ -17,6 +17,8 @@ export interface ContractInput {
   booking?: { start: string; end: string; nights: number };
   shares?: { count: number; totalShares: number };
   legal?: { statusLine: string; governingLaw: string; extraClause?: string };
+  /** Paid by card: the order id and the buyer's name as verified by the platform's identity check. Omitted = paid with Pi. */
+  card?: { orderId: string; buyerName: string };
 }
 
 // Extra SUBJECT lines for dated stays and share purchases. Empty for a plain sale, so those contracts read as before.
@@ -41,7 +43,7 @@ Contract ID: ${c.contractId}
 Date: ${new Date().toISOString()}
 
 PARTIES
-Party A (Buyer): @${c.buyerUsername} — identity verified via Pi Network payment
+Party A (Buyer): @${c.buyerUsername} — ${c.card ? `identity verified by the Platform's KYC/AML review (name on record: ${c.card.buyerName})` : 'identity verified via Pi Network payment'}
 Party B (Platform): RE Global (${c.sellerUsername})
 
 SUBJECT
@@ -51,8 +53,8 @@ Amount: ${c.amount} ${c.currency}${subjectDetails(c)}
 
 TERMS
 1. Subject matter. The Buyer agrees to purchase, and the Platform agrees to transfer rights to, the property described above, subject to the terms herein.
-2. Consideration. The Buyer has paid the amount stated above via the Pi Network payment system (Payment ID: ${c.paymentId}, Transaction: ${c.txid}).
-3. Proof of transaction. The parties agree that the on-chain Pi Network transaction record constitutes conclusive evidence of payment and of the Buyer's assent to this contract.
+2. Consideration. ${c.card ? `The Buyer has paid the amount stated above by card through the Platform's payment provider (Order ID: ${c.card.orderId}).` : `The Buyer has paid the amount stated above via the Pi Network payment system (Payment ID: ${c.paymentId}, Transaction: ${c.txid}).`}
+3. Proof of transaction. ${c.card ? "The parties agree that the payment provider's record of the order, together with the on-chain anchor of this contract's SHA-256 fingerprint on the Pi blockchain, constitutes evidence of payment and of the Buyer's assent to this contract." : "The parties agree that the on-chain Pi Network transaction record constitutes conclusive evidence of payment and of the Buyer's assent to this contract."}
 4. Property condition. Where a certified RE Inspect report exists for this property, its findings and Health Score are incorporated into this contract by reference via the linked certificate hash.
 5. Pilot phase. This contract is issued during a technical pilot phase and does not yet constitute a legally binding real estate conveyance until reviewed and confirmed compliant with applicable law.
 6. Governing law. Upon legal finalization, this contract shall be governed by ${governingLaw}.${extra}`;

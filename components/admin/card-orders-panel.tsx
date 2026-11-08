@@ -17,6 +17,7 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const [rows, setRows] = useState<Order[] | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
 
   const load = useCallback(() => {
     adminApi<{ orders: Order[] }>('/api/admin/card-orders')
@@ -37,6 +38,16 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
     } finally { setBusy(''); }
   };
 
+  const anchor = async () => {
+    setBusy('anchor');
+    try {
+      const r = await adminApi<{ anchored: number; failed: number; total: number }>('/api/admin/contracts/anchor', { method: 'POST' });
+      setNotice(r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} من ${r.total}${r.failed ? ` (فشل ${r.failed}: جرّب تاني بعد شوية، أو راجع رصيد حساب المنصة على Pi Testnet)` : ''}.`);
+    } catch (e) {
+      if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
+    } finally { setBusy(''); }
+  };
+
   if (error) return <Empty>❌ {error}</Empty>;
   if (!rows) return null;
   if (rows.length === 0) return <Empty>مفيش طلبات بطاقة لسه.</Empty>;
@@ -44,6 +55,10 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const sorted = [...waiting, ...rows.filter((r) => !waiting.includes(r))];
   return (
     <Card title={`💳 طلبات البطاقة (${waiting.length} مدفوعة وفي انتظار التسليم)`}>
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        <Btn onClick={anchor} disabled={busy === 'anchor'}>⛓️ ثبّت العقود على البلوك تشين</Btn>
+        {notice ? <span className="text-xs text-gray-300" role="status">{notice}</span> : null}
+      </div>
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };
