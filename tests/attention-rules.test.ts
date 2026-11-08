@@ -66,3 +66,22 @@ describe('card payments and identity checks', () => {
     expect(src).toContain('!d.data().handedOverAt && !d.data().booking');
   });
 });
+
+describe('test payment provider left on', () => {
+  it('is urgent and comes first', () => {
+    const items = buildAttention({ ...ok, cardSandboxOn: true, env: { ...ok.env, PI_API_KEY: false } });
+    expect(items[0].id).toBe('card-sandbox');
+    expect(items[0].level).toBe('bad');
+    expect(items[0].text).toContain('CARD_SANDBOX_SECRET');
+  });
+  it('says nothing when it is off, and the secret value is never read into the message', () => {
+    expect(buildAttention({ ...ok, cardSandboxOn: false })).toEqual([]);
+    const src = require('node:fs').readFileSync('lib/admin-attention.ts', 'utf8') as string;
+    expect(src).toContain("(process.env.CARD_SANDBOX_SECRET ?? '').length >= 16");
+  });
+  it('the operations guide has the card section and the go-live checklist', () => {
+    const doc = require('node:fs').readFileSync('docs/OPERATIONS.md', 'utf8') as string;
+    expect(doc).toContain('الدفع بالبطاقة والتحقق من الهوية');
+    expect(doc).toContain('شيل `CARD_SANDBOX_SECRET`');
+  });
+});

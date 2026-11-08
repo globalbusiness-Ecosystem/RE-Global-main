@@ -16,6 +16,8 @@ export type AttentionInput = {
   cardOrdersToHandOver?: number;
   cardRefunds?: number;
   kycPending?: number;
+  /** The test payment provider is switched on (CARD_SANDBOX_SECRET is set). */
+  cardSandboxOn?: boolean;
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
@@ -25,6 +27,7 @@ const round2 = (n: number) => Math.round(n * 100) / 100;
 // Items that stop money or contracts come first ("bad"), then things waiting on a person ("warn").
 export function buildAttention(i: AttentionInput): AttentionItem[] {
   const out: AttentionItem[] = [];
+  if (i.cardSandboxOn) out.push({ id: 'card-sandbox', level: 'bad', text: 'محاكي الدفع بالبطاقة شغال (CARD_SANDBOX_SECRET): أي مستخدم مسجّل يقدر يعلّم عقار "مباع" أو حجز "مؤكد" من غير ما يدفع. شيله من Vercel وأعد النشر قبل ما تفتح الموقع للناس.', tab: 'dashboard' });
   if (!i.env.PI_API_KEY) out.push({ id: 'env-pi-key', level: 'bad', text: 'مفتاح Pi API مش متضبط في Vercel: الدفع واقف.', tab: 'dashboard' });
   if (!i.env.PI_ISSUER_SECRET_KEY || !i.env.PI_ISSUER_PUBLIC_KEY) out.push({ id: 'env-signing', level: 'bad', text: 'مفاتيح توقيع العقود ناقصة في Vercel: العمليات مش هتتسجل ولا هيتعملها عقد.', tab: 'dashboard' });
   if (!i.env.ADMIN_SESSION_SECRET) out.push({ id: 'env-admin-secret', level: 'bad', text: 'ADMIN_SESSION_SECRET مش متضبط: جلسة الأدمن مش آمنة.', tab: 'dashboard' });

@@ -36,6 +36,7 @@ export async function gatherAttention() {
     cardRefunds: payouts.docs.filter((d) => !!d.data().currency).length,
     cardOrdersToHandOver: cardOrders.docs.filter((d) => !d.data().handedOverAt && !d.data().booking).length,
     kycPending,
+    cardSandboxOn: (process.env.CARD_SANDBOX_SECRET ?? '').length >= 16,
     review: { bookings: rb, holdings: rh, transfers: rt },
     shareMismatches: shareMismatches(
       props.docs.map((d) => ({ id: d.id, title: String(d.data().title ?? d.id).slice(0, 40), sharesSold: Number(d.data().sharesSold) || 0 })),
