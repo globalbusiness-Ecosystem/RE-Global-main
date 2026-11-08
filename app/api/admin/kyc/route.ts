@@ -4,6 +4,7 @@ import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { decideKyc, listKyc } from '@/lib/kyc-store';
 import { cleanNote } from '@/lib/kyc-rules';
+import { notifyKycDecision } from '@/lib/kyc-notify';
 import { deleteKycFiles } from '@/lib/kyc-files-store';
 
 export const dynamic = 'force-dynamic';
@@ -37,7 +38,8 @@ export async function PATCH(req: NextRequest) {
     // A rejected person sends fresh photos with the next request, so the old ones are not kept.
     if (decision === 'rejected') await deleteKycFiles(uid).catch(() => {});
     await logAdmin(`kyc.${decision}`, { uid, reason });
-    return NextResponse.json({ ok: true });
+    const mailed = await notifyKycDecision(uid, decision, reason);
+    return NextResponse.json({ ok: true, mailed });
   } catch (err) {
     console.error('[admin/kyc] update error:', err);
     return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });

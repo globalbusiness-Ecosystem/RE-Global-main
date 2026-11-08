@@ -19,13 +19,13 @@ export async function getKyc(uid: string): Promise<KycRecord> {
 }
 
 /** Saves a verification request; returns false when the current status does not allow a new one (already pending or approved). */
-export async function submitKyc(uid: string, input: KycRequestInput): Promise<boolean> {
+export async function submitKyc(uid: string, input: KycRequestInput, lang = 'en'): Promise<boolean> {
   const ref = col().doc(uid);
   return adminDb.runTransaction(async (tx) => {
     const s = await tx.get(ref);
     const cur = (s.exists ? s.data()?.status : 'none') as KycStatus;
     if (!canMoveKyc(cur === 'pending' || cur === 'approved' || cur === 'rejected' ? cur : 'none', 'pending')) return false;
-    tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: input.phone, docType: input.docType, files: requiredKinds(input.docType), submittedAt: Timestamp.now(), rejectReason: null });
+    tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: input.phone, docType: input.docType, files: requiredKinds(input.docType), lang, submittedAt: Timestamp.now(), rejectReason: null });
     return true;
   });
 }

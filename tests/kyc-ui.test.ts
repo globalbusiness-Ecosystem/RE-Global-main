@@ -17,7 +17,7 @@ describe('kyc labels', () => {
     expect(kl('rejected', 'fr', { reason: 'Nom illisible' })).toContain('Nom illisible');
   });
   it('every key is used by the page or the card button', () => {
-    const all = src('app/kyc/page.tsx') + src('components/card-pay-button.tsx');
+    const all = src('app/kyc/page.tsx') + src('components/card-pay-button.tsx') + src('components/header.tsx') + src('lib/kyc-mail.ts');
     for (const k of keys) {
       const viaMsg = ['invalid','failed','photosMissing','photoBad'].includes(k) && all.includes('kl(msg');
       const viaQuoted = all.includes(`'${k}'`);

@@ -3,6 +3,7 @@ import { guardApi } from '@/lib/api-guard';
 import { submitKyc } from '@/lib/kyc-store';
 import { uploadedKinds } from '@/lib/kyc-files-store';
 import { hasAllPhotos } from '@/lib/kyc-files';
+import { pickMailLang } from '@/lib/kyc-mail';
 import { needsKyc, parseKycRequest } from '@/lib/kyc-rules';
 
 export const dynamic = 'force-dynamic';
@@ -18,7 +19,7 @@ export async function POST(req: NextRequest) {
   try {
     // The photos this document type needs must already be uploaded.
     if (!hasAllPhotos(input.docType, await uploadedKinds(user.uid))) return NextResponse.json({ error: 'Photos missing', code: 'photos_missing' }, { status: 400, headers: H });
-    const ok = await submitKyc(user.uid, input);
+    const ok = await submitKyc(user.uid, input, pickMailLang(req.headers.get('accept-language')));
     if (!ok) return NextResponse.json({ error: 'A request already exists' }, { status: 409, headers: H });
     return NextResponse.json({ ok: true }, { headers: H });
   } catch {

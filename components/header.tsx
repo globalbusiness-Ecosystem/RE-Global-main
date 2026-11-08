@@ -27,6 +27,7 @@ const NAV_LANG_KEY = 're_nav_language';
 export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
+  const [kycRequired, setKycRequired] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const { username, isAuthenticated, accessToken, isInitialized } = usePiAuth();
   const { avatar } = useMyAvatar();
@@ -42,7 +43,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
     let off = false;
     fetch('/api/kyc/me', { headers: authHeaders(), cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => { if (!off && j && typeof j.status === 'string') setKycStatus(j.status); })
+      .then((j) => { if (!off && j && typeof j.status === 'string') { setKycStatus(j.status); setKycRequired(j.required === true); } })
       .catch(() => {});
     return () => { off = true; };
   }, [isInitialized, accessToken]);
@@ -141,6 +142,16 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
             style={{ color: 'rgb(212, 175, 55)', borderColor: 'rgb(212, 175, 55)' }}
           >
             {kl('verifyCta', navLang)}
+          </Link>
+        )}
+
+        {isInitialized && accessToken && !isPiBrowser() && kycRequired && kycStatus === 'approved' && (
+          <Link
+            href="/kyc"
+            className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
+            style={{ color: 'rgb(74, 222, 128)', borderColor: 'rgb(74, 222, 128)' }}
+          >
+            ✓ {kl('verifiedBadge', navLang)}
           </Link>
         )}
 
