@@ -12,6 +12,10 @@ export type AttentionInput = {
   openReports?: number;
   /** Visible listings with no photo, no price or no map spot. */
   incompleteListings?: number;
+  /** Card payments: sales paid and waiting to be handed over, refunds owed in a card currency, identity requests waiting. */
+  cardOrdersToHandOver?: number;
+  cardRefunds?: number;
+  kycPending?: number;
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
@@ -30,6 +34,9 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (r.holdings > 0) out.push({ id: 'review-holdings', level: 'bad', text: `${r.holdings} شراء حصص محتاج مراجعة (المشتري دفع والحصص خلصت): الغيه عشان يتعمله استرداد.`, tab: 'payments' });
   if (r.transfers > 0) out.push({ id: 'review-transfers', level: 'bad', text: `${r.transfers} عملية في سوق الحصص محتاجة مراجعة: ليها استرداد معلّق.`, tab: 'payments' });
   if (i.pendingPayouts.count > 0) out.push({ id: 'payouts', level: 'warn', text: `${i.pendingPayouts.count} مستحقات معلّقة (${round2(i.pendingPayouts.amount)} π) محتاجة تحويل منك.`, tab: 'payments' });
+  if ((i.cardOrdersToHandOver ?? 0) > 0) out.push({ id: 'card-handover', level: 'warn', text: `${i.cardOrdersToHandOver} طلب اتدفع ببطاقة ومستني تسليم العقار للمشتري: المدفوعات ← طلبات البطاقة.`, tab: 'payments' });
+  if ((i.cardRefunds ?? 0) > 0) out.push({ id: 'card-refunds', level: 'warn', text: `${i.cardRefunds} استرداد بالبطاقة محتاج ترجّعه من لوحة شركة الدفع (مش بـ Pi): المدفوعات ← التحويلات والاستردادات.`, tab: 'payments' });
+  if ((i.kycPending ?? 0) > 0) out.push({ id: 'kyc-pending', level: 'warn', text: `${i.kycPending} طلب تحقق هوية مستني مراجعتك (مستخدمو الويب مش هيقدروا يدفعوا قبل الموافقة): المدفوعات ← التحقق من الهوية.`, tab: 'payments' });
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
   if ((i.openReports ?? 0) > 0) out.push({ id: 'reports', level: 'warn', text: `${i.openReports} بلاغ على عقارات مستني مراجعتك (من صفحة العقار العامة): افتح لوحة التحكم ← بلاغات العقارات.`, tab: 'dashboard' });

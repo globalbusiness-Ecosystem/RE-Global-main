@@ -47,3 +47,22 @@ describe('admin two-step login check', () => {
     expect(buildAttention(ok)).toEqual([]);
   });
 });
+
+describe('card payments and identity checks', () => {
+  it('flags paid card sales to hand over, card refunds to return, and identity requests waiting', () => {
+    const items = buildAttention({ ...ok, cardOrdersToHandOver: 2, cardRefunds: 1, kycPending: 3 });
+    expect(items.map((x) => x.id)).toEqual(['card-handover', 'card-refunds', 'kyc-pending']);
+    expect(items.every((x) => x.level === 'warn' && x.tab === 'payments')).toBe(true);
+    expect(items[1].text).not.toContain('π)');
+  });
+  it('says nothing when there are none', () => {
+    expect(buildAttention({ ...ok, cardOrdersToHandOver: 0, cardRefunds: 0, kycPending: 0 })).toEqual([]);
+  });
+  it('card refunds are not added to the Pi owed total', () => {
+    const src = require('node:fs').readFileSync('lib/admin-attention.ts', 'utf8') as string;
+    expect(src).toContain('!d.data().currency');
+    expect(src).toContain('cardRefunds');
+    expect(src).toContain("collection('kyc').where('status', '==', 'pending')");
+    expect(src).toContain('!d.data().handedOverAt && !d.data().booking');
+  });
+});

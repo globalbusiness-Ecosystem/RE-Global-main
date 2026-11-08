@@ -22,6 +22,8 @@ export async function gatherAttention() {
     count(db.collection('share_transfers').where('status', '==', 'review')),
     db.collection('share_holdings').where('status', '==', 'confirmed').select('propertyId', 'shares', 'status').get(),
   ]);
+  const cardOrders = await db.collection('card_orders').where('status', '==', 'paid').limit(200).get().catch(() => ({ docs: [] as FirebaseFirestore.QueryDocumentSnapshot[] }));
+  const kycPending = await count(db.collection('kyc').where('status', '==', 'pending')).catch(() => 0);
   const openReports = await count(db.collection('listing_reports').where('status', '==', 'open')).catch(() => 0);
   const input: AttentionInput = {
     env: { PI_API_KEY: has('PI_API_KEY'), PI_ISSUER_SECRET_KEY: has('PI_ISSUER_SECRET_KEY'), PI_ISSUER_PUBLIC_KEY: has('PI_ISSUER_PUBLIC_KEY'), ADMIN_SESSION_SECRET: has('ADMIN_SESSION_SECRET'), ADMIN_TOTP_SECRET: has('ADMIN_TOTP_SECRET'), ADMIN_PIN_STRONG: has('ADMIN_PIN') ? isStrongPin(process.env.ADMIN_PIN) : undefined, ADMIN_ALERT_EMAIL: (has('GMAIL_USER') && has('GMAIL_APP_PASSWORD')) || has('RESEND_API_KEY') ? has('ADMIN_ALERT_EMAIL') : undefined, CRON_SECRET: has('ADMIN_ALERT_EMAIL') ? has('CRON_SECRET') : undefined },
@@ -29,7 +31,11 @@ export async function gatherAttention() {
     piRateSet: rate !== null,
     openReports,
     incompleteListings: countIncomplete(props.docs.map((d) => d.data())),
-    pendingPayouts: { count: payouts.size, amount: payouts.docs.reduce((n, d) => n + (Number(d.data().amount) || 0), 0) },
+    // Pi payouts only: a refund owed in a card currency is a different thing (the admin returns it from the payment company's dashboard).
+    pendingPayouts: { count: payouts.docs.filter((d) => !d.data().currency).length, amount: payouts.docs.filter((d) => !d.data().currency).reduce((n, d) => n + (Number(d.data().amount) || 0), 0) },
+    cardRefunds: payouts.docs.filter((d) => !!d.data().currency).length,
+    cardOrdersToHandOver: cardOrders.docs.filter((d) => !d.data().handedOverAt && !d.data().booking).length,
+    kycPending,
     review: { bookings: rb, holdings: rh, transfers: rt },
     shareMismatches: shareMismatches(
       props.docs.map((d) => ({ id: d.id, title: String(d.data().title ?? d.id).slice(0, 40), sharesSold: Number(d.data().sharesSold) || 0 })),
