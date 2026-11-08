@@ -16,11 +16,16 @@ export type AttentionInput = {
   cardOrdersToHandOver?: number;
   cardRefunds?: number;
   kycPending?: number;
+  /** Hours the oldest identity request has been waiting (people are blocked from paying until it is decided). */
+  kycOldestHours?: number;
   /** The test payment provider is switched on (CARD_SANDBOX_SECRET is set). */
   cardSandboxOn?: boolean;
 };
 
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
+
+/** A person waiting this long to be verified counts as late. */
+export const KYC_LATE_HOURS = 48;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -39,7 +44,11 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if (i.pendingPayouts.count > 0) out.push({ id: 'payouts', level: 'warn', text: `${i.pendingPayouts.count} مستحقات معلّقة (${round2(i.pendingPayouts.amount)} π) محتاجة تحويل منك.`, tab: 'payments' });
   if ((i.cardOrdersToHandOver ?? 0) > 0) out.push({ id: 'card-handover', level: 'warn', text: `${i.cardOrdersToHandOver} طلب اتدفع ببطاقة ومستني تسليم العقار للمشتري: المدفوعات ← طلبات البطاقة.`, tab: 'payments' });
   if ((i.cardRefunds ?? 0) > 0) out.push({ id: 'card-refunds', level: 'warn', text: `${i.cardRefunds} استرداد بالبطاقة محتاج ترجّعه من لوحة شركة الدفع (مش بـ Pi): المدفوعات ← التحويلات والاستردادات.`, tab: 'payments' });
-  if ((i.kycPending ?? 0) > 0) out.push({ id: 'kyc-pending', level: 'warn', text: `${i.kycPending} طلب تحقق هوية مستني مراجعتك (مستخدمو الويب مش هيقدروا يدفعوا قبل الموافقة): المدفوعات ← التحقق من الهوية.`, tab: 'payments' });
+  if ((i.kycPending ?? 0) > 0) {
+    const h = Math.floor(i.kycOldestHours ?? 0);
+    const late = h >= KYC_LATE_HOURS;
+    out.push({ id: 'kyc-pending', level: late ? 'bad' : 'warn', text: `${i.kycPending} طلب تحقق هوية مستني مراجعتك${h >= 1 ? ` (أقدم واحد مستني من ${h >= 48 ? `${Math.floor(h / 24)} يوم` : `${h} ساعة`})` : ''}، ومستخدمو الويب مش هيقدروا يدفعوا قبل الموافقة${late ? ': اتأخر، راجعه النهاردة' : ''}: المدفوعات ← التحقق من الهوية.`, tab: 'payments' });
+  }
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
   if ((i.openReports ?? 0) > 0) out.push({ id: 'reports', level: 'warn', text: `${i.openReports} بلاغ على عقارات مستني مراجعتك (من صفحة العقار العامة): افتح لوحة التحكم ← بلاغات العقارات.`, tab: 'dashboard' });

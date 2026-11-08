@@ -16,6 +16,7 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [rows, setRows] = useState<Req[] | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
 
   const load = useCallback(() => {
     adminApi<{ requests: Req[] }>('/api/admin/kyc')
@@ -32,7 +33,8 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
     } else if (!window.confirm('وافق بس بعد ما تراجع الاسم والدولة وتفحص قوائم العقوبات (AML). متأكد؟')) return;
     setBusy(uid);
     try {
-      await adminApi('/api/admin/kyc', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, decision, reason }) });
+      const res = await adminApi<{ mailed?: boolean }>('/api/admin/kyc', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, decision, reason }) });
+      setNotice(res?.mailed ? '✉️ اتبعت إيميل بالقرار للمستخدم.' : 'القرار اتسجّل. مفيش إيميل اتبعت (إيميل المستخدم مش متأكد أو الإيميل مش متضبط).');
       load();
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
@@ -42,10 +44,12 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   if (error) return <Empty>❌ {error}</Empty>;
   if (!rows) return null;
   if (rows.length === 0) return <Empty>مفيش طلبات تحقق لسه.</Empty>;
-  const pending = rows.filter((r) => r.status === 'pending');
+  // The one waiting longest goes first.
+  const pending = rows.filter((r) => r.status === 'pending').sort((a, b) => String(a.submittedAt).localeCompare(String(b.submittedAt)));
   const sorted = [...pending, ...rows.filter((r) => r.status !== 'pending')];
   return (
     <Card title={`🪪 التحقق من الهوية (${pending.length} في الانتظار)`}>
+      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };

@@ -85,3 +85,15 @@ describe('test payment provider left on', () => {
     expect(doc).toContain('شيل `CARD_SANDBOX_SECRET`');
   });
 });
+
+describe('identity requests waiting', () => {
+  it('is a warning at first and blocking once it is late', () => {
+    const fresh = buildAttention({ ...ok, kycPending: 2, kycOldestHours: 5 });
+    expect(fresh[0].level).toBe('warn');
+    expect(fresh[0].text).toContain('5 ساعة');
+    const late = buildAttention({ ...ok, kycPending: 1, kycOldestHours: 80 });
+    expect(late[0].level).toBe('bad');
+    expect(late[0].text).toContain('3 يوم');
+    expect(buildAttention({ ...ok, kycPending: 0, kycOldestHours: 90 })).toEqual([]);
+  });
+});
