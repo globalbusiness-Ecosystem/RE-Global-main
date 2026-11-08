@@ -27,7 +27,10 @@ export async function gatherAttention() {
   const kycPending = kycDocs.docs.length;
   const oldest = kycDocs.docs.map((d) => d.data().submittedAt?.toMillis?.() as number | undefined).filter((n): n is number => typeof n === 'number').sort((a, b) => a - b)[0];
   const kycOldestHours = oldest ? Math.max(0, (Date.now() - oldest) / 3_600_000) : 0;
-  const cardContractsUnanchored = await count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('txid', '==', '')).catch(() => 0);
+  const cardContractsUnanchored = (await Promise.all([
+    count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('txid', '==', '')).catch(() => 0),
+    count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('registryPending', '==', true)).catch(() => 0),
+  ])).reduce((x, y) => Math.max(x, y), 0);
   const openReports = await count(db.collection('listing_reports').where('status', '==', 'open')).catch(() => 0);
   const input: AttentionInput = {
     env: { PI_API_KEY: has('PI_API_KEY'), PI_ISSUER_SECRET_KEY: has('PI_ISSUER_SECRET_KEY'), PI_ISSUER_PUBLIC_KEY: has('PI_ISSUER_PUBLIC_KEY'), ADMIN_SESSION_SECRET: has('ADMIN_SESSION_SECRET'), ADMIN_TOTP_SECRET: has('ADMIN_TOTP_SECRET'), ADMIN_PIN_STRONG: has('ADMIN_PIN') ? isStrongPin(process.env.ADMIN_PIN) : undefined, ADMIN_ALERT_EMAIL: (has('GMAIL_USER') && has('GMAIL_APP_PASSWORD')) || has('RESEND_API_KEY') ? has('ADMIN_ALERT_EMAIL') : undefined, CRON_SECRET: has('ADMIN_ALERT_EMAIL') ? has('CRON_SECRET') : undefined },

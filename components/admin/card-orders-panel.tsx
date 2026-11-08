@@ -41,8 +41,8 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const anchor = async () => {
     setBusy('anchor');
     try {
-      const r = await adminApi<{ anchored: number; failed: number; total: number }>('/api/admin/contracts/anchor', { method: 'POST' });
-      setNotice(r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} من ${r.total}${r.failed ? ` (فشل ${r.failed}: جرّب تاني بعد شوية، أو راجع رصيد حساب المنصة على Pi Testnet)` : ''}.`);
+      const r = await adminApi<{ anchored: number; recorded: number; failed: number; total: number }>('/api/admin/contracts/anchor', { method: 'POST' });
+      setNotice(r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded} في العقد الذكي (من ${r.total} عقد)${r.failed ? ` (فشل ${r.failed}: جرّب تاني بعد شوية، أو راجع رصيد حساب المنصة على Pi Testnet)` : ''}.`);
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
     } finally { setBusy(''); }

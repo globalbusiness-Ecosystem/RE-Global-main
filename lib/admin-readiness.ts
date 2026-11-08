@@ -38,6 +38,7 @@ export async function gatherReadiness() {
       EMAIL_CONFIGURED: emailConfigured(),
       FIREBASE_WEB_CONFIG: ['API_KEY', 'AUTH_DOMAIN', 'PROJECT_ID', 'APP_ID'].every((k) => has(`NEXT_PUBLIC_FIREBASE_${k}`)),
       CUSTOM_DOMAIN: has('NEXT_PUBLIC_BASE_URL'),
+      REGISTRY_CONTRACT_ID: has('REGISTRY_CONTRACT_ID'),
     },
     cardSandboxOn: sandboxOn,
     // Only the test provider exists today; a real company counts once its adapter is registered (and it is not the sandbox).

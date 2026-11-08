@@ -4,7 +4,7 @@ export type ReadinessInput = {
   env: {
     PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean;
     ADMIN_SESSION_SECRET: boolean; ADMIN_TOTP_SECRET: boolean; ADMIN_PIN_STRONG: boolean; ADMIN_ALERT_EMAIL: boolean; CRON_SECRET: boolean;
-    EMAIL_CONFIGURED: boolean; FIREBASE_WEB_CONFIG: boolean; CUSTOM_DOMAIN: boolean;
+    EMAIL_CONFIGURED: boolean; FIREBASE_WEB_CONFIG: boolean; CUSTOM_DOMAIN: boolean; REGISTRY_CONTRACT_ID: boolean;
   };
   cardSandboxOn: boolean;
   /** A real card company is connected (not the test provider). */
@@ -51,6 +51,7 @@ export function buildReadiness(i: ReadinessInput): ReadinessCheck[] {
     c('pi-rate', 'pi', i.usdProperties === 0 || i.piRateSet, true, 'سعر Pi متحدد للعقارات المسعّرة بالدولار', 'حدده من المحتوى ← 💱.'),
     c('sandbox-off', 'cards', !i.cardSandboxOn, true, 'محاكي الدفع بالبطاقة مقفول', 'شيل CARD_SANDBOX_SECRET من Vercel وأعد النشر: المحاكي بيخلّي أي مستخدم يعلّم عقار "مباع" من غير دفع.'),
     c('real-card', 'cards', i.realCardProvider, false, 'شركة دفع حقيقية متوصلة (لو هتفتح الدفع بالبطاقة)', 'محتاج حساب تاجر وadapter للشركة. من غيره الدفع بالبطاقة مش هيشتغل للناس: اقفل الزرار أو أجّل الإطلاق للبطاقة.'),
+    c('registry', 'cards', e.REGISTRY_CONTRACT_ID, false, 'سجل الملكية (العقد الذكي) متوصل لعقود البطاقة', 'انشر العقد من contracts/ownership-registry وضيف REGISTRY_CONTRACT_ID في Vercel (الخطوات في docs/OPERATIONS.md).'),
     c('email', 'cards', e.EMAIL_CONFIGURED, false, 'الإيميل شغال (Gmail أو Resend)', 'ضيف GMAIL_USER و GMAIL_APP_PASSWORD أو RESEND_API_KEY: من غيره مفيش إيصالات ولا إيميلات قرار التحقق.'),
     c('kyc-mode', 'identity', true, false, i.kycByCompany ? 'التحقق بيتم عند شركة متخصصة' : 'التحقق بيتم يدويًا من لوحة الأدمن', 'لو متوقع طلبات كتير، اربط شركة تحقق (Sumsub / Veriff).'),
     c('kyc-queue', 'identity', i.kycPending === 0 || i.kycOldestHours < 48, true, 'مفيش طلبات تحقق متأخرة أكتر من 48 ساعة', 'راجع الطلبات من المدفوعات ← التحقق من الهوية.'),

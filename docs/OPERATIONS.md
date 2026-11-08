@@ -124,3 +124,13 @@
 - بصمة العقد (SHA-256) بتتثبّت على Pi Testnet في معاملة صغيرة من حساب المنصة لنفسها، والبصمة في الـ memo. الـ hash بتاع المعاملة بيتحفظ في `txid` وبيظهر في صفحة العقد.
 - حساب المنصة (`PI_ISSUER_PUBLIC_KEY`) لازم يكون موجود ومعاه رصيد Test-π يكفي رسوم المعاملات.
 - لو التثبيت فشل، العقد بيتحفظ والبيع بيكمل، وبيظهر تنبيه "محتاج انتباهك". اضغط "ثبّت العقود على البلوك تشين" في طلبات البطاقة وهو بيعيد المحاولة.
+
+### سجل الملكية: العقد الذكي (Phase 198)
+- الكود في `contracts/ownership-registry` (Rust / Soroban). سجل علني بيتكتب فيه بس: كل سطر = بصمة عقد موقّع + العقار + مرجع المشتري (hash، من غير اسم) + النوع. الأدمن (حساب المنصة) هو الوحيد اللي يكتب، ومفيش مسح ولا تعديل. نفس العقد ما يتسجلش مرتين.
+- البناء والنشر من جهازك (محتاج `stellar` CLI):
+  1. `cd contracts/ownership-registry && stellar contract build`
+  2. `stellar contract deploy --wasm target/wasm32v1-none/release/re_ownership_registry.wasm --source <حساب المنصة> --rpc-url https://rpc.testnet.minepi.com --network-passphrase "Pi Testnet"` (هيطبع contract ID)
+  3. `stellar contract invoke --id <contract ID> --source <حساب المنصة> --rpc-url https://rpc.testnet.minepi.com --network-passphrase "Pi Testnet" -- init --admin <PI_ISSUER_PUBLIC_KEY>`
+  4. ضيف `REGISTRY_CONTRACT_ID=<contract ID>` في Vercel وأعد النشر.
+- بعد كده كل عقد بطاقة بيتسجل لوحده. اللي فشل بيظهر في "محتاج انتباهك"، وزرار ⛓️ في طلبات البطاقة بيعيد المحاولة.
+- مفتاح المنصة السري ما بيتكتبش في أي أمر هنا: الـ CLI بياخده من هويتك المحفوظة عندك (`stellar keys`).
