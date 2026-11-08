@@ -25,7 +25,7 @@ describe('kyc decision mail', () => {
     expect(r.html).not.toContain('<script>');
   });
   it('wiring: decision sends the mail, header shows the verified badge', () => {
-    expect(src('app/api/admin/kyc/route.ts')).toContain('notifyKycDecision');
+    expect(src('lib/kyc-decision.ts')).toContain('notifyKycDecision');
     expect(src('lib/kyc-notify.ts')).toContain('emailVerified');
     expect(src('components/header.tsx')).toContain("kl('verifiedBadge'");
     expect(src('app/api/kyc/request/route.ts')).toContain('accept-language');

@@ -58,7 +58,7 @@ describe('wiring', () => {
     expect(src('app/api/kyc/request/route.ts')).toContain('needsKyc(user.uid)');
     const a = src('app/api/admin/kyc/route.ts');
     expect(a.match(/isAdminRequest\(req\)/g)?.length).toBe(2);
-    expect(a).toContain("logAdmin(`kyc.${decision}`");
+    expect(src('lib/kyc-decision.ts')).toContain("logAdmin(`kyc.${decision}`");
     expect(a).toContain("uid.startsWith('web_')");
   });
   it('a rejection needs a reason', () => {

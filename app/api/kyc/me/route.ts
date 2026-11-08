@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
 import { getKyc } from '@/lib/kyc-store';
 import { needsKyc } from '@/lib/kyc-rules';
+import { ensureKycProviders } from '@/lib/kyc-provider/registry';
+import { activeKycProvider } from '@/lib/kyc-provider/provider';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -11,10 +13,12 @@ export async function GET(req: NextRequest) {
   const user = await guardApi(req, { scope: 'kyc-me', limit: 60 });
   if (user instanceof NextResponse) return user;
   const required = needsKyc(user.uid);
-  if (!required) return NextResponse.json({ required, status: 'approved' }, { headers: H });
+  ensureKycProviders();
+  const hosted = activeKycProvider() !== null;
+  if (!required) return NextResponse.json({ required, hosted, status: 'approved' }, { headers: H });
   try {
     const k = await getKyc(user.uid);
-    return NextResponse.json({ required, status: k.status, rejectReason: k.rejectReason ?? null }, { headers: H });
+    return NextResponse.json({ required, hosted, status: k.status, rejectReason: k.rejectReason ?? null }, { headers: H });
   } catch {
     return NextResponse.json({ error: 'Try again' }, { status: 503, headers: H });
   }

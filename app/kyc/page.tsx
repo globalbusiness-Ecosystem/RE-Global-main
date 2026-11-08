@@ -15,7 +15,7 @@ function countryName(code: string, language: string, fallback: string): string {
   try { return new Intl.DisplayNames([language], { type: 'region' }).of(code) ?? fallback; } catch { return fallback; }
 }
 
-type Me = { required: boolean; status: 'none' | 'pending' | 'approved' | 'rejected'; rejectReason?: string | null };
+type Me = { required: boolean; hosted?: boolean; status: 'none' | 'pending' | 'approved' | 'rejected'; rejectReason?: string | null };
 
 // Identity verification for people who sign in outside the Pi Browser. A person sends name, country and phone;
 // the team reviews it. Card payments stay closed until the request is approved.
@@ -43,7 +43,7 @@ export default function KycPage() {
 
   const submit = async () => {
     setMsg(null);
-    const kinds = requiredKinds(docType);
+    const kinds = me?.hosted ? [] : requiredKinds(docType);
     if (kinds.some((k) => !photos[k])) { setMsg('photosMissing'); return; }
     setBusy(true);
     try {
@@ -57,7 +57,12 @@ export default function KycPage() {
       const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType }) });
       if (r.status === 400) setMsg((await r.json().catch(() => null))?.code === 'photos_missing' ? 'photosMissing' : 'invalid');
       else if (!r.ok && r.status !== 409) setMsg('failed');
-      else load();
+      else {
+        const j = r.ok ? await r.json().catch(() => null) : null;
+        // With an identity company the person finishes the photos on the company's page.
+        if (j && typeof j.url === 'string' && j.url.startsWith('https://')) { window.location.href = j.url; return; }
+        load();
+      }
     } catch { setMsg('failed'); } finally { setBusy(false); setUploading(false); }
   };
 
@@ -97,6 +102,7 @@ export default function KycPage() {
               <label className="text-sm">{kl('phone', language)}
                 <input className={`${input} mt-1`} dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} inputMode="tel" autoComplete="tel" />
               </label>
+              {!me.hosted && (<>
  <label className="text-sm">{kl('docType', language)}
                 <select className={`${input} mt-1`} value={docType} onChange={(e) => { setDocType(e.target.value as DocType); setPhotos({}); }}>
                   <option value="id" className="text-black">{kl('docId', language)}</option>
@@ -114,6 +120,7 @@ export default function KycPage() {
                 </label>
               ))}
               <p className="text-xs text-gray-400">{kl('privacyNote', language)}</p>
+              </>)}
               {uploading && <p className="text-sm text-gray-300">{kl('uploading', language)}</p>}
               {msg && <p role="alert" className="text-sm text-red-400">{kl(msg, language)}</p>}
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-white px-4 py-3 text-base font-semibold text-black disabled:opacity-50">{kl('submit', language)}</button>

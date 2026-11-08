@@ -111,3 +111,10 @@
 - Web users upload ID front/back (or passport page) plus a selfie holding the document. Photos are shrunk in the browser (JPEG, max 600 KB) and stored in the server-only `kyc_files` collection.
 - Only admins can open them (`/api/admin/kyc/file`, every view is logged as `kyc.view-file`). Rejected requests delete the photos.
 - Photos are stored inside Firestore; for scale or long retention move them to private object storage with a retention rule.
+
+### Identity-check company (Phase 195)
+- الوضع الحالي: مراجعة يدوية من لوحة الأدمن (`KYC_PROVIDER` مش متضبط أو `manual`).
+- لما تختار شركة (Sumsub / Veriff): اكتب لها adapter واحد في `lib/kyc-provider/` على شكل `KycProvider` وسجّله في `ensureKycProviders()`، وبعدين اضبط `KYC_PROVIDER=<id>` في Vercel وأعد النشر.
+- الشركة بتنادي `/api/kyc/webhook/<id>` بتوقيعها. التوقيع بيتفحص جوه `parseWebhook`، وأي نداء مش موقّع صح بيتردّ 401.
+- لما شركة مفعّلة، المستخدم بيصوّر الوثائق عند الشركة (مش عندنا)، والقرار بيجي منها تلقائي، والإيميل واللوج بيشتغلوا زي ما هما.
+- قرار تلقائي بالموافقة = قرار قانوني: اتفق مع المحامي على قوائم العقوبات وPEP قبل التفعيل.

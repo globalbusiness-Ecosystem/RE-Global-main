@@ -28,6 +28,6 @@ describe('kyc photos', () => {
     expect(src('app/api/admin/kyc/file/route.ts')).toContain('kyc.view-file');
     expect(src('app/api/admin/kyc/file/route.ts')).toContain('no-store');
     expect(src('components/header.tsx')).toContain("kycStatus !== 'approved'");
-    expect(src('app/api/admin/kyc/route.ts')).toContain('deleteKycFiles');
+    expect(src('lib/kyc-decision.ts')).toContain('deleteKycFiles');
   });
 });
