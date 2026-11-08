@@ -28,13 +28,13 @@ describe('status moves', () => {
 });
 
 describe('verification request', () => {
-  const good = { legalName: 'Ahmed Mohamed Ali', country: 'eg', phone: '+20 100 123 4567' };
+  const good = { legalName: 'Ahmed Mohamed Ali', country: 'eg', phone: '+20 100 123 4567', docType: 'id' };
   it('accepts a full legal name, a known country and a phone number', () => {
-    expect(parseKycRequest(good)).toEqual({ legalName: 'Ahmed Mohamed Ali', country: 'EG', phone: '+20 100 123 4567' });
+    expect(parseKycRequest(good)).toEqual({ legalName: 'Ahmed Mohamed Ali', country: 'EG', phone: '+20 100 123 4567', docType: 'id' });
     expect(parseKycRequest({ ...good, legalName: 'أحمد محمد علي' })).not.toBeNull();
   });
   it('refuses a one-word name, digits, odd country or phone, and non-objects', () => {
-    for (const bad of [{ ...good, legalName: 'Ahmed' }, { ...good, legalName: 'A1 B2 C3' }, { ...good, legalName: '<b>x</b> y z' }, { ...good, country: 'XX' }, { ...good, country: '__proto__' }, { ...good, phone: 'abc' }, { ...good, phone: '1' }, null, 'x', 5, {}]) {
+    for (const bad of [{ ...good, legalName: 'Ahmed' }, { ...good, legalName: 'A1 B2 C3' }, { ...good, legalName: '<b>x</b> y z' }, { ...good, country: 'XX' }, { ...good, country: '__proto__' }, { ...good, phone: 'abc' }, { ...good, phone: '1' }, { ...good, docType: 'selfie' }, { ...good, docType: undefined }, null, 'x', 5, {}]) {
       expect(parseKycRequest(bad)).toBeNull();
     }
   });

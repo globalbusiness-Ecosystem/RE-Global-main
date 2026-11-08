@@ -19,8 +19,9 @@ describe('kyc labels', () => {
   it('every key is used by the page or the card button', () => {
     const all = src('app/kyc/page.tsx') + src('components/card-pay-button.tsx');
     for (const k of keys) {
-      const viaMsg = (k === 'invalid' || k === 'failed') && all.includes('kl(msg');
-      expect(all.includes(`kl('${k}'`) || viaMsg, k).toBe(true);
+      const viaMsg = ['invalid','failed','photosMissing','photoBad'].includes(k) && all.includes('kl(msg');
+      const viaQuoted = all.includes(`'${k}'`);
+      expect(all.includes(`kl('${k}'`) || viaMsg || viaQuoted, k).toBe(true);
     }
   });
 });

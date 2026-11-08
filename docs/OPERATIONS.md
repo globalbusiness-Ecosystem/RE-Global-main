@@ -105,3 +105,9 @@
 - حجز العقار/التواريخ 15 دقيقة. لو الدفع اتأخر أكتر، الحجز بيتعلّم "مراجعة" وبتتنبّه تعمل استرداد.
 - الترجمات (فرنسي/إسباني/برتغالي/أردو/صيني) مش متراجعة من متحدث أصلي.
 - فحص AML الحقيقي (قوائم العقوبات والوثائق) محتاج مزود KYC (مثل Sumsub أو Veriff). المراجعة الحالية يدوية.
+
+
+### KYC identity photos (Phase 192)
+- Web users upload ID front/back (or passport page) plus a selfie holding the document. Photos are shrunk in the browser (JPEG, max 600 KB) and stored in the server-only `kyc_files` collection.
+- Only admins can open them (`/api/admin/kyc/file`, every view is logged as `kyc.view-file`). Rejected requests delete the photos.
+- Photos are stored inside Firestore; for scale or long retention move them to private object storage with a retention rule.

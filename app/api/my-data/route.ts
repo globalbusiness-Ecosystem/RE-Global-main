@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { rateLimited } from '@/lib/rate-guard';
+import { uploadedKinds } from '@/lib/kyc-files-store';
 import { serializeValue } from '@/lib/backup';
 import { EXPORT_LIMIT, KEPT_NOTE, buildExport, exportFilename, isEraseConfirm, isSafeId } from '@/lib/my-data';
 
@@ -37,7 +38,7 @@ export async function GET(req: NextRequest) {
       const d = await adminDb.collection(col).doc(user.username).get();
       return d.exists ? serializeValue(d.data()) : null;
     };
-    const [profile, preferences, referral, avatar, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews, cardOrders, kycDoc] = await Promise.all([
+    const [profile, preferences, referral, avatar, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews, cardOrders, kycDoc, kycPhotos] = await Promise.all([
       one('profiles'), one('preferences'), one('referrals'), one('avatars'),
       by('favorites', 'username', user.username),
       by('ownerships', 'uid', user.uid), by('bookings', 'uid', user.uid), by('share_holdings', 'uid', user.uid), by('payouts', 'uid', user.uid),
@@ -47,6 +48,7 @@ export async function GET(req: NextRequest) {
       by('card_orders', 'uid', user.uid),
       // Identity check of a web sign-in (only they have one): the document is named after the account id.
       adminDb.collection('kyc').doc(user.uid).get(),
+      uploadedKinds(user.uid).catch(() => []),
     ]);
     const transfers = new Map<string, Record<string, unknown>>();
     for (const r of [...rows(tFrom), ...rows(tTo), ...rows(tBuy)]) transfers.set(r.id, r);
@@ -55,7 +57,7 @@ export async function GET(req: NextRequest) {
     const body = buildExport(user, {
       profile, preferences, referral, avatar,
       favorites: rows(favorites), ownerships: rows(ownerships), bookings: rows(bookings), share_holdings: rows(holdings),
-      payouts: rows(payouts), card_orders: rows(cardOrders), identity_check: kycDoc.exists ? serializeValue(kycDoc.data()) : null, stay_reviews: rows(reviews), share_transfers: [...transfers.values()], contracts: [...contracts.values()],
+      payouts: rows(payouts), card_orders: rows(cardOrders), identity_check: kycDoc.exists ? serializeValue(kycDoc.data()) : null, identity_photos_kept: kycPhotos, stay_reviews: rows(reviews), share_transfers: [...transfers.values()], contracts: [...contracts.values()],
     });
     return new NextResponse(JSON.stringify(body, null, 2), {
       status: 200,

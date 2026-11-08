@@ -1,4 +1,5 @@
 import { isCountry } from './legal-profiles';
+import { isDocType, type DocType } from './kyc-files';
 
 // Identity verification (KYC / AML). People who sign in with Google or e-mail (uid "web_…") must be verified before
 // they can pay. Pi users are already identity-checked by Pi Network itself, so they are not asked again.
@@ -12,7 +13,7 @@ export const canMoveKyc = (from: KycStatus, to: KycStatus): boolean => {
   return false;
 };
 
-export interface KycRequestInput { legalName: string; country: string; phone: string }
+export interface KycRequestInput { legalName: string; country: string; phone: string; docType: DocType }
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '');
 
@@ -22,10 +23,12 @@ export function parseKycRequest(b: unknown): KycRequestInput | null {
   const legalName = clean(o.legalName, 100);
   const country = typeof o.country === 'string' ? o.country.toUpperCase() : '';
   const phone = clean(o.phone, 20);
+  const docType = o.docType;
   if (legalName.length < 5 || !/^[\p{L}\p{M}][\p{L}\p{M} .'’-]*$/u.test(legalName) || legalName.split(' ').length < 2) return null;
   if (!isCountry(country)) return null;
   if (!/^\+?[0-9 ()-]{7,20}$/.test(phone)) return null;
-  return { legalName, country, phone };
+  if (!isDocType(docType)) return null;
+  return { legalName, country, phone, docType };
 }
 
 export const cleanNote = (v: unknown): string => clean(v, 300);

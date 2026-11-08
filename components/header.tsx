@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { ll } from '@/lib/login-labels';
 import { kl } from '@/lib/kyc-labels';
 import { isPiBrowser } from '@/lib/pi-env';
+import { authHeaders } from '@/lib/api-token';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
@@ -25,6 +26,7 @@ const NAV_LANG_KEY = 're_nav_language';
 
 export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [darkMode, setDarkMode] = useState(true);
   const { username, isAuthenticated, accessToken, isInitialized } = usePiAuth();
   const { avatar } = useMyAvatar();
@@ -33,6 +35,17 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
   useEffect(() => {
     setDarkMode(getStoredTheme() === 'dark');
   }, []);
+
+  // The verify button only shows while the identity check is not approved.
+  useEffect(() => {
+    if (!isInitialized || !accessToken || isPiBrowser()) return;
+    let off = false;
+    fetch('/api/kyc/me', { headers: authHeaders(), cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (!off && j && typeof j.status === 'string') setKycStatus(j.status); })
+      .catch(() => {});
+    return () => { off = true; };
+  }, [isInitialized, accessToken]);
 
   const t = NAV_DICTIONARY[navLang];
   const isRtl = navLang === 'ar' || navLang === 'ur';
@@ -121,7 +134,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           </Link>
         )}
 
-        {isInitialized && accessToken && !isPiBrowser() && (
+        {isInitialized && accessToken && !isPiBrowser() && kycStatus !== null && kycStatus !== 'approved' && (
           <Link
             href="/kyc"
             className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
