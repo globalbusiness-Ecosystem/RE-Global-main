@@ -14,7 +14,7 @@ export const isSafeId = (id: unknown): id is string =>
 
 export const exportFilename = (now = new Date()): string => `my-re-global-data-${now.toISOString().slice(0, 10)}.json`;
 
-export const KEPT_NOTE = 'Payments, contracts, ownerships and payouts are kept as legal and accounting records.';
+export const KEPT_NOTE = 'Payments, card payments, identity verification, contracts, ownerships and payouts are kept as legal and accounting records.';
 
 export function buildExport(user: { uid: string; username: string }, data: Record<string, unknown>, now = new Date()) {
   return {

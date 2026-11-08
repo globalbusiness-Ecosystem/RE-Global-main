@@ -148,3 +148,17 @@ describe('DELETE /api/my-data', () => {
     expect(store.profiles.ann).toBeDefined();
   });
 });
+
+describe('card payments and identity check in the data export', () => {
+  it('the export lists the card orders and the identity check of this user only, and erasing keeps both', async () => {
+    store.card_orders = { o1: { uid: 'u1', amountMinor: 450000, currency: 'EGP' }, o2: { uid: 'other', amountMinor: 1, currency: 'EGP' } };
+    store.kyc = { u1: { status: 'approved', legalName: 'Ann Lee', phone: '+201001234567' }, other: { status: 'pending', legalName: 'Bob Roy' } };
+    const out = JSON.parse(await (await GET(getReq())).text());
+    expect(out.data.card_orders.map((o: { id: string }) => o.id)).toEqual(['o1']);
+    expect(out.data.identity_check.legalName).toBe('Ann Lee');
+    expect(JSON.stringify(out)).not.toContain('Bob Roy');
+    expect((await DELETE(delReq({ confirm: 'DELETE' }))).status).toBe(200);
+    expect(store.card_orders.o1).toBeDefined();
+    expect(store.kyc.u1).toBeDefined();
+  });
+});

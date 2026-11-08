@@ -37,13 +37,16 @@ export async function GET(req: NextRequest) {
       const d = await adminDb.collection(col).doc(user.username).get();
       return d.exists ? serializeValue(d.data()) : null;
     };
-    const [profile, preferences, referral, avatar, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews] = await Promise.all([
+    const [profile, preferences, referral, avatar, favorites, ownerships, bookings, holdings, payouts, tFrom, tTo, tBuy, cBuy, cSell, reviews, cardOrders, kycDoc] = await Promise.all([
       one('profiles'), one('preferences'), one('referrals'), one('avatars'),
       by('favorites', 'username', user.username),
       by('ownerships', 'uid', user.uid), by('bookings', 'uid', user.uid), by('share_holdings', 'uid', user.uid), by('payouts', 'uid', user.uid),
       by('share_transfers', 'fromUid', user.uid), by('share_transfers', 'toUid', user.uid), by('share_transfers', 'buyerUid', user.uid),
       by('contracts', 'buyerUsername', user.username), by('contracts', 'sellerUsername', user.username),
       by('stay_reviews', 'uid', user.uid),
+      by('card_orders', 'uid', user.uid),
+      // Identity check of a web sign-in (only they have one): the document is named after the account id.
+      adminDb.collection('kyc').doc(user.uid).get(),
     ]);
     const transfers = new Map<string, Record<string, unknown>>();
     for (const r of [...rows(tFrom), ...rows(tTo), ...rows(tBuy)]) transfers.set(r.id, r);
@@ -52,7 +55,7 @@ export async function GET(req: NextRequest) {
     const body = buildExport(user, {
       profile, preferences, referral, avatar,
       favorites: rows(favorites), ownerships: rows(ownerships), bookings: rows(bookings), share_holdings: rows(holdings),
-      payouts: rows(payouts), stay_reviews: rows(reviews), share_transfers: [...transfers.values()], contracts: [...contracts.values()],
+      payouts: rows(payouts), card_orders: rows(cardOrders), identity_check: kycDoc.exists ? serializeValue(kycDoc.data()) : null, stay_reviews: rows(reviews), share_transfers: [...transfers.values()], contracts: [...contracts.values()],
     });
     return new NextResponse(JSON.stringify(body, null, 2), {
       status: 200,
@@ -64,7 +67,8 @@ export async function GET(req: NextRequest) {
   }
 }
 
-// Deletes the personal data. Body must be {"confirm":"DELETE"}. Financial and contract records stay.
+// Deletes the personal data. Body must be {"confirm":"DELETE"}. Financial and contract records stay, and so do the
+// identity check and card payment records (anti-money-laundering rules oblige the platform to keep them).
 export async function DELETE(req: NextRequest) {
   let user;
   try { user = await signedInUser(req); } catch (err) { return NextResponse.json({ error: 'Not authenticated' }, { status: (err as AuthError).status, headers: HEADERS }); }
