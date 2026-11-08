@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { downloadCsv } from '@/lib/csv-download';
 import { adminApi, UnauthorizedError, Btn, Card, Stat, Badge } from './admin-ui';
 
-type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; status: string; guests?: number; note?: string };
+type Booking = { id: string; propertyTitle: string; propertyType: string; username: string; start: string; end: string; nights: number; amount: number; currency?: string; status: string; guests?: number; note?: string };
 type Data = { totals: { confirmed: number; upcoming: number; nights: number; revenue: number; review: number }; bookings: Booking[] };
 
 const LABEL: Record<string, string> = { confirmed: 'مؤكد', review: 'مراجعة', cancelled: 'ملغي' };
@@ -23,7 +23,8 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
   useEffect(() => { load(); }, [load]);
 
   const cancel = async (b: Booking) => {
-    if (!window.confirm(`تلغي حجز @${b.username} وترجّعله ${b.amount} π؟ الأيام هترجع متاحة.`)) return;
+    const card = b.currency && b.currency !== 'Pi';
+    if (!window.confirm(card ? `تلغي حجز ${b.username} (دفع ببطاقة ${b.amount} ${b.currency})؟ الأيام هترجع متاحة، لكن الاسترداد لازم تعمله بنفسك من لوحة شركة الدفع.` : `تلغي حجز @${b.username} وترجّعله ${b.amount} π؟ الأيام هترجع متاحة.`)) return;
     setBusy(b.id); setError('');
     try {
       await adminApi('/api/admin/bookings', { method: 'PATCH', body: JSON.stringify({ id: b.id }) });
@@ -55,7 +56,7 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
           <div key={b.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 truncate font-bold text-white">{b.propertyTitle}</p>
-              <span className="shrink-0 text-xs text-gray-300">{b.amount} π</span>
+              <span className="shrink-0 text-xs text-gray-300">{b.amount} {b.currency && b.currency !== 'Pi' ? b.currency : 'π'}</span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
               <Badge tone={b.status === 'confirmed' ? 'green' : b.status === 'review' ? 'red' : 'gray'}>{LABEL[b.status] ?? b.status}</Badge>

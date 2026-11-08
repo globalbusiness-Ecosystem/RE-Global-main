@@ -1,7 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import type { ApplyResult, CardOrder } from './order';
+import { readStay, type ApplyResult, type CardOrder } from './order';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 128;
 
@@ -15,7 +15,7 @@ export async function applyToOrder(orderId: string, fn: (o: CardOrder) => ApplyR
     const d = snap.data() as Partial<CardOrder>;
     const order: CardOrder = {
       id: orderId, uid: String(d.uid ?? ''), propertyId: typeof d.propertyId === 'string' ? d.propertyId : undefined, amountMinor: Number(d.amountMinor), currency: d.currency as CardOrder['currency'],
-      status: d.status as CardOrder['status'], providerRef: d.providerRef, seenEvents: Array.isArray(d.seenEvents) ? d.seenEvents.map(String).slice(-50) : [],
+      status: d.status as CardOrder['status'], providerRef: d.providerRef, booking: readStay(d.booking), seenEvents: Array.isArray(d.seenEvents) ? d.seenEvents.map(String).slice(-50) : [],
     };
     const r = fn(order);
     if (r.ok && (r.changed || r.order.seenEvents.length !== order.seenEvents.length)) {
@@ -26,11 +26,11 @@ export async function applyToOrder(orderId: string, fn: (o: CardOrder) => ApplyR
 }
 
 // Creates a pending order for a person and a listing, at the price the server worked out.
-export async function createOrder(a: { uid: string; propertyId: string; amountMinor: number; currency: string; providerId: string }): Promise<string> {
+export async function createOrder(a: { uid: string; propertyId: string; amountMinor: number; currency: string; providerId: string; booking?: CardOrder['booking'] }): Promise<string> {
   const ref = adminDb.collection('card_orders').doc();
   await ref.set({
     uid: a.uid, propertyId: a.propertyId, amountMinor: a.amountMinor, currency: a.currency, providerId: a.providerId,
-    status: 'pending', seenEvents: [], createdAt: Timestamp.now(),
+    status: 'pending', seenEvents: [], createdAt: Timestamp.now(), ...(a.booking ? { booking: a.booking } : {}),
   });
   return ref.id;
 }
@@ -52,6 +52,6 @@ export async function getOrder(orderId: string): Promise<CardOrder | null> {
   return {
     id: orderId, uid: String(d.uid ?? ''), propertyId: typeof d.propertyId === 'string' ? d.propertyId : undefined,
     amountMinor: Number(d.amountMinor), currency: d.currency as CardOrder['currency'], status: d.status as CardOrder['status'],
-    providerRef: d.providerRef, seenEvents: [],
+    providerRef: d.providerRef, booking: readStay(d.booking), seenEvents: [],
   };
 }

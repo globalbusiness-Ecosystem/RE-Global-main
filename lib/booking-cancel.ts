@@ -51,7 +51,7 @@ export async function guestCancelBooking(uid: string, bookingId: unknown) {
     }
     tx.update(bRef, { status: 'cancelled', cancelledAt: Timestamp.now(), cancelledBy: 'guest', refundAmount: q.refund, refundPct: q.pct });
     if (q.refund > 0) {
-      tx.set(pRef, { kind: 'refund', uid: d.uid, username: d.username, amount: q.refund, status: 'pending', paymentId: bookingId, bookingId, createdAt: Timestamp.now() });
+      tx.set(pRef, { kind: 'refund', uid: d.uid, username: d.username, amount: q.refund, ...(d.currency && d.currency !== 'Pi' ? { currency: String(d.currency) } : {}), status: 'pending', paymentId: bookingId, bookingId, createdAt: Timestamp.now() });
     }
     return { ok: true as const, refund: q.refund, pct: q.pct };
   });

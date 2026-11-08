@@ -5,7 +5,7 @@ import { pendingFirst } from '@/lib/market-rules';
 import { toCsv } from '@/lib/csv';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate, GOLD } from './admin-ui';
 
-type Payout = { id: string; kind: string; uid: string; username: string; amount: number; fee?: number; gross?: number; status: string; createdAt: string | null; paidAt: string | null; paymentId?: string; note?: string };
+type Payout = { id: string; kind: string; uid: string; username: string; amount: number; fee?: number; gross?: number; status: string; currency?: string; createdAt: string | null; paidAt: string | null; paymentId?: string; note?: string };
 
 // Money the platform owes after share resales: seller proceeds and refunds. The admin sends the Pi by hand, then marks it paid.
 export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -48,7 +48,7 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
   if (!rows) return null;
   if (rows.length === 0) return null;
   const pending = rows.filter((r) => r.status === 'pending');
-  const owed = pending.reduce((n, r) => n + (Number(r.amount) || 0), 0);
+  const owed = pending.filter((r) => !r.currency).reduce((n, r) => n + (Number(r.amount) || 0), 0);
   return (
     <Card title={`💸 مستحقات سوق الحصص (${pending.length} معلّقة · ${Math.round(owed * 100) / 100} π)`} right={<Btn small onClick={exportCsv}>⬇️ CSV</Btn>}>
       <div className="space-y-2">
@@ -56,11 +56,12 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
           <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
             <div className="flex items-start justify-between gap-2">
               <p className="min-w-0 truncate font-bold text-white">@{r.username}</p>
-              <span className="shrink-0 font-bold" style={{ color: GOLD }}>{r.amount} π</span>
+              <span className="shrink-0 font-bold" style={{ color: GOLD }}>{r.amount} {r.currency ?? 'π'}</span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
               <Badge tone={r.kind === 'refund' ? 'red' : 'blue'}>{r.kind === 'refund' ? 'استرداد' : 'حصيلة بيع'}</Badge>
               <Badge tone={r.status === 'paid' ? 'green' : 'gold'}>{r.status === 'paid' ? 'اتحوّل' : 'معلّق'}</Badge>
+              {r.currency ? <Badge tone="blue">بطاقة: رجّعها من لوحة شركة الدفع</Badge> : null}
               <span>{fmtDate(r.createdAt)}</span>
               {r.fee ? <span>· عمولة {r.fee} π</span> : null}
               <span className="truncate" dir="ltr">uid: {r.uid}</span>

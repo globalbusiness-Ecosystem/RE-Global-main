@@ -95,13 +95,14 @@ export function decideBooking(
 export const BOOKING_ERRORS = { unavailable: 'These dates are no longer available' };
 
 // Admin summary of bookings. Only confirmed stays count as revenue; "review" ones need a manual look.
-export function bookingTotals(rows: { status: unknown; amount: number; end: string; nights: number }[], today: string) {
+// Revenue is the Pi total only: stays paid by card are in another currency and are not added to it.
+export function bookingTotals(rows: { status: unknown; amount: number; end: string; nights: number; currency?: string }[], today: string) {
   const confirmed = rows.filter((r) => r.status === 'confirmed');
   return {
     confirmed: confirmed.length,
     upcoming: confirmed.filter((r) => r.end >= today).length,
     nights: confirmed.reduce((n, r) => n + (Number(r.nights) || 0), 0),
-    revenue: confirmed.reduce((n, r) => n + Math.round(r.amount * 100), 0) / 100,
+    revenue: confirmed.filter((r) => !r.currency || r.currency === 'Pi').reduce((n, r) => n + Math.round(r.amount * 100), 0) / 100,
     review: rows.filter((r) => r.status === 'review').length,
   };
 }

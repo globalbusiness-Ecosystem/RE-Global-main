@@ -263,7 +263,7 @@ export function UnifiedPaymentButton({
     );
   }
   if (method === 'card-soon' || method === 'card') {
-    return <CardPayButton propertyId={propertyId} transactionType={transactionType} language={language} className={className} />;
+    return <CardPayButton propertyId={propertyId} transactionType={transactionType} language={language} className={className} booking={booking} />;
   }
 
   return (

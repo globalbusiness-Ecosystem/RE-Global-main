@@ -40,7 +40,7 @@ export async function releaseBooking(propertyId: string, paymentId: string) {
 // If the hold had expired and someone else took the dates meanwhile, the booking is kept as 'review' (manual refund).
 export async function confirmBooking(a: BookingDates & {
   propertyId: string; uid: string; username: string; paymentId: string; contractId: string;
-  propertyTitle: string; propertyType: string; nights: number; amount: number; guests?: number;
+  propertyTitle: string; propertyType: string; nights: number; amount: number; guests?: number; currency?: string;
 }) {
   if (!okId(a.propertyId)) return { recorded: false as const };
   const ref = calRef(a.propertyId);
@@ -60,13 +60,13 @@ export async function confirmBooking(a: BookingDates & {
     }
     tx.set(bRef, {
       uid: a.uid, username: a.username, propertyId: a.propertyId, propertyTitle: a.propertyTitle, propertyType: a.propertyType,
-      start: a.start, end: a.end, nights: a.nights, amount: a.amount, currency: 'Pi',
+      start: a.start, end: a.end, nights: a.nights, amount: a.amount, currency: a.currency ?? 'Pi',
       ...(a.guests && a.guests > 0 ? { guests: a.guests } : {}),
       paymentId: a.paymentId, contractId: a.contractId, status, createdAt: Timestamp.now(),
     });
     return { recorded: true as const, status };
   });
-  if (fresh) await alertReview('حجز', { 'رقم الدفع': a.paymentId, 'العقار': a.propertyTitle, 'الليالي': String(a.nights), 'المبلغ': a.amount + ' Pi', 'المستخدم': a.username });
+  if (fresh) await alertReview('حجز', { 'رقم الدفع': a.paymentId, 'العقار': a.propertyTitle, 'الليالي': String(a.nights), 'المبلغ': a.amount + ' ' + (a.currency ?? 'Pi'), 'المستخدم': a.username });
   return out;
 }
 

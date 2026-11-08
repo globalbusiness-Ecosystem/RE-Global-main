@@ -14,7 +14,7 @@ export async function adminBookings(max = 100) {
       const x = d.data();
       return {
         id: d.id, propertyId: x.propertyId, propertyTitle: x.propertyTitle, propertyType: x.propertyType, username: x.username,
-        start: String(x.start ?? ''), end: String(x.end ?? ''), nights: Number(x.nights) || 0, amount: Number(x.amount) || 0, guests: Number(x.guests) || undefined,
+        start: String(x.start ?? ''), end: String(x.end ?? ''), nights: Number(x.nights) || 0, amount: Number(x.amount) || 0, currency: String(x.currency ?? 'Pi'), guests: Number(x.guests) || undefined,
         status: x.status, note: String(x.guestNote ?? ''), createdAt: iso(x.createdAt),
       };
     })
@@ -44,7 +44,7 @@ export async function adminCancelBooking(paymentId: string) {
     }
     tx.update(bRef, { status: 'cancelled', cancelledAt: Timestamp.now(), cancelledBy: 'admin' });
     tx.set(pRef, {
-      kind: 'refund', uid: d.uid, username: d.username, amount: Number(d.amount) || 0, status: 'pending',
+      kind: 'refund', uid: d.uid, username: d.username, amount: Number(d.amount) || 0, ...(d.currency && d.currency !== 'Pi' ? { currency: String(d.currency) } : {}), status: 'pending',
       paymentId, bookingId: paymentId, createdAt: Timestamp.now(),
     });
     return { ok: true as const, title: String(d.propertyTitle ?? ''), username: String(d.username ?? ''), amount: Number(d.amount) || 0 };
