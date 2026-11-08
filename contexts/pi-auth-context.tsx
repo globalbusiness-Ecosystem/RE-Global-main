@@ -152,6 +152,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<PiUser | null>(null);
   const [location, setLocation] = useState<UserLocation | null>(null);
   const [locationError, setLocationError] = useState<string | null>(null);
+  const webClaimsAsked = useRef<string | null>(null);
   const webUnsub = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -223,6 +224,14 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
           const res = await u.getIdTokenResult();
           if (res.signInProvider === "custom") return;
           const name = `web_${u.uid.slice(0, 10)}`;
+          // The Firestore rules read the name from the sign-in token: have the server store it once, then refresh the token.
+          if (res.claims.username !== name && webClaimsAsked.current !== u.uid) {
+            webClaimsAsked.current = u.uid;
+            try {
+              const r = await fetch("/api/auth/web-claims", { method: "POST", headers: { Authorization: `Bearer ${res.token}` } });
+              if (r.ok) { await u.getIdToken(true); return; }
+            } catch { /* signed in anyway; the rest of the app works, only direct profile reads wait */ }
+          }
           setAccessToken(res.token);
           setApiToken(res.token);
           setUser({ uid: `web_${u.uid}`, username: name });

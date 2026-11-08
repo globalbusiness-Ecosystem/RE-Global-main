@@ -20,7 +20,20 @@ export function webIdentityFromClaims(c: Claims): WebIdentity | null {
   if (!provider || provider === 'custom' || provider === 'anonymous') return null;
   // An address nobody has proven is theirs is not an identity (phone sign-in has no e-mail, so it is exempt).
   if (provider !== 'phone' && c.email_verified !== true) return null;
-  return { uid: `web_${uid}`, username: `web_${uid.slice(0, 10)}` };
+  return { uid: `web_${uid}`, username: webUsername(uid) };
+}
+
+/** The name a web account gets (the Firestore rules read it from the sign-in token). Same everywhere, never chosen by the person. */
+export const webUsername = (firebaseUid: string): string => `web_${firebaseUid.slice(0, 10)}`;
+
+/**
+ * The sign-in claims to store for a web account so the Firestore rules can tell who it is (they read `username`).
+ * Keeps whatever claims exist; returns null when the account already has the right name.
+ */
+export function webClaimsToSet(firebaseUid: string, existing: Record<string, unknown> | undefined): Record<string, unknown> | null {
+  const name = webUsername(firebaseUid);
+  if (existing?.username === name) return null;
+  return { ...(existing ?? {}), username: name };
 }
 
 /** The web identity behind a Firebase ID token, or null when the token is not (a valid) one - the caller then tries Pi. */
