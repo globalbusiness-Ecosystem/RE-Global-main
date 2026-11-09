@@ -24,6 +24,17 @@ const ANCHOR_HELP: Record<string, string> = {
   'registry:bad_input': 'بيانات العقد مش مناسبة للسجل',
 };
 
+// What the account check says, in plain words (the public key is shown so it can be funded).
+const CHECK_HELP: Record<string, string> = {
+  no_keys: 'مفتاح التوقيع السري PI_ISSUER_SECRET_KEY مش موجود في Vercel',
+  bad_secret: 'المفتاح السري PI_ISSUER_SECRET_KEY شكله غلط أو فيه مسافة زيادة (لازم يبدأ بحرف S)',
+  mismatch: 'المفتاح العام PI_ISSUER_PUBLIC_KEY في Vercel مش بتاع المفتاح السري. المنصة بتوقّع فعلاً بالحساب ده',
+  not_found: 'الحساب ده مش موجود على Pi Testnet. لازم تحوّله Test-π عشان يتفعّل',
+  network: 'مفيش رد من شبكة Pi Testnet دلوقتي، جرّب تاني',
+  low_balance: 'الحساب موجود بس رصيده قليل، شحنه بـ Test-π',
+  ok: 'الحساب سليم وجاهز للتثبيت',
+};
+
 // Orders paid by card. Paid ones wait for the admin to hand the property over, then get marked as handed over.
 export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<Order[] | null>(null);
@@ -50,6 +61,16 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
     } finally { setBusy(''); }
   };
 
+  const check = async () => {
+    setBusy('check');
+    try {
+      const r = await adminApi<{ code: string; publicKey?: string; balance?: number }>('/api/admin/contracts/check');
+      setNotice(`${CHECK_HELP[r.code] ?? r.code}${r.publicKey ? ` | الحساب: ${r.publicKey}` : ''}${typeof r.balance === 'number' ? ` | الرصيد: ${r.balance} Test-π` : ''}`);
+    } catch (e) {
+      if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
+    } finally { setBusy(''); }
+  };
+
   const anchor = async () => {
     setBusy('anchor');
     try {
@@ -69,6 +90,7 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
     <Card title={`💳 طلبات البطاقة (${waiting.length} مدفوعة وفي انتظار التسليم)`}>
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <Btn onClick={anchor} disabled={busy === 'anchor'}>⛓️ ثبّت العقود على البلوك تشين</Btn>
+        <Btn onClick={check} disabled={busy === 'check'}>🔍 افحص حساب المنصة</Btn>
         {notice ? <span className="text-xs text-gray-300" role="status">{notice}</span> : null}
       </div>
       <div className="space-y-2">
