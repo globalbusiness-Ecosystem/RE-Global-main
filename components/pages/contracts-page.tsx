@@ -11,6 +11,7 @@ import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/li
 import { useFirebaseDatabase, type SmartContract } from '@/lib/firebase-database';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { CONTRACTS_I18N } from '@/lib/contracts-i18n';
+import { ex } from '@/lib/explorer-labels';
 import { MyProperties } from '@/components/my-properties';
 import { contractKind, CONTRACT_KINDS, KIND_ICON, KIND_STYLE, KIND_LABELS, type ContractKind } from '@/lib/contract-kind';
 import { TAB_LABELS, NO_ASSETS, visibleTabs, safeTab, type ContractsTab, type AssetCounts } from '@/lib/contracts-tabs';
@@ -461,6 +462,10 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                 {c.txid && (
                   <div>
                     <VerifyOnChain txid={c.txid} language={language} />
+                    <a href={`/explorer?q=${c.txid}`} className="mt-1 flex items-center gap-1.5 text-[11px] text-accent underline">
+                      <Link2 className="w-3 h-3" />
+                      {ex('openExplorer', language)}
+                    </a>
                   </div>
                 )}
 

@@ -19,6 +19,7 @@ export const HOME_CATEGORIES: Record<string, Lang7> = {
   'ai-advisor': { en: 'Aladdin', ar: 'علاء الدين', fr: 'Aladdin', es: 'Aladdin', pt: 'Aladdin', ur: 'علاء الدین', zh: '阿拉丁' },
   contracts: { en: 'Contracts', ar: 'العقود', fr: 'Contrats', es: 'Contratos', pt: 'Contratos', ur: 'معاہدے', zh: '合同' },
   inspections: { en: 'Inspect', ar: 'الفحص', fr: 'Inspecter', es: 'Inspeccionar', pt: 'Inspecionar', ur: 'معائنہ', zh: '查验' },
+  explorer: { en: 'Blockchain', ar: 'البلوك تشين', fr: 'Blockchain', es: 'Blockchain', pt: 'Blockchain', ur: 'بلاک چین', zh: '区块链' },
   're-token': { en: 'Platform Credits', ar: 'رصيد المنصة', fr: 'Crédits Plateforme', es: 'Créditos de Plataforma', pt: 'Créditos da Plataforma', ur: 'پلیٹ فارم کریڈٹس', zh: '平台积分' },
 };
 

@@ -1,7 +1,7 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
@@ -40,6 +40,7 @@ const categories = [
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
+  { id: 'explorer', titleEn: 'Blockchain', titleAr: 'البلوك تشين', icon: Link2 },
   { id: 're-token', titleEn: 'Platform Credits', titleAr: 'رصيد المنصة', icon: Coins },
 ];
 
@@ -111,6 +112,8 @@ export default function HomePage({
                     setShowVRTour(true);
                   } else if (cat.id === 'ai-advisor') {
                     setShowAdvisor(true);
+                  } else if (cat.id === 'explorer') {
+                    router.push('/explorer');
                   } else if (cat.id === 'share-market') {
                     router.push('/market');
                   } else {
