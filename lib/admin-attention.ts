@@ -7,6 +7,7 @@ import { buildAttention, type AttentionInput } from '@/lib/attention-rules';
 import { shareMismatches } from '@/lib/share-rules';
 import { isStrongPin } from '@/lib/pin-strength';
 import { countIncomplete } from '@/lib/listing-quality';
+import { checkPlatformAccount } from '@/lib/chain-check';
 
 const has = (k: string) => !!process.env[k];
 const count = async (q: FirebaseFirestore.Query) => (await q.count().get()).data().count;
@@ -33,6 +34,9 @@ export async function gatherAttention() {
     count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('txid', '==', '')).catch(() => 0),
     count(db.collection('signed_contracts').where('paymentMethod', '==', 'card').where('registryPending', '==', true)).catch(() => 0),
   ])).reduce((x, y) => Math.max(x, y), 0);
+  // Only real problems with the anchoring account are flagged (a network hiccup or "no keys yet" is not news).
+  const chainCode = await checkPlatformAccount().then((c) => c.code).catch(() => 'network');
+  const chainAccount = chainCode === 'low_balance' || chainCode === 'not_found' || chainCode === 'mismatch' || chainCode === 'bad_secret' ? chainCode : undefined;
   const openReports = await count(db.collection('listing_reports').where('status', '==', 'open')).catch(() => 0);
   const input: AttentionInput = {
     env: { PI_API_KEY: has('PI_API_KEY'), PI_ISSUER_SECRET_KEY: has('PI_ISSUER_SECRET_KEY'), PI_ISSUER_PUBLIC_KEY: has('PI_ISSUER_PUBLIC_KEY'), ADMIN_SESSION_SECRET: has('ADMIN_SESSION_SECRET'), ADMIN_TOTP_SECRET: has('ADMIN_TOTP_SECRET'), ADMIN_PIN_STRONG: has('ADMIN_PIN') ? isStrongPin(process.env.ADMIN_PIN) : undefined, ADMIN_ALERT_EMAIL: (has('GMAIL_USER') && has('GMAIL_APP_PASSWORD')) || has('RESEND_API_KEY') ? has('ADMIN_ALERT_EMAIL') : undefined, CRON_SECRET: has('ADMIN_ALERT_EMAIL') ? has('CRON_SECRET') : undefined },
@@ -46,6 +50,7 @@ export async function gatherAttention() {
     cardOrdersToHandOver: cardOrders.docs.filter((d) => !d.data().handedOverAt && !d.data().booking).length,
     kycPending,
     cardContractsUnanchored,
+    chainAccount,
     cardOrdersWithoutContract,
     kycOldestHours,
     cardSandboxOn: (process.env.CARD_SANDBOX_SECRET ?? '').length >= 16,

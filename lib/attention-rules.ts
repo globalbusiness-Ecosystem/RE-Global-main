@@ -1,5 +1,12 @@
 // What the admin should look at right now. Pure: takes plain counts and yes/no flags (never secret values).
 
+const CHAIN_ACCOUNT_TEXT = {
+  low_balance: 'رصيد حساب المنصة على Pi Testnet قليل: لو خلص، عقود البطاقة مش هتتثبّت على البلوك تشين. شحنه بـ Test-π (المدفوعات ← طلبات البطاقة ← 🔍 افحص حساب المنصة بيعرض عنوانه).',
+  not_found: 'حساب تثبيت العقود مش موجود على Pi Testnet (لازم يتفعّل ويتشحن): المدفوعات ← طلبات البطاقة ← 🔍 افحص حساب المنصة.',
+  mismatch: 'المفتاح العام في Vercel (PI_ISSUER_PUBLIC_KEY) مش بتاع المفتاح السري: شيله أو صحّحه.',
+  bad_secret: 'مفتاح تثبيت العقود السري (CHAIN_ANCHOR_SECRET_KEY أو PI_ISSUER_SECRET_KEY) شكله مش سليم.',
+} as const;
+
 export type AttentionInput = {
   env: { PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean; ADMIN_SESSION_SECRET: boolean; ADMIN_TOTP_SECRET?: boolean; ADMIN_PIN_STRONG?: boolean; ADMIN_ALERT_EMAIL?: boolean; CRON_SECRET?: boolean };
   usdProperties: number;
@@ -17,6 +24,8 @@ export type AttentionInput = {
   cardRefunds?: number;
   /** Card contracts that are signed but whose fingerprint is not on the blockchain yet. */
   cardContractsUnanchored?: number;
+  /** What the check of the platform's blockchain account found (only the problems; 'ok', 'network' and 'no_keys' are not passed). */
+  chainAccount?: 'low_balance' | 'not_found' | 'mismatch' | 'bad_secret';
   /** Paid card orders of web buyers that have no signed contract (the buyer sees nothing in Contracts). */
   cardOrdersWithoutContract?: number;
   kycPending?: number;
@@ -49,6 +58,7 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
   if ((i.cardOrdersToHandOver ?? 0) > 0) out.push({ id: 'card-handover', level: 'warn', text: `${i.cardOrdersToHandOver} طلب اتدفع ببطاقة ومستني تسليم العقار للمشتري: المدفوعات ← طلبات البطاقة.`, tab: 'payments' });
   if ((i.cardRefunds ?? 0) > 0) out.push({ id: 'card-refunds', level: 'warn', text: `${i.cardRefunds} استرداد بالبطاقة محتاج ترجّعه من لوحة شركة الدفع (مش بـ Pi): المدفوعات ← التحويلات والاستردادات.`, tab: 'payments' });
   if ((i.cardOrdersWithoutContract ?? 0) > 0) out.push({ id: 'card-no-contract', level: 'bad', text: `${i.cardOrdersWithoutContract} طلب بطاقة مدفوع من غير عقد (المشتري مش شايف حاجة في "العقود"): المدفوعات ← طلبات البطاقة ← زرار "ثبّت العقود". لو فشل راجع مفاتيح PI_ISSUER_* في Vercel.`, tab: 'payments' });
+  if (i.chainAccount) out.push({ id: 'chain-account', level: i.chainAccount === 'low_balance' ? 'warn' : 'bad', text: CHAIN_ACCOUNT_TEXT[i.chainAccount], tab: 'payments' });
   if ((i.cardContractsUnanchored ?? 0) > 0) out.push({ id: 'card-contracts', level: 'warn', text: `${i.cardContractsUnanchored} عقد دفع بالبطاقة اتوقّع بس لسه مش متثبّت على البلوك تشين: المدفوعات ← طلبات البطاقة ← زرار "ثبّت العقود".`, tab: 'payments' });
   if ((i.kycPending ?? 0) > 0) {
     const h = Math.floor(i.kycOldestHours ?? 0);
