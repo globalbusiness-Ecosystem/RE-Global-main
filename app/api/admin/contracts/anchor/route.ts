@@ -19,12 +19,17 @@ export async function POST(req: NextRequest) {
       col.where('paymentMethod', '==', 'card').where('registryPending', '==', true).limit(10).get(),
     ]);
     const ids = [...new Set([...a.docs, ...b.docs].map((d) => d.id))].slice(0, 10);
-    const out = { created: made.created, createdFailed: made.failed, anchored: 0, recorded: 0, failed: 0, total: ids.length };
+    const out = { created: made.created, createdFailed: made.failed, anchored: 0, recorded: 0, failed: 0, total: ids.length, errors: [] as string[] };
+    // Short error codes of the attempts that failed (never a secret), so the panel can say what to fix.
+    const why = async (id: string, field: 'anchor' | 'registry') => {
+      const e = (await col.doc(id).get()).data()?.[field]?.error;
+      if (typeof e === 'string' && !out.errors.includes(`${field}:${e}`)) out.errors.push(`${field}:${e}`);
+    };
     for (const id of ids) {
       const r = await anchorContract(id);
-      if (r === 'anchored') out.anchored++; else if (r === 'failed' || r === 'not_configured') out.failed++;
+      if (r === 'anchored') out.anchored++; else if (r === 'failed' || r === 'not_configured') { out.failed++; if (r === 'failed') await why(id, 'anchor'); }
       const g = await recordContract(id);
-      if (g === 'recorded') out.recorded++; else if (g === 'failed') out.failed++;
+      if (g === 'recorded') out.recorded++; else if (g === 'failed') { out.failed++; await why(id, 'registry'); }
     }
     await logAdmin('contracts.anchor', out);
     return NextResponse.json({ ok: true, ...out }, { headers: { 'Cache-Control': 'no-store' } });

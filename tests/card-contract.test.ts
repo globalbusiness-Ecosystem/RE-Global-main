@@ -74,3 +74,15 @@ describe('paid card orders without a contract', () => {
     expect(src('lib/card-contract.ts')).toContain('ordersWithoutContract');
   });
 });
+
+describe('web buyers see their contracts', () => {
+  it('the web username used for every saved record is the rule-matching name, not the e-mail', () => {
+    const ctx = src('contexts/pi-auth-context.tsx');
+    expect(ctx).toContain('setUsername(name);');
+    expect(ctx).not.toContain('setUsername(u.email');
+  });
+  it('the admin anchor call reports why it failed', () => {
+    expect(src('app/api/admin/contracts/anchor/route.ts')).toContain('errors');
+    expect(src('components/admin/card-orders-panel.tsx')).toContain('ANCHOR_HELP');
+  });
+});

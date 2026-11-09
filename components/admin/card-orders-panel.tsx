@@ -12,6 +12,18 @@ const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | '
   refunded: { label: 'مسترد', tone: 'blue' },
 };
 
+// What a short error code from the blockchain step means for the admin.
+const ANCHOR_HELP: Record<string, string> = {
+  'anchor:account': 'حساب المنصة (PI_ISSUER_PUBLIC_KEY) مش موجود على Pi Testnet: لازم يتفعّل ويتشحن بـ Test-π',
+  'anchor:rejected': 'الشبكة رفضت المعاملة (رصيد Test-π ناقص أو الرسوم)',
+  'anchor:network': 'مفيش رد من شبكة Pi Testnet، جرّب تاني بعد شوية',
+  'anchor:bad_hash': 'بصمة العقد مش سليمة',
+  'registry:network': 'مفيش رد من عقد السجل الذكي',
+  'registry:rejected': 'العقد الذكي رفض التسجيل',
+  'registry:timeout': 'التسجيل اتأخر، جرّب تاني',
+  'registry:bad_input': 'بيانات العقد مش مناسبة للسجل',
+};
+
 // Orders paid by card. Paid ones wait for the admin to hand the property over, then get marked as handed over.
 export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<Order[] | null>(null);
@@ -41,8 +53,8 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const anchor = async () => {
     setBusy('anchor');
     try {
-      const r = await adminApi<{ created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number }>('/api/admin/contracts/anchor', { method: 'POST' });
-      setNotice(r.created > 0 || r.createdFailed > 0 ? `اتعمل ${r.created} عقد ناقص${r.createdFailed ? ` (فشل ${r.createdFailed}: راجع مفاتيح توقيع المنصة PI_ISSUER_* في Vercel)` : ''}. ` + (r.total === 0 ? '' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded}.`) : r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded} في العقد الذكي (من ${r.total} عقد)${r.failed ? ` (فشل ${r.failed}: جرّب تاني بعد شوية، أو راجع رصيد حساب المنصة على Pi Testnet)` : ''}.`);
+      const r = await adminApi<{ created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number; errors?: string[] }>('/api/admin/contracts/anchor', { method: 'POST' });
+      setNotice(r.created > 0 || r.createdFailed > 0 ? `اتعمل ${r.created} عقد ناقص${r.createdFailed ? ` (فشل ${r.createdFailed}: راجع مفاتيح توقيع المنصة PI_ISSUER_* في Vercel)` : ''}. ` + (r.total === 0 ? '' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded}.`) : r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded} في العقد الذكي (من ${r.total} عقد)${r.failed ? ` (فشل ${r.failed}: ${(r.errors ?? []).map((e) => ANCHOR_HELP[e] ?? e).join(' / ') || 'جرّب تاني بعد شوية'})` : ''}.`);
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
     } finally { setBusy(''); }

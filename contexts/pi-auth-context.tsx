@@ -235,7 +235,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
           setAccessToken(res.token);
           setApiToken(res.token);
           setUser({ uid: `web_${u.uid}`, username: name });
-          setUsername(u.email ?? name);
+          // The same name the Firestore rules and every saved record use (contracts, favorites, profile): never the e-mail.
+          setUsername(name);
         } catch (e) {
           console.warn("[PiAuth] Web token unavailable:", e);
         }
