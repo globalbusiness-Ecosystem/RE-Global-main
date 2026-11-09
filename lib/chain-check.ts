@@ -1,5 +1,5 @@
-import { Keypair } from '@stellar/stellar-sdk';
 import { PI_TESTNET_HORIZON } from '@/lib/chain-anchor';
+import { anchorSecret, publicOf } from '@/lib/signing-keys';
 
 export type ChainCheckCode = 'no_keys' | 'bad_secret' | 'mismatch' | 'not_found' | 'network' | 'low_balance' | 'ok';
 
@@ -28,9 +28,8 @@ export function diagnose(f: { hasSecret: boolean; derived: string | null; config
 
 /** Looks at the platform's anchoring account on Pi Testnet. */
 export async function checkPlatformAccount(): Promise<ChainCheck> {
-  const secret = process.env.PI_ISSUER_SECRET_KEY ?? '';
-  let derived: string | null = null;
-  try { derived = secret ? Keypair.fromSecret(secret).publicKey() : null; } catch { derived = null; }
+  const secret = anchorSecret() ?? '';
+  const derived = publicOf(secret);
   let status: 'ok' | 'not_found' | 'network' = 'network';
   let balance: number | undefined;
   if (derived) {
@@ -44,5 +43,5 @@ export async function checkPlatformAccount(): Promise<ChainCheck> {
       }
     } catch { status = 'network'; }
   }
-  return diagnose({ hasSecret: !!secret, derived, configuredPublic: process.env.PI_ISSUER_PUBLIC_KEY ?? '', status, balance });
+  return diagnose({ hasSecret: !!secret, derived, configuredPublic: '', status, balance });
 }

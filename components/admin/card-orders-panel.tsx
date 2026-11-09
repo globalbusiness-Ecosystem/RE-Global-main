@@ -74,8 +74,8 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const anchor = async () => {
     setBusy('anchor');
     try {
-      const r = await adminApi<{ created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number; errors?: string[] }>('/api/admin/contracts/anchor', { method: 'POST' });
-      setNotice(r.created > 0 || r.createdFailed > 0 ? `اتعمل ${r.created} عقد ناقص${r.createdFailed ? ` (فشل ${r.createdFailed}: راجع مفاتيح توقيع المنصة PI_ISSUER_* في Vercel)` : ''}. ` + (r.total === 0 ? '' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded}.`) : r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded} في العقد الذكي (من ${r.total} عقد)${r.failed ? ` (فشل ${r.failed}: ${(r.errors ?? []).map((e) => ANCHOR_HELP[e] ?? e).join(' / ') || 'جرّب تاني بعد شوية'})` : ''}.`);
+      const r = await adminApi<{ created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number; errors?: string[]; keysRepaired?: number }>('/api/admin/contracts/anchor', { method: 'POST' });
+      setNotice((r.keysRepaired ? `اتصلّح مفتاح التوقيع في ${r.keysRepaired} عقد. ` : '') + (r.created > 0 || r.createdFailed > 0 ? `اتعمل ${r.created} عقد ناقص${r.createdFailed ? ` (فشل ${r.createdFailed}: راجع مفاتيح توقيع المنصة PI_ISSUER_* في Vercel)` : ''}. ` + (r.total === 0 ? '' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded}.`) : r.total === 0 ? 'كل عقود البطاقة متثبّتة على البلوك تشين.' : `اتثبّت ${r.anchored} وسُجّل ${r.recorded} في العقد الذكي (من ${r.total} عقد)${r.failed ? ` (فشل ${r.failed}: ${(r.errors ?? []).map((e) => ANCHOR_HELP[e] ?? e).join(' / ') || 'جرّب تاني بعد شوية'})` : ''}.`));
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
     } finally { setBusy(''); }

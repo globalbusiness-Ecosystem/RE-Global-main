@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { getLegalProfile } from '@/lib/legal-server';
 import { anchorHash } from '@/lib/chain-anchor';
+import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { buyerRef, recordOnRegistry, registryKind } from '@/lib/registry-client';
 import { webUsername } from '@/lib/web-auth';
 import type { CardOrder } from '@/lib/card-pay/order';
@@ -13,15 +14,21 @@ import { getOrder } from '@/lib/card-pay/store';
 // contract's fingerprint is anchored on the Pi blockchain. The contract is saved first; anchoring is best effort and
 // can be repeated from the admin panel, so a blockchain outage never loses a contract or blocks a payment.
 
+// The signing key: the public key is always the one of the secret, so a contract's stored key always verifies its signature.
 const keys = () => {
-  const secret = process.env.PI_ISSUER_SECRET_KEY, pub = process.env.PI_ISSUER_PUBLIC_KEY;
+  const secret = process.env.PI_ISSUER_SECRET_KEY, pub = publicOf(secret);
   return secret && pub ? { secret, pub } : null;
+};
+// The account that pays for blockchain records (see anchorSecret).
+const chainKeys = () => {
+  const secret = anchorSecret();
+  return secret && publicOf(secret) ? { secret } : null;
 };
 
 /** Creates (once) the contract of a paid card order and tries to anchor it. Returns the contract id, or null when signing is not configured. */
 export async function createCardContract(o: CardOrder): Promise<string | null> {
   const k = keys();
-  if (!k) console.error('[card-contract] PI_ISSUER_SECRET_KEY / PI_ISSUER_PUBLIC_KEY are not set: no contract was created');
+  if (!k) console.error('[card-contract] PI_ISSUER_SECRET_KEY is not set or not a valid key: no contract was created');
   if (!k || !o.propertyId || !o.uid.startsWith('web_')) return null;
   const [prop, kyc] = await Promise.all([adminDb.collection('properties').doc(o.propertyId).get(), adminDb.collection('kyc').doc(o.uid).get()]);
   const p = prop.data() ?? {};
@@ -65,7 +72,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
 
 /** Anchors a card contract's fingerprint on the blockchain (if not done yet). Returns what happened. */
 export async function anchorContract(orderId: string): Promise<'anchored' | 'already' | 'missing' | 'not_configured' | 'failed'> {
-  const k = keys();
+  const k = chainKeys();
   if (!k) return 'not_configured';
   const ref = adminDb.collection('signed_contracts').doc(orderId);
   const snap = await ref.get();
@@ -85,7 +92,7 @@ export async function anchorContract(orderId: string): Promise<'anchored' | 'alr
 
 /** Writes a card contract into the ownership registry smart contract (if one is configured and it is not in yet). */
 export async function recordContract(orderId: string): Promise<'recorded' | 'already' | 'missing' | 'not_configured' | 'failed'> {
-  const k = keys();
+  const k = chainKeys();
   const registryId = process.env.REGISTRY_CONTRACT_ID;
   if (!k || !registryId) return 'not_configured';
   const ref = adminDb.collection('signed_contracts').doc(orderId);

@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { Timestamp } from 'firebase-admin/firestore';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
+import { publicOf } from '@/lib/signing-keys';
 import { rateLimited } from '@/lib/rate-guard';
 import { kycBlock } from '@/lib/kyc-gate';
 import { resolveExpected, BookingInputError, type Quote } from '@/lib/property-price';
@@ -17,7 +18,7 @@ export const dynamic = 'force-dynamic';
 
 export async function POST(req: NextRequest) {
   const secretKey = process.env.PI_ISSUER_SECRET_KEY;
-  const publicKey = process.env.PI_ISSUER_PUBLIC_KEY;
+  const publicKey = publicOf(secretKey) ?? undefined; // always the key of the secret that signs
   if (!secretKey || !publicKey || !process.env.PI_API_KEY) {
     return NextResponse.json({ error: 'Platform signing is not configured' }, { status: 500 });
   }

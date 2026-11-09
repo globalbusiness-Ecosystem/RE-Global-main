@@ -2,6 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { ipLimited } from '@/lib/rate-guard';
+import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { PI_TESTNET_HORIZON } from '@/lib/chain-anchor';
 import { classifyQuery, fingerprintMatches, shapeTx, type ChainTx } from '@/lib/explorer';
 
@@ -28,7 +29,7 @@ export async function GET(req: NextRequest) {
   const raw = req.nextUrl.searchParams.get('q');
 
   if (!raw) {
-    const pub = process.env.PI_ISSUER_PUBLIC_KEY;
+    const pub = publicOf(anchorSecret());
     if (!pub) return NextResponse.json({ recent: [] }, { headers: H });
     const r = await horizon(`/accounts/${pub}/transactions?order=desc&limit=8`);
     if (!r || !r.ok) return NextResponse.json({ recent: [] }, { headers: H });

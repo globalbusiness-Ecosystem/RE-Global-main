@@ -1,3 +1,4 @@
+import { publicOf } from '@/lib/signing-keys';
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
@@ -11,7 +12,7 @@ const cleanName = (v: unknown, max: number) => String(v ?? '').replace(/[\u0000-
 // Returns null when platform signing is not configured, so a missing key never blocks the settlement itself.
 export async function signResaleContract(a: { paymentId: string; txid: string; listingId: string; buyerName: string; amount: number }): Promise<{ contractId: string } | null> {
   const secretKey = process.env.PI_ISSUER_SECRET_KEY;
-  const publicKey = process.env.PI_ISSUER_PUBLIC_KEY;
+  const publicKey = publicOf(secretKey) ?? undefined; // always the key of the secret that signs
   if (!secretKey || !publicKey) { console.error('[resale-contract] platform signing is not configured'); return null; }
 
   const ref = adminDb.collection('signed_contracts').doc(a.paymentId);
