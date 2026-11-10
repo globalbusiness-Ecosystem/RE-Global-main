@@ -8,6 +8,7 @@ import { Download } from 'lucide-react';
 import { useEffect, useRef } from 'react';
 import QRCode from 'qrcode';
 import type { NavLanguage } from '@/lib/nav-i18n';
+import { buyerDisplayFromText, isCardContractText } from '@/lib/contract-identity';
 import { translateContract, contractDir, CONTRACT_LANGS } from '@/lib/contract-translations';
 import { cv, kindPartyLabel, kindTitleLabel, contractStatusLabel } from '@/lib/contract-view-labels';
 
@@ -63,6 +64,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
   const [showFullText, setShowFullText] = useState(false);
   const [textLang, setTextLang] = useState<NavLanguage>(language);
   const isSigned = Boolean(contract.contractHash && contract.platformSignature);
+  const buyer = buyerDisplayFromText(contract.contractText);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
 
   const downloadPdf = async () => {
@@ -133,6 +135,8 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
     y += 10;
     writeLine('SIGNATURES', 11, true);
     writeLine(`${KIND_PARTY[contractKind(contract)]}: @${contract.buyerUsername}`);
+    const who = buyerDisplayFromText(contract.contractText);
+    if (who) writeLine(`${who.kind === 'name' ? 'Name on record' : 'Personal invite code'}: ${who.value}`);
     if (contract.paymentId) writeLine(`Payment ID: ${contract.paymentId}`);
     if (contract.txid) writeLine(`Transaction ID: ${contract.txid}`);
     y += 6;
@@ -270,10 +274,15 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
               <div>
                 <p className="text-[10.5px] text-stone-500">{cv('partyA', language, { role: kindPartyLabel(contractKind(contract), language) })}</p>
                 <p className="text-[14px] text-stone-100 font-medium">@{contract.buyerUsername}</p>
+                {buyer && (
+                  <p className="mt-0.5 text-[11.5px] text-stone-400">
+                    {cv(buyer.kind === 'name' ? 'nameOnRecord' : 'inviteCode', language)}: <span dir="ltr" className="text-stone-200">{buyer.value}</span>
+                  </p>
+                )}
               </div>
               {contract.paymentId && (
                 <span className="inline-flex items-center gap-1 text-[10.5px] text-emerald-400 bg-emerald-400/10 rounded-full px-2 py-0.5">
-                  <Check size={10} /> {cv('verifiedPi', language)}
+                  <Check size={10} /> {cv(isCardContractText(contract.contractText) ? 'verifiedCard' : 'verifiedPi', language)}
                 </span>
               )}
             </div>
