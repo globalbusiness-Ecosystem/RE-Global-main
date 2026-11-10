@@ -8,6 +8,7 @@ import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { buyerRef, recordOnRegistry, registryKind } from '@/lib/registry-client';
 import { webUsername } from '@/lib/web-auth';
 import { parseNameMode, referralCodeOf } from '@/lib/contract-identity';
+import { getHandle } from '@/lib/handle-store';
 import type { CardOrder } from '@/lib/card-pay/order';
 import { getOrder } from '@/lib/card-pay/store';
 
@@ -48,6 +49,8 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
   const legal = await getLegalProfile(typeof p.country === 'string' ? p.country : '');
   const buyerUsername = webUsername(o.uid.slice(4));
   const nameMode = parseNameMode(kyc.data()?.contractName);
+  // The username the buyer chose is the name the contract shows (the account name above stays the technical id).
+  const shownName = (await getHandle(buyerUsername).catch(() => null))?.handle ?? buyerUsername;
   const inviteCode = nameMode === 'alias' ? await inviteCodeOf(buyerUsername, o.uid) : undefined;
   const type = typeof o.booking?.type === 'string' && o.booking.type ? o.booking.type : String(p.type ?? 'buy');
   const amount = o.amountMinor / 100;
@@ -59,7 +62,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
     if (snap.exists) return String(snap.data()?.contractId ?? '');
     const id = `${o.id}-${Date.now().toString(36)}`;
     const text = generateContractText({
-      contractId: id, propertyId: o.propertyId!, propertyTitle: title, buyerUsername, sellerUsername: 'RE-Global-Platform',
+      contractId: id, propertyId: o.propertyId!, propertyTitle: title, buyerUsername: shownName, sellerUsername: 'RE-Global-Platform',
       type, amount, currency: o.currency, paymentId: o.id, txid: '',
       booking: o.booking ? { start: o.booking.start, end: o.booking.end, nights: o.booking.nights } : undefined,
       legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },

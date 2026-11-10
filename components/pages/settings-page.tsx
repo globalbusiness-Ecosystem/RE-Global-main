@@ -45,6 +45,7 @@ import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { getOrCreateReferralCode, getReferralCount } from '@/lib/referrals';
+import { authHeaders } from '@/lib/api-token';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 
 interface SettingsPageProps {
@@ -110,6 +111,12 @@ export default function SettingsPage({
   const [navLanguage, setNavLanguage] = useState<NavLanguage>(language);
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [referralCode, setReferralCode] = useState<string | null>(null);
+  // Web accounts (outside the Pi Browser) choose their own username once; it is also their invite code.
+  const isWebAccount = Boolean(username?.startsWith('web_'));
+  const [handle, setHandle] = useState<string | null>(null);
+  const [handleInput, setHandleInput] = useState('');
+  const [handleMsg, setHandleMsg] = useState<'invalid' | 'taken' | 'already' | 'failed' | 'saved' | null>(null);
+  const [handleBusy, setHandleBusy] = useState(false);
   const [referralCount, setReferralCount] = useState<number>(0);
   const [copied, setCopied] = useState(false);
   const { avatar, save: saveAvatar, remove: removeAvatar, signedIn: avatarSignedIn } = useMyAvatar();
@@ -126,7 +133,24 @@ export default function SettingsPage({
     if (!username) return;
     getOrCreateReferralCode(username).then(setReferralCode).catch(() => setReferralCode(null));
     getReferralCount(username).then(setReferralCount).catch(() => setReferralCount(0));
+    if (username.startsWith('web_')) {
+      fetch('/api/handle', { headers: authHeaders(), cache: 'no-store' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then((j) => { if (j && typeof j.handle === 'string') { setHandle(j.handle); if (typeof j.code === 'string') setReferralCode(j.code); } })
+        .catch(() => {});
+    }
   }, [username]);
+
+  const saveHandle = async () => {
+    setHandleMsg(null);
+    setHandleBusy(true);
+    try {
+      const r = await fetch('/api/handle', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ handle: handleInput }) });
+      const j = await r.json().catch(() => null);
+      if (r.ok && j && typeof j.handle === 'string') { setHandle(j.handle); setReferralCode(String(j.code)); setHandleMsg('saved'); }
+      else setHandleMsg(j?.error === 'invalid' || j?.error === 'taken' || j?.error === 'already' ? j.error : 'failed');
+    } catch { setHandleMsg('failed'); } finally { setHandleBusy(false); }
+  };
 
   useEffect(() => {
     if (!username) return;
@@ -256,7 +280,7 @@ export default function SettingsPage({
           </div>
           <div className="min-w-0 max-w-full">
             <p className="font-bold text-foreground text-lg truncate">
-              {username ? `@${username}` : sl('guest', language)}
+              {username ? `@${handle ?? username}` : sl('guest', language)}
             </p>
             <p className="text-xs text-muted-foreground">
               {isPiVerified
@@ -352,6 +376,31 @@ export default function SettingsPage({
             <p className="text-xs text-muted-foreground mt-2">
               {sl('referralCount', language, referralCount)}
             </p>
+            {isWebAccount && !handle && (
+              <div className="mt-3 border-t border-border pt-3">
+                <p className="text-sm font-medium text-foreground">{sl('handleTitle', language)}</p>
+                <p className="text-xs text-muted-foreground mt-1">{sl('handleHint', language)}</p>
+                <input
+                  dir="ltr"
+                  aria-label={sl('handleTitle', language)}
+                  value={handleInput}
+                  onChange={(e) => setHandleInput(e.target.value)}
+                  maxLength={12}
+                  autoCapitalize="none"
+                  autoCorrect="off"
+                  placeholder={sl('handlePlaceholder', language)}
+                  className="mt-2 w-full rounded-lg bg-muted px-3 py-2.5 font-mono text-sm text-foreground outline-none"
+                />
+                <button onClick={saveHandle} disabled={handleBusy || handleInput.trim().length < 4} className="mt-2 w-full rounded-lg bg-accent px-3 py-2.5 text-sm font-semibold text-accent-foreground disabled:opacity-50">
+                  {sl('handleSave', language)}
+                </button>
+              </div>
+            )}
+            {handleMsg && (
+              <p role="status" className={`mt-2 text-xs ${handleMsg === 'saved' ? 'text-emerald-500' : 'text-red-400'}`}>
+                {sl(handleMsg === 'saved' ? 'handleSaved' : handleMsg === 'taken' || handleMsg === 'already' ? 'handleTaken' : handleMsg === 'invalid' ? 'handleInvalid' : 'handleFailed', language)}
+              </p>
+            )}
           </div>
 
           <div className="bg-card border border-border rounded-lg overflow-hidden">
@@ -361,7 +410,7 @@ export default function SettingsPage({
                   {sl('username', language)}
                 </span>
                 <span className="text-sm font-medium text-foreground">
-                  {username ? `@${username}` : '—'}
+                  {username ? `@${handle ?? username}` : '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between px-4 py-3.5">

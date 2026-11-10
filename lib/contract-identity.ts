@@ -27,6 +27,9 @@ export function buyerDisplayFromText(text: string | undefined): BuyerDisplay | n
   return code ? { kind: 'code', value: code } : null;
 }
 
+/** The username written in the Party A line (what the buyer chose, or the account name). Null when the text has no such line. */
+export const buyerHandleFromText = (text: string | undefined): string | null => /^Party A \([^)]*\): @(\S+)/m.exec(text ?? '')?.[1] ?? null;
+
 /** True when the contract text says the buyer paid by card (so "verified via Pi payment" would be wrong). */
 export const isCardContractText = (text: string | undefined): boolean => /by card through the Platform's payment provider/.test(text ?? '');
 
