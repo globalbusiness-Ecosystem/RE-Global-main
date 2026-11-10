@@ -128,10 +128,11 @@
 
 ### سجل الملكية: العقد الذكي (Phase 198)
 - الكود في `contracts/ownership-registry` (Rust / Soroban). سجل علني بيتكتب فيه بس: كل سطر = بصمة عقد موقّع + العقار + مرجع المشتري (hash، من غير اسم) + النوع. الأدمن (حساب المنصة) هو الوحيد اللي يكتب، ومفيش مسح ولا تعديل. نفس العقد ما يتسجلش مرتين.
-- البناء والنشر من جهازك (محتاج `stellar` CLI):
+- أسهل طريقة (Phase 207): من جهازك شغّل `bash scripts/deploy-registry.sh` (الافتراضي بيستخدم هوية `platform-anchor`، يعني نفس حساب التثبيت). بيبني وينشر ويعمل `init` ويتأكد إن الأدمن هو الحساب الصح، وفي الآخر يطبعلك `REGISTRY_CONTRACT_ID` تحطه في Vercel. بعدها زرار 🔍 في طلبات البطاقة بيقولك لو العقد سليم.
+- أو يدوي (محتاج `stellar` CLI):
   1. `cd contracts/ownership-registry && stellar contract build`
   2. `stellar contract deploy --wasm target/wasm32v1-none/release/re_ownership_registry.wasm --source <حساب المنصة> --rpc-url https://rpc.testnet.minepi.com --network-passphrase "Pi Testnet"` (هيطبع contract ID)
-  3. `stellar contract invoke --id <contract ID> --source <حساب المنصة> --rpc-url https://rpc.testnet.minepi.com --network-passphrase "Pi Testnet" -- init --admin <PI_ISSUER_PUBLIC_KEY>`
+  3. `stellar contract invoke --id <contract ID> --source <حساب المنصة> --rpc-url https://rpc.testnet.minepi.com --network-passphrase "Pi Testnet" -- init --admin <عنوان حساب التثبيت: stellar keys address platform-anchor>`
   4. ضيف `REGISTRY_CONTRACT_ID=<contract ID>` في Vercel وأعد النشر.
 - بعد كده كل عقد بطاقة بيتسجل لوحده. اللي فشل بيظهر في "محتاج انتباهك"، وزرار ⛓️ في طلبات البطاقة بيعيد المحاولة.
 - مفتاح المنصة السري ما بيتكتبش في أي أمر هنا: الـ CLI بياخده من هويتك المحفوظة عندك (`stellar keys`).

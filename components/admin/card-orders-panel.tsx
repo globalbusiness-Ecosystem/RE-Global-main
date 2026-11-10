@@ -35,6 +35,15 @@ const CHECK_HELP: Record<string, string> = {
   ok: 'الحساب سليم وجاهز للتثبيت',
 };
 
+// What the check says about the ownership registry (smart contract).
+const REGISTRY_HELP: Record<string, string> = {
+  not_configured: 'العقد الذكي للملكية لسه ما اتضافش (REGISTRY_CONTRACT_ID): التثبيت بالبصمة شغال، والسجل العلني لسه',
+  ok: 'العقد الذكي للملكية سليم وحسابك هو الأدمن بتاعه',
+  not_ready: 'العقد الذكي للملكية مش جاهز: يا إما مش منشور على الشبكة الحالية، يا إما ما اتعملوش init',
+  admin_mismatch: 'أدمن العقد الذكي غير حساب التثبيت: اعمل نشر جديد بـ platform-anchor',
+  unreachable: 'تعذّر الوصول للعقد الذكي دلوقتي، جرّب تاني',
+};
+
 // Orders paid by card. Paid ones wait for the admin to hand the property over, then get marked as handed over.
 export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<Order[] | null>(null);
@@ -64,8 +73,8 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
   const check = async () => {
     setBusy('check');
     try {
-      const r = await adminApi<{ code: string; publicKey?: string; balance?: number }>('/api/admin/contracts/check');
-      setNotice(`${CHECK_HELP[r.code] ?? r.code}${r.publicKey ? ` | الحساب: ${r.publicKey}` : ''}${typeof r.balance === 'number' ? ` | الرصيد: ${r.balance} Test-π` : ''}`);
+      const r = await adminApi<{ code: string; publicKey?: string; balance?: number; registry?: string }>('/api/admin/contracts/check');
+      setNotice(`${CHECK_HELP[r.code] ?? r.code}${r.publicKey ? ` | الحساب: ${r.publicKey}` : ''}${typeof r.balance === 'number' ? ` | الرصيد: ${r.balance} Test-π` : ''}${r.registry ? ` | ${REGISTRY_HELP[r.registry] ?? r.registry}` : ''}`);
     } catch (e) {
       if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
     } finally { setBusy(''); }

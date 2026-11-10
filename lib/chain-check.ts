@@ -1,5 +1,6 @@
 import { PI_TESTNET_HORIZON } from '@/lib/chain-anchor';
 import { anchorSecret, publicOf } from '@/lib/signing-keys';
+import { readRegistryAdmin, registryVerdict, type RegistryState } from '@/lib/registry-client';
 
 export type ChainCheckCode = 'no_keys' | 'bad_secret' | 'mismatch' | 'not_found' | 'network' | 'low_balance' | 'ok';
 
@@ -9,6 +10,8 @@ export type ChainCheck = {
   publicKey?: string;
   /** Native balance in Test-π, when the account exists. */
   balance?: number;
+  /** The ownership registry (smart contract): is it configured, deployed, and is the anchoring account its admin? Only checked when the account itself is fine. */
+  registry?: RegistryState;
 };
 
 /** Smallest balance that still pays for a few anchoring transactions (each costs about 0.01 with the 100000 stroop fee). */
@@ -43,5 +46,11 @@ export async function checkPlatformAccount(): Promise<ChainCheck> {
       }
     } catch { status = 'network'; }
   }
-  return diagnose({ hasSecret: !!secret, derived, configuredPublic: '', status, balance });
+  const out = diagnose({ hasSecret: !!secret, derived, configuredPublic: '', status, balance });
+  if (out.code === 'ok' && derived) {
+    const id = (process.env.REGISTRY_CONTRACT_ID ?? '').trim();
+    const read = id ? await readRegistryAdmin(id, derived) : { reach: 'ok' as const };
+    out.registry = registryVerdict({ configured: !!id, reach: read.reach, admin: 'admin' in read ? read.admin : undefined, expectedAdmin: derived });
+  }
+  return out;
 }

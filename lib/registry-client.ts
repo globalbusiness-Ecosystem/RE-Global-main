@@ -38,6 +38,31 @@ export function buildRecordOp(contractId: string, e: RegistryEntryInput): xdr.Op
   );
 }
 
+export type RegistryState = 'not_configured' | 'ok' | 'not_ready' | 'admin_mismatch' | 'unreachable';
+
+/** Decides the registry's state from plain facts (pure). "not_ready" = not deployed yet or init was never called. */
+export function registryVerdict(f: { configured: boolean; reach: 'ok' | 'error' | 'network'; admin?: string; expectedAdmin: string }): RegistryState {
+  if (!f.configured) return 'not_configured';
+  if (f.reach === 'network') return 'unreachable';
+  if (f.reach === 'error' || !f.admin) return 'not_ready';
+  return f.admin === f.expectedAdmin ? 'ok' : 'admin_mismatch';
+}
+
+/** Reads the registry's admin address (a read-only simulation, nothing is written and nothing is paid). */
+export async function readRegistryAdmin(contractId: string, sourcePublic: string, opts: { rpcUrl?: string } = {}): Promise<{ reach: 'ok' | 'error' | 'network'; admin?: string }> {
+  try {
+    const server = new rpc.Server(opts.rpcUrl ?? PI_TESTNET_RPC);
+    const account = await server.getAccount(sourcePublic);
+    const tx = new TransactionBuilder(account, { fee: '100', networkPassphrase: PI_TESTNET_PASSPHRASE }).addOperation(new Contract(contractId).call('admin')).setTimeout(30).build();
+    const sim = await server.simulateTransaction(tx);
+    if (rpc.Api.isSimulationError(sim)) return { reach: 'error' };
+    const v = 'result' in sim ? sim.result?.retval : undefined;
+    return v ? { reach: 'ok', admin: String(scValToNative(v)) } : { reach: 'error' };
+  } catch {
+    return { reach: 'network' };
+  }
+}
+
 export type RegistryResult = { ok: true; entryId: number; txid: string } | { ok: false; error: 'bad_input' | 'network' | 'rejected' | 'timeout' };
 
 /** Writes one entry. Never throws; the error is a short code. Waits up to ~20 s for the ledger to include it. */
