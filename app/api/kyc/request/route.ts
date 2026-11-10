@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
-import { submitKyc } from '@/lib/kyc-store';
+import { setContractName, submitKyc } from '@/lib/kyc-store';
 import { uploadedKinds } from '@/lib/kyc-files-store';
 import { hasAllPhotos } from '@/lib/kyc-files';
 import { pickMailLang } from '@/lib/kyc-mail';
@@ -8,6 +8,7 @@ import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { activeKycProvider } from '@/lib/kyc-provider/provider';
 import { siteUrl } from '@/lib/site-url';
 import { needsKyc, parseKycRequest } from '@/lib/kyc-rules';
+import { parseNameMode } from '@/lib/contract-identity';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -17,7 +18,8 @@ export async function POST(req: NextRequest) {
   const user = await guardApi(req, { scope: 'kyc-request', limit: 5, windowMs: 60 * 60 * 1000 });
   if (user instanceof NextResponse) return user;
   if (!needsKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
-  const input = parseKycRequest(await req.json().catch(() => null));
+  const raw = await req.json().catch(() => null);
+  const input = parseKycRequest(raw);
   if (!input) return NextResponse.json({ error: 'Please check your details' }, { status: 400, headers: H });
   try {
     ensureKycProviders();
@@ -28,6 +30,7 @@ export async function POST(req: NextRequest) {
     const session = provider ? await provider.start({ uid: user.uid, legalName: input.legalName, country: input.country, docType: input.docType, returnUrl: `${siteUrl().replace(/\/+$/, '')}/kyc` }) : null;
     const ok = await submitKyc(user.uid, input, pickMailLang(req.headers.get('accept-language')));
     if (!ok) return NextResponse.json({ error: 'A request already exists' }, { status: 409, headers: H });
+    await setContractName(user.uid, parseNameMode((raw as Record<string, unknown> | null)?.contractName));
     return NextResponse.json({ ok: true, ...(session ? { url: session.url } : {}) }, { headers: H });
   } catch {
     return NextResponse.json({ error: 'Try again' }, { status: 503, headers: H });

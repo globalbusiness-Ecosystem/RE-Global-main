@@ -7,6 +7,7 @@ import { anchorHash } from '@/lib/chain-anchor';
 import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { buyerRef, recordOnRegistry, registryKind } from '@/lib/registry-client';
 import { webUsername } from '@/lib/web-auth';
+import { parseNameMode, referralCodeOf } from '@/lib/contract-identity';
 import type { CardOrder } from '@/lib/card-pay/order';
 import { getOrder } from '@/lib/card-pay/store';
 
@@ -25,6 +26,16 @@ const chainKeys = () => {
   return secret && publicOf(secret) ? { secret } : null;
 };
 
+/** The buyer's personal invite code (the one on their referral page). Saved on the spot if the person never opened that page, so the code in the contract can really be used. */
+async function inviteCodeOf(username: string, uid: string): Promise<string> {
+  const ref = adminDb.collection('referrals').doc(username);
+  const stored = (await ref.get().catch(() => null))?.data()?.code;
+  if (typeof stored === 'string' && stored) return stored;
+  const code = referralCodeOf(username);
+  await ref.set({ username, uid, code, createdAt: Timestamp.now() }, { merge: true }).catch(() => {});
+  return code;
+}
+
 /** Creates (once) the contract of a paid card order and tries to anchor it. Returns the contract id, or null when signing is not configured. */
 export async function createCardContract(o: CardOrder): Promise<string | null> {
   const k = keys();
@@ -36,6 +47,8 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
   const title = String(p.title ?? '').slice(0, 150) || `Property ${o.propertyId}`;
   const legal = await getLegalProfile(typeof p.country === 'string' ? p.country : '');
   const buyerUsername = webUsername(o.uid.slice(4));
+  const nameMode = parseNameMode(kyc.data()?.contractName);
+  const inviteCode = nameMode === 'alias' ? await inviteCodeOf(buyerUsername, o.uid) : undefined;
   const type = typeof o.booking?.type === 'string' && o.booking.type ? o.booking.type : String(p.type ?? 'buy');
   const amount = o.amountMinor / 100;
 
@@ -50,7 +63,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
       type, amount, currency: o.currency, paymentId: o.id, txid: '',
       booking: o.booking ? { start: o.booking.start, end: o.booking.end, nights: o.booking.nights } : undefined,
       legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
-      card: { orderId: o.id, buyerName },
+      card: { orderId: o.id, buyerName, nameMode, inviteCode },
     });
     const hash = hashContract(text);
     const signedAt = new Date().toISOString();

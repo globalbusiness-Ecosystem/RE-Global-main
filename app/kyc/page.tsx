@@ -15,7 +15,8 @@ function countryName(code: string, language: string, fallback: string): string {
   try { return new Intl.DisplayNames([language], { type: 'region' }).of(code) ?? fallback; } catch { return fallback; }
 }
 
-type Me = { required: boolean; hosted?: boolean; status: 'none' | 'pending' | 'approved' | 'rejected'; rejectReason?: string | null };
+type NameMode = 'real' | 'alias';
+type Me = { required: boolean; contractName?: NameMode; hosted?: boolean; status: 'none' | 'pending' | 'approved' | 'rejected'; rejectReason?: string | null };
 
 // Identity verification for people who sign in outside the Pi Browser. A person sends name, country and phone;
 // the team reviews it. Card payments stay closed until the request is approved.
@@ -31,12 +32,14 @@ export default function KycPage() {
   const [photos, setPhotos] = useState<Partial<Record<FileKind, File>>>({});
   const [msg, setMsg] = useState<'invalid' | 'failed' | 'photosMissing' | 'photoBad' | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [nameMode, setNameMode] = useState<NameMode>('alias');
+  const [nameSaved, setNameSaved] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const load = () => {
     fetch('/api/kyc/me', { headers: authHeaders(), cache: 'no-store' })
       .then((r) => (r.ok ? r.json() : null))
-      .then((j) => { if (j && typeof j.status === 'string') setMe(j as Me); else setMsg('failed'); })
+      .then((j) => { if (j && typeof j.status === 'string') { setMe(j as Me); if (j.contractName === 'real' || j.contractName === 'alias') setNameMode(j.contractName); } else setMsg('failed'); })
       .catch(() => setMsg('failed'));
   };
   useEffect(() => { if (accessToken) load(); }, [accessToken]);
@@ -54,7 +57,7 @@ export default function KycPage() {
         if (!small || !(await uploadPhoto(k, small))) { setMsg('photoBad'); setUploading(false); return; }
       }
       setUploading(false);
-      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType }) });
+      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType, contractName: nameMode }) });
       if (r.status === 400) setMsg((await r.json().catch(() => null))?.code === 'photos_missing' ? 'photosMissing' : 'invalid');
       else if (!r.ok && r.status !== 409) setMsg('failed');
       else {
@@ -66,6 +69,25 @@ export default function KycPage() {
     } catch { setMsg('failed'); } finally { setBusy(false); setUploading(false); }
   };
 
+  const saveName = async () => {
+    setNameSaved(false);
+    try {
+      const r = await fetch('/api/kyc/contract-name', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ contractName: nameMode }) });
+      if (r.ok) setNameSaved(true); else setMsg('failed');
+    } catch { setMsg('failed'); }
+  };
+  const nameChoice = (
+    <fieldset className="flex flex-col gap-2 text-sm">
+      <legend className="mb-1 font-semibold">{kl('nameTitle', language)}</legend>
+      {(['alias', 'real'] as const).map((m) => (
+        <label key={m} className="flex items-start gap-2">
+          <input type="radio" name="contractName" checked={nameMode === m} onChange={() => { setNameMode(m); setNameSaved(false); }} className="mt-1" />
+          <span>{kl(m === 'alias' ? 'nameAlias' : 'nameReal', language)}</span>
+        </label>
+      ))}
+      <p className="text-xs text-gray-400">{kl('nameHint', language)}</p>
+    </fieldset>
+  );
   const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-white/40';
   const note = 'rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300';
   const canSend = me && me.required && (me.status === 'none' || me.status === 'rejected');
@@ -88,6 +110,13 @@ export default function KycPage() {
           {me.status === 'pending' && <p className={note}>{kl('pending', language)}</p>}
           {me.status === 'approved' && <p className={note}>{kl('approved', language)}</p>}
           {me.status === 'rejected' && <p className={note}>{kl('rejected', language, { reason: me.rejectReason ?? '' })}</p>}
+          {(me.status === 'pending' || me.status === 'approved') && (
+            <div className="flex flex-col gap-2">
+              {nameChoice}
+              <button type="button" onClick={saveName} className="w-full rounded-xl bg-white px-4 py-3 text-base font-semibold text-black">{kl('nameSave', language)}</button>
+              {nameSaved && <p role="status" className="text-sm text-green-400">{kl('nameSaved', language)}</p>}
+            </div>
+          )}
           {canSend && (
             <form className="flex flex-col gap-3" onSubmit={(e) => { e.preventDefault(); submit(); }}>
               <label className="text-sm">{kl('legalName', language)}
@@ -121,6 +150,7 @@ export default function KycPage() {
               ))}
               <p className="text-xs text-gray-400">{kl('privacyNote', language)}</p>
               </>)}
+              {nameChoice}
               {uploading && <p className="text-sm text-gray-300">{kl('uploading', language)}</p>}
               {msg && <p role="alert" className="text-sm text-red-400">{kl(msg, language)}</p>}
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-white px-4 py-3 text-base font-semibold text-black disabled:opacity-50">{kl('submit', language)}</button>

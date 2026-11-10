@@ -1,14 +1,8 @@
 import { doc, getDoc, setDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { db, waitForFirebaseAuth } from './firebase';
+import { referralCodeOf } from './contract-identity';
 
-function generateReferralCode(username: string): string {
-  let hash = 0;
-  for (let i = 0; i < username.length; i++) {
-    hash = (hash << 5) - hash + username.charCodeAt(i);
-    hash |= 0;
-  }
-  return Math.abs(hash).toString(36).toUpperCase().slice(0, 8);
-}
+const generateReferralCode = referralCodeOf;
 
 export async function getOrCreateReferralCode(username: string): Promise<string> {
   await waitForFirebaseAuth();

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
-import { getKyc } from '@/lib/kyc-store';
+import { getContractName, getKyc } from '@/lib/kyc-store';
 import { needsKyc } from '@/lib/kyc-rules';
 import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { activeKycProvider } from '@/lib/kyc-provider/provider';
@@ -17,8 +17,8 @@ export async function GET(req: NextRequest) {
   const hosted = activeKycProvider() !== null;
   if (!required) return NextResponse.json({ required, hosted, status: 'approved' }, { headers: H });
   try {
-    const k = await getKyc(user.uid);
-    return NextResponse.json({ required, hosted, status: k.status, rejectReason: k.rejectReason ?? null }, { headers: H });
+    const [k, contractName] = await Promise.all([getKyc(user.uid), getContractName(user.uid)]);
+    return NextResponse.json({ required, hosted, status: k.status, rejectReason: k.rejectReason ?? null, contractName }, { headers: H });
   } catch {
     return NextResponse.json({ error: 'Try again' }, { status: 503, headers: H });
   }

@@ -2,6 +2,7 @@ import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { requiredKinds } from './kyc-files';
+import { parseNameMode, type NameMode } from './contract-identity';
 import { canMoveKyc, type KycRequestInput, type KycStatus } from './kyc-rules';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 140;
@@ -28,6 +29,16 @@ export async function submitKyc(uid: string, input: KycRequestInput, lang = 'en'
     tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: input.phone, docType: input.docType, files: requiredKinds(input.docType), lang, submittedAt: Timestamp.now(), rejectReason: null });
     return true;
   });
+}
+
+/** How the person wants to be named in contracts: "alias" (account name + invite code, the default) or "real" (legal name). */
+export async function setContractName(uid: string, mode: NameMode): Promise<void> {
+  if (!okId(uid)) return;
+  await col().doc(uid).set({ contractName: mode }, { merge: true });
+}
+export async function getContractName(uid: string): Promise<NameMode> {
+  if (!okId(uid)) return 'alias';
+  return parseNameMode((await col().doc(uid).get()).data()?.contractName);
 }
 
 /** Admin decision. Returns 404 when there is no request, 409 when the move is not allowed. */
