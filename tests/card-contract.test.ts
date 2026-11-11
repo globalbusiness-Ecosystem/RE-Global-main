@@ -70,7 +70,7 @@ describe('paid card orders without a contract', () => {
     const a = buildAttention({ ...base, cardOrdersWithoutContract: 3 });
     expect(a[0]).toMatchObject({ id: 'card-no-contract', level: 'bad' });
     expect(buildAttention({ ...base, cardOrdersWithoutContract: 0 })).toEqual([]);
-    expect(src('app/api/admin/contracts/anchor/route.ts')).toContain('createMissingCardContracts');
+    expect(src('lib/chain-sync.ts')).toContain('createMissingCardContracts');
     expect(src('lib/card-contract.ts')).toContain('ordersWithoutContract');
   });
 });
@@ -82,7 +82,7 @@ describe('web buyers see their contracts', () => {
     expect(ctx).not.toContain('setUsername(u.email');
   });
   it('the admin anchor call reports why it failed', () => {
-    expect(src('app/api/admin/contracts/anchor/route.ts')).toContain('errors');
+    expect(src('lib/chain-sync.ts')).toContain('errors');
     expect(src('components/admin/card-orders-panel.tsx')).toContain('ANCHOR_HELP');
   });
 });

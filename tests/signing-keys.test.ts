@@ -31,7 +31,7 @@ describe('signing keys', () => {
   it('anchoring and the registry use the anchoring account, and the admin call repairs old keys', () => {
     const c = src('lib/card-contract.ts');
     expect(c.match(/chainKeys\(\)/g)?.length).toBe(2);
-    expect(src('app/api/admin/contracts/anchor/route.ts')).toContain('repairPlatformKeys');
+    expect(src('lib/chain-sync.ts')).toContain('repairPlatformKeys');
     expect(src('lib/signing-keys.ts')).toContain('verifyContractSignature');
   });
 });

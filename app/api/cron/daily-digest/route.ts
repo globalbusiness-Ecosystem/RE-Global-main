@@ -8,6 +8,7 @@ import { buildDigest, digestRecipient } from '@/lib/daily-digest';
 import { sendEmail, emailConfigured } from '@/lib/send-email';
 import { siteUrl } from '@/lib/site-url';
 import { sendGuestReminders } from '@/lib/guest-reminders-server';
+import { syncCardContracts } from '@/lib/chain-sync';
 
 export const dynamic = 'force-dynamic';
 
@@ -22,6 +23,13 @@ export async function GET(req: NextRequest) {
     } catch (err) {
       console.error('[cron/guest-reminders] error:', err);
     }
+  }
+  // Card contracts that are not on the blockchain yet are retried here too (same reason: only two cron jobs). Never blocks the summary.
+  try {
+    const r = await syncCardContracts(10);
+    if (r.anchored || r.recorded || r.failed || r.created) console.log(`[cron/chain-sync] created ${r.created}, anchored ${r.anchored}, recorded ${r.recorded}, failed ${r.failed} ${r.errors.join(',')}`);
+  } catch (err) {
+    console.error('[cron/chain-sync] error:', err);
   }
   const to = digestRecipient();
   if (!to || !emailConfigured()) return NextResponse.json({ ok: true, sent: false, reason: 'no-recipient' }, { headers: { 'Cache-Control': 'no-store' } });
