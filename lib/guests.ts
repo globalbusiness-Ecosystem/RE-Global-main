@@ -11,7 +11,7 @@ export function parseGuests(raw: unknown, maxGuests?: unknown): { ok: true; gues
   return { ok: true, guests: n };
 }
 
-export interface GuestStrings { label: string; count: string }
+interface GuestStrings { label: string; count: string }
 // {n} is replaced by the number of guests.
 export const GUEST_I18N: Record<NavLanguage, GuestStrings> = {
   en: { label: 'Guests', count: '{n} guests' },

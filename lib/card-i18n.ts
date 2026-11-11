@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface CardStrings { price: string; sold: string; viewMap: string; noMap: string; tour: string; noTour: string; tourTitle: string; here: string; details: string; close: string; favorite: string; featured: string }
+interface CardStrings { price: string; sold: string; viewMap: string; noMap: string; tour: string; noTour: string; tourTitle: string; here: string; details: string; close: string; favorite: string; featured: string }
 
 export const CARD_I18N: Record<NavLanguage, CardStrings> = {
   en: { price: 'Price', sold: 'Sold', viewMap: 'View on map', noMap: 'No map location for this property', tour: '360° tour', noTour: 'No 360° tour for this property', tourTitle: '360° Virtual Tour', here: 'Property location', details: 'Details', close: 'Close', favorite: 'Add to favorites', featured: 'Featured' },

@@ -11,7 +11,6 @@ import {
   Coins,
   FileText,
   Phone,
-  Mail,
   AtSign,
   Info,
   User,
@@ -32,7 +31,6 @@ import { MyDataPanel } from '@/components/my-data-panel';
 import { RewardsPanel } from '@/components/rewards-panel';
 import { IconBadge, RowChevron } from '@/components/ui/icon-badge';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
-import { Button } from '@/components/ui/button';
 import { UserAvatar } from '@/components/user-avatar';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { useMyAvatar } from '@/hooks/use-my-avatar';

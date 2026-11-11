@@ -5,9 +5,9 @@ export const COLLECTION: Record<ContentKind, string> = { banners: 'site_banners'
 export const isKind = (k: unknown): k is ContentKind => CONTENT_KINDS.includes(k as ContentKind);
 
 // Pages a banner button may open (matches the app's navigateToPage ids).
-export const LINK_PAGES = ['', 'buy', 'rent', 'hotel', 'invest', 'tokenized', 'abroad', 'offplan', 'map', 'partners'];
+const LINK_PAGES = ['', 'buy', 'rent', 'hotel', 'invest', 'tokenized', 'abroad', 'offplan', 'map', 'partners'];
 
-export type Parsed = { ok: true; doc: Record<string, unknown> } | { ok: false; error: string };
+type Parsed = { ok: true; doc: Record<string, unknown> } | { ok: false; error: string };
 const fail = (error: string): Parsed => ({ ok: false, error });
 
 function str(v: unknown, max: number): string {

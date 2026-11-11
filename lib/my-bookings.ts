@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 import { parseDay, DAY_MS } from './booking-rules';
 
-export type BookingPhase = 'upcoming' | 'current' | 'past';
+type BookingPhase = 'upcoming' | 'current' | 'past';
 
 // Where a stay is relative to today ('YYYY-MM-DD'). The check-out day itself already counts as past.
 export function bookingPhase(start: string, end: string, today: string): BookingPhase {
@@ -18,7 +18,7 @@ export function daysUntil(start: string, today: string): number | null {
   return Math.round((s - t) / DAY_MS);
 }
 
-export interface MyBookingStrings {
+interface MyBookingStrings {
   title: string; confirmed: string; review: string; cancelled: string;
   upcoming: string; current: string; past: string; today: string; tomorrow: string; inDays: string; addToCalendar: string;
 }

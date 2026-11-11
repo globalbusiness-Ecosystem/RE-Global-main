@@ -16,7 +16,7 @@ export const PROPERTY_DETAILS_LABELS = {
   buyNow: { en: 'Buy Now', ar: 'اشتري الآن', fr: 'Acheter maintenant', es: 'Comprar ahora', pt: 'Comprar agora', ur: 'ابھی خریدیں', zh: '立即购买' },
 } satisfies Record<string, Row>;
 
-export type PropertyDetailsLabelKey = keyof typeof PROPERTY_DETAILS_LABELS;
+type PropertyDetailsLabelKey = keyof typeof PROPERTY_DETAILS_LABELS;
 
 export function pd(key: PropertyDetailsLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

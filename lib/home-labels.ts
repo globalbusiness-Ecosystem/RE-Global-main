@@ -23,7 +23,7 @@ export const HOME_LABELS = {
   welcomeAdmin: { en: 'Welcome to Admin Panel', ar: 'مرحبا بك في لوحة التحكم', fr: 'Bienvenue dans le panneau d’administration', es: 'Bienvenido al panel de administración', pt: 'Bem-vindo ao painel de administração', ur: 'ایڈمن پینل میں خوش آمدید', zh: '欢迎进入管理面板' },
 } satisfies Record<string, Row>;
 
-export type HomeLabelKey = keyof typeof HOME_LABELS;
+type HomeLabelKey = keyof typeof HOME_LABELS;
 
 export function hm(key: HomeLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

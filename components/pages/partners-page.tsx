@@ -1,7 +1,7 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { Users, Building2, Mail, Phone } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { qs } from '@/lib/scanner-labels';
 

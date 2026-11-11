@@ -3,10 +3,9 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { X, Send, Bot, Loader, Volume2, VolumeX, Mic, MicOff, Phone, Settings, Image } from 'lucide-react';
+import { X, Send, Bot, Loader, VolumeX, Mic, MicOff, Phone, Settings } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import voiceService from '@/lib/voice-service';
-import { MediaCapture, type CapturedMedia } from '@/components/media-capture';
 import { authHeaders } from '@/lib/api-token';
 
 interface Message {

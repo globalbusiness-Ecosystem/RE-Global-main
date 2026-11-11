@@ -2,9 +2,9 @@ import { PI_TESTNET_HORIZON } from '@/lib/chain-anchor';
 import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { readRegistryAdmin, registryVerdict, type RegistryState } from '@/lib/registry-client';
 
-export type ChainCheckCode = 'no_keys' | 'bad_secret' | 'mismatch' | 'not_found' | 'network' | 'low_balance' | 'ok';
+type ChainCheckCode = 'no_keys' | 'bad_secret' | 'mismatch' | 'not_found' | 'network' | 'low_balance' | 'ok';
 
-export type ChainCheck = {
+type ChainCheck = {
   code: ChainCheckCode;
   /** The account the platform really signs with (derived from the secret). Public, so it is safe to show and to fund. */
   publicKey?: string;
@@ -15,7 +15,7 @@ export type ChainCheck = {
 };
 
 /** Smallest balance that still pays for a few anchoring transactions (each costs about 0.01 with the 100000 stroop fee). */
-export const MIN_ANCHOR_BALANCE = 0.1;
+const MIN_ANCHOR_BALANCE = 0.1;
 
 /** Decides what is wrong from plain facts. No network, no secrets in or out. */
 export function diagnose(f: { hasSecret: boolean; derived: string | null; configuredPublic: string; status: 'ok' | 'not_found' | 'network'; balance?: number }): ChainCheck {

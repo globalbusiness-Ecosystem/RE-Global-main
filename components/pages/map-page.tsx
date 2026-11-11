@@ -5,10 +5,10 @@ import { useProperties } from '@/lib/useProperties';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { 
-  ShoppingCart, Search, X, 
+  Search, X, 
   MapPin, Star,
   Filter, Globe, Bed, Maximize2, TrendingUp,
-  TrendingDown, Activity, DollarSign, Users, Zap, Target, Eye, Home, Video,
+  TrendingDown, Activity, DollarSign, Users, Zap, Eye, Home, Video,
   LocateFixed, Loader2, Car, Footprints, Navigation
 } from 'lucide-react';
 import { NavigationPanel } from '@/components/navigation-panel';

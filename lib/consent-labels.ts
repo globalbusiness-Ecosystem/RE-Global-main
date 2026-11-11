@@ -16,7 +16,7 @@ export const CONSENT_LABELS = {
   accept: { en: 'Accept & Continue', ar: 'موافق ومتابعة', fr: 'Accepter et continuer', es: 'Aceptar y continuar', pt: 'Aceitar e continuar', ur: 'قبول کریں اور جاری رکھیں', zh: '同意并继续' },
 } satisfies Record<string, Row>;
 
-export type ConsentLabelKey = keyof typeof CONSENT_LABELS;
+type ConsentLabelKey = keyof typeof CONSENT_LABELS;
 
 export function cl(key: ConsentLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

@@ -8,8 +8,8 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
-import { Zap, Bed, Maximize2, Video, Heart, MapPin, Eye } from 'lucide-react';
-import { useMemo, memo, useState } from 'react';
+import { Zap, Bed, Maximize2, Video, Heart, MapPin } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { SharePicker } from '@/components/share-picker';
 import { propertyPaymentAmount } from '@/lib/payment-rules';

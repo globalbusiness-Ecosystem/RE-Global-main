@@ -18,7 +18,7 @@ export const BUY_PAGE_LABELS = {
   sold: { en: 'This property has been sold', ar: 'العقار ده اتباع', fr: 'Ce bien a été vendu', es: 'Esta propiedad ya se vendió', pt: 'Este imóvel já foi vendido', ur: 'یہ جائیداد فروخت ہو چکی ہے', zh: '该房产已售出' },
 } satisfies Record<string, Row>;
 
-export type BuyPageLabelKey = keyof typeof BUY_PAGE_LABELS;
+type BuyPageLabelKey = keyof typeof BUY_PAGE_LABELS;
 
 export function bp(key: BuyPageLabelKey, language: string | undefined, vars: Record<string, string | number> = {}): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

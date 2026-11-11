@@ -2,7 +2,7 @@
 
 export type ProfileStepId = 'picture' | 'pi' | 'email' | 'invite';
 
-export interface ProfileFacts { hasPicture: boolean; piVerified: boolean; emailVerified: boolean; invitedSomeone: boolean }
+interface ProfileFacts { hasPicture: boolean; piVerified: boolean; emailVerified: boolean; invitedSomeone: boolean }
 export interface ProfileStep { id: ProfileStepId; done: boolean }
 
 export function profileSteps(f: ProfileFacts): ProfileStep[] {

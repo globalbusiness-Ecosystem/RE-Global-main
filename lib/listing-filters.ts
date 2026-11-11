@@ -5,7 +5,7 @@ export type SortKey = 'newest' | 'priceAsc' | 'priceDesc';
 export interface Filters { query: string; guests: number; maxPi: number | null; sort: SortKey }
 export const EMPTY_FILTERS: Filters = { query: '', guests: 0, maxPi: null, sort: 'newest' };
 
-export type FilterItem = { price?: unknown; currency?: unknown; payAmountPi?: unknown; maxGuests?: unknown };
+type FilterItem = { price?: unknown; currency?: unknown; payAmountPi?: unknown; maxGuests?: unknown };
 
 // "150" or "150.5" -> number; empty or not a positive number -> null (no limit).
 export function parseMaxPi(s: string): number | null {
@@ -44,7 +44,7 @@ export function filterListings<T extends FilterItem>(items: T[], f: Filters, piR
     .map((x) => x.p);
 }
 
-export interface FilterStrings {
+interface FilterStrings {
   search: string; guests: string; anyGuests: string; maxPrice: string; sort: string;
   newest: string; priceAsc: string; priceDesc: string; clear: string; none: string; showing: string;
 }

@@ -2,7 +2,7 @@
 // It returns plain data (never HTML), so the page renders it as React elements and nothing from the model is injected as markup.
 
 export type Inline = { text: string; bold: boolean };
-export type Block =
+type Block =
   | { type: 'heading'; inline: Inline[] }
   | { type: 'item'; inline: Inline[]; marker: string }
   | { type: 'paragraph'; inline: Inline[] };

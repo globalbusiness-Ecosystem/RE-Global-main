@@ -2,14 +2,14 @@
 // after the user paid). Pure planning plus a small client runner that reuses the existing server routes, which are
 // all safe to repeat: complete, cancel, contracts/sign and market/settle.
 
-export type IncompletePayment = {
+type IncompletePayment = {
   identifier?: unknown;
   metadata?: { propertyId?: unknown; propertyTitle?: unknown; transactionType?: unknown } | null;
   transaction?: { txid?: unknown } | null;
   status?: { developer_approved?: boolean; developer_completed?: boolean; cancelled?: boolean; user_cancelled?: boolean } | null;
 };
 
-export type RecoveryPlan =
+type RecoveryPlan =
   | { action: 'ignore' }
   | { action: 'cancel'; paymentId: string }
   | { action: 'finish'; paymentId: string; txid: string; complete: boolean; resale: boolean; propertyId: string; propertyTitle: string };

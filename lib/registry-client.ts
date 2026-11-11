@@ -5,11 +5,11 @@ import { PI_TESTNET_PASSPHRASE } from '@/lib/chain-anchor';
 // Talks to the RE Global ownership registry smart contract (contracts/ownership-registry) on Pi Testnet.
 // Every call is written by the platform account, which is the registry's admin.
 
-export const PI_TESTNET_RPC = 'https://rpc.testnet.minepi.com';
+const PI_TESTNET_RPC = 'https://rpc.testnet.minepi.com';
 export const NO_REPLACES = 4294967295; // u32::MAX: "replaces no entry"
 
 /** What the registry calls a contract: only these four words are accepted by the contract. */
-export type RegistryKind = 'buy' | 'rent' | 'invest' | 'tokenized';
+type RegistryKind = 'buy' | 'rent' | 'invest' | 'tokenized';
 export function registryKind(type: string): RegistryKind {
   if (type === 'rent' || type === 'hotel' || type === 'stay') return 'rent';
   if (type === 'invest' || type === 'tokenized') return type;
@@ -22,7 +22,7 @@ export const buyerRef = (uid: string): string => crypto.createHash('sha256').upd
 const HASH_RE = /^[0-9a-f]{64}$/;
 const bytes32 = (hex: string) => nativeToScVal(Buffer.from(hex, 'hex'), { type: 'bytes' });
 
-export interface RegistryEntryInput { propertyId: string; buyerRef: string; contractHash: string; kind: RegistryKind; shares?: number; replaces?: number }
+interface RegistryEntryInput { propertyId: string; buyerRef: string; contractHash: string; kind: RegistryKind; shares?: number; replaces?: number }
 
 /** The `record` call as a contract operation. Pure; null when an input is not valid. */
 export function buildRecordOp(contractId: string, e: RegistryEntryInput): xdr.Operation | null {
@@ -63,7 +63,7 @@ export async function readRegistryAdmin(contractId: string, sourcePublic: string
   }
 }
 
-export type RegistryResult = { ok: true; entryId: number; txid: string } | { ok: false; error: 'bad_input' | 'network' | 'rejected' | 'timeout' };
+type RegistryResult = { ok: true; entryId: number; txid: string } | { ok: false; error: 'bad_input' | 'network' | 'rejected' | 'timeout' };
 
 /** Writes one entry. Never throws; the error is a short code. Waits up to ~20 s for the ledger to include it. */
 export async function recordOnRegistry(secretKey: string, contractId: string, e: RegistryEntryInput, opts: { rpcUrl?: string } = {}): Promise<RegistryResult> {

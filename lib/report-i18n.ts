@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 import type { ReportReason } from './listing-report';
 
-export interface ReportStrings {
+interface ReportStrings {
   open: string; title: string; reason: string; details: string; email: string; send: string; cancel: string; thanks: string; error: string;
   reasons: Record<ReportReason, string>;
 }

@@ -15,7 +15,7 @@ export const LISTING_PAGE_LABELS = {
   tokenized: { en: 'Tokenized', ar: 'رمزية', fr: 'Tokenisé', es: 'Tokenizado', pt: 'Tokenizado', ur: 'ٹوکنائزڈ', zh: '已代币化' },
 } satisfies Record<string, Row>;
 
-export type ListingPageLabelKey = keyof typeof LISTING_PAGE_LABELS;
+type ListingPageLabelKey = keyof typeof LISTING_PAGE_LABELS;
 
 export function lpl(key: ListingPageLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

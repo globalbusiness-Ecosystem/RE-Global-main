@@ -1,7 +1,7 @@
 // The username a web account chooses for itself. It is also the account's invite code (like a Pi username), so it
 // follows the invite-code rules: letters and digits only, 4 to 12 characters. It starts with a letter. Uniqueness
 // ignores upper/lower case ("Ahmed7" and "ahmed7" are the same name).
-export type ParsedHandle = { handle: string; key: string; code: string };
+type ParsedHandle = { handle: string; key: string; code: string };
 
 const SHAPE = /^[A-Za-z][A-Za-z0-9]{3,11}$/;
 // Names that could be mistaken for the platform or its team.

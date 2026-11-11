@@ -3,13 +3,6 @@ import { readJsonLimited, cleanString } from '@/lib/ai-input';
 import { advisorText, isAdvisorLanguage, languageInstruction } from '@/lib/advisor-i18n';
 import { buildAdvisorMessages, MEMORY_INSTRUCTIONS } from '@/lib/advisor-history';
 import { Anthropic } from '@anthropic-ai/sdk';
-import { 
-  aladdinConfig, 
-  generateREComparison, 
-  generateCTA, 
-  convertToPI,
-  generatePiComparisonText
-} from '@/lib/aladdin-system-config';
 
 interface RequestBody {
   message: string;

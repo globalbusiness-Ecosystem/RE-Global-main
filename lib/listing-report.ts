@@ -11,8 +11,8 @@ const ID_RE = /^[A-Za-z0-9_-]{1,128}$/;
 const clean = (v: unknown, max: number) =>
   typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '';
 
-export const isReportReason = (v: unknown): v is ReportReason => typeof v === 'string' && (REPORT_REASONS as readonly string[]).includes(v);
-export const isReportStatus = (v: unknown): v is ReportStatus => typeof v === 'string' && (REPORT_STATUSES as readonly string[]).includes(v);
+const isReportReason = (v: unknown): v is ReportReason => typeof v === 'string' && (REPORT_REASONS as readonly string[]).includes(v);
+const isReportStatus = (v: unknown): v is ReportStatus => typeof v === 'string' && (REPORT_STATUSES as readonly string[]).includes(v);
 
 /** A safe, small record from whatever the browser sent. Null when it is not a usable report. */
 export function normalizeReport(body: unknown): ReportInput | null {

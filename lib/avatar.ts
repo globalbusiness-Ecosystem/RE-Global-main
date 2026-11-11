@@ -3,9 +3,9 @@
 
 export const AVATAR_SIZE = 192;
 export const AVATAR_MAX_BYTES = 40_000;
-export const AVATAR_QUALITIES = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
+const AVATAR_QUALITIES = [0.85, 0.75, 0.65, 0.55, 0.45, 0.35];
 
-export interface AvatarPreset { id: string; emoji: string; from: string; to: string }
+interface AvatarPreset { id: string; emoji: string; from: string; to: string }
 
 export const AVATAR_PRESETS: AvatarPreset[] = [
   { id: 'home', emoji: '🏠', from: '#f59e0b', to: '#ef4444' },
@@ -30,7 +30,7 @@ export function presetById(id: string): AvatarPreset | undefined {
   return AVATAR_PRESETS.find((p) => p.id === id);
 }
 
-export type AvatarValue = { kind: 'preset'; id: string } | { kind: 'photo'; dataUrl: string };
+type AvatarValue = { kind: 'preset'; id: string } | { kind: 'photo'; dataUrl: string };
 
 const PHOTO_RE = /^data:image\/(jpeg|webp);base64,([A-Za-z0-9+/]+={0,2})$/;
 

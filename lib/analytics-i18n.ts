@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface AnalyticsStrings {
+interface AnalyticsStrings {
   marketAnalytics: string;
   globalStatsDesc: string;
   totalProperties: string;

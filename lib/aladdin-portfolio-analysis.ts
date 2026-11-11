@@ -9,7 +9,7 @@ export interface Portfolio {
   }>;
 }
 
-export interface PortfolioAnalysis {
+interface PortfolioAnalysis {
   totalValue: number;
   totalROI: number;
   avgROI: number;
@@ -23,7 +23,7 @@ export interface PortfolioAnalysis {
   };
 }
 
-export class PortfolioAnalyzer {
+class PortfolioAnalyzer {
   async analyze(portfolio: Portfolio): Promise<PortfolioAnalysis> {
     const totalValue = this.calculateTotalValue(portfolio);
     const totalROI = this.calculateTotalROI(portfolio);

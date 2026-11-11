@@ -3,7 +3,7 @@
  * Handles QR code generation, validation, batch operations, and printing
  */
 
-export interface PropertyQRData {
+interface PropertyQRData {
   propertyId: string;
   propertyName: string;
   price: number;
@@ -13,7 +13,7 @@ export interface PropertyQRData {
   currency?: string;
 }
 
-export interface PrintQROptions {
+interface PrintQROptions {
   propertyId: string;
   propertyName: string;
   price: number;
@@ -53,7 +53,7 @@ export function validateQRData(data: PropertyQRData): boolean {
 /**
  * Download QR code as image
  */
-export async function downloadQRCode(
+async function downloadQRCode(
   qrImageUrl: string,
   propertyId: string
 ): Promise<void> {
@@ -77,7 +77,7 @@ export async function downloadQRCode(
 /**
  * Copy QR code URL to clipboard
  */
-export async function copyQRCodeToClipboard(propertyId: string): Promise<boolean> {
+async function copyQRCodeToClipboard(propertyId: string): Promise<boolean> {
   try {
     const url = `${typeof window !== 'undefined' ? window.location.origin : 'https://re.pi'}?property=${propertyId}`;
     await navigator.clipboard.writeText(url);
@@ -103,7 +103,7 @@ export async function generateBatchQRCodes(
 /**
  * Print QR code with property details
  */
-export function printQRCode(
+function printQRCode(
   qrImageUrl: string,
   options: PrintQROptions
 ): void {
@@ -210,7 +210,7 @@ export function printQRCode(
 /**
  * Create shareable link for property
  */
-export function createShareableLink(propertyId: string): string {
+function createShareableLink(propertyId: string): string {
   const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'https://re.pi';
   return `${baseUrl}?property=${propertyId}`;
 }
@@ -218,7 +218,7 @@ export function createShareableLink(propertyId: string): string {
 /**
  * Format QR code data for export
  */
-export function formatQRDataForExport(
+function formatQRDataForExport(
   properties: PropertyQRData[]
 ): string {
   return properties
@@ -232,7 +232,7 @@ export function formatQRDataForExport(
 /**
  * Generate QR code metadata
  */
-export function generateQRMetadata(data: PropertyQRData): {
+function generateQRMetadata(data: PropertyQRData): {
   title: string;
   description: string;
   url: string;

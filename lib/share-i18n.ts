@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface ShareStrings { share: string; copied: string; copyFailed: string; openPage: string }
+interface ShareStrings { share: string; copied: string; copyFailed: string; openPage: string }
 
 export const SHARE_I18N: Record<NavLanguage, ShareStrings> = {
   en: { share: 'Share', copied: 'Link copied', copyFailed: 'Could not copy the link', openPage: 'Public property page' },

@@ -13,7 +13,7 @@ import { sharePath } from '@/lib/share';
 import { SHARE_I18N } from '@/lib/share-i18n';
 
 import { useProperties } from '@/lib/useProperties';
-import { MapPin, Bed, Maximize2, Video, Heart, X, Eye } from 'lucide-react';
+import { MapPin, Bed, Maximize2, Video, Heart, X } from 'lucide-react';
 import { useState, useMemo, memo } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { propertyPaymentAmount, isUsdPegged } from '@/lib/payment-rules';

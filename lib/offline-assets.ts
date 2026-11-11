@@ -5,8 +5,8 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 // Same rules as the bookings copy: per user, only the displayed fields, expires after 30 days.
 const PREFIX = 're_offline_assets_v1:';
 
-export interface OfflineHolding { id: string; propertyTitle: string; shares: number; totalShares: number; amount: number; status: string }
-export interface OfflinePayout { id: string; kind: string; amount: number; status: string }
+interface OfflineHolding { id: string; propertyTitle: string; shares: number; totalShares: number; amount: number; status: string }
+interface OfflinePayout { id: string; kind: string; amount: number; status: string }
 
 const str = (v: unknown, max: number): string => (typeof v === 'string' ? v.slice(0, max) : '');
 const num = (v: unknown): number => (typeof v === 'number' && Number.isFinite(v) ? v : 0);

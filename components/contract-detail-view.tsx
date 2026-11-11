@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { a11yLabels } from '@/lib/a11y-labels';
-import { ShieldCheck, Key, Link2, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
+import { ShieldCheck, Key, FileText, Copy, Check, ChevronDown, ScanLine, X } from 'lucide-react';
 import type { SmartContract } from '@/lib/firebase-database';
 import { contractKind, KIND_ICON, KIND_LABELS, KIND_TITLE, KIND_PARTY } from '@/lib/contract-kind';
 import { Download } from 'lucide-react';

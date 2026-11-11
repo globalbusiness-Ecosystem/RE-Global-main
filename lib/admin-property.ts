@@ -1,5 +1,5 @@
-export const TYPES = ['buy', 'rent', 'hotel', 'tokenized', 'abroad', 'offplan', 'invest'];
-export const PROPERTY_TYPES = ['apartment', 'villa', 'penthouse', 'commercial'];
+const TYPES = ['buy', 'rent', 'hotel', 'tokenized', 'abroad', 'offplan', 'invest'];
+const PROPERTY_TYPES = ['apartment', 'villa', 'penthouse', 'commercial'];
 export const STATUSES = ['available', 'sold', 'under_construction'];
 import { isCountry } from '@/lib/legal-profiles';
 import { parseStayInfo } from '@/lib/stay-info';
@@ -34,7 +34,7 @@ function num(v: unknown, min: number, max: number): number | null {
 }
 
 
-export type ParsedProperty = { ok: true; doc: Record<string, unknown> } | { ok: false; error: string };
+type ParsedProperty = { ok: true; doc: Record<string, unknown> } | { ok: false; error: string };
 
 const fail = (error: string): ParsedProperty => ({ ok: false, error });
 

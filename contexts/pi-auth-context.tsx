@@ -21,12 +21,12 @@ import type {
   UserPurchaseBalance,
 } from "@/lib/sdklite-types";
 
-export interface PiUser {
+interface PiUser {
   uid: string;
   username: string;
 }
 
-export interface UserLocation {
+interface UserLocation {
   lat: number;
   lng: number;
   label?: string; // reverse-geocoded city/area, filled in async

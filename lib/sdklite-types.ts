@@ -5,12 +5,12 @@ export interface PurchaseResult {
   txid: string;
 }
 
-export interface SDKLiteError extends Error {
+interface SDKLiteError extends Error {
   name: "SDKLiteError";
   code: "product_not_found" | "purchase_cancelled" | "purchase_error";
 }
 
-export interface UserStateRecord {
+interface UserStateRecord {
   blob: Record<string, unknown>;
   updatedAt: string;
   version: number;
@@ -33,20 +33,20 @@ export interface Product {
   created_at: string;
 }
 
-export interface ProductsResponse {
+interface ProductsResponse {
   products: Product[];
 }
 
-export interface PurchasesResponse {
+interface PurchasesResponse {
   purchases: UserPurchaseBalance[];
 }
 
-export interface ConsumeResponse {
+interface ConsumeResponse {
   productId: string;
   quantity: number;
 }
 
-export interface RestoreOptions {
+interface RestoreOptions {
   keys?: string[];
 }
 

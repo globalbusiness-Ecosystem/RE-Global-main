@@ -39,7 +39,7 @@ export const EXPLORER_LABELS = {
   home: { en: 'Back to the platform', ar: 'العودة إلى المنصة', fr: 'Retour à la plateforme', es: 'Volver a la plataforma', pt: 'Voltar à plataforma', ur: 'پلیٹ فارم پر واپس', zh: '返回平台' },
 } satisfies Record<string, Row>;
 
-export type ExplorerLabelKey = keyof typeof EXPLORER_LABELS;
+type ExplorerLabelKey = keyof typeof EXPLORER_LABELS;
 
 export function ex(key: ExplorerLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

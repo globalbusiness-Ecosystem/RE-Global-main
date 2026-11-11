@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 
 // The "you are offline" strip. It must not promise cached data: the app only keeps a saved copy of the guest's bookings.
-export interface OfflineStrings { message: string; close: string }
+interface OfflineStrings { message: string; close: string }
 
 export const OFFLINE_I18N: Record<NavLanguage, OfflineStrings> = {
   en: { message: 'You are offline. Some features need an internet connection.', close: 'Close' },

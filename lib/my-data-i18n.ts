@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface MyDataStrings {
+interface MyDataStrings {
   title: string;
   intro: string;
   download: string;

@@ -2,7 +2,7 @@
 // the browser is attacker-controlled, so it is never trusted on its own.
 // SVG is deliberately NOT accepted: it can carry scripts.
 
-export interface DetectedImage {
+interface DetectedImage {
   mime: 'image/jpeg' | 'image/png' | 'image/gif' | 'image/webp';
   ext: 'jpg' | 'png' | 'gif' | 'webp';
 }

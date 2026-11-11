@@ -2,9 +2,9 @@
 import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { TrendingUp, MapPin, Home, DollarSign, Users, Activity, ArrowUp, ArrowDown } from 'lucide-react';
+import { TrendingUp, MapPin, Home, DollarSign, ArrowUp, ArrowDown } from 'lucide-react';
 import { useMemo } from 'react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import AIMarketAnalysisDashboard from '@/components/ai-market-analysis-dashboard';
 import { ANALYTICS_I18N } from '@/lib/analytics-i18n';
 

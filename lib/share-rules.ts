@@ -2,9 +2,9 @@
 // share by share; its price (or payAmountPi) is the value of the WHOLE asset.
 // Pure rules: no Firebase, safe for the browser and the server.
 
-export const SHARE_TYPES = ['invest', 'tokenized'];
-export const isShareType = (t: unknown) => typeof t === 'string' && SHARE_TYPES.includes(t);
-export const MAX_SHARES = 1_000_000;
+const SHARE_TYPES = ['invest', 'tokenized'];
+const isShareType = (t: unknown) => typeof t === 'string' && SHARE_TYPES.includes(t);
+const MAX_SHARES = 1_000_000;
 export const SHARE_HOLD_MS = 15 * 60 * 1000;
 
 export type ShareHold = { paymentId: string; uid: string; count: number; expiresAtMs: number };
@@ -76,8 +76,8 @@ export function canCancelHolding(status: unknown, shares: number, availableToBuy
   return { ok: true, returnsShares: true };
 }
 
-export type ShareCheckProperty = { id: string; title: string; sharesSold: number };
-export type ShareCheckHolding = { propertyId: string; shares: number; status: unknown };
+type ShareCheckProperty = { id: string; title: string; sharesSold: number };
+type ShareCheckHolding = { propertyId: string; shares: number; status: unknown };
 
 // A property's sold-shares counter must equal the shares of its confirmed purchases.
 // Returns the properties where the two disagree (old data from before purchases were recorded can show up here).

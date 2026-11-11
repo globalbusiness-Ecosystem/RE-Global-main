@@ -17,7 +17,7 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-export const storage = getStorage(app);
+const storage = getStorage(app);
 
 // The Pi login -> Firebase sign-in exchange runs in the background. User-scoped
 // Firestore calls wait for it, otherwise the very first request after login would

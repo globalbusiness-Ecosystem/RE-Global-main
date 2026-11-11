@@ -11,7 +11,7 @@ export interface WebhookDeps {
   onFailed?: (o: CardOrder) => Promise<void>;
 }
 
-export interface WebhookReply { status: number; body: { ok: boolean; error?: string } }
+interface WebhookReply { status: number; body: { ok: boolean; error?: string } }
 
 // Handles a payment company's notification. Everything is checked before anything is changed: the provider must be
 // connected, the signature must be valid (parseWebhook returns null otherwise), the order must exist, and the amount

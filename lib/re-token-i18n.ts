@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface RETokenStrings {
+interface RETokenStrings {
   couldNotFetchPrice: string;
   platformCredits: string;
   balanceForServices: string;

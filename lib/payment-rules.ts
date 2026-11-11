@@ -3,7 +3,7 @@
 // a payment tied to a property is only accepted when the amount matches what the
 // platform charges for that kind of transaction.
 
-export const PLATFORM_FEES_PI = {
+const PLATFORM_FEES_PI = {
   buy: 1, // purchase reservation
   other: 50, // rent / invest / tokenized / hotel
 } as const;
@@ -16,7 +16,7 @@ export function expectedAmountFor(transactionType: unknown): number | null {
   return t === 'buy' ? PLATFORM_FEES_PI.buy : PLATFORM_FEES_PI.other;
 }
 
-export interface IntentCheck {
+interface IntentCheck {
   ok: boolean;
   error?: string;
 }
@@ -24,7 +24,7 @@ export interface IntentCheck {
 // Returns ok for payments that are not about a property (nothing to enforce here).
 // Currencies that are pegged 1:1 to the US dollar. A listing priced in one of these is
 // charged in Pi at the admin-set rate (settings/pricing.piUsdRate = how many USD one Pi is worth).
-export const USD_PEGGED = ['USD', 'OUSD', 'USDC', 'USDT'];
+const USD_PEGGED = ['USD', 'OUSD', 'USDC', 'USDT'];
 export const isUsdPegged = (c: unknown) => typeof c === 'string' && USD_PEGGED.includes(c.toUpperCase());
 
 // USD -> Pi, rounded UP to 2 decimals so the platform never undercharges.

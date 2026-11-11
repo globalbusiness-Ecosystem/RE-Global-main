@@ -1,7 +1,7 @@
 // How long technical records are kept (GDPR "storage limitation"). Pure: just the rules, no database.
 // Legal records (payments, contracts, ownership, payouts, the admin activity log) are NOT here: they are kept on purpose.
 
-export type RetentionRule = { collection: string; field: string; before: Date };
+type RetentionRule = { collection: string; field: string; before: Date };
 
 const DAY = 24 * 60 * 60 * 1000;
 

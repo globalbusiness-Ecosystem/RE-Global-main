@@ -2,7 +2,7 @@ import { kl } from './kyc-labels';
 
 // The e-mail a person gets when the team decides on their identity check. Pure text building (no sending here).
 const SUPPORTED = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'] as const;
-export type MailLang = (typeof SUPPORTED)[number];
+type MailLang = (typeof SUPPORTED)[number];
 
 const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 

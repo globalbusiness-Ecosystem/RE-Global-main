@@ -3,7 +3,7 @@
 // Google Calendar, Airbnb or Booking.com to keep other channels in sync.
 import type { BookingDates } from '@/lib/booking-rules';
 
-export const ICAL_PRODID = '-//RE Global//Availability//EN';
+const ICAL_PRODID = '-//RE Global//Availability//EN';
 const DAY_RE = /^\d{4}-\d{2}-\d{2}$/;
 
 // Text values: escape \ ; , and newlines (RFC 5545 3.3.11).

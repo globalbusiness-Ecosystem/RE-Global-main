@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { QR_PAYMENT_LABELS, qp, qrMessages } from '@/lib/qr-payment-labels';
 
 const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'] as const;

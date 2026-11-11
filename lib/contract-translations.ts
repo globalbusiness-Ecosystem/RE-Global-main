@@ -147,7 +147,7 @@ export function contractDir(lang: NavLanguage): 'ltr' | 'rtl' {
   return lang === 'en' ? 'ltr' : T[lang].dir;
 }
 
-export interface TranslatableContract {
+interface TranslatableContract {
   id: string;
   contractText?: string;
   propertyId: string;

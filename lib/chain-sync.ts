@@ -3,7 +3,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { repairPlatformKeys } from '@/lib/signing-keys';
 import { anchorContract, createMissingCardContracts, recordContract } from '@/lib/card-contract';
 
-export type ChainSyncResult = { created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number; errors: string[]; keysRepaired: number };
+type ChainSyncResult = { created: number; createdFailed: number; anchored: number; recorded: number; failed: number; total: number; errors: string[]; keysRepaired: number };
 
 /**
  * Brings card contracts up to date on the blockchain (up to `max` per run): creates contracts that are missing, fixes old signing keys,

@@ -36,7 +36,7 @@ export function parseStayInfo(b: unknown): { ok: true; info: StayInfo } | { ok: 
   return { ok: true, info };
 }
 
-export interface StayStrings { checkIn: string; checkOut: string; guests: string; minStay: string; maxStay: string }
+interface StayStrings { checkIn: string; checkOut: string; guests: string; minStay: string; maxStay: string }
 // {n} is replaced by the guest limit.
 export const STAY_I18N: Record<NavLanguage, StayStrings> = {
   en: { checkIn: 'Check-in from', checkOut: 'Check-out until', guests: 'Up to {n} guests', minStay: 'Minimum stay: {n} nights', maxStay: 'Maximum stay: {n} nights' },

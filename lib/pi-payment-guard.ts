@@ -6,7 +6,7 @@ import { rateLimited } from '@/lib/rate-guard';
 
 const PI_API = 'https://api.minepi.com/v2';
 
-export interface PaymentContext {
+interface PaymentContext {
   user: AuthenticatedPiUser;
   paymentId: string;
   payment: PiPayment;

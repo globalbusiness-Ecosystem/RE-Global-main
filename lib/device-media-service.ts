@@ -5,7 +5,7 @@ import { authHeaders } from '@/lib/api-token';
  * Supports iOS, Android, and desktop browsers
  */
 
-export interface DeviceMediaConfig {
+interface DeviceMediaConfig {
   enableCamera?: boolean;
   enableMicrophone?: boolean;
   imageQuality?: number; // 0.1 - 1.0
@@ -25,7 +25,7 @@ export interface CapturedMedia {
   };
 }
 
-export interface MediaError {
+interface MediaError {
   code: string;
   message: string;
   recoveryHint?: string;

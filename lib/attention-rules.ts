@@ -38,7 +38,7 @@ export type AttentionInput = {
 export type AttentionItem = { id: string; level: 'bad' | 'warn'; text: string; tab: 'dashboard' | 'properties' | 'payments' | 'users' | 'content' };
 
 /** A person waiting this long to be verified counts as late. */
-export const KYC_LATE_HOURS = 48;
+const KYC_LATE_HOURS = 48;
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
 

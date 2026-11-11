@@ -8,7 +8,7 @@ export const isRtl = (l: SeoLang) => l === 'ar' || l === 'ur';
 
 export const LANG_NAMES: Record<SeoLang, string> = { en: 'English', ar: 'العربية', fr: 'Français', es: 'Español', pt: 'Português', ur: 'اردو', zh: '中文' };
 
-export type SeoStrings = {
+type SeoStrings = {
   bed: string; bath: string; sold: string; openApp: string; viewOnMap: string;
   propertiesIn: (country: string) => string;
   browse: (country: string) => string;

@@ -1,7 +1,7 @@
 import { hasValidCoords } from './map-focus';
 
 // What is missing from a listing, so the admin sees at a glance what visitors will not get.
-export type Gap = 'image' | 'price' | 'coords' | 'country' | 'description' | 'translations';
+type Gap = 'image' | 'price' | 'coords' | 'country' | 'description' | 'translations';
 
 /** Gaps that break something for the visitor (no photo, no price to pay, 📍 button disabled). */
 export const CRITICAL_GAPS: readonly Gap[] = ['image', 'price', 'coords'];

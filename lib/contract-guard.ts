@@ -2,8 +2,8 @@
 
 import { checkPropertyPaymentIntent } from '@/lib/payment-rules';
 
-export const ALLOWED_CONTRACT_TYPES = ['buy', 'rent', 'invest', 'tokenized'] as const;
-export type ContractType = (typeof ALLOWED_CONTRACT_TYPES)[number];
+const ALLOWED_CONTRACT_TYPES = ['buy', 'rent', 'invest', 'tokenized'] as const;
+type ContractType = (typeof ALLOWED_CONTRACT_TYPES)[number];
 
 const PAYMENT_ID_RE = /^[A-Za-z0-9_-]{8,128}$/;
 const TXID_RE = /^[A-Za-z0-9]{16,128}$/;
@@ -37,7 +37,7 @@ export interface PiPayment {
   transaction?: { txid?: string } | null;
 }
 
-export interface PaymentCheck {
+interface PaymentCheck {
   ok: boolean;
   status?: number;
   error?: string;

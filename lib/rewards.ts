@@ -12,8 +12,8 @@ export type Rules = {
   benefits: Record<TierId, string>;
 };
 
-export const POINTS_MAX = 10_000;
-export const TIER_MAX = 10_000_000;
+const POINTS_MAX = 10_000;
+const TIER_MAX = 10_000_000;
 export const BENEFIT_MAX = 200;
 // At most this many invited friends are checked and rewarded per member.
 export const REFERRAL_CAP = 50;
@@ -86,7 +86,7 @@ export const countStays = (rows: { status?: unknown; end?: unknown }[], today: s
 export const countPurchases = (rows: { status?: unknown; type?: unknown }[]): number =>
   rows.filter((r) => r.status === 'completed' && typeof r.type === 'string' && PURCHASE_TYPES.includes(r.type)).length;
 
-export interface RewardStrings {
+interface RewardStrings {
   title: string; points: string; unit: string; levels: string; yourLevel: string; nextLevel: string; topLevel: string; howTitle: string;
   stay: string; purchase: string; review: string; perEach: string; benefits: string; yourActivity: string; start: string; signIn: string; loadError: string; loading: string;
   bronze: string; silver: string; gold: string; platinum: string; from: string;

@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 import { DAY_MS, parseDay, type BookingDates } from './booking-rules';
 
-export const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
+const isoDay = (ms: number) => new Date(ms).toISOString().slice(0, 10);
 
 // First day of the week by language: Saturday for Arabic and Urdu, Monday for French, Spanish and Portuguese, Sunday otherwise.
 export const weekStartFor = (lang: string): number => (lang === 'ar' || lang === 'ur' ? 6 : lang === 'fr' || lang === 'es' || lang === 'pt' ? 1 : 0);
@@ -31,7 +31,7 @@ export function busyNights(busy: BookingDates[]): Set<string> {
   return out;
 }
 
-export type Selection = { start: string; end: string };
+type Selection = { start: string; end: string };
 
 // A tap on a day. First tap = check-in; second tap later in the same free stretch = check-out; any other tap starts over.
 export function applyPick(sel: Selection, day: string, taken: Set<string>, today: string): Selection {
@@ -65,7 +65,7 @@ export function weekdayLabels(lang: string, weekStart: number): string[] {
   return out;
 }
 
-export interface CalendarStrings { prev: string; next: string; booked: string }
+interface CalendarStrings { prev: string; next: string; booked: string }
 export const CALENDAR_I18N: Record<NavLanguage, CalendarStrings> = {
   en: { prev: 'Previous month', next: 'Next month', booked: 'Booked' },
   ar: { prev: 'الشهر اللي فات', next: 'الشهر الجاي', booked: 'محجوز' },

@@ -3,7 +3,7 @@ import type { NavLanguage } from './nav-i18n';
 // Printable booking receipt for a guest. Pure: builds one self-contained HTML page (no scripts).
 // Every value that comes from a user or a listing is escaped. The guest saves it as PDF with the browser's print.
 
-export interface ReceiptStrings {
+interface ReceiptStrings {
   title: string; reference: string; payment: string; property: string; checkIn: string; checkOut: string; nights: string;
   guests: string; checkInTime: string; checkOutTime: string; guest: string; total: string; status: string; confirmed: string;
   issued: string; policy: string; saveHint: string;

@@ -1,11 +1,11 @@
 // Dated bookings for rent (price = per month) and hotel (price = per night) listings.
 // Pure rules: no Firebase, safe to import from the browser and the server.
 
-export const BOOKING_TYPES = ['rent', 'hotel'];
+const BOOKING_TYPES = ['rent', 'hotel'];
 export const isBookingType = (t: unknown) => typeof t === 'string' && BOOKING_TYPES.includes(t);
 export const HOLD_MS = 15 * 60 * 1000;
 export const DAY_MS = 24 * 60 * 60 * 1000;
-export const NIGHT_LIMITS: Record<string, { min: number; max: number }> = {
+const NIGHT_LIMITS: Record<string, { min: number; max: number }> = {
   hotel: { min: 1, max: 60 },
   rent: { min: 30, max: 365 },
 };
@@ -26,10 +26,10 @@ export function parseDay(s: unknown): number | null {
   return new Date(ms).toISOString().slice(0, 10) === s ? ms : null;
 }
 
-export const dayStart = (nowMs: number) => Math.floor(nowMs / DAY_MS) * DAY_MS;
+const dayStart = (nowMs: number) => Math.floor(nowMs / DAY_MS) * DAY_MS;
 
 export type BookingErrorCode = 'invalid' | 'past' | 'min' | 'max';
-export type BookingCheck =
+type BookingCheck =
   | { ok: true; start: string; end: string; nights: number }
   | { ok: false; error: string; code: BookingErrorCode; limit?: number };
 
@@ -111,11 +111,11 @@ export function bookingTotals(rows: { status: unknown; amount: number; end: stri
 export const isCancellableBooking = (status: unknown) => status === 'confirmed' || status === 'review';
 
 // ---- Dates the admin closes on a hotel / rental (maintenance, owner stay, ...) ----
-export const BLOCK_MAX_NIGHTS = 365;
-export const BLOCK_NOTE_MAX = 120;
+const BLOCK_MAX_NIGHTS = 365;
+const BLOCK_NOTE_MAX = 120;
 export const isBlock = (r: Pick<Range, 'block'>) => r.block === true;
 
-export type BlockCheck = { ok: true; start: string; end: string; nights: number; note: string } | { ok: false; error: string };
+type BlockCheck = { ok: true; start: string; end: string; nights: number; note: string } | { ok: false; error: string };
 
 // Today or later, check-out after check-in, at most a year. The note is plain text and optional.
 export function validateBlock(raw: unknown, nowMs: number): BlockCheck {

@@ -11,7 +11,7 @@ export const SIM_LABELS = {
   certify: { en: 'Certifying on-chain', ar: 'توثيق على البلوكتشين', fr: 'Certification sur la blockchain', es: 'Certificando en la blockchain', pt: 'Certificando na blockchain', ur: 'بلاک چین پر تصدیق', zh: '链上认证' },
 } satisfies Record<string, Row>;
 
-export type SimLabelKey = keyof typeof SIM_LABELS;
+type SimLabelKey = keyof typeof SIM_LABELS;
 
 export function sim(key: SimLabelKey, language: string): string {
   const row = SIM_LABELS[key] as Row;

@@ -3,9 +3,9 @@ import type { CardProvider } from './provider';
 import { isBookingType, stayLimits, validateBooking } from '@/lib/booking-rules';
 import { parseGuests } from '@/lib/guests';
 
-export interface StayPlan { type: string; start: string; end: string; nights: number; guests: number }
+interface StayPlan { type: string; start: string; end: string; nights: number; guests: number }
 
-export type CheckoutPlan =
+type CheckoutPlan =
   | { ok: true; quote: CardQuote; provider: CardProvider; stay?: StayPlan }
   | { ok: false; status: number; error: string };
 

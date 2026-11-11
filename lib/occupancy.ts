@@ -13,7 +13,7 @@ export const parseWindow = (raw: unknown): number => {
 const dayAt = (fromMs: number, i: number) => new Date(fromMs + i * DAY_MS).toISOString().slice(0, 10);
 const covering = (live: Range[], day: string) => live.filter((r) => r.start <= day && day < r.end);
 
-export type Occupancy = { booked: number; blocked: number; free: number; sellable: number; rate: number | null };
+type Occupancy = { booked: number; blocked: number; free: number; sellable: number; rate: number | null };
 
 export function occupancy(ranges: Range[], fromDay: string, days: number, nowMs: number): Occupancy {
   const from = parseDay(fromDay);
@@ -54,7 +54,7 @@ export function overallRate(rows: { booked: number; sellable: number }[]): numbe
 export const HINT_MIN_SELLABLE = 7;
 export const HINT_HIGH = 85;
 export const HINT_LOW = 25;
-export type PriceHint = 'raise' | 'lower' | null;
+type PriceHint = 'raise' | 'lower' | null;
 
 export function priceHint(rate: number | null, sellable: number): PriceHint {
   if (rate === null || !Number.isFinite(rate) || sellable < HINT_MIN_SELLABLE) return null;

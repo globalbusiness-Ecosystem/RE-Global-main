@@ -8,7 +8,7 @@ export interface InvestmentProfile {
   currency: 'PI' | 'USD' | 'AED' | 'EGP' | 'TRY';
 }
 
-export interface AdvancedRecommendation {
+interface AdvancedRecommendation {
   portfolio: Array<{
     market: string;
     percentage: number;
@@ -21,7 +21,7 @@ export interface AdvancedRecommendation {
   actions: string[];
 }
 
-export class AladdinAdvanced {
+class AladdinAdvanced {
   async getPortfolioRecommendation(profile: InvestmentProfile): Promise<AdvancedRecommendation> {
     const allocation = this.calculateAllocation(profile);
     const analysis = this.generateAnalysis(profile, allocation);

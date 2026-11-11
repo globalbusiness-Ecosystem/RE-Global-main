@@ -1,12 +1,12 @@
 // Rules for properties that can only be sold once (buy, off-plan, abroad).
 // Rent / hotel / invest / tokenized are not exclusive: they need dates or shares (later phases).
 
-export const EXCLUSIVE_TYPES = ['buy', 'offplan', 'abroad'];
+const EXCLUSIVE_TYPES = ['buy', 'offplan', 'abroad'];
 export const RESERVE_MS = 15 * 60 * 1000;
 
 export const isExclusiveType = (t: unknown) => typeof t === 'string' && EXCLUSIVE_TYPES.includes(t);
 
-export type Reservation = { uid: string; expiresAtMs: number } | null;
+type Reservation = { uid: string; expiresAtMs: number } | null;
 
 // May this user start paying for the property right now?
 export function decideReservation(

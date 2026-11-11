@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface PaymentStrings {
+interface PaymentStrings {
   errorLoadingWallet: string;
   all: string;
   buy: string;

@@ -16,7 +16,7 @@ async function hasActivity(uid: string, username: string): Promise<boolean> {
   return b.some((x) => x.status === 'confirmed') || c.some((x) => x.status === 'completed');
 }
 
-export type RedeemResult = { ok: true } | { ok: false; status: number; error: ReferralError };
+type RedeemResult = { ok: true } | { ok: false; status: number; error: ReferralError };
 
 // A new customer enters a friend's code once. The server checks everything: the code exists, it is not their
 // own, they have not used one, they have no bookings or purchases yet, and the friend did not use their code.

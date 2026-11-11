@@ -1,5 +1,4 @@
 import { describe, it, expect } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { PROPERTY_DETAILS_LABELS, pd, pickListingText } from '@/lib/property-details-labels';
 
 const LANGS = ['en', 'ar', 'fr', 'es', 'pt', 'ur', 'zh'] as const;

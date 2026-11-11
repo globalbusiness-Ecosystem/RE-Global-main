@@ -2,7 +2,7 @@ import { Keypair } from '@stellar/stellar-sdk';
 import crypto from 'crypto';
 import { cardParty, type NameMode } from '@/lib/contract-identity';
 
-export interface ContractInput {
+interface ContractInput {
   contractId: string;
   propertyId: string;
   propertyTitle: string;
@@ -23,7 +23,7 @@ export interface ContractInput {
 }
 
 // Extra SUBJECT lines for dated stays and share purchases. Empty for a plain sale, so those contracts read as before.
-export function subjectDetails(c: Pick<ContractInput, 'booking' | 'shares'>): string {
+function subjectDetails(c: Pick<ContractInput, 'booking' | 'shares'>): string {
   const lines: string[] = [];
   if (c.booking) lines.push(`Stay: ${c.booking.start} to ${c.booking.end} (${c.booking.nights} night${c.booking.nights === 1 ? '' : 's'}; check-out on the end date)`);
   if (c.shares) {
@@ -61,7 +61,7 @@ TERMS
 6. Governing law. Upon legal finalization, this contract shall be governed by ${governingLaw}.${extra}`;
 }
 
-export interface ResaleContractInput {
+interface ResaleContractInput {
   contractId: string;
   propertyId: string;
   propertyTitle: string;

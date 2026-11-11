@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { X, Eye, Pause, Play, Image as ImageIcon } from 'lucide-react';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { VRPropertyTour } from '@/lib/vr-tour-types';

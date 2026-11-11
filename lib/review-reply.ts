@@ -3,7 +3,7 @@ import type { NavLanguage } from './nav-i18n';
 // The host's public reply under a guest review. Pure rules: no Firebase, safe for the browser and the server.
 export const REPLY_MAX = 400;
 
-export type ReplyCheck = { ok: true; reply: string } | { ok: false; error: string };
+type ReplyCheck = { ok: true; reply: string } | { ok: false; error: string };
 
 // An empty reply is allowed: it removes the reply.
 export function validateReply(raw: unknown): ReplyCheck {
@@ -12,7 +12,7 @@ export function validateReply(raw: unknown): ReplyCheck {
   return { ok: true, reply };
 }
 
-export const REPLY_I18N: Record<NavLanguage, string> = {
+const REPLY_I18N: Record<NavLanguage, string> = {
   en: 'Reply from the host', ar: 'رد الإدارة', fr: 'Réponse de l’établissement', es: 'Respuesta del anfitrión',
   pt: 'Resposta do anfitrião', ur: 'میزبان کا جواب', zh: '房东回复',
 };

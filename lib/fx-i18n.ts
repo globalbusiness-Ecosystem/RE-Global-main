@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface FxStrings { title: string; note: string; ratesBy: string }
+interface FxStrings { title: string; note: string; ratesBy: string }
 
 export const FX_I18N: Record<NavLanguage, FxStrings> = {
   en: { title: 'Show prices in my currency', note: 'An estimate only. You always pay in Pi.', ratesBy: 'Rates By Exchange Rate API' },

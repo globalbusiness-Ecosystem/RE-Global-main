@@ -15,7 +15,7 @@ import { adminDb } from '@/lib/firebase-admin';
 // - If Firestore is unreachable/unconfigured (local dev, outage) we fall back to a
 //   per-instance in-memory counter instead of failing requests.
 
-export interface RateLimitResult {
+interface RateLimitResult {
   ok: boolean;
   /** Seconds until the window resets (only meaningful when ok === false). */
   retryAfter: number;

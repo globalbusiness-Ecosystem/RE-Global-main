@@ -3,14 +3,14 @@
  * Ultra-reliable implementation that works on all devices
  */
 
-export interface VoiceConfig {
+interface VoiceConfig {
   language: 'en' | 'ar';
   rate?: number;
   pitch?: number;
   volume?: number;
 }
 
-export interface VoiceState {
+interface VoiceState {
   isListening: boolean;
   isSpeaking: boolean;
   isProcessing: boolean;

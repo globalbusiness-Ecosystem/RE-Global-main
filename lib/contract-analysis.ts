@@ -10,7 +10,7 @@ export const MAX_CONTRACT_CHARS = 40_000;
 export const MAX_CONTRACT_FILE_BYTES = 3 * 1024 * 1024; // Vercel functions reject request bodies over 4.5 MB (base64 adds a third)
 export const MAX_CONTRACT_BODY_BYTES = 4_400_000; // a 3 MB file as base64 + a little text
 
-export type ContractMediaType = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/webp';
+type ContractMediaType = 'application/pdf' | 'image/jpeg' | 'image/png' | 'image/webp';
 
 // First bytes of each accepted file type, as base64 (a base64 prefix identifies the file whatever the browser claims).
 const MAGIC: Record<ContractMediaType, string> = {
@@ -20,7 +20,7 @@ const MAGIC: Record<ContractMediaType, string> = {
   'image/webp': 'UklGR', // RIFF....WEBP
 };
 
-export type ContractInput =
+type ContractInput =
   | { ok: true; kind: 'text'; text: string }
   | { ok: true; kind: 'file'; mediaType: ContractMediaType; data: string }
   | { ok: false; error: string; status: number };
@@ -70,7 +70,7 @@ export const CONTRACT_SECTIONS = {
   questions: { en: 'Questions to ask before signing', ar: 'أسئلة قبل التوقيع', fr: 'Questions à poser avant de signer', es: 'Preguntas antes de firmar', pt: 'Perguntas antes de assinar', ur: 'دستخط سے پہلے پوچھنے کے سوالات', zh: '签署前应询问的问题' },
 } satisfies Record<string, Row>;
 
-export type ContractSectionKey = keyof typeof CONTRACT_SECTIONS;
+type ContractSectionKey = keyof typeof CONTRACT_SECTIONS;
 export const CONTRACT_SECTION_ORDER = Object.keys(CONTRACT_SECTIONS) as ContractSectionKey[];
 
 export const CONTRACT_RISK_WORDS = {
@@ -126,7 +126,7 @@ export function wrapContractText(text: string): string {
   return `<contract>\n${safe}\n</contract>`;
 }
 
-export type ContractContentBlock =
+type ContractContentBlock =
   | { type: 'text'; text: string }
   | { type: 'document'; source: { type: 'base64'; media_type: 'application/pdf'; data: string } }
   | { type: 'image'; source: { type: 'base64'; media_type: 'image/jpeg' | 'image/png' | 'image/webp'; data: string } };

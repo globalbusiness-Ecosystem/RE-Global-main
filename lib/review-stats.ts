@@ -1,7 +1,7 @@
 // Admin review overview: how guests rate each property, worst first so problems stand out. Pure helpers.
 export interface ReviewRow { propertyTitle: string; rating: number; hidden: boolean; reply: string }
-export interface PropertyRating { title: string; count: number; avg: number }
-export interface ReviewOverview { count: number; avg: number; unanswered: number; properties: PropertyRating[] }
+interface PropertyRating { title: string; count: number; avg: number }
+interface ReviewOverview { count: number; avg: number; unanswered: number; properties: PropertyRating[] }
 
 export const LOW_RATING = 3.5;
 const round1 = (n: number) => Math.round(n * 10) / 10;

@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface SettingsStrings {
+interface SettingsStrings {
   backToHome: string;
   settings: string;
   language: string;

@@ -1,9 +1,8 @@
-import { shareUrl } from './share';
 
-export type ShareResult = 'shared' | 'copied' | 'failed' | 'cancelled';
+type ShareResult = 'shared' | 'copied' | 'failed' | 'cancelled';
 
 // The browser pieces, injectable so the logic can be tested without a browser.
-export interface ShareEnv {
+interface ShareEnv {
   share?: (data: { title: string; url: string }) => Promise<void>;
   copy?: (text: string) => Promise<void>;
 }
@@ -38,4 +37,3 @@ export function browserShareEnv(): ShareEnv {
   };
 }
 
-export { shareUrl };

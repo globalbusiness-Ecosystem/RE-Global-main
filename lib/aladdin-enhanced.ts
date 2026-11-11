@@ -1,7 +1,6 @@
 import { aladdinConfig } from './aladdin-system-config';
 import { aladdinKnowledgeBase } from './aladdin-knowledge-base';
 import { predictiveAnalytics } from './aladdin-predictive';
-import { portfolioAnalyzer } from './aladdin-portfolio-analysis';
 import { aladdinAdvanced } from './aladdin-advanced';
 
 /**
@@ -9,7 +8,7 @@ import { aladdinAdvanced } from './aladdin-advanced';
  * Integrated with comprehensive knowledge, predictive analytics, and portfolio management
  */
 
-export interface EnhancedAladdinResponse {
+interface EnhancedAladdinResponse {
   message: string;
   language: 'en' | 'ar';
   analysis: AnalysisData;
@@ -20,7 +19,7 @@ export interface EnhancedAladdinResponse {
   cta: string;
 }
 
-export interface AnalysisData {
+interface AnalysisData {
   marketInsights: string;
   financialMetrics: Record<string, any>;
   strategicAdvice: string;
@@ -388,4 +387,3 @@ class EnhancedAladdin {
 }
 
 export const enhancedAladdin = new EnhancedAladdin();
-export default EnhancedAladdin;

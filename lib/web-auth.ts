@@ -7,7 +7,7 @@ import 'server-only';
 const JWT_SHAPE = /^[\w-]{10,}\.[\w-]{10,}\.[\w-]{10,}$/;
 export const looksLikeJwt = (t: string): boolean => JWT_SHAPE.test(t);
 
-export interface WebIdentity { uid: string; username: string }
+interface WebIdentity { uid: string; username: string }
 
 type Claims = { uid?: unknown; email_verified?: unknown; firebase?: { sign_in_provider?: unknown } };
 

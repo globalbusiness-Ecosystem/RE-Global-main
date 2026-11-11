@@ -3,7 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { parseHandle } from '@/lib/handle';
 
-export type ClaimResult = { ok: true; handle: string; code: string } | { ok: false; error: 'invalid' | 'taken' | 'already' | 'not_web' };
+type ClaimResult = { ok: true; handle: string; code: string } | { ok: false; error: 'invalid' | 'taken' | 'already' | 'not_web' };
 
 /** The username a web account chose (and its invite code, which is the same word in capitals). Null when none was chosen yet. */
 export async function getHandle(username: string): Promise<{ handle: string; code: string } | null> {

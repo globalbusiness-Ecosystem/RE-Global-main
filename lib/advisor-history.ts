@@ -1,7 +1,7 @@
 // Aladdin's memory inside one chat: which earlier messages are sent along with a new question, and how they are cleaned.
 // The server rebuilds the list itself from what the browser sends, because the browser is not trusted.
 
-export type HistoryMessage = { role: 'user' | 'assistant'; content: string };
+type HistoryMessage = { role: 'user' | 'assistant'; content: string };
 
 export const MAX_HISTORY_MESSAGES = 12;
 export const MAX_HISTORY_USER_CHARS = 2000;

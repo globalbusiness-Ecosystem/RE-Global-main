@@ -8,7 +8,7 @@ import { canMoveKyc, type KycRequestInput, type KycStatus } from './kyc-rules';
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 140;
 const col = () => adminDb.collection('kyc');
 
-export interface KycRecord { status: KycStatus; rejectReason?: string }
+interface KycRecord { status: KycStatus; rejectReason?: string }
 
 export async function getKyc(uid: string): Promise<KycRecord> {
   if (!okId(uid)) return { status: 'none' };

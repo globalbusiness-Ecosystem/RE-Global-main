@@ -52,7 +52,7 @@ const createHotspot = (pitch: number, yaw: number, targetRoom: number, text: str
 });
 
 // Room definitions with hotspot positions and property images
-export const DEMO_ROOMS: VRRoom[] = [
+const DEMO_ROOMS: VRRoom[] = [
   {
     id: 0,
     name: 'Living Room',
@@ -141,7 +141,7 @@ export const DEMO_PROPERTY: VRPropertyTour = {
 
 // Multiple test properties - all share the same placeholder room images/tour for now.
 // Replace `propertyName`, `price`, `piPrice` per property once real data/photos are ready.
-export const TEST_PROPERTIES: VRPropertyTour[] = [
+const TEST_PROPERTIES: VRPropertyTour[] = [
   { propertyId: 'tour-1', propertyName: 'Luxury Downtown Penthouse', rooms: DEMO_ROOMS, price: 850000, piPrice: 85000 },
   { propertyId: 'tour-2', propertyName: 'Modern Apartment Manhattan', rooms: DEMO_ROOMS, price: 650000, piPrice: 65000 },
   { propertyId: 'tour-3', propertyName: 'Beachfront Villa Thailand', rooms: DEMO_ROOMS, price: 450000, piPrice: 45000 },
@@ -150,11 +150,11 @@ export const TEST_PROPERTIES: VRPropertyTour[] = [
   { propertyId: 'tour-6', propertyName: 'Hillside Estate Paris', rooms: DEMO_ROOMS, price: 920000, piPrice: 92000 },
 ];
 
-export const getTestPropertyById = (id: string): VRPropertyTour =>
+const getTestPropertyById = (id: string): VRPropertyTour =>
   TEST_PROPERTIES.find((p) => p.propertyId === id) || DEMO_PROPERTY;
 
 // Hotspot styling configuration
-export const HOTSPOT_STYLES = {
+const HOTSPOT_STYLES = {
   width: '50px',
   height: '50px',
   backgroundColor: 'rgba(245, 158, 11, 0.3)',
@@ -173,7 +173,7 @@ export const HOTSPOT_STYLES = {
 };
 
 // CSS Animation for glowing hotspots
-export const HOTSPOT_ANIMATION = `
+const HOTSPOT_ANIMATION = `
   @keyframes pulse-glow {
     0%, 100% {
       box-shadow: 0 0 10px rgba(245, 158, 11, 0.5), inset 0 0 10px rgba(245, 158, 11, 0.2);

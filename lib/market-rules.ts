@@ -3,7 +3,7 @@
 
 export const RESALE_FEE_PCT = 2;
 export const LISTING_RESERVE_MS = 15 * 60 * 1000;
-export const MAX_PRICE_PER_SHARE = 1_000_000_000;
+const MAX_PRICE_PER_SHARE = 1_000_000_000;
 
 const toCents = (n: number) => Math.round(n * 100);
 
@@ -75,7 +75,7 @@ export const ownedShares = (bought: number, received: number, sold: number) => M
 // Shares the user can still put on sale (owned minus what is already listed).
 export const availableToList = (owned: number, listed: number) => Math.max(0, owned - listed);
 
-export type ListingState = {
+type ListingState = {
   status?: unknown; sellerUid?: unknown;
   reservedBy?: unknown; reservedPaymentId?: unknown; reservedUntilMs?: unknown;
 };

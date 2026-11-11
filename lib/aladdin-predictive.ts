@@ -1,4 +1,4 @@
-export interface MarketForecast {
+interface MarketForecast {
   market: string;
   currentPrice: number;
   forecastedPrice6M: number;
@@ -8,7 +8,7 @@ export interface MarketForecast {
   alerts: string[];
 }
 
-export class PredictiveAnalytics {
+class PredictiveAnalytics {
   private historicalData = {
     'Dubai': { trend: 0.08, volatility: 0.12 },
     'Cairo': { trend: 0.12, volatility: 0.20 },

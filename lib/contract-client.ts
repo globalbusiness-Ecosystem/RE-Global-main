@@ -4,10 +4,10 @@ import type { ContractUiKey } from './contract-ui-labels';
 // server answer maps to. Pure functions, no browser APIs, so they are tested. The server checks everything again.
 
 export const CLIENT_MAX_FILE_BYTES = 3 * 1024 * 1024;
-export const CLIENT_MAX_TEXT_CHARS = 40_000;
-export const CLIENT_MAX_TXT_BYTES = 200_000;
+const CLIENT_MAX_TEXT_CHARS = 40_000;
+const CLIENT_MAX_TXT_BYTES = 200_000;
 
-export type PickedFile =
+type PickedFile =
   | { ok: true; kind: 'pdf' | 'image' | 'txt' }
   | { ok: false; error: ContractUiKey };
 
@@ -39,7 +39,7 @@ export function contractErrorKey(status: number): ContractUiKey {
   return 'errFailed';
 }
 
-export type ContractRequest = {
+type ContractRequest = {
   language: string;
   question?: string;
   text?: string;

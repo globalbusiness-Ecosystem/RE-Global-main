@@ -16,7 +16,7 @@ export const MORE_PAGE_LABELS = {
   featuredProperties: { en: '⭐ Featured Properties', ar: '⭐ عقارات مميزة', fr: '⭐ Biens à la une', es: '⭐ Propiedades destacadas', pt: '⭐ Imóveis em destaque', ur: '⭐ نمایاں جائیدادیں', zh: '⭐ 精选房产' },
 } satisfies Record<string, Row>;
 
-export type MorePageLabelKey = keyof typeof MORE_PAGE_LABELS;
+type MorePageLabelKey = keyof typeof MORE_PAGE_LABELS;
 
 export function mpl(key: MorePageLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface DashboardStrings {
+interface DashboardStrings {
   title: string;
   welcomeBack: string;
   privacyNote: string;

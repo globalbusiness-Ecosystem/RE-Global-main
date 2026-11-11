@@ -3,7 +3,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect } from 'react';
-import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, Upload, FileText } from 'lucide-react';
+import { X, Send, Bot, Loader, Volume2, VolumeX, Camera, FileText } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import PropertyPhotoAnalysisCard from '@/components/property-photo-analysis-card';
 import { authHeaders } from '@/lib/api-token';

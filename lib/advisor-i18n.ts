@@ -25,7 +25,7 @@ export const ADVISOR_LABELS = {
   tipHeading: { en: '💡 Pi Investment Tip:', ar: '💡 نصيحة استثمار Pi:', fr: '💡 Conseil d\'investissement Pi :', es: '💡 Consejo de inversión Pi:', pt: '💡 Dica de investimento Pi:', ur: '💡 Pi سرمایہ کاری کا مشورہ:', zh: '💡 Pi 投资提示：' },
 } satisfies Record<string, Row>;
 
-export type AdvisorLabelKey = keyof typeof ADVISOR_LABELS;
+type AdvisorLabelKey = keyof typeof ADVISOR_LABELS;
 
 export const ADVISOR_LANGUAGE_NAMES: Row = {
   en: 'English', ar: 'Arabic', fr: 'French', es: 'Spanish', pt: 'Portuguese', ur: 'Urdu', zh: 'Simplified Chinese',

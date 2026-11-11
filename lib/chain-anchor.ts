@@ -22,7 +22,7 @@ export function buildAnchorTx(secretKey: string, sequence: string, hashHex: stri
   return { xdr: tx.toEnvelope().toXDR('base64'), txid: tx.hash().toString('hex') };
 }
 
-export type AnchorResult = { ok: true; txid: string; ledger?: number } | { ok: false; error: 'bad_hash' | 'account' | 'rejected' | 'network' };
+type AnchorResult = { ok: true; txid: string; ledger?: number } | { ok: false; error: 'bad_hash' | 'account' | 'rejected' | 'network' };
 
 /** Anchors one fingerprint. Never throws; the error is a short code (no secrets, no raw responses). */
 export async function anchorHash(secretKey: string, hashHex: string, opts: { horizon?: string; fee?: string; timeoutMs?: number } = {}): Promise<AnchorResult> {

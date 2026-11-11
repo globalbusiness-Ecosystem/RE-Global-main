@@ -1,6 +1,6 @@
 // Pure helpers of the public blockchain explorer (no network, no secrets).
 
-export type QueryKind = 'hash' | 'id' | 'invalid';
+type QueryKind = 'hash' | 'id' | 'invalid';
 
 const HEX64 = /^[0-9a-fA-F]{64}$/;
 const ID = /^[A-Za-z0-9_-]{6,80}$/;

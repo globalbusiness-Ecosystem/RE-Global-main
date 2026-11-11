@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface ContractsStrings {
+interface ContractsStrings {
   verifyOnStellar: string;
   verifying: string;
   confirmedOnChainLedger: (ledger: string | number) => string;

@@ -16,7 +16,7 @@ export function referralCodeOf(username: string): string {
   return Math.abs(hash).toString(36).toUpperCase().slice(0, 8);
 }
 
-export type BuyerDisplay = { kind: 'name' | 'code'; value: string };
+type BuyerDisplay = { kind: 'name' | 'code'; value: string };
 
 /** What the contract text says about the buyer: the legal name (real-name choice) or the invite code (alias choice). Null for Pi contracts. */
 export function buyerDisplayFromText(text: string | undefined): BuyerDisplay | null {

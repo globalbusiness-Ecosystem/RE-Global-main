@@ -88,7 +88,7 @@ export function getLocalizedLocation(property: Property, language: string): stri
   return property.location;
 }
 
-export function getLocalizedDescription(property: Property, language: string): string {
+function getLocalizedDescription(property: Property, language: string): string {
   if (language === 'ar' && property.descriptionAr) return property.descriptionAr;
   return property.description || '';
 }

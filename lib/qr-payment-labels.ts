@@ -18,7 +18,7 @@ export const QR_PAYMENT_LABELS = {
   qrSystem: { en: 'QR System', ar: 'نظام QR', fr: 'Système QR', es: 'Sistema QR', pt: 'Sistema QR', ur: 'QR سسٹم', zh: '二维码系统' },
 } satisfies Record<string, Row>;
 
-export type QrPaymentKey = keyof typeof QR_PAYMENT_LABELS;
+type QrPaymentKey = keyof typeof QR_PAYMENT_LABELS;
 
 export function qp(key: QrPaymentKey, language: string, price = ''): string {
   const row = QR_PAYMENT_LABELS[key] as Row;

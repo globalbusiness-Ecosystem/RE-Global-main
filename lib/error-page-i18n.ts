@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface ErrorPageStrings {
+interface ErrorPageStrings {
   errorTitle: string;
   errorBody: string;
   retry: string;

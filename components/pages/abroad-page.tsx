@@ -8,8 +8,8 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
-import { Globe, Bed, Maximize2, Video, Heart, MapPin, Eye } from 'lucide-react';
-import { useMemo, memo, useState } from 'react';
+import { Bed, Maximize2, Video, Heart, MapPin } from 'lucide-react';
+import { useMemo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';

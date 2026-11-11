@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface MapStrings {
+interface MapStrings {
   geoNotSupported: string;
   yourLocation: string;
   locateError: string;

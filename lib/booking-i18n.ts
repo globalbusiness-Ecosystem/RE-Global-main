@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 import type { BookingErrorCode } from './booking-rules';
 
-export interface BookingStrings {
+interface BookingStrings {
   stayDates: string; rentalPeriod: string; checkIn: string; checkOut: string; from: string; to: string;
   night: string; nights: string; total: string; taken: string; perNight: string; perMonth: string;
   chooseDates: string; bookNow: string;

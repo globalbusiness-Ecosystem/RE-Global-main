@@ -23,7 +23,7 @@ export const ADVISOR_CHROME = {
   rateLimit: { en: 'Too many questions in a short time. Please wait a few minutes and try again.', ar: 'أسئلة كثيرة في وقت قصير. من فضلك انتظر بضع دقائق وحاول مرة أخرى.', fr: 'Trop de questions en peu de temps. Patientez quelques minutes et réessayez.', es: 'Demasiadas preguntas en poco tiempo. Espera unos minutos e inténtalo de nuevo.', pt: 'Perguntas demais em pouco tempo. Aguarde alguns minutos e tente novamente.', ur: 'تھوڑے وقت میں بہت زیادہ سوالات۔ براہ کرم چند منٹ انتظار کریں اور دوبارہ کوشش کریں۔', zh: '短时间内提问过多，请等待几分钟后重试。' },
 } satisfies Record<string, Row>;
 
-export type AdvisorChromeKey = keyof typeof ADVISOR_CHROME;
+type AdvisorChromeKey = keyof typeof ADVISOR_CHROME;
 
 export function ac(key: AdvisorChromeKey, language: string | undefined, vars: Record<string, string | number> = {}): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

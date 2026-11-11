@@ -17,7 +17,7 @@ import {
 import { db, waitForFirebaseAuth } from './firebase';
 import { toast } from 'sonner';
 
-export interface Property {
+interface Property {
   id: string;
   title: string;
   location: string;
@@ -31,7 +31,7 @@ export interface Property {
   updatedAt: Date;
 }
 
-export interface User {
+interface User {
   id: string;
   phoneNumber: string;
   email?: string;
@@ -42,7 +42,7 @@ export interface User {
   updatedAt: Date;
 }
 
-export interface Transaction {
+interface Transaction {
   id: string;
   userId: string;
   propertyId: string;
@@ -62,7 +62,7 @@ export interface Favorite {
   createdAt: Date;
 }
 
-export interface UserProfile {
+interface UserProfile {
   username: string;
   fullName: string;
   email: string;
@@ -79,7 +79,7 @@ export interface UserProfile {
   updatedAt: Date;
 }
 
-export interface UserPreferences {
+interface UserPreferences {
   username: string;
   notificationsEnabled: boolean;
   priceAlertsEnabled?: boolean;
@@ -546,7 +546,7 @@ class FirebaseDatabase {
   }
 }
 
-export const firebaseDB = new FirebaseDatabase();
+const firebaseDB = new FirebaseDatabase();
 
 // User-scoped reads/writes need the Firebase identity (see /api/auth/firebase-token).
 // Wait for the in-flight sign-in so the first request after login isn't rejected by the rules.

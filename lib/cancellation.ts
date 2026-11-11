@@ -10,7 +10,7 @@ import { DAY_MS, parseDay } from './booking-rules';
 
 export type CancellationPolicy = { freeDays: number; partialDays: number; partialPct: number };
 export const DEFAULT_POLICY: CancellationPolicy = { freeDays: 7, partialDays: 2, partialPct: 50 };
-export const MAX_FREE_DAYS = 90;
+const MAX_FREE_DAYS = 90;
 
 const int = (v: unknown) => (typeof v === 'string' && v.trim() === '' ? NaN : Number(v));
 
@@ -31,7 +31,7 @@ export const policyOf = (raw: unknown): CancellationPolicy => parsePolicy(raw) ?
 
 const toCents = (n: number) => Math.round(n * 100);
 
-export type RefundQuote = { allowed: boolean; reason?: 'status' | 'started'; days: number; pct: number; refund: number };
+type RefundQuote = { allowed: boolean; reason?: 'status' | 'started'; days: number; pct: number; refund: number };
 
 // What a guest gets back if they cancel today. Only confirmed stays that have not started can be cancelled.
 export function refundQuote(policy: CancellationPolicy, b: { status: unknown; start: string; amount: number }, today: string): RefundQuote {
@@ -45,7 +45,7 @@ export function refundQuote(policy: CancellationPolicy, b: { status: unknown; st
   return { allowed: true, days, pct, refund: Math.floor((toCents(amount) * pct) / 100) / 100 };
 }
 
-export interface CancelStrings {
+interface CancelStrings {
   policyTitle: string; policyFree: string; policyPartial: string; policyNone: string;
   button: string; refundFull: string; refundPart: string; refundNone: string;
   confirm: string; keep: string; working: string; done: string; error: string;

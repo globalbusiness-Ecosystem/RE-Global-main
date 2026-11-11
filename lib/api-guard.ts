@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { consumeRateLimit } from '@/lib/rate-limit';
 
-export interface GuardedUser {
+interface GuardedUser {
   uid: string;
   username: string;
 }

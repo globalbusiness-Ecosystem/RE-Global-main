@@ -1,5 +1,4 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { readFileSync } from 'node:fs';
 import { Timestamp } from 'firebase-admin/firestore';
 
 vi.mock('server-only', () => ({}));

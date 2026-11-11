@@ -11,7 +11,7 @@ describe('avatar shows everywhere it should', () => {
   });
   it('save and remove tell the other places', () => {
     const s = read('hooks/use-my-avatar.ts');
-    expect(s).toContain("export const AVATAR_EVENT = 're-avatar-changed'");
+    expect(s).toContain("const AVATAR_EVENT = 're-avatar-changed'");
     expect((s.match(/announce\(/g) || []).length).toBe(2);
     expect(s).toContain('addEventListener(AVATAR_EVENT');
     expect(s).toContain('removeEventListener(AVATAR_EVENT');

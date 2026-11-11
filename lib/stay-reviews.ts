@@ -6,7 +6,7 @@ import type { NavLanguage } from './nav-i18n';
 export const REVIEW_COMMENT_MAX = 500;
 export const REVIEW_LIST_MAX = 20;
 
-export type ReviewCheck = { ok: true; rating: number; comment: string } | { ok: false; error: string };
+type ReviewCheck = { ok: true; rating: number; comment: string } | { ok: false; error: string };
 
 export function validateReview(raw: unknown): ReviewCheck {
   const r = (raw && typeof raw === 'object' ? raw : {}) as Record<string, unknown>;
@@ -32,7 +32,7 @@ export function summarize(rows: { rating: number }[]): { count: number; avg: num
   return { count: ok.length, avg: Math.round((sum / ok.length) * 10) / 10 };
 }
 
-export interface ReviewStrings {
+interface ReviewStrings {
   title: string; count: string; rate: string; placeholder: string; submit: string; sending: string;
   thanks: string; reviewed: string; button: string; error: string; verified: string;
 }

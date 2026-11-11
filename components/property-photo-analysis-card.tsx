@@ -7,11 +7,9 @@ import { memo } from 'react';
 import { 
   Building2, 
   Zap, 
-  Home, 
   AlertCircle, 
   TrendingUp,
   CheckCircle2,
-  XCircle
 } from 'lucide-react';
 
 interface PropertyAnalysis {

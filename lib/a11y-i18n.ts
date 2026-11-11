@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface A11yStrings { skip: string; close: string }
+interface A11yStrings { skip: string; close: string }
 
 export const A11Y_I18N: Record<NavLanguage, A11yStrings> = {
   en: { skip: 'Skip to main content', close: 'Close' },

@@ -10,7 +10,7 @@ import { parseShares, sharesTotal, totalSharesOf } from '@/lib/share-rules';
 // property is not in Firestore (demo listings) or has no usable price (fee rule applies).
 // Throws when Firestore cannot be reached, or when a USD-priced property has no Pi rate set,
 // so callers fail closed instead of charging a wrong amount.
-export async function lookupExpectedAmount(propertyId: string): Promise<number | null> {
+async function lookupExpectedAmount(propertyId: string): Promise<number | null> {
   if (!propertyId || propertyId.includes('/')) return null;
   const snap = await Promise.race([
     adminDb.collection('properties').doc(propertyId).get(),

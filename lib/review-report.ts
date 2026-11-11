@@ -1,7 +1,7 @@
 import type { NavLanguage } from './nav-i18n';
 
 // "Report this review" strings. Pure: safe for the browser and the server.
-export interface ReviewReportStrings { report: string; sending: string; done: string; error: string }
+interface ReviewReportStrings { report: string; sending: string; done: string; error: string }
 export const REVIEW_REPORT_I18N: Record<NavLanguage, ReviewReportStrings> = {
   en: { report: 'Report', sending: 'Sending...', done: 'Reported, thank you', error: 'Could not send' },
   ar: { report: 'إبلاغ', sending: 'جاري الإرسال...', done: 'تم الإبلاغ، شكراً', error: 'تعذر الإرسال' },

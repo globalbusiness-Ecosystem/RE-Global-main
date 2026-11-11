@@ -24,7 +24,7 @@ export const QR_PAY_LABELS = {
   qrAlt: { en: 'QR Code', ar: 'رمز QR', fr: 'Code QR', es: 'Código QR', pt: 'Código QR', ur: 'QR کوڈ', zh: '二维码' },
 } satisfies Record<string, Row>;
 
-export type QrPayLabelKey = keyof typeof QR_PAY_LABELS;
+type QrPayLabelKey = keyof typeof QR_PAY_LABELS;
 
 export function qrp(key: QrPayLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

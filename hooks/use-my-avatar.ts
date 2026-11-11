@@ -7,7 +7,7 @@ import type { AvatarState } from '@/components/user-avatar';
 type Result = 'ok' | 'failed';
 
 // Lets every place that shows the picture (settings, header, menu) update together.
-export const AVATAR_EVENT = 're-avatar-changed';
+const AVATAR_EVENT = 're-avatar-changed';
 const announce = (a: AvatarState | null) => { try { window.dispatchEvent(new CustomEvent(AVATAR_EVENT, { detail: a })); } catch { /* ignore */ } };
 
 // Loads and saves the signed-in user's private profile picture.

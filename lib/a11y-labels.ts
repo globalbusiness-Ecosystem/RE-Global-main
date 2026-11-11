@@ -2,7 +2,7 @@ import type { NavLanguage } from './nav-i18n';
 
 // Names for icon-only buttons (close, back, favourite, share...). A screen reader reads an icon button as just
 // "button" unless it has a name. Pure: safe for the browser and the server.
-export interface A11yLabels { close: string; back: string; addFavorite: string; removeFavorite: string; share: string; refresh: string; stopSpeaking: string; send: string }
+interface A11yLabels { close: string; back: string; addFavorite: string; removeFavorite: string; share: string; refresh: string; stopSpeaking: string; send: string }
 
 export const A11Y_LABELS: Record<NavLanguage, A11yLabels> = {
   en: { close: 'Close', back: 'Back', addFavorite: 'Add to favorites', removeFavorite: 'Remove from favorites', share: 'Share', refresh: 'Refresh', stopSpeaking: 'Stop speaking', send: 'Send' },

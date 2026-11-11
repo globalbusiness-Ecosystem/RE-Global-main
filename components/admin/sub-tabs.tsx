@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { keyTab, pickTab } from '@/lib/sub-tabs';
 import { GOLD } from './admin-ui';
 
-export type SubTab = { id: string; icon: string; label: string; badge?: number; render: () => ReactNode };
+type SubTab = { id: string; icon: string; label: string; badge?: number; render: () => ReactNode };
 
 const KEY = 'admin-sub-';
 

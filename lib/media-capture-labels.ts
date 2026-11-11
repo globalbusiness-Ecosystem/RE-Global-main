@@ -17,7 +17,7 @@ export const MEDIA_LABELS = {
   noCamera: { en: 'No camera found', ar: 'لا توجد كاميرا متاحة', fr: 'Aucune caméra trouvée', es: 'No se encontró ninguna cámara', pt: 'Nenhuma câmera encontrada', ur: 'کوئی کیمرہ نہیں ملا', zh: '未找到相机' },
 } satisfies Record<string, Row>;
 
-export type MediaLabelKey = keyof typeof MEDIA_LABELS;
+type MediaLabelKey = keyof typeof MEDIA_LABELS;
 
 /** All texts of the box in one language, falling back to English. */
 export function mediaLabels(language: string): Record<MediaLabelKey, string> {

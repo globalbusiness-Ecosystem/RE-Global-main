@@ -45,7 +45,7 @@ export interface PropertyInspection {
 }
 
 /** Weighted overall score — structural and safety count more than moisture/thermal. */
-export function computeOverallHealthScore(scores: InspectionSubScore): number {
+function computeOverallHealthScore(scores: InspectionSubScore): number {
   const weighted =
     scores.structural * 0.35 +
     scores.safety * 0.3 +
@@ -95,7 +95,7 @@ export const DEMO_INSPECTION: PropertyInspection = {
 };
 
 /** Extra-language demo copy (fr/es/pt/ur/zh); en/ar stay on the fields above for backward compat. */
-export const DEMO_INSPECTION_TRANSLATIONS: Partial<Record<NavLanguage, { propertyTitle: string; aiSummary: string }>> = {
+const DEMO_INSPECTION_TRANSLATIONS: Partial<Record<NavLanguage, { propertyTitle: string; aiSummary: string }>> = {
   fr: {
     propertyTitle: 'Tour Marina Heights — Unité 1204',
     aiSummary:

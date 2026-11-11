@@ -18,7 +18,7 @@ export const RENT_PAGE_LABELS = {
   propertyLocation: { en: 'Property Location', ar: 'موقع العقار', fr: 'Emplacement du bien', es: 'Ubicación de la propiedad', pt: 'Localização do imóvel', ur: 'جائیداد کا مقام', zh: '房产位置' },
 } satisfies Record<string, Row>;
 
-export type RentPageLabelKey = keyof typeof RENT_PAGE_LABELS;
+type RentPageLabelKey = keyof typeof RENT_PAGE_LABELS;
 
 export function rp(key: RentPageLabelKey, language: string | undefined): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

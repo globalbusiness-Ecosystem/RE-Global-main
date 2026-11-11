@@ -1,5 +1,5 @@
 // Is the guest e-mail reminder system ready to send? Takes only yes/no answers, never the secret values themselves.
-export interface NotifyEnv { mailConfigured: boolean; adminEmailValid: boolean; cronSecretOk: boolean }
+interface NotifyEnv { mailConfigured: boolean; adminEmailValid: boolean; cronSecretOk: boolean }
 export interface ReadinessItem { id: 'mail' | 'cron' | 'adminEmail'; ok: boolean; label: string; fix: string }
 
 export function notifyReadiness(env: NotifyEnv): { items: ReadinessItem[]; ready: boolean } {

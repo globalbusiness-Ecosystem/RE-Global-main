@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface ProfileStrings {
+interface ProfileStrings {
   mustSignInFirst: string;
   profileSaved: string;
   errorSaving: string;

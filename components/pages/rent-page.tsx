@@ -9,7 +9,7 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { DemoOnly } from '@/components/demo-only';
 import { ListingCard } from '@/components/listing-card';
 
-import { MapPin, Bed, Maximize2, MapPin as MapIcon, Video, Heart, Eye } from 'lucide-react';
+import { MapPin, Bed, Maximize2, Video, Heart } from 'lucide-react';
 import { useMemo, memo, useState } from 'react';
 import { UnifiedPaymentButton } from '@/components/unified-payment-button';
 import { BookingPicker } from '@/components/booking-picker';

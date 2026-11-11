@@ -1,7 +1,7 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Camera, Upload, X, ImageIcon, Loader2 } from 'lucide-react';
 import { deviceMediaService, type CapturedMedia } from '@/lib/device-media-service';
 import { Button } from '@/components/ui/button';

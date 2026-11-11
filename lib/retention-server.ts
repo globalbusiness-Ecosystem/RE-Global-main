@@ -6,7 +6,7 @@ import { retentionRules } from '@/lib/retention';
 const BATCH = 400;
 const MAX_ROUNDS = 5; // up to 2000 documents per rule per run; the next day's run continues
 
-export type RetentionResult = { collection: string; deleted: number; error?: boolean };
+type RetentionResult = { collection: string; deleted: number; error?: boolean };
 
 // Deletes records older than their retention period. One failing collection never stops the others.
 export async function runRetention(now: Date = new Date()): Promise<RetentionResult[]> {

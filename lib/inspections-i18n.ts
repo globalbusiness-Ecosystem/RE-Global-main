@@ -1,6 +1,6 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface InspectionsStrings {
+interface InspectionsStrings {
   inspectDesc: string;
   healthScore: string;
   liveDemo: string;

@@ -5,7 +5,7 @@ import type { NavLanguage } from './nav-i18n';
 
 export const REQUEST_MAX = 300;
 
-export type RequestCheck = { ok: true; note: string } | { ok: false; error: string };
+type RequestCheck = { ok: true; note: string } | { ok: false; error: string };
 
 export function cleanRequest(raw: unknown): RequestCheck {
   if (raw === undefined || raw === null) return { ok: true, note: '' };
@@ -16,7 +16,7 @@ export function cleanRequest(raw: unknown): RequestCheck {
 // Only confirmed stays that are not over yet (dates are YYYY-MM-DD, compared as text).
 export const canEditRequest = (b: { status: unknown; end: string }, today: string) => b.status === 'confirmed' && b.end > today;
 
-export interface RequestStrings { label: string; placeholder: string; save: string; saving: string; saved: string; edit: string; add: string; error: string }
+interface RequestStrings { label: string; placeholder: string; save: string; saving: string; saved: string; edit: string; add: string; error: string }
 export const REQUEST_I18N: Record<NavLanguage, RequestStrings> = {
   en: { label: 'Special request', placeholder: 'e.g. late check-in, baby cot (optional)', save: 'Save request', saving: 'Saving...', saved: 'Saved. The host will see your request.', edit: 'Edit request', add: 'Add a special request', error: 'Could not save. Please try again.' },
   ar: { label: 'طلب خاص', placeholder: 'مثلاً: وصول متأخر، سرير أطفال (اختياري)', save: 'احفظ الطلب', saving: 'جاري الحفظ...', saved: 'اتحفظ. صاحب المكان هيشوف طلبك.', edit: 'عدّل الطلب', add: 'ضيف طلب خاص', error: 'ماقدرناش نحفظ. جرّب تاني.' },

@@ -1,17 +1,17 @@
 import type { NavLanguage } from './nav-i18n';
 
-export interface RoadmapPhaseCopy {
+interface RoadmapPhaseCopy {
   quarter: string;
   title: string;
   items: string[];
 }
 
-export interface FeatureCopy {
+interface FeatureCopy {
   title: string;
   desc: string;
 }
 
-export interface WhitepaperStrings {
+interface WhitepaperStrings {
   headerTitle: string;
   subtitle: string;
   heroDesc: string;

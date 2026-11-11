@@ -1,4 +1,4 @@
-export type Theme = 'dark' | 'light';
+type Theme = 'dark' | 'light';
 
 const THEME_KEY = 're_theme_preference';
 

@@ -1,7 +1,7 @@
 // Aladdin AI System Configuration
 // Implements the System Instruction Protocol for Real Estate Advisor
 
-export interface AladdinConfig {
+interface AladdinConfig {
   brand: string;
   role: string;
   markets: Record<string, MarketData>;
@@ -9,7 +9,7 @@ export interface AladdinConfig {
   features: AladdinFeatures;
 }
 
-export interface MarketData {
+interface MarketData {
   city: string;
   country: string;
   avgPrice: number; // USD equivalent
@@ -21,7 +21,7 @@ export interface MarketData {
   tokenizationOptions?: boolean;
 }
 
-export interface AladdinFeatures {
+interface AladdinFeatures {
   realTimeResearch: boolean;
   piConversion: boolean;
   strategicComparison: boolean;
@@ -145,7 +145,7 @@ export function convertToPI(amount: number, fromCurrency: string): number {
   return baseUSD / piRate;
 }
 
-export function getMarketInsight(market: string): MarketData | null {
+function getMarketInsight(market: string): MarketData | null {
   return aladdinConfig.markets[market.toLowerCase()] || null;
 }
 
@@ -263,4 +263,3 @@ Or reach out:
   `;
 }
 
-export default aladdinConfig;

@@ -33,7 +33,7 @@ export const CONTRACT_VIEW_LABELS = {
   fullText: { en: 'Full contract text', ar: 'نص العقد الكامل', fr: 'Texte complet du contrat', es: 'Texto completo del contrato', pt: 'Texto completo do contrato', ur: 'معاہدے کا مکمل متن', zh: '合同全文' },
 } satisfies Record<string, Row>;
 
-export type ContractViewLabelKey = keyof typeof CONTRACT_VIEW_LABELS;
+type ContractViewLabelKey = keyof typeof CONTRACT_VIEW_LABELS;
 
 const known = (language: string | undefined): NavLanguage => LANGS.find((l) => l === language) ?? 'en';
 

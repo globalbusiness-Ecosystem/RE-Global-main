@@ -42,7 +42,7 @@ export const MARKET_LABELS = {
   statusCancelled: { en: 'Cancelled', ar: 'ملغاة', fr: 'Annulée', es: 'Cancelada', pt: 'Cancelada', ur: 'منسوخ', zh: '已取消' },
 } satisfies Record<string, Row>;
 
-export type MarketLabelKey = keyof typeof MARKET_LABELS;
+type MarketLabelKey = keyof typeof MARKET_LABELS;
 
 export function mk(key: MarketLabelKey, language: string | undefined, vars: Record<string, string | number> = {}): string {
   const known = LANGS.find((l) => l === language) ?? 'en';

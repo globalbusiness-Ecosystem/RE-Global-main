@@ -27,7 +27,7 @@ export interface Wallet {
   transactions: Transaction[];
 }
 
-export class TransactionManager {
+class TransactionManager {
   private apiUrl = '/api/payments';
 
   async processPayment(
@@ -186,7 +186,7 @@ export class TransactionManager {
   }
 }
 
-export const transactionManager = new TransactionManager();
+const transactionManager = new TransactionManager();
 
 export function useTransactionManager() {
   return {

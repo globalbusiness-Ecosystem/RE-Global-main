@@ -5,7 +5,7 @@ import { aladdinConfig } from './aladdin-system-config';
  * Provides extensive real estate investment knowledge and strategies
  */
 
-export interface MarketIntelligence {
+interface MarketIntelligence {
   market: string;
   marketPhase: 'growth' | 'mature' | 'decline' | 'recovery';
   futureProjections: {
@@ -18,7 +18,7 @@ export interface MarketIntelligence {
   opportunities: string[];
 }
 
-export interface InvestmentStrategy {
+interface InvestmentStrategy {
   name: string;
   description: string;
   minimumBudget: number;
@@ -28,14 +28,14 @@ export interface InvestmentStrategy {
   suitable_for: string[];
 }
 
-export interface RealEstateKnowledge {
+interface RealEstateKnowledge {
   propertyTypes: Record<string, PropertyTypeInfo>;
   investmentStrategies: InvestmentStrategy[];
   marketConditions: Record<string, MarketIntelligence>;
   tips: TipCategory[];
 }
 
-export interface PropertyTypeInfo {
+interface PropertyTypeInfo {
   name: string;
   averageROI: number;
   averageVacancyRate: number;
@@ -45,7 +45,7 @@ export interface PropertyTypeInfo {
   disadvantages: string[];
 }
 
-export interface TipCategory {
+interface TipCategory {
   category: string;
   tips: string[];
   language: 'en' | 'ar';
@@ -438,4 +438,3 @@ class AladdinKnowledgeBase {
 }
 
 export const aladdinKnowledgeBase = new AladdinKnowledgeBase();
-export default AladdinKnowledgeBase;

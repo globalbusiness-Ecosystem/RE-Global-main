@@ -5,7 +5,7 @@ export const OFFLINE_TTL_MS = 30 * 24 * 60 * 60 * 1000;
 const PREFIX = 're_offline_bookings_v1:';
 
 export interface StorageLike { getItem(k: string): string | null; setItem(k: string, v: string): void; removeItem(k: string): void }
-export interface OfflineBooking {
+interface OfflineBooking {
   id: string; propertyTitle: string; propertyType: string; start: string; end: string; nights: number; amount: number; currency?: string; status: string;
   guests?: number; reviewed?: boolean; hostReply?: string; guestNote?: string;
 }

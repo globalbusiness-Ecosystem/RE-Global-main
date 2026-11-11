@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { generatePropertyQRUrl, generateBatchQRCodes, validateQRData } from '@/lib/qr-code-utils';
+import { generatePropertyQRUrl, validateQRData } from '@/lib/qr-code-utils';
 import { consumeRateLimit, clientIp } from '@/lib/rate-limit';
 
 // Public endpoint: limit per IP and accept only simple property ids.
