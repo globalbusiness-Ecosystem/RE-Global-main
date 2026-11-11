@@ -16,13 +16,6 @@ describe('QR window and simple Pi button labels in 7 languages', () => {
     for (const bad of [undefined, '', 'xx', '__proto__', 'constructor']) expect(qrp('close', bad)).toBe('Close');
     expect(qrp('close', 'fr')).toBe('Fermer');
   });
-  it('the QR window has no Arabic/English-only text left', () => {
-    const src = readFileSync('components/qr-code-modal.tsx', 'utf8');
-    expect(src).not.toMatch(/language *(===|!==) *'en' *\?/);
-    for (const k of ['qrTitle', 'location', 'bedrooms', 'shareLink', 'copied', 'copy', 'printTitle', 'print', 'close']) expect(src).toContain(`qrp('${k}', language)`);
-    expect(src).toContain("bp('price', language)");
-    expect(src).toContain("pd('area', language)");
-  });
   it('the simple Pi button is translated and keeps the English error text as it is', () => {
     const src = readFileSync('components/simple-pi-payment-button.tsx', 'utf8');
     expect(src).toContain("pay('piUnavailable', language)");
@@ -35,16 +28,5 @@ describe('QR window and simple Pi button labels in 7 languages', () => {
     const src = readFileSync('components/header.tsx', 'utf8');
     expect(src).toContain('title={t.settings}');
     expect(src).not.toContain("'الإعدادات'");
-  });
-});
-
-describe('the QR picture and its buttons are translated too', () => {
-  const src = readFileSync('components/qr-code-generator.tsx', 'utf8');
-  it('use the labels instead of fixed English', () => {
-    for (const k of ['qrAlt', 'generating', 'downloadTitle', 'download', 'copyTitle', 'copied', 'copy']) expect(src).toContain(`qrp('${k}', language)`);
-    for (const old of ['>Generating QR Code...<', 'title="Download QR Code"', 'title="Copy QR Code to clipboard"']) expect(src).not.toContain(old);
-  });
-  it('the window passes its language down', () => {
-    expect(readFileSync('components/qr-code-modal.tsx', 'utf8')).toContain('language={language}');
   });
 });

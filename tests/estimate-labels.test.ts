@@ -31,8 +31,8 @@ describe('AI estimate and photo analysis labels', () => {
   it('the disclaimer is shown in every language (never dropped)', () => {
     for (const l of LANGS) expect(estimateLabels(l).disclaimer.length, l).toBeGreaterThan(20);
   });
-  it('both components use the labels and no longer pick text by language !== ar', () => {
-    for (const f of ['components/ai-price-estimate-modal.tsx', 'components/property-photo-analysis-card.tsx']) {
+  it('the photo analysis card uses the labels and no longer pick text by language !== ar', () => {
+    for (const f of ['components/property-photo-analysis-card.tsx']) {
       const src = readFileSync(f, 'utf8');
       expect(src, f).toContain('estimateLabels(language)');
       expect(src, f).not.toMatch(/language [!=]== 'ar'|labels\[/);

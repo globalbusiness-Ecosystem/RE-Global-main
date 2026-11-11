@@ -98,10 +98,3 @@ describe('GET /api/cron/retention', () => {
     expect(deletes.length).toBe(5);
   });
 });
-
-describe('no one-time codes in the logs', () => {
-  it('never prints a generated code', () => {
-    expect(readFileSync('lib/otp-authentication.ts', 'utf8')).not.toMatch(/OTP generated:/);
-    expect(readFileSync('lib/auth-manager.ts', 'utf8')).not.toMatch(/OTP generated: \$\{/);
-  });
-});

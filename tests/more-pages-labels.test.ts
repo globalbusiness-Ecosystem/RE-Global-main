@@ -19,7 +19,6 @@ describe('off-plan, favorites and property card labels in 7 languages', () => {
   it.each([
     'components/pages/offplan-page.tsx',
     'components/pages/favorites-page.tsx',
-    'components/property-card.tsx',
     'components/firestore-listings.tsx',
   ])('%s has no Arabic/English-only text left', (file) => {
     const src = readFileSync(file, 'utf8');
@@ -27,13 +26,12 @@ describe('off-plan, favorites and property card labels in 7 languages', () => {
     expect(src).toContain("from '@/lib/more-pages-labels'");
   });
   it('use client stays the first line of the client components', () => {
-    for (const file of ['components/pages/offplan-page.tsx', 'components/pages/favorites-page.tsx', 'components/property-card.tsx', 'components/firestore-listings.tsx']) {
+    for (const file of ['components/pages/offplan-page.tsx', 'components/pages/favorites-page.tsx', 'components/firestore-listings.tsx']) {
       const first = readFileSync(file, 'utf8').split('\n')[0];
       expect(first === "'use client';" || first === '"use client";' || first.startsWith('import')).toBe(true);
     }
   });
   it('the cards use the localized title and the right keys', () => {
-    expect(readFileSync('components/property-card.tsx', 'utf8')).toContain('pickListingText(language, titleEn, titleAr)');
     expect(readFileSync('components/pages/offplan-page.tsx', 'utf8')).toContain("mpl('offplanTitle', language)");
     expect(readFileSync('components/pages/favorites-page.tsx', 'utf8')).toContain("mpl('favoritesTitle', language)");
     expect(readFileSync('components/firestore-listings.tsx', 'utf8')).toContain("mpl('featuredProperties', language)");

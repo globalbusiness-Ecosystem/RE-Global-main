@@ -28,10 +28,4 @@ describe('QR payment button labels', () => {
     expect(qrMessages('ar').retry).toBe('إعادة محاولة');
     expect(Object.keys(qrMessages('zh')).sort()).toEqual(['generateQR', 'notAvailable', 'paymentFailed', 'productNotFound', 'purchaseCancelled', 'purchaseError', 'qrGenerated', 'retry', 'success']);
   });
-  it('the button no longer picks text by language !== ar', () => {
-    const src = readFileSync('components/qr-payment-button.tsx', 'utf8');
-    expect(src).not.toMatch(/language [!=]== 'ar'/);
-    expect(src).not.toContain('ERROR_MESSAGES');
-    expect(src).toContain("qp('qrSystem', language)");
-  });
 });

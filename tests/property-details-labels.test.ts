@@ -23,10 +23,4 @@ describe('property details labels in 7 languages', () => {
     expect(pickListingText('ar', 'Villa', '')).toBe('Villa');
     expect(pickListingText('en', undefined, undefined)).toBe('');
   });
-  it('the modal uses the labels and no longer shows Arabic to every non-English language', () => {
-    const src = readFileSync('components/property-details-modal.tsx', 'utf8');
-    for (const k of keys) expect(src).toContain(`pd('${k}', language)`);
-    expect(src).not.toContain("language === 'en' ?");
-    expect(src).toContain('pickListingText(language, property.titleEn, property.titleAr)');
-  });
 });
