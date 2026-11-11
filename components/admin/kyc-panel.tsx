@@ -68,7 +68,6 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                   <span className="w-full text-xs text-gray-500">{r.docType === 'passport' ? 'جواز سفر' : 'بطاقة هوية'}: افتح كل صورة وقارنها بالاسم وبالسيلفي</span>
                   {r.files.map((k) => (
                     <a key={k} href={`/api/admin/kyc/file?uid=${encodeURIComponent(r.uid)}&kind=${k}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#2a2a2a] p-1 text-center text-xs text-gray-300">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img src={`/api/admin/kyc/file?uid=${encodeURIComponent(r.uid)}&kind=${k}`} alt={k} className="h-24 w-32 rounded object-cover" loading="lazy" />
                       {k === 'front' ? 'الوش' : k === 'back' ? 'الضهر' : 'سيلفي'}
                     </a>

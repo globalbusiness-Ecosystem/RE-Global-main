@@ -1,4 +1,3 @@
-import { aladdinConfig } from './aladdin-system-config';
 
 /**
  * Aladdin Comprehensive Knowledge Base
@@ -26,13 +25,6 @@ interface InvestmentStrategy {
   timeframe: string;
   riskLevel: 'low' | 'medium' | 'high';
   suitable_for: string[];
-}
-
-interface RealEstateKnowledge {
-  propertyTypes: Record<string, PropertyTypeInfo>;
-  investmentStrategies: InvestmentStrategy[];
-  marketConditions: Record<string, MarketIntelligence>;
-  tips: TipCategory[];
 }
 
 interface PropertyTypeInfo {

@@ -8,7 +8,6 @@ export function UserAvatar({ avatar, username, size = 56, className = '' }: { av
   const box = { width: size, height: size, fontSize: Math.round(size * 0.46) };
   const base = `rounded-full overflow-hidden flex items-center justify-center shrink-0 select-none ${className}`;
   if (avatar?.photo) {
-    // eslint-disable-next-line @next/next/no-img-element
     return <img src={avatar.photo} alt="" width={size} height={size} className={`${base} object-cover`} style={box} draggable={false} />;
   }
   const preset = avatar?.preset ? presetById(avatar.preset) : undefined;

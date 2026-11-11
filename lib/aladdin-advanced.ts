@@ -1,4 +1,3 @@
-import { aladdinConfig } from './aladdin-system-config';
 
 export interface InvestmentProfile {
   budget: number;
@@ -36,7 +35,6 @@ class AladdinAdvanced {
   }
 
   private calculateAllocation(profile: InvestmentProfile) {
-    const markets = Object.values(aladdinConfig.markets);
     const allocation = [];
 
     // Risk-based allocation

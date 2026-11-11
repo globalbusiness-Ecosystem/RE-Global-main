@@ -33,7 +33,6 @@ export async function POST(req: Request) {
     if (parsedBody instanceof Response) return parsedBody;
     const { imageData, language = 'en' } = parsedBody as any;
     const city = cleanString(parsedBody.city, 80) ?? '';
-    const country = cleanString(parsedBody.country, 80) ?? '';
 
     if (!imageData || typeof imageData !== 'string') {
       return Response.json(

@@ -38,11 +38,3 @@ export interface VRPropertyTour {
   piPrice?: number;
 }
 
-interface DesignVariant {
-  name: 'current' | 'furnished';
-  label: string;
-  description: string;
-}
-
-type VRTourConfig = VRPropertyTour;
-type VRScene = VRRoom;

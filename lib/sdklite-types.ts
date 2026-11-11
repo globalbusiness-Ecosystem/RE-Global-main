@@ -5,11 +5,6 @@ export interface PurchaseResult {
   txid: string;
 }
 
-interface SDKLiteError extends Error {
-  name: "SDKLiteError";
-  code: "product_not_found" | "purchase_cancelled" | "purchase_error";
-}
-
 interface UserStateRecord {
   blob: Record<string, unknown>;
   updatedAt: string;

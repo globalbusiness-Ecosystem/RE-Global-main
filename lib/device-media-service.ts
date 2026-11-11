@@ -5,13 +5,6 @@ import { authHeaders } from '@/lib/api-token';
  * Supports iOS, Android, and desktop browsers
  */
 
-interface DeviceMediaConfig {
-  enableCamera?: boolean;
-  enableMicrophone?: boolean;
-  imageQuality?: number; // 0.1 - 1.0
-  maxImageSize?: number; // bytes
-}
-
 export interface CapturedMedia {
   type: 'camera' | 'gallery' | 'audio';
   data: Blob;

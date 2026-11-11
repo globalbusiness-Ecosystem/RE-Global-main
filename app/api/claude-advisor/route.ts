@@ -4,11 +4,6 @@ import { advisorText, isAdvisorLanguage, languageInstruction } from '@/lib/advis
 import { buildAdvisorMessages, MEMORY_INSTRUCTIONS } from '@/lib/advisor-history';
 import { Anthropic } from '@anthropic-ai/sdk';
 
-interface RequestBody {
-  message: string;
-  language?: string;
-}
-
 // Comprehensive real estate knowledge base
 const KNOWLEDGE_BASE = {
   markets: {

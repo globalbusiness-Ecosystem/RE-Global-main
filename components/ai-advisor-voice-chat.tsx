@@ -4,7 +4,6 @@ import { a11yLabels } from '@/lib/a11y-labels';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { X, Send, Bot, Loader, VolumeX, Mic, MicOff, Phone, Settings } from 'lucide-react';
-import { usePiAuth } from '@/contexts/pi-auth-context';
 import voiceService from '@/lib/voice-service';
 import { authHeaders } from '@/lib/api-token';
 
@@ -67,7 +66,6 @@ const VOICE_LABELS = {
 };
 
 export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoice = true }: AIAdvisorVoiceChatProps) {
-  const { isAuthenticated } = usePiAuth();
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -78,7 +76,6 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
   const [showSettings, setShowSettings] = useState(false);
   const [autoSpeak, setAutoSpeak] = useState(true);
   const [micEnabled, setMicEnabled] = useState(true);
-  const [showMediaCapture, setShowMediaCapture] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const labels = VOICE_LABELS[currentLang];
 

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { COUNTRIES } from '@/lib/legal-profiles';
 import { listPublicListings } from '@/lib/public-listings-server';
@@ -45,7 +46,7 @@ export default async function CountryPage({ params, searchParams }: Props) {
             );
           })}
         </ul>
-        <a href="/" className="underline">{S.openApp}</a>
+        <Link href="/" className="underline">{S.openApp}</Link>
         <SeoLangSwitch path={`/country/${c.toLowerCase()}`} current={lang} />
       </div>
     </main>

@@ -56,7 +56,6 @@ export default function ExplorerPage() {
     fetch('/api/explorer', { cache: 'no-store' }).then((r) => (r.ok ? r.json() : { recent: [] })).then((j) => setRecent(Array.isArray(j.recent) ? j.recent : [])).catch(() => setRecent([]));
     const first = new URLSearchParams(window.location.search).get('q');
     if (first) void search(first);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const tx = res?.tx ?? null;

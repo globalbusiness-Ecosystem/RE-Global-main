@@ -7,11 +7,6 @@ import { NextRequest, NextResponse } from 'next/server';
  * Fetches real-time market data and compares with RE opportunities
  */
 
-interface MarketResearchRequest {
-  location: string;
-  language?: 'ar' | 'en';
-}
-
 // Simulated market database (in production, connect to real APIs)
 const MARKET_DATABASE = {
   'dubai': {

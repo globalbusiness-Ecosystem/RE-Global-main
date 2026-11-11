@@ -37,20 +37,3 @@ export async function verifyTransactionOnStellar(txid: string): Promise<StellarV
   }
 }
 
-/**
- * Fetches recent transactions for a given Stellar/Pi wallet address directly
- * from-chain. Useful for cross-checking Firestore records against ground truth.
- */
-async function getAccountTransactions(walletAddress: string, limit = 20) {
-  try {
-    const res = await fetch(
-      `${PI_HORIZON_TESTNET}/accounts/${walletAddress}/transactions?order=desc&limit=${limit}`
-    );
-    if (!res.ok) return [];
-    const data = await res.json();
-    return data?._embedded?.records || [];
-  } catch (e) {
-    console.error('[Stellar] Account transactions fetch error:', e);
-    return [];
-  }
-}

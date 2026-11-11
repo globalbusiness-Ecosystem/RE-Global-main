@@ -5,71 +5,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useSiteContent } from '@/lib/useSiteContent';
 import { HERO_SLIDES, HERO_STAT_LABELS, tt, type HeroSlideI18n } from '@/lib/hero-i18n';
 
-interface Slide {
-  id: number;
-  type: 'hero' | 'action' | 'stats';
-  titleEn: string;
-  titleAr: string;
-  subtitleEn: string;
-  subtitleAr: string;
-  buttonEn?: string;
-  buttonAr?: string;
-  imageUrl?: string;
-  stats?: { label: string; value: number }[];
-}
-
 interface HeroSliderProps {
   language: NavLanguage;
   onInvestClick?: () => void;
   onTokenizedClick?: () => void;
 }
-
-const slides: Slide[] = [
-  {
-    id: 1,
-    type: 'hero',
-    titleEn: 'Global Real Estate on Pi',
-    titleAr: 'العقارات العالمية على Pi',
-    subtitleEn: 'Invest, buy, rent, and explore properties across 195 countries',
-    subtitleAr: 'استثمر واشتر وأجّر واستكشف العقارات في 195 دولة',
-    imageUrl: 'https://images.unsplash.com/photo-1486325212027-8081e485255e?w=1200&fit=crop',
-  },
-  {
-    id: 2,
-    type: 'action',
-    titleEn: 'Investment Opportunities',
-    titleAr: 'فرص الاستثمار',
-    subtitleEn: 'Build wealth through premium real estate on Pi Network',
-    subtitleAr: 'بناء الثروة من خلال العقارات الفاخرة على شبكة Pi',
-    buttonEn: 'Invest Now',
-    buttonAr: 'استثمر الآن',
-    imageUrl: 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&fit=crop',
-  },
-  {
-    id: 3,
-    type: 'action',
-    titleEn: 'Tokenized Real Estate',
-    titleAr: 'العقارات المعمّنة',
-    subtitleEn: 'Own fractions of premium properties worldwide',
-    subtitleAr: 'امتلك أجزاء من العقارات الفاخرة حول العالم',
-    buttonEn: 'Tokenized',
-    buttonAr: 'معمّن',
-    imageUrl: 'https://images.unsplash.com/photo-1552321554-5fefe8c9ef14?w=1200&fit=crop',
-  },
-  {
-    id: 4,
-    type: 'stats',
-    titleEn: 'Why Join RE?',
-    titleAr: 'لماذا تنضم إلى RE؟',
-    subtitleEn: 'Trusted by thousands of investors worldwide',
-    subtitleAr: 'موثوق من قبل آلاف المستثمرين في جميع أنحاء العالم',
-    stats: [
-      { label: 'Properties', value: 12500 },
-      { label: 'Countries', value: 195 },
-      { label: 'Investors', value: 45200 },
-    ],
-  },
-];
 
 function AnimatedCounter({ value, duration = 2000 }: { value: number; duration?: number }) {
   const [count, setCount] = useState(0);
@@ -103,7 +43,7 @@ function AnimatedCounter({ value, duration = 2000 }: { value: number; duration?:
 export default function HeroSlider({ language, onInvestClick, onTokenizedClick }: HeroSliderProps) {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [fade, setFade] = useState(true);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [, setImageLoaded] = useState(false);
   const { items: banners } = useSiteContent<any>('banners');
   const list: (HeroSlideI18n & { link?: string })[] = useMemo(
     () =>

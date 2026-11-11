@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { siteUrl } from '@/lib/site-url';
 import { COUNTRIES } from '@/lib/legal-profiles';
@@ -52,7 +53,7 @@ export default async function PropertyPublicPage({ params, searchParams }: Props
         {t.facts && <p className="text-muted-foreground">{t.facts}</p>}
         {t.body && <p>{t.body}</p>}
         <p className="flex flex-wrap gap-4 pt-4">
-          <a href="/" className="underline">{S.openApp}</a>
+          <Link href="/" className="underline">{S.openApp}</Link>
           {map && <a href={map} target="_blank" rel="noopener noreferrer" className="underline">{S.viewOnMap}</a>}
           {l.country && <a href={`/country/${l.country.toLowerCase()}${lang === 'en' ? '' : `?lang=${lang}`}`} className="underline">{countryName(l.country, lang, COUNTRIES[l.country]?.en ?? '')}</a>}
         </p>

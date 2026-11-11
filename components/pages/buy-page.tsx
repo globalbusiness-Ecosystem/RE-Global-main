@@ -26,7 +26,6 @@ import { PropertyQRCode } from '@/components/property-qr-code';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { Property } from '@/lib/useProperties';
-import { usePiAuth } from '@/contexts/pi-auth-context';
 import { pTitle, pLocation, pDesc } from '@/lib/useProperties';
 import { contractDocLabel } from '@/lib/useProperties';
 
@@ -272,7 +271,6 @@ export function FirebasePropertyModal({
   language: NavLanguage;
   onClose: () => void;
 }) {
-  const { accessToken } = usePiAuth();
   const isSold = isExclusiveType(prop.type) && prop.status === 'sold';
   const piRate = usePiRate();
   const payPi = propertyPaymentAmount(prop, piRate);

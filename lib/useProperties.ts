@@ -88,11 +88,6 @@ export function getLocalizedLocation(property: Property, language: string): stri
   return property.location;
 }
 
-function getLocalizedDescription(property: Property, language: string): string {
-  if (language === 'ar' && property.descriptionAr) return property.descriptionAr;
-  return property.description || '';
-}
-
 type PropText = { title?: string; location?: string; description?: string };
 function pick(p: Property, lang: string, key: keyof PropText, base?: string, ar?: string): string {
   const t = (p.translations?.[lang] as PropText | undefined)?.[key];

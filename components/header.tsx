@@ -22,8 +22,6 @@ interface HeaderProps {
   onLogoTap?: () => void;
 }
 
-const NAV_LANG_KEY = 're_nav_language';
-
 export default function Header({ language, onSettingsClick, onMenuItemClick, currentPage, onLogoTap }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [kycStatus, setKycStatus] = useState<string | null>(null);

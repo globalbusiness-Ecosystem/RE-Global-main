@@ -99,7 +99,7 @@ function CopyId({ value }: { value: string }) {
 export default function ContractsPage({ language, onBack }: ContractsPageProps) {
   const t = CONTRACTS_I18N[language];
   const { username } = usePiAuth();
-  const { getContractsForUser, getAllContracts } = useFirebaseDatabase();
+  const { getContractsForUser } = useFirebaseDatabase();
 
   const [contracts, setContracts] = useState<SmartContract[]>([]);
   const [loading, setLoading] = useState(true);

@@ -66,7 +66,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
   const isSigned = Boolean(contract.contractHash && contract.platformSignature);
   const buyer = buyerDisplayFromText(contract.contractText);
   const buyerHandle = buyerHandleFromText(contract.contractText) ?? contract.buyerUsername;
-  const [isGeneratingPdf, setIsGeneratingPdf] = useState(false);
+  const [, setIsGeneratingPdf] = useState(false);
 
   const downloadPdf = async () => {
     setIsGeneratingPdf(true);
@@ -83,6 +83,7 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
 
     const drawWatermark = () => {
       doc.saveGraphicsState();
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
       // @ts-ignore - GState exists on jsPDF instance at runtime
       doc.setGState(new (doc as any).GState({ opacity: 0.07 }));
       doc.setFont('helvetica', 'bold');

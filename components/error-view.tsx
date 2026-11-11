@@ -25,6 +25,8 @@ export function ErrorView({ kind, reset }: { kind: 'error' | 'notfound'; reset?:
       <p style={{ maxWidth: 380, margin: 0, color: '#9ca3af', fontSize: 14, lineHeight: 1.6 }}>{kind === 'error' ? t.errorBody : t.notFoundBody}</p>
       <div style={{ display: 'flex', gap: 10, marginTop: 8 }}>
         {kind === 'error' && reset && <button onClick={reset} style={{ ...btn, background: '#d4af37', color: '#000', border: 'none' }}>{t.retry}</button>}
+        {/* Plain link on purpose: a full page load clears the broken state that caused this screen. */}
+        {/* eslint-disable-next-line @next/next/no-html-link-for-pages */}
         <a href="/" style={{ ...btn, border: '1px solid #444', color: '#fff' }}>{t.home}</a>
       </div>
     </div>

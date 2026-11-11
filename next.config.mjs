@@ -111,7 +111,7 @@ const nextConfig = {
     ];
   },
   // Webpack optimizations
-  webpack: (config, { isServer }) => {
+  webpack: (config) => {
     config.optimization = {
       ...config.optimization,
       splitChunks: {

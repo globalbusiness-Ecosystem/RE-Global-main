@@ -107,7 +107,7 @@ export default function SharesMarketPage() {
     <main dir={dir} className="min-h-screen bg-black text-white">
       <header className="sticky top-0 z-10 border-b border-white/10 bg-black/90 backdrop-blur">
         <div className="max-w-2xl mx-auto flex items-center gap-2 px-4 h-14">
-          <a href="/" aria-label={mk('back', language)} className="-ms-2 p-2 rounded-full text-gray-300 hover:bg-white/10"><Back className="w-5 h-5" /></a>
+          <Link href="/" aria-label={mk('back', language)} className="-ms-2 p-2 rounded-full text-gray-300 hover:bg-white/10"><Back className="w-5 h-5" /></Link>
           <TrendingUp className="w-5 h-5 text-amber-500" aria-hidden="true" />
           <h1 className="text-lg font-bold text-amber-500">{mk('title', language)}</h1>
         </div>

@@ -164,7 +164,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
       } else {
         toast.error(t.errorSaving);
       }
-    } catch (error) {
+    } catch {
       toast.error(t.errorSaving);
     } finally {
       setSaving(false);

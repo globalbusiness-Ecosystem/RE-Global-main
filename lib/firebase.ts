@@ -1,7 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
 import { getAuth } from "firebase/auth";
-import { getStorage } from "firebase/storage";
 
 // A missing apiKey makes getAuth() throw "auth/invalid-api-key" during `next build`.
 // Fall back to a placeholder so the build can't crash; real deployments set the real key.
@@ -17,7 +16,6 @@ const firebaseConfig = {
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
 export const auth = getAuth(app);
-const storage = getStorage(app);
 
 // The Pi login -> Firebase sign-in exchange runs in the background. User-scoped
 // Firestore calls wait for it, otherwise the very first request after login would

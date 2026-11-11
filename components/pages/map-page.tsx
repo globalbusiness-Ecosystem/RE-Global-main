@@ -28,7 +28,6 @@ import { propertyPaymentAmount } from '@/lib/payment-rules';
 let L: any;
 let mapInitialized = false;
 const markerClusterGroup = new Map(); // Cache for performance
-const geoJsonCache = new Map(); // Cache for geojson layers
 
 interface Property {
   id: number | string;
@@ -155,7 +154,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [viewMode, setViewMode] = useState<'global' | 'regional'>('global');
+  const [, setViewMode] = useState<'global' | 'regional'>('global');
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [headerVisible, setHeaderVisible] = useState(true);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
@@ -175,7 +174,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
   const filteredProperties = useMemo(() => {
     const allProperties: Property[] = [...(showDemo === false ? [] : properties), ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1, isAdmin: true} as Property))];
-    let filtered = allProperties.filter((p) => {
+    const filtered = allProperties.filter((p) => {
       const matchType = filterType === 'all' || p.type === filterType;
       const matchSearch =
         p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -264,7 +263,6 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
       const downCount = regionProps.filter(p => p.marketTrend === 'down').length;
       const trend: 'up' | 'down' | 'stable' = upCount > downCount ? 'up' : downCount > upCount ? 'down' : 'stable';
       
-      const cities = new Set(regionProps.map(p => p.city));
       const topCity = regionProps.length > 0 ? regionProps.reduce((a, b) => (b.roiScore || 0) > (a.roiScore || 0) ? b : a).city : '';
 
       stats[region] = {
@@ -307,15 +305,6 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
 
       L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-      const handleMapEvent = () => {
-        try {
-          const bounds = map.getBounds();
-        } catch (e) {
-          console.error('Map event error:', e);
-        }
-      };
-      
-      map.on('moveend zoomend', handleMapEvent);
 
       mapInstanceRef.current = map;
       setMapReady(true);
@@ -338,7 +327,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
     markersRef.current.forEach(marker => {
       try {
         map.removeLayer(marker);
-      } catch (e) {
+      } catch {
         // Marker already removed
       }
     });

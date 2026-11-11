@@ -29,7 +29,7 @@ export default function SecondaryMarketPage() {
       });
       const data = await res.json();
       setResult(data);
-    } catch (err) {
+    } catch {
       setResult({ success: false, error: 'حصل خطأ في الاتصال' });
     } finally {
       setLoading(false);

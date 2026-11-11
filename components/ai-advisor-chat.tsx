@@ -83,7 +83,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           try {
             const piBalance = await (window as any).Pi.requestReadAccess?.();
             balance = piBalance || 0;
-          } catch (e) {
+          } catch {
             console.log('[v0] Balance not available');
           }
           
@@ -168,7 +168,6 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
     const lowerMessage = userMessage.toLowerCase();
     const tier = getBudgetTier();
 ;
-    const balance = userContext?.balance || 0;
 
     // Helper: detect country from user message (uses outer userMessage via closure)
     // Checks both English and Arabic location terms

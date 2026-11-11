@@ -78,7 +78,6 @@ export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const action = searchParams.get('action');
-    const language = (searchParams.get('language') as 'en' | 'ar') || 'en';
 
     if (action === 'health') {
       return NextResponse.json({

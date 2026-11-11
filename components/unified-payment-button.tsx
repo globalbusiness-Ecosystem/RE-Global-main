@@ -50,7 +50,7 @@ export function UnifiedPaymentButton({
   onSuccess,
   onError,
 }: UnifiedPaymentButtonProps) {
-  const { sdk, isAuthenticated, username, accessToken, isInitialized } = usePiAuth();
+  const { accessToken, isInitialized } = usePiAuth();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPiAvailable = true; // Check at payment time, not load time

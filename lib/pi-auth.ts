@@ -62,7 +62,7 @@ export async function verifyPiAccessToken(accessToken: unknown): Promise<Authent
       cache: 'no-store',
       signal: AbortSignal.timeout(8000),
     });
-  } catch (err) {
+  } catch {
     throw new AuthError('Could not reach Pi Platform API to verify identity', 503);
   }
 

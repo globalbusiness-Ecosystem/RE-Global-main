@@ -180,7 +180,6 @@ export function listingJsonLd(l: PublicListing, base: string, lang: SeoLang) {
   };
 }
 
-const countrySlug = (code: string) => code.toLowerCase();
 export const countryFromSlug = (slug: string): string | null => {
   const c = slug.toUpperCase();
   return isCountry(c) ? c : null;

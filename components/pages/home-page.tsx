@@ -44,20 +44,6 @@ const categories = [
   { id: 're-token', titleEn: 'Platform Credits', titleAr: 'رصيد المنصة', icon: Coins },
 ];
 
-const FEATURE_ITEMS = [
-  { en: '360° Virtual Tours', ar: 'جولات افتراضية 360 درجة', icon: Glasses },
-  { en: 'Pi Network Payments', ar: 'دفع عبر شبكة Pi', icon: Zap },
-  { en: 'Tokenized Real Estate', ar: 'عقارات رمزية', icon: Building2 },
-  { en: 'Global Coverage', ar: 'تغطية عالمية', icon: Globe },
-  { en: 'AI Advisor — Aladdin', ar: 'مستشار ذكاء اصطناعي — علاء الدين', icon: Bot },
-  { en: 'Smart Contracts on Stellar', ar: 'عقود ذكية على شبكة Stellar', icon: ScrollText },
-  { en: 'Verified On-Chain Transactions', ar: 'معاملات موثّقة على البلوكشين', icon: ShieldCheck },
-  { en: 'AI-Guided Property Tours', ar: 'جولات عقارية بالذكاء الاصطناعي', icon: Video },
-  { en: 'Live Market Analytics', ar: 'تحليلات سوق لحظية', icon: BarChart3 },
-  { en: 'Off-Plan & Investment Options', ar: 'خيارات عقارات تحت الإنشاء واستثمار', icon: TrendingUp },
-  { en: 'Multi-language Experience', ar: 'تجربة متعددة اللغات', icon: Languages },
-];
-
 export default function HomePage({
   language,
   onCategoryClick,

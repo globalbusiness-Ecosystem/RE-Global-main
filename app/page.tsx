@@ -81,8 +81,8 @@ export default function App() {
   const { getFavoritesForUser, addFavorite, removeFavorite } = useFirebaseDatabase();
   const [currentPage, setCurrentPage] = useState('home');
   const alertCount = useStayAlertCount(currentPage);
-  const [previousPage, setPreviousPage] = useState('home');
-  const [currency, setCurrency] = useState<'PI' | 'USD'>('PI');
+  const [, setPreviousPage] = useState('home');
+  const [currency] = useState<'PI' | 'USD'>('PI');
   const [favorites, setFavorites] = useState<string[]>([]);
   const [logoTaps, setLogoTaps] = useState(0);
   const [showAdminPin, setShowAdminPin] = useState(false);

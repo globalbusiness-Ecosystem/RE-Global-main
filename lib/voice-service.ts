@@ -10,13 +10,6 @@ interface VoiceConfig {
   volume?: number;
 }
 
-interface VoiceState {
-  isListening: boolean;
-  isSpeaking: boolean;
-  isProcessing: boolean;
-  error?: string;
-}
-
 class VoiceService {
   private synth: SpeechSynthesis | null = null;
   private recognition: any = null;
@@ -82,7 +75,7 @@ class VoiceService {
       this.recognitionInstance.onend = () => {
         console.log('[v0] Recognition ended');
       };
-    } catch (error) {
+    } catch {
       onError('فشل تهيئة الميكروفون');
     }
   }
@@ -94,7 +87,7 @@ class VoiceService {
     if (!this.recognitionInstance) return;
     try {
       this.recognitionInstance.start();
-    } catch (e) {
+    } catch {
       console.error('[v0] Error starting mic');
     }
   }
@@ -106,7 +99,7 @@ class VoiceService {
     if (!this.recognitionInstance) return;
     try {
       this.recognitionInstance.stop();
-    } catch (e) {
+    } catch {
       console.error('[v0] Error stopping mic');
     }
   }
@@ -118,7 +111,7 @@ class VoiceService {
     if (!this.recognitionInstance) return;
     try {
       this.recognitionInstance.abort();
-    } catch (e) {
+    } catch {
       console.error('[v0] Error aborting mic');
     }
   }
@@ -207,7 +200,7 @@ class VoiceService {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach((track) => track.stop());
       return true;
-    } catch (error) {
+    } catch {
       console.error('[v0] Mic permission denied');
       return false;
     }
@@ -241,7 +234,7 @@ class VoiceService {
     if (this.synth) {
       try {
         this.synth.pause();
-      } catch (e) {
+      } catch {
         console.warn('[v0] Pause not supported');
       }
     }
@@ -254,7 +247,7 @@ class VoiceService {
     if (this.synth) {
       try {
         this.synth.resume();
-      } catch (e) {
+      } catch {
         console.warn('[v0] Resume not supported');
       }
     }

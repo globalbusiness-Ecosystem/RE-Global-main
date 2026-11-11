@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
     for (let i = 13; i >= 0; i--) series[dayKey(new Date(now - i * DAY))] = { count: 0, amount: 0 };
     const cByType: Record<string, { count: number; amount: number }> = {};
     let totalAmount = 0;
-    let last7 = { count: 0, amount: 0 };
+    const last7 = { count: 0, amount: 0 };
     const rows = contracts.docs.map((d) => {
       const c = d.data();
       const at: Date = c.createdAt?.toDate?.() ?? new Date(0);

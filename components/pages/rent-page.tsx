@@ -381,7 +381,6 @@ export default function RentPage({ language, currency, favorites, toggleFavorite
     [firebaseProperties, filters, filterRate, language]
   );
 
-  const activeTourProperty = rentProperties.find((p) => p.id === activeTourId);
 
   // If viewing tour, show VR Tour viewer
   if (activeTourId) {
