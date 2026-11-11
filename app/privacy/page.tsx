@@ -16,12 +16,12 @@ export default function PrivacyPolicyPage() {
 
         <section className="space-y-3 mb-8">
           <p>
-            RE ("RE", "we", "us", or "our") is the Real Estate
+            RE (&quot;RE&quot;, &quot;we&quot;, &quot;us&quot;, or &quot;our&quot;) is the Real Estate
             pillar of the Globalbusiness ecosystem, providing a platform for browsing, buying,
             renting, tokenizing, and investing in real estate through Pi Network payments and
             blockchain-based smart contracts. This Privacy Policy explains how we collect, use,
             disclose, and safeguard your information when you use the RE application (the
-            "App" or "Service"), whether accessed through the Pi Browser or the
+            &quot;App&quot; or &quot;Service&quot;), whether accessed through the Pi Browser or the
             web.
           </p>
           <p>
@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
             information from Pi Network, such as your Pi username and a unique user identifier,
             in accordance with the permission scopes (e.g. <Code>username</Code>,{" "}
             <Code>payments</Code>) you approve at the time of login. We do not receive your Pi
-            wallet's private keys or seed phrase — these remain solely under your control
+            wallet&apos;s private keys or seed phrase — these remain solely under your control
             within the Pi ecosystem.
           </p>
           <SubHeading>b. Transaction and Payment Data</SubHeading>
@@ -94,7 +94,7 @@ export default function PrivacyPolicyPage() {
               providers), under obligations of confidentiality
             </li>
             <li>Other users, limited to information necessary to complete a transaction (e.g. a property seller and buyer)</li>
-            <li>Authorities, where required by law or to protect our rights and users' safety</li>
+            <li>Authorities, where required by law or to protect our rights and users&apos; safety</li>
           </ul>
         </Section>
 
@@ -141,7 +141,7 @@ export default function PrivacyPolicyPage() {
         <Section title="9. Changes to This Policy">
           <p>
             We may update this Privacy Policy from time to time. We will notify you of material
-            changes by updating the "Last updated" date above and, where appropriate,
+            changes by updating the &quot;Last updated&quot; date above and, where appropriate,
             through an in-app notice. Continued use of RE after changes take effect constitutes
             acceptance of the revised policy.
           </p>

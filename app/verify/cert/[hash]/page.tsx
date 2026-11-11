@@ -136,7 +136,7 @@ export default function VerifyCertificatePage() {
 
           {reportStatus === 'done' && !report && (
             <p className="text-sm text-muted-foreground">
-              The on-chain hash is the permanent proof; the full readable report for this certificate isn't
+              The on-chain hash is the permanent proof; the full readable report for this certificate isn&apos;t
               published yet.
             </p>
           )}

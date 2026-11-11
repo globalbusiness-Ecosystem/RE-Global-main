@@ -48,7 +48,7 @@ export default function MarketAdminPanel({ onUnauthorized }: { onUnauthorized: (
       </div>
       {review.length > 0 && (
         <div className="mb-3 rounded-xl border border-red-500/40 bg-red-500/10 p-3 text-xs text-red-200">
-          ⚠️ {review.length} عملية محتاجة مراجعة (المشتري دفع والعرض اتلغى أو اتباع). في طلب استرداد معلّق ليها في "مستحقات سوق الحصص".
+          ⚠️ {review.length} عملية محتاجة مراجعة (المشتري دفع والعرض اتلغى أو اتباع). في طلب استرداد معلّق ليها في &quot;مستحقات سوق الحصص&quot;.
         </div>
       )}
       <div className="space-y-2">

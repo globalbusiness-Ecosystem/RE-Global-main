@@ -40,7 +40,7 @@ export default async function VerifyContractPage(props: { params: Promise<{ id: 
       style={{ backgroundImage: 'radial-gradient(circle at 50% 0%, rgba(201,162,39,0.06), transparent 60%)' }}>
       <ContractDetailView contract={contract} />
       <p className="text-center text-[11px] text-stone-600 mt-6 max-w-[560px] mx-auto">
-        This is a publicly verifiable record on RE Global. Anyone with this link can view the contract's
+        This is a publicly verifiable record on RE Global. Anyone with this link can view the contract&apos;s
         signed status and hash — no login required.
       </p>
     </main>

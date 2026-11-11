@@ -16,8 +16,8 @@ export default function TermsOfServicePage() {
 
         <section className="space-y-3 mb-8">
           <p>
-            These Terms of Service ("Terms") govern your access to and use of RE (the
-            "App" or "Service"), the Real Estate pillar of the Globalbusiness
+            These Terms of Service (&quot;Terms&quot;) govern your access to and use of RE (the
+            &quot;App&quot; or &quot;Service&quot;), the Real Estate pillar of the Globalbusiness
             ecosystem, developed by Elsayed777X. By accessing or using RE, you agree to be bound
             by these Terms. If you do not agree, please do not use the Service.
           </p>
@@ -28,7 +28,7 @@ export default function TermsOfServicePage() {
             RE is a real estate platform that allows users to browse, buy, rent, book, invest in,
             and tokenize property listings, with payments processed through the Pi Network and,
             where applicable, recorded via smart contracts on the Pi blockchain. RE also provides
-            supporting features such as an AI advisor ("Aladdin") and an admin dashboard
+            supporting features such as an AI advisor (&quot;Aladdin&quot;) and an admin dashboard
             for platform management.
           </p>
         </Section>
@@ -36,7 +36,7 @@ export default function TermsOfServicePage() {
         <Section title="2. Eligibility">
           <p>
             You must be at least 18 years old and have a valid, verified Pi Network account to use
-            RE's payment and transaction features. By using the Service, you represent that
+            RE&apos;s payment and transaction features. By using the Service, you represent that
             you meet these requirements and that all information you provide is accurate and
             complete.
           </p>
@@ -91,7 +91,7 @@ export default function TermsOfServicePage() {
             </li>
             <li>
               RE is not responsible for losses resulting from Pi Network outages, blockchain
-              network congestion, incorrect wallet activity, or issues outside RE's reasonable
+              network congestion, incorrect wallet activity, or issues outside RE&apos;s reasonable
               control
             </li>
           </ul>
@@ -100,7 +100,7 @@ export default function TermsOfServicePage() {
         <Section title="6. RE Token and Tokenized Assets">
           <p>
             RE Token and tokenized real estate features are provided for use within the RE
-            ecosystem and, where indicated, operate on Pi Network's Testnet environment.
+            ecosystem and, where indicated, operate on Pi Network&apos;s Testnet environment.
             Testnet tokens and transactions have no real-world monetary value and are provided for
             testing and demonstration purposes unless expressly stated otherwise.
           </p>
@@ -111,7 +111,7 @@ export default function TermsOfServicePage() {
           <ul className="list-disc list-inside space-y-1.5">
             <li>Use RE for any unlawful purpose or in violation of these Terms</li>
             <li>Submit false, misleading, or fraudulent property listings or transaction data</li>
-            <li>Attempt to interfere with, disrupt, or gain unauthorized access to RE's systems, admin dashboard, or smart contracts</li>
+            <li>Attempt to interfere with, disrupt, or gain unauthorized access to RE&apos;s systems, admin dashboard, or smart contracts</li>
             <li>Use automated means to scrape or extract data from the Service without permission</li>
             <li>Impersonate any person or entity, or misrepresent your affiliation with any person or entity</li>
           </ul>
@@ -128,7 +128,7 @@ export default function TermsOfServicePage() {
 
         <Section title="9. Disclaimers">
           <p>
-            RE is provided on an "as is" and "as available" basis, without
+            RE is provided on an &quot;as is&quot; and &quot;as available&quot; basis, without
             warranties of any kind, express or implied, including but not limited to merchantability,
             fitness for a particular purpose, and non-infringement. RE does not guarantee
             uninterrupted, error-free, or secure operation of the Service.
@@ -155,8 +155,8 @@ export default function TermsOfServicePage() {
 
         <Section title="12. Changes to These Terms">
           <p>
-            We may revise these Terms from time to time. We will update the "Last
-            updated" date above when changes are made. Continued use of RE after changes take
+            We may revise these Terms from time to time. We will update the &quot;Last
+            updated&quot; date above when changes are made. Continued use of RE after changes take
             effect constitutes your acceptance of the revised Terms.
           </p>
         </Section>
