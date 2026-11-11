@@ -27,7 +27,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: 0.110.0
-        version: 0.110.0(zod@3.25.67)
+        version: 0.110.0(zod@4.6.7)
       '@google/generative-ai':
         specifier: 0.24.1
         version: 0.24.1
@@ -39,7 +39,7 @@ importers:
         version: 16.2.0
       ai:
         specifier: 6.0.142
-        version: 6.0.142(zod@3.25.67)
+        version: 6.0.142(zod@4.6.7)
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -98,8 +98,8 @@ importers:
         specifier: ^2.5.5
         version: 2.6.1
       zod:
-        specifier: 3.25.67
-        version: 3.25.67
+        specifier: 4.6.7
+        version: 4.6.7
     devDependencies:
       '@eslint/eslintrc':
         specifier: ^3.3.7
@@ -3631,24 +3631,24 @@ packages:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
     engines: {node: '>=10'}
 
-  zod@3.25.67:
-    resolution: {integrity: sha512-idA2YXwpCdqUSKRCACDE6ItZD9TZzy3OZMtpfLoh6oPR47lipysRrJfjzMqFxQ3uJuUPyUeWe1r9vLH33xO/Qw==}
+  zod@4.6.7:
+    resolution: {integrity: sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg==}
 
 snapshots:
 
-  '@ai-sdk/gateway@3.0.84(zod@3.25.67)':
+  '@ai-sdk/gateway@3.0.84(zod@4.6.7)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.67)
+      '@ai-sdk/provider-utils': 4.0.21(zod@4.6.7)
       '@vercel/oidc': 3.1.0
-      zod: 3.25.67
+      zod: 4.6.7
 
-  '@ai-sdk/provider-utils@4.0.21(zod@3.25.67)':
+  '@ai-sdk/provider-utils@4.0.21(zod@4.6.7)':
     dependencies:
       '@ai-sdk/provider': 3.0.8
       '@standard-schema/spec': 1.1.0
       eventsource-parser: 3.1.0
-      zod: 3.25.67
+      zod: 4.6.7
 
   '@ai-sdk/provider@3.0.8':
     dependencies:
@@ -3656,12 +3656,12 @@ snapshots:
 
   '@alloc/quick-lru@5.2.0': {}
 
-  '@anthropic-ai/sdk@0.110.0(zod@3.25.67)':
+  '@anthropic-ai/sdk@0.110.0(zod@4.6.7)':
     dependencies:
       json-schema-to-ts: 3.1.1
       standardwebhooks: 1.0.0
     optionalDependencies:
-      zod: 3.25.67
+      zod: 4.6.7
 
   '@babel/runtime@7.29.7': {}
 
@@ -4916,13 +4916,13 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  ai@6.0.142(zod@3.25.67):
+  ai@6.0.142(zod@4.6.7):
     dependencies:
-      '@ai-sdk/gateway': 3.0.84(zod@3.25.67)
+      '@ai-sdk/gateway': 3.0.84(zod@4.6.7)
       '@ai-sdk/provider': 3.0.8
-      '@ai-sdk/provider-utils': 4.0.21(zod@3.25.67)
+      '@ai-sdk/provider-utils': 4.0.21(zod@4.6.7)
       '@opentelemetry/api': 1.9.0
-      zod: 3.25.67
+      zod: 4.6.7
 
   ajv@6.15.0:
     dependencies:
@@ -7493,4 +7493,4 @@ snapshots:
 
   yocto-queue@0.1.0: {}
 
-  zod@3.25.67: {}
+  zod@4.6.7: {}
