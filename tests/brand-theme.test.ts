@@ -28,3 +28,14 @@ describe('brand look and profile cover', () => {
     expect(s).toContain('setPickerOpen(true)');
   });
 });
+
+describe('sign-in and identity-check pages share the brand look', () => {
+  it('show the RE mark and use the gold accent for the main action', () => {
+    for (const p of ['app/login/page.tsx', 'app/kyc/page.tsx']) {
+      const s = src(p);
+      expect(s).toContain('<BrandMark />');
+      expect(s).not.toContain('focus:border-white/40');
+    }
+    expect(src('app/kyc/page.tsx')).not.toContain('bg-white px-4 py-3');
+  });
+});

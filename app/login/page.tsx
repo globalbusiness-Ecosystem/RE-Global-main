@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { BrandMark } from '@/components/brand-mark';
 import { useLanguage } from '@/contexts/language-context';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { ll } from '@/lib/login-labels';
@@ -40,18 +41,19 @@ export default function LoginPage() {
     }
   };
 
-  const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-white/40';
+  const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-accent';
   const btn = 'w-full rounded-xl px-4 py-3 text-base font-semibold disabled:opacity-50';
 
   return (
     <main dir={rtl ? 'rtl' : 'ltr'} className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4 py-10 text-white">
-      <h1 className="text-2xl font-bold">{ll('title', language)}</h1>
+      <BrandMark />
+      <h1 className="text-center text-2xl font-bold">{ll('title', language)}</h1>
       {isPiVerified ? (
         <p className="rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300">{ll('inPi', language)}</p>
       ) : user ? (
         <div className="flex flex-col gap-3">
           <p className="text-sm text-gray-300">{ll('signedInAs', language, { email: user.username })}</p>
-          <button type="button" className={`${btn} border border-white/20`} onClick={() => run(logout)} disabled={busy}>{ll('signOut', language)}</button>
+          <button type="button" className={`${btn} border border-accent/40 text-accent`} onClick={() => run(logout)} disabled={busy}>{ll('signOut', language)}</button>
         </div>
       ) : (
         <>

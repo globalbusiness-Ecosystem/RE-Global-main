@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { BrandMark } from '@/components/brand-mark';
 import { useLanguage } from '@/contexts/language-context';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { authHeaders } from '@/lib/api-token';
@@ -88,17 +89,18 @@ export default function KycPage() {
       <p className="text-xs text-gray-400">{kl('nameHint', language)}</p>
     </fieldset>
   );
-  const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-white/40';
+  const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-accent';
   const note = 'rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300';
   const canSend = me && me.required && (me.status === 'none' || me.status === 'rejected');
 
   return (
     <main dir={rtl ? 'rtl' : 'ltr'} className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4 py-10 text-white">
-      <h1 className="text-2xl font-bold">{kl('title', language)}</h1>
+      <BrandMark />
+      <h1 className="text-center text-2xl font-bold">{kl('title', language)}</h1>
       {!isInitialized ? null : !accessToken ? (
         <>
           <p className={note}>{kl('needLogin', language)}</p>
-          <Link href="/login" className="w-full rounded-xl bg-white px-4 py-3 text-center text-base font-semibold text-black">{kl('login', language)}</Link>
+          <Link href="/login" className="w-full rounded-xl bg-accent px-4 py-3 text-center text-base font-semibold text-accent-foreground">{kl('login', language)}</Link>
         </>
       ) : !me ? (
         msg === 'failed' ? <p role="alert" className="text-sm text-red-400">{kl('failed', language)}</p> : null
@@ -113,7 +115,7 @@ export default function KycPage() {
           {(me.status === 'pending' || me.status === 'approved') && (
             <div className="flex flex-col gap-2">
               {nameChoice}
-              <button type="button" onClick={saveName} className="w-full rounded-xl bg-white px-4 py-3 text-base font-semibold text-black">{kl('nameSave', language)}</button>
+              <button type="button" onClick={saveName} className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-accent-foreground">{kl('nameSave', language)}</button>
               {nameSaved && <p role="status" className="text-sm text-green-400">{kl('nameSaved', language)}</p>}
             </div>
           )}
@@ -153,7 +155,7 @@ export default function KycPage() {
               {nameChoice}
               {uploading && <p className="text-sm text-gray-300">{kl('uploading', language)}</p>}
               {msg && <p role="alert" className="text-sm text-red-400">{kl(msg, language)}</p>}
-              <button type="submit" disabled={busy} className="w-full rounded-xl bg-white px-4 py-3 text-base font-semibold text-black disabled:opacity-50">{kl('submit', language)}</button>
+              <button type="submit" disabled={busy} className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-accent-foreground disabled:opacity-50">{kl('submit', language)}</button>
             </form>
           )}
         </>
