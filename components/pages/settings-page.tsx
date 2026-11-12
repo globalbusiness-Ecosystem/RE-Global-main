@@ -8,7 +8,6 @@ import {
   Globe2,
   Moon,
   Bell,
-  Coins,
   FileText,
   Phone,
   AtSign,
@@ -34,6 +33,7 @@ import { ToggleSwitch } from '@/components/ui/toggle-switch';
 import { UserAvatar } from '@/components/user-avatar';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
+import { announceHandle, useIdentity } from '@/hooks/use-identity';
 import { AVATAR_I18N } from '@/lib/avatar';
 import { sl, type SettingsLabelKey } from '@/lib/settings-labels';
 import { ProfileChecklist } from '@/components/profile-checklist';
@@ -97,6 +97,7 @@ export default function SettingsPage({
 }: SettingsPageProps) {
   const t = SETTINGS_I18N[language];
   const { username, isPiVerified } = usePiAuth();
+  const { name: shownName, isWebAccount, kycApproved } = useIdentity();
   const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
   const [profileVerified, setProfileVerified] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
@@ -110,7 +111,6 @@ export default function SettingsPage({
   const [activeTab, setActiveTab] = useState<SettingsTab>('profile');
   const [referralCode, setReferralCode] = useState<string | null>(null);
   // Web accounts (outside the Pi Browser) choose their own username once; it is also their invite code.
-  const isWebAccount = Boolean(username?.startsWith('web_'));
   const [handle, setHandle] = useState<string | null>(null);
   const [handleInput, setHandleInput] = useState('');
   const [handleMsg, setHandleMsg] = useState<'invalid' | 'taken' | 'already' | 'failed' | 'saved' | null>(null);
@@ -145,7 +145,7 @@ export default function SettingsPage({
     try {
       const r = await fetch('/api/handle', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ handle: handleInput }) });
       const j = await r.json().catch(() => null);
-      if (r.ok && j && typeof j.handle === 'string') { setHandle(j.handle); setReferralCode(String(j.code)); setHandleMsg('saved'); }
+      if (r.ok && j && typeof j.handle === 'string') { setHandle(j.handle); setReferralCode(String(j.code)); announceHandle(j.handle); setHandleMsg('saved'); }
       else setHandleMsg(j?.error === 'invalid' || j?.error === 'taken' || j?.error === 'already' ? j.error : 'failed');
     } catch { setHandleMsg('failed'); } finally { setHandleBusy(false); }
   };
@@ -237,13 +237,12 @@ export default function SettingsPage({
     });
   };
 
-  const securityScore = !isPiVerified ? 30 : profileVerified ? 95 : 65;
-  const securityLabel = !isPiVerified
-    ? sl('secBasic', language)
-    : profileVerified
-      ? sl('secExcellent', language)
-      : sl('secGood', language);
-  const securityColor = !isPiVerified ? '#f59e0b' : profileVerified ? '#22c55e' : '#3b82f6';
+  // Web accounts are verified by the identity check (KYC); Pi accounts by Pi, and fully once the e-mail is verified too.
+  const level: 'none' | 'pi' | 'full' = isWebAccount ? (kycApproved ? 'full' : 'none') : !isPiVerified ? 'none' : profileVerified ? 'full' : 'pi';
+  const securityScore = level === 'none' ? 30 : level === 'pi' ? 65 : 95;
+  const securityLabel = sl(level === 'none' ? 'secBasic' : level === 'pi' ? 'secGood' : 'secExcellent', language);
+  const securityColor = level === 'none' ? '#f59e0b' : level === 'pi' ? '#3b82f6' : '#22c55e';
+  const statusLine = level === 'full' ? sl('fullyVerified', language) : level === 'pi' ? sl('connectedPi', language) : sl(isWebAccount ? 'unverified' : 'notConnected', language);
 
   return (
     <main className="px-4 py-6 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto pb-24 space-y-4">
@@ -264,8 +263,8 @@ export default function SettingsPage({
       <div className="bg-card border border-border rounded-xl p-5">
         <div className="flex flex-col items-center text-center gap-3">
           <div className="relative">
-            <button onClick={handleLogoTap} className="block rounded-full" aria-label={username ? `@${username}` : 'Profile'}>
-              <UserAvatar avatar={avatar} username={username} size={88} />
+            <button onClick={handleLogoTap} className="block rounded-full" aria-label={shownName ?? 'Profile'}>
+              <UserAvatar avatar={avatar} username={shownName} size={88} />
             </button>
             <button
               type="button"
@@ -278,13 +277,12 @@ export default function SettingsPage({
           </div>
           <div className="min-w-0 max-w-full">
             <p className="font-bold text-foreground text-lg truncate">
-              {username ? `@${handle ?? username}` : sl('guest', language)}
+              {username ? (shownName ?? sl('guest', language)) : sl('guest', language)}
             </p>
-            <p className="text-xs text-muted-foreground">
-              {isPiVerified
-                ? sl('connectedPi', language)
-                : sl('notConnected', language)}
-            </p>
+            {isWebAccount && handle && handle !== shownName && (
+              <p dir="ltr" className="text-xs text-muted-foreground">@{handle}</p>
+            )}
+            <p className="text-xs text-muted-foreground">{statusLine}</p>
           </div>
         </div>
         <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
@@ -312,7 +310,7 @@ export default function SettingsPage({
       {pickerOpen && (
         <AvatarPicker
           language={language}
-          username={username}
+          username={shownName}
           avatar={avatar}
           signedIn={avatarSignedIn}
           onSave={saveAvatar}
@@ -347,7 +345,7 @@ export default function SettingsPage({
         <div className="space-y-4">
           <ProfileChecklist
             language={language}
-            steps={profileSteps({ hasPicture: Boolean(avatar), piVerified: isPiVerified, emailVerified: profileVerified, invitedSomeone: referralCount > 0 })}
+            steps={profileSteps({ hasPicture: Boolean(avatar), piVerified: isWebAccount ? kycApproved : isPiVerified, emailVerified: profileVerified, invitedSomeone: referralCount > 0 })}
             onStep={(id: ProfileStepId) => {
               if (id === 'picture') setPickerOpen(true);
               else if (id === 'email') setActiveTab('security');
@@ -408,27 +406,15 @@ export default function SettingsPage({
                   {sl('username', language)}
                 </span>
                 <span className="text-sm font-medium text-foreground">
-                  {username ? `@${handle ?? username}` : '—'}
+                  {username && (handle || !isWebAccount) ? <bdi dir="ltr">@{handle ?? username}</bdi> : '—'}
                 </span>
               </div>
               <div className="flex items-center justify-between px-4 py-3.5">
                 <span className="text-sm text-muted-foreground">
                   {sl('verification', language)}
                 </span>
-                <span
-                  className={`text-sm font-medium ${
-                    !isPiVerified
-                      ? 'text-muted-foreground'
-                      : profileVerified
-                        ? 'text-emerald-500'
-                        : 'text-blue-400'
-                  }`}
-                >
-                  {!isPiVerified
-                    ? sl('unverified', language)
-                    : profileVerified
-                      ? sl('fullyVerified', language)
-                      : sl('verifiedPi', language)}
+                <span className={`text-sm font-medium ${level === 'none' ? 'text-muted-foreground' : level === 'full' ? 'text-emerald-500' : 'text-blue-400'}`}>
+                  {level === 'none' ? sl('unverified', language) : level === 'full' ? sl('fullyVerified', language) : sl('verifiedPi', language)}
                 </span>
               </div>
               <button
@@ -466,31 +452,27 @@ export default function SettingsPage({
             </div>
           </div>
 
-          <div className="bg-card border border-border rounded-lg p-4">
-            <SectionLabel icon={Coins}>
-              {t.reToken}
-            </SectionLabel>
-            <div className="grid grid-cols-2 gap-3 mb-3">
-              <div className="bg-muted rounded-lg p-3">
-                <p className="text-xs text-muted-foreground mb-1">{t.tokenPrice}</p>
-                <p className="text-base font-bold text-accent">1 $RE = 0.01π</p>
-              </div>
-              <div className="bg-muted rounded-lg p-3">
-                <p className="text-xs text-muted-foreground mb-1">{t.totalSupply}</p>
-                <p className="text-base font-bold text-accent">100M $RE</p>
+          <CurrencyPicker />
+
+          <div className="bg-card border border-border rounded-lg">
+          <div className="flex items-center justify-between p-4">
+            <div className="flex items-center gap-3">
+              <IconBadge icon={Moon} size="sm" />
+              <div>
+                <h3 className="font-semibold text-foreground text-sm">{t.darkMode}</h3>
+                <p className="text-xs text-muted-foreground mt-0.5">{t.luxuryDarkTheme}</p>
               </div>
             </div>
-            <div className="bg-muted rounded-lg p-3 mb-4">
-              <p className="text-xs text-muted-foreground mb-2">{t.howToEarn}</p>
-              <ul className="text-xs text-foreground space-y-1">
-                <li>• {t.buyProperties}</li>
-                <li>• {t.investTokenizedAssets}</li>
-                <li>• {t.referFriends}</li>
-              </ul>
-            </div>
-            <button className="w-full bg-accent text-accent-foreground py-2.5 rounded-lg font-semibold hover:opacity-90 transition">
-              {t.buyRE}
-            </button>
+            <ToggleSwitch
+              label={t.darkMode}
+              checked={darkMode}
+              onClick={() => {
+                const next = !darkMode;
+                setDarkMode(next);
+                applyTheme(next ? 'dark' : 'light');
+              }}
+            />
+          </div>
           </div>
 
           <div className="bg-card border border-border rounded-lg overflow-hidden">
@@ -588,6 +570,18 @@ export default function SettingsPage({
               {sl('accountStatus', language)}
             </SectionLabel>
             <div className="space-y-2 text-sm">
+              {isWebAccount ? (
+              <div className="flex items-center justify-between py-1.5">
+                <span className="text-muted-foreground">
+                  {sl('verification', language)}
+                </span>
+                <span className={kycApproved ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}>
+                  {kycApproved
+                    ? sl('fullyVerified', language)
+                    : sl('unverified', language)}
+                </span>
+              </div>
+              ) : (
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-muted-foreground">
                   {sl('piVerification', language)}
@@ -598,6 +592,7 @@ export default function SettingsPage({
                     : sl('notConnected', language)}
                 </span>
               </div>
+              )}
               <div className="flex items-center justify-between py-1.5">
                 <span className="text-muted-foreground">
                   {sl('emailVerification', language)}
@@ -609,7 +604,7 @@ export default function SettingsPage({
                 </span>
               </div>
             </div>
-            {isPiVerified && !profileVerified && (
+            {!isWebAccount && isPiVerified && !profileVerified && (
               <button
                 onClick={() => onNavigate?.('profile')}
                 className="w-full mt-3 text-xs font-medium text-accent hover:opacity-80 transition text-left rtl:text-right"
@@ -618,8 +613,6 @@ export default function SettingsPage({
               </button>
             )}
           </div>
-
-          <CurrencyPicker />
 
           <MyDataPanel />
 
@@ -643,25 +636,6 @@ export default function SettingsPage({
 
       {activeTab === 'notifications' && (
         <div className="bg-card border border-border rounded-lg divide-y divide-border">
-          <div className="flex items-center justify-between p-4">
-            <div className="flex items-center gap-3">
-              <IconBadge icon={Moon} size="sm" />
-              <div>
-                <h3 className="font-semibold text-foreground text-sm">{t.darkMode}</h3>
-                <p className="text-xs text-muted-foreground mt-0.5">{t.luxuryDarkTheme}</p>
-              </div>
-            </div>
-            <ToggleSwitch
-              label={t.darkMode}
-              checked={darkMode}
-              onClick={() => {
-                const next = !darkMode;
-                setDarkMode(next);
-                applyTheme(next ? 'dark' : 'light');
-              }}
-            />
-          </div>
-
           <div className="flex items-center justify-between p-4">
             <div className="flex items-center gap-3">
               <IconBadge icon={Bell} size="sm" />

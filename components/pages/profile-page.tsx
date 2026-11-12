@@ -96,7 +96,7 @@ function splitPhone(stored: string): { dialCode: string; local: string } {
 export default function ProfilePage({ language = 'en', favorites = [], onBack }: ProfilePageProps) {
   const t = PROFILE_I18N[language];
   const isRTL = language === 'ar' || language === 'ur';
-  const { username, accessToken, location: deviceLocation, locationError, requestLocation } = usePiAuth();
+  const { username, displayName, accessToken, location: deviceLocation, locationError, requestLocation } = usePiAuth();
   const { getProfile, saveProfile, getContractsForUser } = useFirebaseDatabase();
 
   const [loading, setLoading] = useState(true);
@@ -122,7 +122,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
     Promise.all([getProfile(username), getContractsForUser(username)]).then(([p, contracts]) => {
       if (p) {
         setProfile({
-          fullName: p.fullName || '',
+          fullName: p.fullName || displayName || '',
           email: p.email || '',
           phone: p.phone || '',
           location: p.location || '',
@@ -138,11 +138,13 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
         const { dialCode: dc, local } = splitPhone(p.phone || '');
         setDialCode(dc);
         setLocalPhone(local);
+      } else if (displayName) {
+        setProfile((prev) => ({ ...prev, fullName: displayName }));
       }
       setContractsCount(contracts.length);
       setLoading(false);
     });
-  }, [username]);
+  }, [username, displayName]);
 
   const handleSaveProfile = async () => {
     if (!username) {

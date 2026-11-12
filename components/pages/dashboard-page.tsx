@@ -86,7 +86,7 @@ function VerifyRow({ txid, language }: { txid: string; language: NavLanguage }) 
 
 export default function DashboardPage({ language, favorites }: DashboardPageProps) {
   const t = DASHBOARD_I18N[language];
-  const { username, isAuthenticated } = usePiAuth();
+  const { username, isAuthenticated, isWebAccount } = usePiAuth();
   const { getContractsForUser } = useFirebaseDatabase();
   const { properties } = useProperties();
 
@@ -137,6 +137,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
           <p className="text-xs text-green-300">{t.privacyNote}</p>
         </div>
 
+        {!isWebAccount && (
         <Card className="bg-card border border-border p-4">
           <div className="flex items-center gap-2 mb-3">
             <Wallet className="w-4 h-4 text-accent" />
@@ -168,6 +169,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
           </div>
           <p className="text-[11px] text-muted-foreground mt-3 border-t border-border pt-2">{t.sdkNote}</p>
         </Card>
+        )}
 
         {loading ? (
           <div className="flex items-center justify-center py-10">

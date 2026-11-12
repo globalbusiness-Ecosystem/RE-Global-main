@@ -9,6 +9,7 @@ import { isPiBrowser } from '@/lib/pi-env';
 import { authHeaders } from '@/lib/api-token';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
+import { useIdentity } from '@/hooks/use-identity';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { useLanguage } from '@/contexts/language-context';
 import { getStoredTheme, applyTheme } from '@/lib/theme';
@@ -27,8 +28,9 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [kycRequired, setKycRequired] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
-  const { username, isAuthenticated, accessToken, isInitialized } = usePiAuth();
+  const { isAuthenticated, accessToken, isInitialized } = usePiAuth();
   const { avatar } = useMyAvatar();
+  const { name: shownName, handle: shownHandle } = useIdentity();
   const { language: navLang } = useLanguage();
 
   useEffect(() => {
@@ -159,7 +161,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           title={t.settings}
         >
           {avatar ? (
-            <UserAvatar avatar={avatar} username={username} size={24} />
+            <UserAvatar avatar={avatar} username={shownName} size={24} />
           ) : (
             <Circle className="w-4 h-4" style={{ color: 'rgb(212, 175, 55)', strokeWidth: 1.5 }} />
           )}
@@ -185,7 +187,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
               </div>
               <div className="flex items-center gap-2.5">
                 {avatar ? (
-                  <UserAvatar avatar={avatar} username={username} size={36} />
+                  <UserAvatar avatar={avatar} username={shownName} size={36} />
                 ) : (
                   <div className="w-9 h-9 rounded-full bg-accent/20 flex items-center justify-center shrink-0">
                     <User className="w-4 h-4 text-accent" />
@@ -195,7 +197,8 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
                   <p className="text-[11px] text-gray-500">
                     {isAuthenticated ? t.signedInAs : t.notSignedIn}
                   </p>
-                  {username && <p className="text-sm text-white font-medium truncate">{username}</p>}
+                  {shownName && <p className="text-sm text-white font-medium truncate">{shownName}</p>}
+                  {shownHandle && shownHandle !== shownName && <p dir="ltr" className="text-[11px] text-gray-500 truncate">@{shownHandle}</p>}
                 </div>
               </div>
             </div>

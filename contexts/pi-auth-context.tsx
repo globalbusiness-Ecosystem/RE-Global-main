@@ -42,6 +42,9 @@ interface PiAuthContextType {
   products: Product[] | null;
   restoredPurchases: UserPurchaseBalance[] | null;
   username: string | null;
+  // Web sign-in only: the Google account's name and whether the account is a web one (its username is a technical id).
+  displayName: string | null;
+  isWebAccount: boolean;
   accessToken: string | null;
   user: PiUser | null;
   location: UserLocation | null;
@@ -144,6 +147,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
   const [hasError, setHasError] = useState(false);
   const [sdk, setSdk] = useState<SDKLiteInstance | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [displayName, setDisplayName] = useState<string | null>(null);
+  const [isWebAccount, setIsWebAccount] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
   const [products, setProducts] = useState<Product[] | null>(null);
   const [restoredPurchases, setRestoredPurchases] = useState<
@@ -218,6 +223,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
           setApiToken(null);
           setUser(null);
           setUsername(null);
+          setDisplayName(null);
+          setIsWebAccount(false);
           return;
         }
         try {
@@ -237,6 +244,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
           setUser({ uid: `web_${u.uid}`, username: name });
           // The same name the Firestore rules and every saved record use (contracts, favorites, profile): never the e-mail.
           setUsername(name);
+          setDisplayName(u.displayName?.trim() || null);
+          setIsWebAccount(true);
         } catch (e) {
           console.warn("[PiAuth] Web token unavailable:", e);
         }
@@ -382,6 +391,8 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
     products,
     restoredPurchases,
     username,
+    displayName,
+    isWebAccount,
     accessToken,
     user,
     location,
