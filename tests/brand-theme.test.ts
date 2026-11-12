@@ -39,3 +39,15 @@ describe('sign-in and identity-check pages share the brand look', () => {
     expect(src('app/kyc/page.tsx')).not.toContain('bg-white px-4 py-3');
   });
 });
+
+describe('dashboard and profile layout on a phone', () => {
+  it('shows big portfolio values in short form so they never get cut off', () => {
+    const s = src('components/pages/dashboard-page.tsx');
+    expect(s).toContain('formatCompact(portfolioValue, language)');
+    expect(s).toContain('truncate');
+  });
+  it('stacks e-mail and phone on narrow screens and lets the glow show behind pages', () => {
+    expect(src('components/pages/profile-page.tsx')).toContain('grid-cols-1 sm:grid-cols-2');
+    expect(src('app/globals.css')).toContain('.dark main.bg-background');
+  });
+});

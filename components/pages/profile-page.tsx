@@ -342,12 +342,12 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.fullName}
               onChange={(e) => setProfile({ ...profile, fullName: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder={t.enterFullName}
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-foreground mb-2 flex items-center gap-2">
                 <Mail className="w-4 h-4" /> {t.email}
@@ -356,7 +356,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                 type="email"
                 value={profile.email}
                 onChange={(e) => setProfile({ ...profile, email: e.target.value })}
-                className="bg-background border-border text-foreground"
+                className="bg-input border-border text-foreground"
                 placeholder="example@email.com"
               />
               {profile.email && (
@@ -383,7 +383,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                       value={otpCode}
                       onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
                       placeholder={pl('codePlaceholder', language)}
-                      className="bg-background border-border text-foreground text-sm h-9"
+                      className="bg-input border-border text-foreground text-sm h-9"
                       inputMode="numeric"
                     />
                     <button
@@ -418,7 +418,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                   aria-label={t.phone}
                   value={dialCode}
                   onChange={(e) => handleDialCodeChange(e.target.value)}
-                  className="bg-background border border-border text-foreground rounded-md px-2 text-sm w-24 shrink-0"
+                  className="bg-input border border-border text-foreground rounded-md px-2 text-sm w-24 shrink-0"
                 >
                   {DIAL_CODES.map((d) => (
                     <option key={d.code} value={d.code}>
@@ -429,7 +429,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
                 <Input
                   value={localPhone}
                   onChange={(e) => handleLocalPhoneChange(e.target.value.replace(/[^\d]/g, ''))}
-                  className="bg-background border-border text-foreground"
+                  className="bg-input border-border text-foreground"
                   placeholder="1XX XXX XXXX"
                   inputMode="numeric"
                 />
@@ -445,7 +445,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
               <Input
                 value={profile.location}
                 onChange={(e) => setProfile({ ...profile, location: e.target.value })}
-                className="bg-background border-border text-foreground"
+                className="bg-input border-border text-foreground"
                 placeholder={t.cityCountry}
               />
               <button
@@ -470,7 +470,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Textarea
               value={profile.bio}
               onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-              className="bg-background border-border text-foreground min-h-24"
+              className="bg-input border-border text-foreground min-h-24"
               placeholder={t.tellUsAboutYourself}
             />
           </div>
@@ -490,7 +490,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.companyName}
               onChange={(e) => setProfile({ ...profile, companyName: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder={t.yourCompanyName}
             />
           </div>
@@ -502,7 +502,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.websiteUrl}
               onChange={(e) => setProfile({ ...profile, websiteUrl: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder="https://example.com"
             />
           </div>
@@ -523,7 +523,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.facebookUrl}
               onChange={(e) => setProfile({ ...profile, facebookUrl: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder="https://facebook.com/yourpage"
             />
           </div>
@@ -535,7 +535,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.twitterUrl}
               onChange={(e) => setProfile({ ...profile, twitterUrl: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder="https://x.com/yourhandle"
             />
           </div>
@@ -547,7 +547,7 @@ export default function ProfilePage({ language = 'en', favorites = [], onBack }:
             <Input
               value={profile.instagramUrl}
               onChange={(e) => setProfile({ ...profile, instagramUrl: e.target.value })}
-              className="bg-background border-border text-foreground"
+              className="bg-input border-border text-foreground"
               placeholder="https://instagram.com/yourhandle"
             />
           </div>

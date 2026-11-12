@@ -85,3 +85,8 @@ body.dark {
 .dark .bg-accent.text-accent-foreground {
   box-shadow: 0 6px 20px -8px color-mix(in oklch, var(--accent) 70%, transparent);
 }
+/* Pages that paint their own flat background would hide the violet glow: let it through in the dark look. */
+.dark main.bg-background,
+.dark div.min-h-screen.bg-background {
+  background-color: transparent;
+}

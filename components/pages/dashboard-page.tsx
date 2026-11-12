@@ -1,5 +1,5 @@
 'use client';
-import { formatNumber } from '@/lib/format';
+import { formatCompact, formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
@@ -114,7 +114,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
   const stats = [
     { labelEn: 'Favorites Saved', labelKey: 'favoritesSaved' as const, value: String(favorites.length), icon: Home, color: 'from-accent to-amber-500', pageId: 'favorites' },
     { labelEn: 'My Contracts', labelKey: 'myContracts' as const, value: String(contracts.length), icon: ScrollText, color: 'from-blue-500 to-blue-600', pageId: 'contracts' },
-    { labelEn: 'Portfolio Value', labelKey: 'portfolioValueLabel' as const, value: `${formatNumber(portfolioValue, language)}π`, icon: TrendingUp, color: 'from-green-500 to-green-600', pageId: 'contracts' },
+    { labelEn: 'Portfolio Value', labelKey: 'portfolioValueLabel' as const, value: `${portfolioValue >= 100000 ? formatCompact(portfolioValue, language) : formatNumber(portfolioValue, language)}π`, icon: TrendingUp, color: 'from-green-500 to-green-600', pageId: 'contracts' },
   ];
 
   const handleQuickAction = (pageId: string) => {
@@ -188,7 +188,7 @@ export default function DashboardPage({ language, favorites }: DashboardPageProp
                   <div className={`bg-gradient-to-br ${stat.color} p-3 rounded-lg w-fit mb-3`}>
                     <Icon className="w-5 h-5 text-white" />
                   </div>
-                  <div className="text-2xl font-bold text-accent mb-1">{stat.value}</div>
+                  <div className="text-xl sm:text-2xl font-bold text-accent mb-1 truncate" dir="ltr" title={stat.value}>{stat.value}</div>
                   <p className="text-xs text-muted-foreground">{t[stat.labelKey]}</p>
                 </Card>
               );
