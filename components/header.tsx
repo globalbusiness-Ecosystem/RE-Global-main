@@ -102,7 +102,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
 
   return (
     <header className="sticky top-0 z-40">
-      <div className="bg-black h-12 px-3 flex items-center justify-between gap-2">
+      <div className="bg-[#100c24]/90 backdrop-blur-md border-b border-white/5 h-12 px-3 flex items-center justify-between gap-2">
         <button
           className="p-1 hover:opacity-70 transition flex-shrink-0"
           onClick={() => setMenuOpen(!menuOpen)}
@@ -176,7 +176,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           />
           <div
             dir={isRtl ? 'rtl' : 'ltr'}
-            className="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] bg-gray-950 border-r border-gray-800 shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col"
+            className="fixed top-0 left-0 bottom-0 w-80 max-w-[85vw] bg-[#0f0b20] border-r border-white/10 shadow-2xl z-50 overflow-y-auto animate-in slide-in-from-left duration-300 flex flex-col"
           >
             <div className="p-4 border-b border-gray-800 bg-gradient-to-br from-accent/10 to-transparent">
               <div className="flex items-center justify-between mb-2">

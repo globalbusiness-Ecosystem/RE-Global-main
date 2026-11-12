@@ -4,6 +4,8 @@ import { useRef, useState } from 'react';
 import { Camera, Trash2, X } from 'lucide-react';
 import { AVATAR_I18N, AVATAR_PRESETS, AVATAR_SIZE, centerSquare, encodeUnderLimit } from '@/lib/avatar';
 import { UserAvatar, type AvatarState } from '@/components/user-avatar';
+import { useCover } from '@/hooks/use-cover';
+import { COVERS, coverCss } from '@/lib/cover';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 interface Props {
@@ -37,6 +39,7 @@ export function AvatarPicker({ language, username, avatar, signedIn, onSave, onR
   const fileRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
+  const { cover, setCover } = useCover();
 
   const run = async (fn: () => Promise<'ok' | 'failed'>) => {
     setBusy(true); setMsg(s.saving);
@@ -64,6 +67,14 @@ export function AvatarPicker({ language, username, avatar, signedIn, onSave, onR
           <button type="button" onClick={onClose} aria-label={s.done} className="p-1 text-muted-foreground hover:text-foreground"><X className="w-5 h-5" aria-hidden /></button>
         </div>
         <div className="flex justify-center"><UserAvatar avatar={avatar} username={username} size={96} /></div>
+        <div>
+          <p className="text-xs text-muted-foreground mb-2">{s.cover}</p>
+          <div className="grid grid-cols-6 gap-2">
+            {COVERS.map((c) => (
+              <button key={c.id} type="button" aria-label={`${s.cover}: ${c.id}`} aria-pressed={cover === c.id} onClick={() => setCover(c.id)} className={`h-9 rounded-lg border-2 ${cover === c.id ? 'border-accent' : 'border-transparent'}`} style={{ background: coverCss(c.id) }} />
+            ))}
+          </div>
+        </div>
         {!signedIn ? (
           <p className="text-sm text-muted-foreground text-center">{s.signIn}</p>
         ) : (

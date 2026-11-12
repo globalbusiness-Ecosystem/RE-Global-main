@@ -279,10 +279,10 @@ export function FirebasePropertyModal({
 
   return (
     <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-sm flex items-end md:items-center justify-center p-4">
-      <div className="bg-[#0f1923] border border-accent/30 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div className="bg-[#15112b] border border-accent/30 rounded-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
 
         {/* Header */}
-        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-accent/20 bg-[#0f1923] z-10">
+        <div className="sticky top-0 flex items-center justify-between p-4 border-b border-accent/20 bg-[#15112b] z-10">
           <h2 className="text-lg font-bold text-white truncate flex-1">{title}</h2>
           <button aria-label={a11yLabels(language).close}
             onClick={onClose}
@@ -362,7 +362,7 @@ export function FirebasePropertyModal({
           {/* Map */}
           {prop.lat && prop.lng ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
-              <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
+              <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#15112b]">
                 📍 {rp('propertyLocation', language)}
               </p>
               <iframe
@@ -382,7 +382,7 @@ export function FirebasePropertyModal({
           {/* 360° VR Tour */}
           {prop.vrUrl ? (
             <div className="rounded-xl overflow-hidden border border-accent/20">
-              <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#0f1923]">
+              <p className="text-xs text-gray-400 px-3 pt-2 pb-1 bg-[#15112b]">
                 🎥 {bp('tour360', language)}
               </p>
               <iframe

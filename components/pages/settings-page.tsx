@@ -34,6 +34,8 @@ import { UserAvatar } from '@/components/user-avatar';
 import { AvatarPicker } from '@/components/avatar-picker';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { announceHandle, useIdentity } from '@/hooks/use-identity';
+import { useCover } from '@/hooks/use-cover';
+import { coverCss } from '@/lib/cover';
 import { AVATAR_I18N } from '@/lib/avatar';
 import { sl, type SettingsLabelKey } from '@/lib/settings-labels';
 import { ProfileChecklist } from '@/components/profile-checklist';
@@ -119,6 +121,7 @@ export default function SettingsPage({
   const [copied, setCopied] = useState(false);
   const { avatar, save: saveAvatar, remove: removeAvatar, signedIn: avatarSignedIn } = useMyAvatar();
   const [pickerOpen, setPickerOpen] = useState(false);
+  const { cover } = useCover();
 
   useEffect(() => {
     try {
@@ -260,9 +263,13 @@ export default function SettingsPage({
         <div className="w-6" />
       </div>
 
-      <div className="bg-card border border-border rounded-xl p-5">
-        <div className="flex flex-col items-center text-center gap-3">
-          <div className="relative">
+      <div className="bg-card border border-border rounded-xl overflow-hidden">
+        <div className="relative h-28" style={{ background: coverCss(cover) }} aria-hidden>
+          <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 15% 25%, rgba(255,255,255,0.35) 0, transparent 35%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 0, transparent 40%)' }} />
+        </div>
+        <div className="px-5 pb-5">
+        <div className="flex flex-col items-center text-center gap-3 -mt-14">
+          <div className="relative rounded-full ring-4 ring-card shadow-xl">
             <button onClick={handleLogoTap} className="block rounded-full" aria-label={shownName ?? 'Profile'}>
               <UserAvatar avatar={avatar} username={shownName} size={88} />
             </button>
@@ -284,6 +291,9 @@ export default function SettingsPage({
             )}
             <p className="text-xs text-muted-foreground">{statusLine}</p>
           </div>
+          <button type="button" onClick={() => setPickerOpen(true)} className="text-xs font-medium text-accent border border-accent/40 rounded-full px-3 py-1 hover:bg-accent/10 transition">
+            {(AVATAR_I18N[language] ?? AVATAR_I18N.en).change}
+          </button>
         </div>
         <div className="mt-4 pt-4 border-t border-border flex items-center gap-3">
           <div
@@ -304,6 +314,7 @@ export default function SettingsPage({
               />
             </div>
           </div>
+        </div>
         </div>
       </div>
 
