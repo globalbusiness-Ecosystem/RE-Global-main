@@ -5,6 +5,7 @@ import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, inputCls, TYPE_LA
 import PropertyForm from './property-form';
 import DisplaySettings from './display-settings';
 import BrandingSettings from './branding-settings';
+import AppIconSettings from './app-icon-settings';
 import HomeFeaturesSettings from './home-features-settings';
 import SubTabs from './sub-tabs';
 import { listingGaps, hasCriticalGap, GAP_LABELS, CRITICAL_GAPS } from '@/lib/listing-quality';
@@ -116,7 +117,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
         },
         { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => <DisplaySettings onUnauthorized={onUnauthorized} /> },
         { id: 'homefeatures', icon: '✨', label: 'شريط الرئيسية', render: () => <HomeFeaturesSettings onUnauthorized={onUnauthorized} /> },
-        { id: 'branding', icon: '🎨', label: 'اللوجو', render: () => <BrandingSettings onUnauthorized={onUnauthorized} /> },
+        { id: 'branding', icon: '🎨', label: 'اللوجو', render: () => (<><BrandingSettings onUnauthorized={onUnauthorized} /><div className="mt-4"><AppIconSettings onUnauthorized={onUnauthorized} /></div></>) },
       ]}
     />
   );

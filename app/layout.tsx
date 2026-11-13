@@ -45,7 +45,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('re_theme_preference')==='light')document.documentElement.classList.remove('dark')}catch(e){}" }} />
         <link rel="manifest" href="/manifest.json" />
         <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-icon.png" />
+        <link rel="apple-touch-icon" href="/apple-touch-icon" />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
