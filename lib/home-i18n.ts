@@ -47,10 +47,6 @@ export const HOME_STATS: Record<string, Lang7> = {
 export const HOME_UI: Record<string, Lang7> = {
   exploreCategories: { en: 'Explore Categories', ar: 'استكشف الفئات', fr: 'Explorer les catégories', es: 'Explorar categorías', pt: 'Explorar categorias', ur: 'زمرہ جات دیکھیں', zh: '探索分类' },
   whyChoose: { en: 'Why Choose RE?', ar: 'لماذا تختار RE؟', fr: 'Pourquoi choisir RE ?', es: '¿Por qué elegir RE?', pt: 'Por que escolher a RE?', ur: 'RE کیوں منتخب کریں؟', zh: '为什么选择RE？' },
-  payWithPi: { en: 'Pay with Pi', ar: 'ادفع بـ Pi', fr: 'Payer avec Pi', es: 'Pagar con Pi', pt: 'Pagar com Pi', ur: 'Pi سے ادائیگی کریں', zh: '使用Pi支付' },
-  payDesc: { en: 'Experience seamless property transactions powered by Pi Network', ar: 'اختبر معاملات العقارات السلسة المدعومة بشبكة Pi', fr: 'Découvrez des transactions immobilières fluides propulsées par Pi Network', es: 'Vive transacciones inmobiliarias fluidas impulsadas por Pi Network', pt: 'Viva transações imobiliárias fluidas com tecnologia da Pi Network', ur: 'پائی نیٹ ورک کی مدد سے ہموار پراپرٹی لین دین کا تجربہ کریں', zh: '体验由Pi网络支持的无缝房产交易' },
-  sampleProperty: { en: 'Sample Luxury Property', ar: 'عقار فاخر للعينة', fr: 'Exemple de propriété de luxe', es: 'Propiedad de lujo de muestra', pt: 'Imóvel de luxo de exemplo', ur: 'نمونہ لگژری پراپرٹی', zh: '示例豪华房产' },
-  secureFast: { en: 'Secure • Fast • Decentralized', ar: 'آمن • سريع • لامركزي', fr: 'Sécurisé • Rapide • Décentralisé', es: 'Seguro • Rápido • Descentralizado', pt: 'Seguro • Rápido • Descentralizado', ur: 'محفوظ • تیز • ڈی سینٹرلائزڈ', zh: '安全 • 快速 • 去中心化' },
 };
 
 export function tt(dict: Lang7, language: NavLanguage): string {

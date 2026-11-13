@@ -1,20 +1,20 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, ShoppingCart, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
 import { FirestoreListings } from '@/components/firestore-listings';
-import { UnifiedPaymentButton } from '@/components/unified-payment-button';
+import { FEATURE_ICONS, DEFAULT_ICON_ORDER } from '@/components/home-feature-icon';
+import { useHomeFeatures } from '@/hooks/use-home-features';
+import { pickText } from '@/lib/home-features';
 import AIAdvisorChat from '@/components/ai-advisor-chat';
 import AIAdvisorVoiceChat from '@/components/ai-advisor-voice-chat';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
 import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
 import { HOME_CATEGORIES, HOME_FEATURES, HOME_STATS, HOME_UI, tt } from '@/lib/home-i18n';
-
-const FEATURE_ICONS = [Glasses, Zap, Building2, Globe, Bot, ScrollText, ShieldCheck, Video, BarChart3, TrendingUp, Languages];
 
 interface HomePageProps {
   language: NavLanguage;
@@ -51,6 +51,8 @@ export default function HomePage({
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [useVoiceAdvisor, setUseVoiceAdvisor] = useState(false);
   const [showVRTour, setShowVRTour] = useState(false);
+  const homeFeatures = useHomeFeatures();
+  const stripItems = (homeFeatures.items ?? HOME_FEATURES.map((t, i) => ({ icon: DEFAULT_ICON_ORDER[i % DEFAULT_ICON_ORDER.length], t }))).map((it) => ({ icon: it.icon, text: pickText(it.t, language) }));
   const router = useRouter();
 
   return (
@@ -119,84 +121,34 @@ export default function HomePage({
           })}
         </div>
 
-        {/* Why Choose RE — premium ticker */}
-        <div
-          className="rounded-lg py-6 mb-8 relative overflow-hidden"
-          style={{
-            background: 'linear-gradient(135deg, rgba(212,175,55,0.08), rgba(0,0,0,0.2))',
-            border: '1px solid rgba(212,175,55,0.25)',
-          }}
-        >
-          <h3 className="text-lg font-semibold text-foreground mb-5 px-6 flex items-center gap-2">
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ background: '#D4AF37', boxShadow: '0 0 8px #D4AF37' }}
-            />
-            {tt(HOME_UI.whyChoose, language)}
-          </h3>
+        {/* Why Choose RE — strip the admin controls (Admin → Properties → Home strip) */}
+        {homeFeatures.enabled && (
+          <div className="rounded-lg py-6 mb-8 relative overflow-hidden border border-accent/30 bg-gradient-to-br from-accent/10 to-card">
+            <h3 className="text-lg font-semibold text-foreground mb-5 px-6 flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent)]" />
+              {homeFeatures.title ? pickText(homeFeatures.title, language) : tt(HOME_UI.whyChoose, language)}
+            </h3>
 
-          <div className="relative">
-            <div
-              className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(90deg, #0d0d0d, transparent)' }}
-            />
-            <div
-              className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none"
-              style={{ background: 'linear-gradient(270deg, #0d0d0d, transparent)' }}
-            />
+            <div className="relative">
+              <div className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none bg-gradient-to-r from-card to-transparent" />
+              <div className="absolute right-0 top-0 bottom-0 w-10 z-10 pointer-events-none bg-gradient-to-l from-card to-transparent" />
 
-            <div className="flex overflow-hidden">
-              <div className="flex gap-4 animate-marquee shrink-0 pr-4">
-                {[...HOME_FEATURES, ...HOME_FEATURES].map((item, i) => {
-                  const FeatureIcon = FEATURE_ICONS[i % FEATURE_ICONS.length];
-                  return (
-                    <div
-                      key={`feat-${i}`}
-                      className="flex items-center gap-2.5 shrink-0 px-4 py-2.5 rounded-full"
-                      style={{
-                        background: 'rgba(212,175,55,0.08)',
-                        border: '1px solid rgba(212,175,55,0.35)',
-                        boxShadow: '0 0 12px rgba(212,175,55,0.12)',
-                      }}
-                    >
-                      <FeatureIcon className="w-4 h-4 shrink-0" style={{ color: '#D4AF37' }} />
-                      <span className="text-sm text-gray-200 whitespace-nowrap">
-                        {tt(item, language)}
-                      </span>
-                    </div>
-                  );
-                })}
+              <div className="flex overflow-hidden">
+                <div className="flex gap-4 animate-marquee shrink-0 pr-4">
+                  {[...stripItems, ...stripItems].map((item, i) => {
+                    const FeatureIcon = FEATURE_ICONS[item.icon];
+                    return (
+                      <div key={`feat-${i}`} className="flex items-center gap-2.5 shrink-0 px-4 py-2.5 rounded-full bg-accent/10 border border-accent/40 shadow-[0_0_12px_-4px_var(--accent)]">
+                        <FeatureIcon className="w-4 h-4 shrink-0 text-accent" />
+                        <span className="text-sm text-foreground whitespace-nowrap">{item.text}</span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-
-        {/* Pi Payment */}
-        <div className="rounded-lg p-6 mb-8" style={{ backgroundColor: 'rgba(212,175,55,0.1)', borderLeft: '3px solid rgba(212,175,55,1)' }}>
-          <div className="flex items-center gap-2 mb-4">
-            <ShoppingCart className="w-5 h-5 text-accent" />
-            <h3 className="text-lg font-semibold text-accent">
-              {tt(HOME_UI.payWithPi, language)}
-            </h3>
-          </div>
-          <p className="text-sm text-gray-300 mb-4">
-            {tt(HOME_UI.payDesc, language)}
-          </p>
-          <UnifiedPaymentButton
-            propertyId="showcase-property-001"
-            propertyTitle={tt(HOME_UI.sampleProperty, language)}
-            price={50}
-            transactionType="buy"
-            language={language}
-            currency="PI"
-            className="w-full"
-            onSuccess={() => {}}
-            onError={(error) => { console.error('Payment error:', error); }}
-          />
-          <p className="text-xs text-gray-400 mt-3 text-center">
-            {tt(HOME_UI.secureFast, language)}
-          </p>
-        </div>
+        )}
 
       </div>
 
