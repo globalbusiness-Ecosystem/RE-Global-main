@@ -4,7 +4,7 @@ import { a11yLabels } from '@/lib/a11y-labels';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { useEffect, useState } from 'react';
-import { ArrowLeft, ScrollText, Lock, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode, Link2, Loader2, ShieldAlert } from 'lucide-react';
+import { ArrowLeft, ScrollText, Copy, Check, ShieldCheck, Search, X, SlidersHorizontal, QrCode, Link2, Loader2, ShieldAlert } from 'lucide-react';
 import { QRScannerModal } from '@/components/qr-scanner-modal';
 import { ContractDetailView } from '@/components/contract-detail-view';
 import { verifyTransactionOnStellar, type StellarVerificationResult } from '@/lib/stellar-verify';
@@ -103,10 +103,6 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
 
   const [contracts, setContracts] = useState<SmartContract[]>([]);
   const [loading, setLoading] = useState(true);
-  const [adminMode, setAdminMode] = useState(false);
-  const [showPinPrompt, setShowPinPrompt] = useState(false);
-  const [pin, setPin] = useState('');
-  const [pinError, setPinError] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | SmartContract['status']>('all');
   const [typeFilter, setTypeFilter] = useState<'all' | ContractKind>('all');
@@ -119,70 +115,19 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
   const tabNames = TAB_LABELS[language] ?? TAB_LABELS.en;
   const kindNames = KIND_LABELS[language] ?? KIND_LABELS.en;
 
-  const load = async (asAdmin: boolean) => {
+  const load = async () => {
     setLoading(true);
     try {
-      if (asAdmin) {
-        const res = await fetch('/api/admin/contracts', { cache: 'no-store' });
-        if (!res.ok) {
-          setAdminMode(false);
-          setContracts(username ? await getContractsForUser(username) : []);
-          return;
-        }
-        const json = await res.json();
-        setContracts(
-          (json.contracts || []).map((c: any) => ({
-            ...c,
-            createdAt: new Date(c.createdAt),
-            updatedAt: new Date(c.updatedAt),
-          }))
-        );
-      } else if (username) {
-        const mine = await getContractsForUser(username);
-        setContracts(mine);
-      } else {
-        setContracts([]);
-      }
+      setContracts(username ? await getContractsForUser(username) : []);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    load(adminMode);
+    load();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [username]);
-
-  const handleAdminToggle = () => {
-    if (adminMode) {
-      setAdminMode(false);
-      load(false);
-      return;
-    }
-    setShowPinPrompt(true);
-  };
-
-  const submitPin = async () => {
-    try {
-      const res = await fetch('/api/admin-auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin }),
-      });
-      if (res.ok) {
-        setAdminMode(true);
-        setShowPinPrompt(false);
-        setPin('');
-        setPinError(false);
-        load(true);
-        return;
-      }
-    } catch {
-      /* fall through */
-    }
-    setPinError(true);
-    setPin('');
-  };
 
   const filteredContracts = contracts.filter((c) => {
     if (statusFilter !== 'all' && c.status !== statusFilter) return false;
@@ -224,22 +169,10 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                 {t.smartContracts}
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
-                {adminMode ? t.adminViewAll : t.yourContractsOnly}
+                {t.yourContractsOnly}
               </p>
             </div>
           </div>
-
-          <button
-            onClick={handleAdminToggle}
-            className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-md border transition ${
-              adminMode
-                ? 'bg-accent/20 border-accent text-accent'
-                : 'border-border text-muted-foreground hover:text-foreground'
-            }`}
-          >
-            {adminMode ? <ShieldCheck className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}
-            {adminMode ? t.admin : t.viewAll}
-          </button>
         </div>
 
         {visibleTabs(counts).length > 1 && (
@@ -266,47 +199,6 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
         )}
 
         <MyProperties language={language} section={activeTab === 'contracts' ? null : activeTab} onCounts={setCounts} />
-
-        {showPinPrompt && (
-          <div className="bg-card border border-border rounded-lg p-4 space-y-3">
-            <p className="text-sm text-muted-foreground">
-              {t.enterAdminPin}
-            </p>
-            <input
-              type="password"
-              inputMode="numeric"
-              value={pin}
-              onChange={(e) => {
-                setPin(e.target.value);
-                setPinError(false);
-              }}
-              onKeyDown={(e) => e.key === 'Enter' && submitPin()}
-              className="w-full bg-background border border-border rounded-md py-2 px-3 text-center tracking-widest"
-              placeholder="••••••" aria-label={t.enterAdminPin}
-              autoFocus
-            />
-            {pinError && (
-              <p className="text-xs text-red-400">{t.incorrectPin}</p>
-            )}
-            <div className="flex gap-2">
-              <button
-                onClick={submitPin}
-                className="flex-1 py-2 rounded-md bg-accent text-accent-foreground font-semibold"
-              >
-                {t.unlock}
-              </button>
-              <button
-                onClick={() => {
-                  setShowPinPrompt(false);
-                  setPin('');
-                }}
-                className="flex-1 py-2 rounded-md border border-border text-muted-foreground"
-              >
-                {t.cancel}
-              </button>
-            </div>
-          </div>
-        )}
 
         {activeTab === 'contracts' && (
         <>
@@ -442,13 +334,6 @@ export default function ContractsPage({ language, onBack }: ContractsPageProps) 
                     {t.statusLabels[c.status]}
                   </span>
                 </div>
-
-                {adminMode && (
-                  <div className="text-xs text-muted-foreground flex flex-wrap gap-x-4 gap-y-1">
-                    <span>{t.buyer}: {c.buyerUsername}</span>
-                    <span>{t.seller}: {c.sellerUsername}</span>
-                  </div>
-                )}
 
                 {c.contractIdOnChain && (
                   <div className="flex items-center gap-1.5 bg-background/60 rounded px-2 py-1">

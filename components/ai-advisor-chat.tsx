@@ -516,18 +516,18 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
   return (
     <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-end">
       {/* Chat Container */}
-      <div className="w-full h-screen md:h-[90vh] md:max-w-2xl md:mx-auto md:rounded-t-2xl bg-gradient-to-b from-[#1a1410] to-[#0f0b08] border-t border-[#F59E0B]/30 flex flex-col overflow-hidden">
+      <div className="w-full h-screen md:h-[90vh] md:max-w-2xl md:mx-auto md:rounded-t-2xl bg-gradient-to-b from-card to-background border-t border-accent/30 flex flex-col overflow-hidden">
         {/* Header */}
-        <div className="bg-[#2a1f15] border-b border-[#F59E0B]/30 px-4 py-4 flex items-center justify-between">
+        <div className="bg-muted border-b border-accent/30 px-4 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-[#F59E0B]/20 border border-[#F59E0B] flex items-center justify-center">
-              <Bot className="w-5 h-5 text-[#F59E0B]" />
+            <div className="w-10 h-10 rounded-full bg-accent/20 border border-accent flex items-center justify-center">
+              <Bot className="w-5 h-5 text-accent" />
             </div>
             <div>
-              <h2 className="text-sm font-bold text-white">
+              <h2 className="text-sm font-bold text-foreground">
                 {ac('title', language)}
               </h2>
-              <p className="text-xs text-gray-400">
+              <p className="text-xs text-muted-foreground">
                 {ac('subtitle', language)}
               </p>
             </div>
@@ -537,9 +537,9 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               stopSpeech();
               onClose();
             }}
-            className="p-2 hover:bg-[#F59E0B]/10 rounded-lg transition-colors"
+            className="p-2 hover:bg-accent/10 rounded-lg transition-colors"
           >
-            <X className="w-5 h-5 text-[#F59E0B]" />
+            <X className="w-5 h-5 text-accent" />
           </button>
         </div>
 
@@ -554,7 +554,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                     <img 
                       src={message.photoUrl} 
                       alt="Property photo" 
-                      className="w-full rounded-lg border border-[#F59E0B]/50 shadow-lg"
+                      className="w-full rounded-lg border border-accent/50 shadow-lg"
                     />
                   </div>
                 </div>
@@ -586,20 +586,20 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                 <div
                   className={`max-w-xs md:max-w-md px-4 py-3 rounded-lg ${
                     message.role === 'user'
-                      ? 'bg-[#F59E0B] text-black'
-                      : 'bg-[#2a1f15] border border-[#F59E0B]/30 text-gray-100'
+                      ? 'bg-accent text-accent-foreground'
+                      : 'bg-muted border border-accent/30 text-foreground'
                   }`}
                 >
                   {message.rich ? <MiniMarkdown text={message.content} /> : <p className="text-sm whitespace-pre-wrap">{message.content}</p>}
                   {message.disclaimer && (
-                    <p dir="auto" className="mt-3 border-t border-[#F59E0B]/20 pt-2 text-[11px] leading-snug text-gray-400">{message.disclaimer}</p>
+                    <p dir="auto" className="mt-3 border-t border-accent/20 pt-2 text-[11px] leading-snug text-muted-foreground">{message.disclaimer}</p>
                   )}
                   
                   {/* Voice button for assistant messages */}
                   {message.role === 'assistant' && (
                     <button
                       onClick={() => handlePlayVoice(message.id, message.content)}
-                      className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded bg-[#F59E0B]/20 hover:bg-[#F59E0B]/30 text-[#F59E0B] transition-colors"
+                      className="mt-2 flex items-center gap-1 text-xs px-2 py-1 rounded bg-accent/20 hover:bg-accent/30 text-accent transition-colors"
                       title={ac('listenTitle', language)}
                     >
                       {playingMessageId === message.id ? (
@@ -619,7 +619,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               </div>
               {message.poweredByAI && (
                 <div className="flex justify-start mt-2">
-                  <span className="text-xs text-[#F59E0B] bg-[#2a1f15]/50 px-2 py-1 rounded">
+                  <span className="text-xs text-accent bg-muted/50 px-2 py-1 rounded">
                     🤖 Powered by AI
                   </span>
                 </div>
@@ -630,11 +630,11 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {/* Typing Indicator */}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-[#2a1f15] border border-[#F59E0B]/30 text-gray-100 px-4 py-3 rounded-lg">
+              <div className="bg-muted border border-accent/30 text-foreground px-4 py-3 rounded-lg">
                 <div className="flex items-center gap-1">
-                  <div className="w-2 h-2 bg-[#F59E0B] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-                  <div className="w-2 h-2 bg-[#F59E0B] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-                  <div className="w-2 h-2 bg-[#F59E0B] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                  <div className="w-2 h-2 bg-accent rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
                 </div>
               </div>
             </div>
@@ -643,7 +643,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {/* Suggested Questions - Show only initially */}
           {messages.length === 1 && !isLoading && (
             <div className="mt-8 space-y-2">
-              <p className="text-xs text-gray-400 px-2">
+              <p className="text-xs text-muted-foreground px-2">
                 {suggestHeading(language)}
               </p>
               <div className="space-y-2">
@@ -652,7 +652,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
                     key={idx}
                     onClick={() => handleSuggestedQuestion(question)}
                     disabled={isLoading}
-                    className="w-full text-left p-3 bg-[#2a1f15] border border-[#F59E0B]/30 rounded-lg hover:bg-[#3a2f25] hover:border-[#F59E0B]/50 transition-colors disabled:opacity-50 text-sm text-gray-200"
+                    className="w-full text-left p-3 bg-muted border border-accent/30 rounded-lg hover:bg-muted/70 hover:border-accent/50 transition-colors disabled:opacity-50 text-sm text-gray-200"
                   >
                     {question}
                   </button>
@@ -664,13 +664,13 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
           {/* After a contract analysis: questions people usually ask next */}
           {hasContractContext(messages) && messages[messages.length - 1]?.role === 'assistant' && !isLoading && (
             <div className="mt-6 space-y-2">
-              <p className="text-xs text-gray-400 px-2">{contractHeading(language)}</p>
+              <p className="text-xs text-muted-foreground px-2">{contractHeading(language)}</p>
               <div className="space-y-2">
                 {contractQuestions(language).map((question, idx) => (
                   <button
                     key={idx}
                     onClick={() => handleSuggestedQuestion(question)}
-                    className="w-full text-left p-3 bg-[#2a1f15] border border-[#F59E0B]/30 rounded-lg hover:bg-[#3a2f25] hover:border-[#F59E0B]/50 transition-colors text-sm text-gray-200"
+                    className="w-full text-left p-3 bg-muted border border-accent/30 rounded-lg hover:bg-muted/70 hover:border-accent/50 transition-colors text-sm text-gray-200"
                   >
                     {question}
                   </button>
@@ -683,17 +683,17 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
         </div>
 
         {/* Input Area */}
-        <div className="border-t border-[#F59E0B]/30 bg-[#1a1410] p-4 space-y-3">
+        <div className="border-t border-accent/30 bg-card p-4 space-y-3">
           {/* City Selector for Photo Analysis */}
           <div className="flex items-center gap-2 px-2">
-            <span className="text-xs text-gray-400">
+            <span className="text-xs text-muted-foreground">
               {ac('analyzeFor', language)}
             </span>
             <select 
               aria-label={ac('analyzeFor', language)}
               value={selectedCity}
               onChange={(e) => setSelectedCity(e.target.value)}
-              className="text-xs bg-[#2a1f15] border border-[#F59E0B]/30 text-white rounded px-2 py-1 focus:outline-none focus:border-[#F59E0B]"
+              className="text-xs bg-muted border border-accent/30 text-foreground rounded px-2 py-1 focus:outline-none focus:border-accent"
             >
               <option>Dubai</option>
               <option>Abu Dhabi</option>
@@ -721,7 +721,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               onChange={(e) => setInput(e.target.value)}
               placeholder={ac('placeholder', language)} aria-label={ac('placeholder', language)}
               disabled={isLoading || uploadingPhoto}
-              className="flex-1 bg-[#2a1f15] border border-[#F59E0B]/30 text-white placeholder-gray-500 rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-[#F59E0B] disabled:opacity-50"
+              className="flex-1 bg-muted border border-accent/30 text-foreground placeholder:text-muted-foreground rounded-lg px-4 py-3 text-sm focus:outline-none focus:border-accent disabled:opacity-50"
             />
 
             {/* Photo Upload Button */}
@@ -730,7 +730,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               onClick={() => fileInputRef.current?.click()}
               disabled={isLoading || uploadingPhoto}
               title={ac('uploadPhoto', language)}
-              className="px-3 py-3 bg-[#2a1f15] border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 text-[#F59E0B] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-[#3a2f25]"
+              className="px-3 py-3 bg-muted border border-accent/30 hover:border-accent/60 text-accent rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-muted/70"
             >
               {uploadingPhoto ? (
                 <Loader className="w-4 h-4 animate-spin" />
@@ -747,7 +747,7 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               title={cu('openTitle', language)}
               aria-label={cu('openTitle', language)}
               aria-expanded={showContract}
-              className="px-3 py-3 bg-[#2a1f15] border border-[#F59E0B]/30 hover:border-[#F59E0B]/60 text-[#F59E0B] rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-[#3a2f25]"
+              className="px-3 py-3 bg-muted border border-accent/30 hover:border-accent/60 text-accent rounded-lg transition-all disabled:opacity-50 flex items-center justify-center hover:bg-muted/70"
             >
               <FileText className="w-4 h-4" />
             </button>
@@ -766,12 +766,12 @@ export default function AIAdvisorChat({ language, onClose }: AIAdvisorChatProps)
               type="submit"
               aria-label={a11yLabels(language ?? 'en').send}
               disabled={isLoading || uploadingPhoto || !input.trim()}
-              className="px-4 py-3 bg-gradient-to-r from-[#F59E0B] to-[#d97706] hover:from-[#d97706] hover:to-[#b45309] text-white rounded-lg transition-all disabled:opacity-50 flex items-center justify-center"
+              className="px-4 py-3 bg-gradient-to-r from-accent to-secondary text-accent-foreground hover:opacity-90 rounded-lg transition-all disabled:opacity-50 flex items-center justify-center"
             >
               <Send className="w-4 h-4" />
             </button>
           </form>
-          <p className="mt-2 text-[10px] leading-snug text-gray-500 text-center">
+          <p className="mt-2 text-[10px] leading-snug text-muted-foreground text-center">
             {ac('disclaimer', language)}
           </p>
         </div>

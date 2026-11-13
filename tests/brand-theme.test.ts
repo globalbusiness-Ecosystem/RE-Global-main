@@ -62,3 +62,19 @@ describe('light mode really works', () => {
     expect(rf('app/globals.css', 'utf8')).toContain(':root:not(.dark)')
   })
 })
+
+describe('the last screens follow the platform look', () => {
+  it('Aladdin chat, voice chat and the shares market use theme tokens, not fixed browns or ambers', () => {
+    for (const f of ['components/ai-advisor-chat.tsx', 'components/ai-advisor-voice-chat.tsx', 'app/market/page.tsx']) {
+      const s = rf(f, 'utf8');
+      expect(s, f).not.toMatch(/#F59E0B|#2a1f15|#1a1410|amber-[0-9]|slate-[0-9]/);
+    }
+    expect(rf('app/market/page.tsx', 'utf8')).not.toContain('bg-black text-white');
+  });
+  it('the contracts page has no "view all" lock button or PIN prompt any more', () => {
+    const s = rf('components/pages/contracts-page.tsx', 'utf8');
+    expect(s).not.toContain('viewAll');
+    expect(s).not.toContain('showPinPrompt');
+    expect(s).not.toContain('/api/admin-auth');
+  });
+});

@@ -214,18 +214,18 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-end md:justify-center bg-black/50" dir={currentLang === 'ar' ? 'rtl' : 'ltr'}>
-      <div className="w-full md:w-96 h-screen md:h-[600px] bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col border border-gold/20">
+      <div className="w-full md:w-96 h-screen md:h-[600px] bg-gradient-to-b from-card via-background to-card rounded-t-3xl md:rounded-2xl shadow-2xl flex flex-col border border-accent/20">
         {/* Header */}
-        <div className="bg-gradient-to-r from-gold/10 to-slate-800 border-b border-gold/20 px-6 py-4 flex items-center justify-between">
+        <div className="bg-gradient-to-r from-accent/10 to-muted border-b border-accent/20 px-6 py-4 flex items-center justify-between">
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-white">{labels.title}</h2>
-            <p className="text-xs text-gold/80">{labels.subtitle}</p>
+            <h2 className="text-lg font-bold text-foreground">{labels.title}</h2>
+            <p className="text-xs text-accent/80">{labels.subtitle}</p>
           </div>
           <div className="flex gap-2">
             {enableVoice && (
               <button
                 onClick={() => setShowSettings(!showSettings)}
-                className="p-2 rounded-full hover:bg-gold/10 text-gold transition"
+                className="p-2 rounded-full hover:bg-accent/10 text-accent transition"
                 title={labels.settings}
               >
                 <Settings size={20} />
@@ -243,23 +243,23 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
 
         {/* Settings Panel */}
         {showSettings && (
-          <div className="border-b border-gold/20 px-6 py-4 bg-slate-800/50 space-y-3">
+          <div className="border-b border-accent/20 px-6 py-4 bg-muted/50 space-y-3">
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-300">{labels.speak}</label>
+              <label className="text-sm text-foreground/80">{labels.speak}</label>
               <button
                 onClick={() => setAutoSpeak(!autoSpeak)}
                 className={`px-3 py-1 rounded text-sm transition ${
-                  autoSpeak ? 'bg-gold/20 text-gold' : 'bg-slate-700 text-gray-400'
+                  autoSpeak ? 'bg-accent/20 text-accent' : 'bg-muted text-muted-foreground'
                 }`}
               >
                 {autoSpeak ? 'On' : 'Off'}
               </button>
             </div>
             <div className="flex items-center justify-between">
-              <label className="text-sm text-gray-300">Language</label>
+              <label className="text-sm text-foreground/80">Language</label>
               <button
                 onClick={() => setCurrentLang(currentLang === 'en' ? 'ar' : 'en')}
-                className="px-3 py-1 rounded text-sm bg-slate-700 text-gray-300 hover:bg-slate-600 transition"
+                className="px-3 py-1 rounded text-sm bg-muted text-foreground/80 hover:bg-muted/70 transition"
               >
                 {currentLang === 'en' ? 'العربية' : 'English'}
               </button>
@@ -271,8 +271,8 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-4">
           {messages.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-full text-center">
-              <Bot size={48} className="text-gold/50 mb-4" />
-              <p className="text-gold/60 text-sm">{labels.accessibility}</p>
+              <Bot size={48} className="text-accent/50 mb-4" />
+              <p className="text-accent/60 text-sm">{labels.accessibility}</p>
             </div>
           ) : (
             messages.map((msg) => (
@@ -280,13 +280,13 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
                 <div
                   className={`max-w-xs px-4 py-3 rounded-lg text-sm ${
                     msg.role === 'user'
-                      ? 'bg-gold/20 text-gold border border-gold/30'
-                      : 'bg-slate-700 text-gray-100 border border-slate-600'
+                      ? 'bg-accent/20 text-accent border border-accent/30'
+                      : 'bg-muted text-foreground border border-border'
                   }`}
                 >
                   {msg.content}
                   {msg.role === 'assistant' && msg.poweredByAI && (
-                    <div className="text-xs text-gold/60 mt-1">Powered by AI</div>
+                    <div className="text-xs text-accent/60 mt-1">Powered by AI</div>
                   )}
                 </div>
               </div>
@@ -294,9 +294,9 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
           )}
           {isLoading && (
             <div className="flex justify-start">
-              <div className="bg-slate-700 px-4 py-3 rounded-lg flex items-center gap-2">
-                <Loader size={16} className="animate-spin text-gold" />
-                <span className="text-sm text-gray-300">Thinking...</span>
+              <div className="bg-muted px-4 py-3 rounded-lg flex items-center gap-2">
+                <Loader size={16} className="animate-spin text-accent" />
+                <span className="text-sm text-foreground/80">Thinking...</span>
               </div>
             </div>
           )}
@@ -318,14 +318,14 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
 
         {/* Status Bar */}
         {(isListening || isSpeaking) && (
-          <div className="px-6 py-3 bg-gold/10 border-t border-gold/20 flex items-center justify-center gap-2 text-sm text-gold">
+          <div className="px-6 py-3 bg-accent/10 border-t border-accent/20 flex items-center justify-center gap-2 text-sm text-accent">
             <Loader size={16} className="animate-spin" />
             {isListening ? labels.listening : labels.speaking}
           </div>
         )}
 
         {/* Input Area */}
-        <div className="border-t border-gold/20 bg-slate-800/50 px-6 py-4 space-y-3">
+        <div className="border-t border-accent/20 bg-muted/50 px-6 py-4 space-y-3">
           {/* Voice Controls */}
           {enableVoice && (
             <div className="flex gap-2">
@@ -335,7 +335,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
                 className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg transition ${
                   isListening
                     ? 'bg-red-500/20 text-red-400 border border-red-500/30'
-                    : 'bg-gold/10 text-gold border border-gold/30 hover:bg-gold/20'
+                    : 'bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20'
                 } disabled:opacity-50 disabled:cursor-not-allowed`}
               >
                 {isListening ? <MicOff size={18} /> : <Mic size={18} />}
@@ -344,7 +344,7 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
               {isSpeaking && (
                 <button aria-label={a11yLabels(language).stopSpeaking}
                   onClick={handleToggleSpeaker}
-                  className="px-4 py-2 rounded-lg bg-gold/10 text-gold border border-gold/30 hover:bg-gold/20 transition"
+                  className="px-4 py-2 rounded-lg bg-accent/10 text-accent border border-accent/30 hover:bg-accent/20 transition"
                 >
                   <VolumeX size={18} />
                 </button>
@@ -361,12 +361,12 @@ export default function AIAdvisorVoiceChat({ language = 'en', onClose, enableVoi
               onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
               placeholder={labels.placeholder} aria-label={labels.placeholder}
               disabled={isLoading}
-              className="flex-1 bg-slate-700 border border-slate-600 rounded-lg px-4 py-2 text-sm text-gray-100 placeholder-gray-500 focus:outline-none focus:border-gold/50 disabled:opacity-50"
+              className="flex-1 bg-muted border border-border rounded-lg px-4 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-accent/50 disabled:opacity-50"
             />
             <button
               onClick={() => handleSendMessage()}
               disabled={isLoading || !inputValue.trim()}
-              className="px-4 py-2 rounded-lg bg-gold/20 text-gold border border-gold/30 hover:bg-gold/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              className="px-4 py-2 rounded-lg bg-accent/20 text-accent border border-accent/30 hover:bg-accent/30 transition disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Send size={18} />
             </button>
