@@ -43,3 +43,18 @@ describe('wiring', () => {
     expect(s).toContain("me.status === 'none' || me.status === 'rejected'");
   });
 });
+
+describe('identity page look', () => {
+  it('uses the photo cards with a tip guide and three steps', () => {
+    const s = src('app/kyc/page.tsx');
+    expect(s).toContain('KycPhotoSlot');
+    expect(s).toContain("'tipLight'");
+    expect(s).toContain("stepHead(1, 'stepData')");
+  });
+  it('the photo card is accessible and opens the camera for the selfie', () => {
+    const c = src('components/kyc-photo-slot.tsx');
+    expect(c).toContain('aria-label={title}');
+    expect(c).toContain("capture: 'user'");
+    expect(c).toContain('URL.revokeObjectURL');
+  });
+});

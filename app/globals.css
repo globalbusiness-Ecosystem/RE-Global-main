@@ -145,3 +145,8 @@
 :root:not(.dark) .text-yellow-400, :root:not(.dark) .text-amber-400 { color: oklch(0.52 0.13 75); }
 :root:not(.dark) .text-blue-400 { color: oklch(0.5 0.17 255); }
 :root:not(.dark) .text-gray-400, :root:not(.dark) .text-gray-500 { color: var(--muted-foreground); }
+
+/* Identity photo cards: a gold scan line sweeping over the drawing. */
+.kyc-scan { position: absolute; inset-inline: 10%; top: 0; height: 2px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 14px 3px color-mix(in oklch, var(--accent) 70%, transparent); animation: kyc-scan 2.8s ease-in-out infinite; }
+@keyframes kyc-scan { 0%, 100% { top: 14%; opacity: 0.2; } 50% { top: 84%; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .kyc-scan { animation: none; top: 50%; } }
