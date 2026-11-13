@@ -9,6 +9,7 @@ import { isPiBrowser } from '@/lib/pi-env';
 import { authHeaders } from '@/lib/api-token';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { UserAvatar } from '@/components/user-avatar';
+import { BrandLogo } from '@/components/brand-logo';
 import { useIdentity } from '@/hooks/use-identity';
 import { useMyAvatar } from '@/hooks/use-my-avatar';
 import { useLanguage } from '@/contexts/language-context';
@@ -121,7 +122,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           className="flex flex-col items-center gap-0.5 flex-shrink-0 cursor-pointer"
           onClick={onLogoTap}
         >
-          <h1 className="text-lg font-bold text-white tracking-wider">RE</h1>
+          <h1 className="m-0 leading-none"><BrandLogo height={34} rounded="rounded-lg" /><span className="sr-only">RE Platform</span></h1>
           <div className="h-0.5 w-10 bg-gradient-to-r from-accent to-yellow-500"></div>
         </div>
 

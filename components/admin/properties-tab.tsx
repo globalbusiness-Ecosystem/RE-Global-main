@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, inputCls, TYPE_LABELS, STATUS_LABELS, GOLD } from './admin-ui';
 import PropertyForm from './property-form';
 import DisplaySettings from './display-settings';
+import BrandingSettings from './branding-settings';
 import SubTabs from './sub-tabs';
 import { listingGaps, hasCriticalGap, GAP_LABELS, CRITICAL_GAPS } from '@/lib/listing-quality';
 
@@ -113,6 +114,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
           ),
         },
         { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => <DisplaySettings onUnauthorized={onUnauthorized} /> },
+        { id: 'branding', icon: '🎨', label: 'اللوجو', render: () => <BrandingSettings onUnauthorized={onUnauthorized} /> },
       ]}
     />
   );

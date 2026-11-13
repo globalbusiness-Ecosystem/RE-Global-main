@@ -8,6 +8,7 @@ import { join } from 'node:path';
 const GUARDS = /isAdminRequest|verifyAdminToken|guardApi|ipLimited|consumeRateLimit|authorizePayment|requireUser|verifyPiAccessToken|isCronRequest|CRON_SECRET/;
 
 const PUBLIC_ON_PURPOSE: Record<string, string> = {
+  'app/api/brand/route.ts': 'read-only logo setting (one document, https address only); cached for a minute',
   'app/api/legal/route.ts': 'read-only legal notice; the country is checked against a fixed list and the answer is cached',
   'app/api/pricing/route.ts': 'read-only Pi/USD rate (one document); cached',
   'app/api/swap/route.ts': 'placeholder that only answers 503; reads nothing',
