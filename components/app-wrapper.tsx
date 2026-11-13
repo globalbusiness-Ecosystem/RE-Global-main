@@ -1,7 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { LanguageProvider } from "@/contexts/language-context";
 import { OfflineBanner } from "./offline-banner";
@@ -20,8 +20,15 @@ function AppContent({ children }: { children: ReactNode }) {
 
   useServiceWorker();
 
+  const [toastTheme, setToastTheme] = useState<'dark' | 'light'>('dark');
   useEffect(() => {
     applyTheme(getStoredTheme());
+    const sync = () => setToastTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    sync();
+    // The header and Settings switch the theme by toggling the class on <html>; the toasts follow it.
+    const obs = new MutationObserver(sync);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
   }, []);
 
   return (
@@ -34,7 +41,7 @@ function AppContent({ children }: { children: ReactNode }) {
       <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>
       <Toaster
         position="top-center"
-        theme="dark"
+        theme={toastTheme}
         richColors
         expand
         style={{

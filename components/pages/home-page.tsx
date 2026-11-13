@@ -73,8 +73,8 @@ export default function HomePage({
               { key: 'investors', val: '45.2K' },
               { key: 'volume', val: '$2.3B' },
             ].map((s) => (
-              <div key={s.key} className="flex-shrink-0 rounded-lg p-3 flex flex-col items-center gap-1" style={{ backgroundColor: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-gray-400 text-xs">{tt(HOME_STATS[s.key], language)}</p>
+              <div key={s.key} className="flex-shrink-0 rounded-lg p-3 flex flex-col items-center gap-1 bg-card border border-border">
+                <p className="text-muted-foreground text-xs">{tt(HOME_STATS[s.key], language)}</p>
                 <p className="text-xl font-bold text-accent">{s.val}</p>
               </div>
             ))}
@@ -84,7 +84,7 @@ export default function HomePage({
         <FirestoreListings featuredOnly language={language} />
 
         {/* Categories */}
-        <h3 className="text-lg font-semibold text-white mb-6 tracking-wide">
+        <h3 className="text-lg font-semibold text-foreground mb-6 tracking-wide">
           {tt(HOME_UI.exploreCategories, language)}
         </h3>
         <div className="grid grid-cols-3 gap-5 mb-12">
@@ -106,13 +106,12 @@ export default function HomePage({
                     onCategoryClick?.(cat.id);
                   }
                 }}
-                className="rounded-lg p-5 flex flex-col items-center gap-3 hover:shadow-xl transition duration-300 border border-gray-800 hover:border-accent"
-                style={{ backgroundColor: '#1a2332' }}
+                className="rounded-lg p-5 flex flex-col items-center gap-3 hover:shadow-xl transition duration-300 border border-border bg-card hover:border-accent"
               >
-                <div className="rounded-lg p-4" style={{ backgroundColor: '#1a2332' }}>
+                <div className="rounded-lg p-4 bg-muted">
                   <Icon className="w-7 h-7 text-accent" />
                 </div>
-                <span className="text-xs font-medium text-white text-center leading-tight">
+                <span className="text-xs font-medium text-foreground text-center leading-tight">
                   {tt(HOME_CATEGORIES[cat.id], language)}
                 </span>
               </button>
@@ -128,7 +127,7 @@ export default function HomePage({
             border: '1px solid rgba(212,175,55,0.25)',
           }}
         >
-          <h3 className="text-lg font-semibold text-white mb-5 px-6 flex items-center gap-2">
+          <h3 className="text-lg font-semibold text-foreground mb-5 px-6 flex items-center gap-2">
             <span
               className="w-1.5 h-1.5 rounded-full"
               style={{ background: '#D4AF37', boxShadow: '0 0 8px #D4AF37' }}

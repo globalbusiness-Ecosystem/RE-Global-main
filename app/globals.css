@@ -71,7 +71,7 @@
   --secondary: oklch(0.62 0.2 295);
   --sidebar: oklch(0.15 0.04 285);
 }
-body.dark {
+.dark body {
   background-image:
     radial-gradient(60rem 40rem at 90% -8%, color-mix(in oklch, var(--secondary) 26%, transparent), transparent 62%),
     radial-gradient(48rem 34rem at -10% 105%, color-mix(in oklch, var(--accent) 12%, transparent), transparent 62%);
@@ -106,3 +106,42 @@ body.dark {
   animation: re-logo-shine 4.5s ease-in-out infinite;
 }
 @media (prefers-reduced-motion: reduce) { .re-logo-anim, .re-logo-anim::after { animation: none; } }
+
+/* Light look: soft lavender white, white cards, deeper gold so it stays readable. Dark is untouched. */
+:root:not(.dark) {
+  color-scheme: light;
+  --background: oklch(0.975 0.008 290);
+  --foreground: oklch(0.2 0.03 285);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.2 0.03 285);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.2 0.03 285);
+  --muted: oklch(0.95 0.015 290);
+  --muted-foreground: oklch(0.46 0.035 285);
+  --border: oklch(0.88 0.03 290);
+  --input: oklch(0.965 0.012 290);
+  --primary: oklch(0.56 0.13 72);
+  --primary-foreground: oklch(1 0 0);
+  --accent: oklch(0.56 0.13 72);
+  --accent-foreground: oklch(1 0 0);
+  --ring: oklch(0.56 0.13 72);
+  --secondary: oklch(0.55 0.2 295);
+  --secondary-foreground: oklch(1 0 0);
+  --sidebar: oklch(0.97 0.01 290);
+}
+:root:not(.dark) body {
+  background-image:
+    radial-gradient(55rem 36rem at 92% -8%, color-mix(in oklch, var(--secondary) 12%, transparent), transparent 62%),
+    radial-gradient(44rem 30rem at -10% 105%, color-mix(in oklch, var(--accent) 10%, transparent), transparent 62%);
+  background-attachment: fixed;
+}
+:root:not(.dark) .bg-card {
+  box-shadow: 0 8px 28px -18px color-mix(in oklch, var(--secondary) 45%, transparent);
+}
+.dark { color-scheme: dark; }
+/* Status colours chosen for a dark page are too pale on white: use deeper tones in the light look. */
+:root:not(.dark) .text-green-400, :root:not(.dark) .text-emerald-400, :root:not(.dark) .text-emerald-500 { color: oklch(0.45 0.14 150); }
+:root:not(.dark) .text-red-300, :root:not(.dark) .text-red-400 { color: oklch(0.5 0.2 25); }
+:root:not(.dark) .text-yellow-400, :root:not(.dark) .text-amber-400 { color: oklch(0.52 0.13 75); }
+:root:not(.dark) .text-blue-400 { color: oklch(0.5 0.17 255); }
+:root:not(.dark) .text-gray-400, :root:not(.dark) .text-gray-500 { color: var(--muted-foreground); }

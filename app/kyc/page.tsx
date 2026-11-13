@@ -86,15 +86,15 @@ export default function KycPage() {
           <span>{kl(m === 'alias' ? 'nameAlias' : 'nameReal', language)}</span>
         </label>
       ))}
-      <p className="text-xs text-gray-400">{kl('nameHint', language)}</p>
+      <p className="text-xs text-muted-foreground">{kl('nameHint', language)}</p>
     </fieldset>
   );
-  const input = 'w-full rounded-xl border border-white/15 bg-white/[0.04] px-4 py-3 text-base text-white outline-none focus:border-accent';
-  const note = 'rounded-xl border border-white/10 bg-white/[0.03] p-3 text-sm text-gray-300';
+  const input = 'w-full rounded-xl border border-border bg-muted/60 px-4 py-3 text-base text-foreground outline-none focus:border-accent';
+  const note = 'rounded-xl border border-border bg-muted/60 p-3 text-sm text-foreground/80';
   const canSend = me && me.required && (me.status === 'none' || me.status === 'rejected');
 
   return (
-    <main dir={rtl ? 'rtl' : 'ltr'} className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4 py-10 text-white">
+    <main dir={rtl ? 'rtl' : 'ltr'} className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4 py-10 text-foreground">
       <BrandMark />
       <h1 className="text-center text-2xl font-bold">{kl('title', language)}</h1>
       {!isInitialized ? null : !accessToken ? (
@@ -108,7 +108,7 @@ export default function KycPage() {
         <p className={note}>{kl('notRequired', language)}</p>
       ) : (
         <>
-          <p className="text-sm text-gray-300">{kl('intro', language)}</p>
+          <p className="text-sm text-foreground/80">{kl('intro', language)}</p>
           {me.status === 'pending' && <p className={note}>{kl('pending', language)}</p>}
           {me.status === 'approved' && <p className={note}>{kl('approved', language)}</p>}
           {me.status === 'rejected' && <p className={note}>{kl('rejected', language, { reason: me.rejectReason ?? '' })}</p>}
@@ -127,7 +127,7 @@ export default function KycPage() {
               <label className="text-sm">{kl('country', language)}
                 <select className={`${input} mt-1`} value={country} onChange={(e) => setCountry(e.target.value)}>
                   <option value="" />
-                  {Object.entries(COUNTRIES).map(([code, n]) => <option key={code} value={code} className="text-black">{countryName(code, language, n.en)}</option>)}
+                  {Object.entries(COUNTRIES).map(([code, n]) => <option key={code} value={code}>{countryName(code, language, n.en)}</option>)}
                 </select>
               </label>
               <label className="text-sm">{kl('phone', language)}
@@ -136,31 +136,31 @@ export default function KycPage() {
               {!me.hosted && (<>
  <label className="text-sm">{kl('docType', language)}
                 <select className={`${input} mt-1`} value={docType} onChange={(e) => { setDocType(e.target.value as DocType); setPhotos({}); }}>
-                  <option value="id" className="text-black">{kl('docId', language)}</option>
-                  <option value="passport" className="text-black">{kl('docPassport', language)}</option>
+                  <option value="id">{kl('docId', language)}</option>
+                  <option value="passport">{kl('docPassport', language)}</option>
                 </select>
               </label>
-              <p className="text-xs text-gray-400">{kl('photoHint', language)}</p>
+              <p className="text-xs text-muted-foreground">{kl('photoHint', language)}</p>
               {requiredKinds(docType).map((k) => (
                 <label key={k} className="text-sm">
                   {k === 'front' ? kl(docType === 'passport' ? 'photoPassport' : 'photoFront', language) : k === 'back' ? kl('photoBack', language) : kl('photoSelfie', language)}
-                  {k === 'selfie' && <span className="block text-xs text-gray-400">{kl('selfieHint', language)}</span>}
+                  {k === 'selfie' && <span className="block text-xs text-muted-foreground">{kl('selfieHint', language)}</span>}
                   <input type="file" accept="image/*" {...(k === 'selfie' ? { capture: 'user' as const } : {})} className={`${input} mt-1 text-sm`}
                     onChange={(e) => { const f = e.target.files?.[0]; setPhotos((p) => ({ ...p, [k]: f })); }} />
                   {photos[k] && <span className="mt-1 block text-xs text-green-400">✓ {photos[k]?.name}</span>}
                 </label>
               ))}
-              <p className="text-xs text-gray-400">{kl('privacyNote', language)}</p>
+              <p className="text-xs text-muted-foreground">{kl('privacyNote', language)}</p>
               </>)}
               {nameChoice}
-              {uploading && <p className="text-sm text-gray-300">{kl('uploading', language)}</p>}
+              {uploading && <p className="text-sm text-foreground/80">{kl('uploading', language)}</p>}
               {msg && <p role="alert" className="text-sm text-red-400">{kl(msg, language)}</p>}
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-accent-foreground disabled:opacity-50">{kl('submit', language)}</button>
             </form>
           )}
         </>
       )}
-      <Link href="/" className="text-center text-sm text-gray-400 underline">{kl('home', language)}</Link>
+      <Link href="/" className="text-center text-sm text-muted-foreground underline">{kl('home', language)}</Link>
     </main>
   );
 }

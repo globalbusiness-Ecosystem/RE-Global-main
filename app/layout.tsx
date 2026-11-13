@@ -31,7 +31,7 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   themeColor: "#000000",
-  colorScheme: "dark",
+  colorScheme: "dark light",
 };
 
 export default function RootLayout({
@@ -40,8 +40,9 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('re_theme_preference')==='light')document.documentElement.classList.remove('dark')}catch(e){}" }} />
         <link rel="manifest" href="/manifest.json" />
         <style>{`
 html {
@@ -56,7 +57,7 @@ html {
         <meta name="theme-color" content="#000000" />
         <script src="https://sdk.minepi.com/pi-sdk.js"></script>
       </head>
-      <body className="dark">
+      <body>
         <AppWrapper>{children}</AppWrapper>
       </body>
     </html>

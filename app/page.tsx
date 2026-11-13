@@ -101,11 +101,6 @@ export default function App() {
     [properties]
   );
 
-  // Initialize dark mode once
-  useEffect(() => {
-    document.documentElement.classList.add('dark');
-  }, []);
-
   // Listen for custom navigation events from property cards
   useEffect(() => {
     const handleNavigation = (event: Event) => {
@@ -449,7 +444,7 @@ export default function App() {
   }, [currentPage, language, currency, favorites, featuredProperties, propertiesLoading]);
 
   return (
-    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden dark">
+    <div className="h-screen bg-background text-foreground flex flex-col overflow-hidden">
       <Header 
         language={language} 
         onSettingsClick={() => handlePageChange('settings')}

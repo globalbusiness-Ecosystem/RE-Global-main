@@ -51,3 +51,14 @@ describe('dashboard and profile layout on a phone', () => {
     expect(src('app/globals.css')).toContain('.dark main.bg-background');
   });
 });
+
+import { readFileSync as rf } from 'node:fs'
+describe('light mode really works', () => {
+  it('does not force dark on body or page', () => {
+    expect(rf('app/layout.tsx', 'utf8')).not.toMatch(/<body[^>]*className="dark"/)
+    expect(rf('app/page.tsx', 'utf8')).not.toMatch(/classList\.add\(['"]dark['"]\)/)
+  })
+  it('has light tokens', () => {
+    expect(rf('app/globals.css', 'utf8')).toContain(':root:not(.dark)')
+  })
+})

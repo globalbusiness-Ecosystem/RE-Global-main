@@ -101,7 +101,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
   const slide = list[currentSlide % list.length];
 
   return (
-    <div className="relative w-full h-96 bg-black overflow-hidden">
+    <div className="relative w-full h-96 bg-[#120d2a] overflow-hidden">
       {/* Slide Background */}
       {slide.type !== 'stats' && slide.imageUrl && (
         <div
@@ -121,7 +121,7 @@ export default function HeroSlider({ language, onInvestClick, onTokenizedClick }
       )}
 
       {(slide.type === 'stats' || !slide.imageUrl) && (
-        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-black to-gray-900" />
+        <div className="absolute inset-0 bg-gradient-to-br from-[#1a1140] via-[#0c0820] to-[#1a1140]" />
       )}
 
       {/* Content */}
