@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#000000",
+  themeColor: "#0d0722",
   colorScheme: "dark light",
 };
 
@@ -44,6 +44,8 @@ export default function RootLayout({
       <head>
         <script dangerouslySetInnerHTML={{ __html: "try{if(localStorage.getItem('re_theme_preference')==='light')document.documentElement.classList.remove('dark')}catch(e){}" }} />
         <link rel="manifest" href="/manifest.json" />
+        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/apple-icon.png" />
         <style>{`
 html {
   font-family: ${GeistSans.style.fontFamily};
