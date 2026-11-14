@@ -15,6 +15,9 @@ import OccupancyPanel from './occupancy-panel';
 import ArrivalsPanel from './arrivals-panel';
 import HoldingsPanel from './holdings-panel';
 import PaymentsList from './payments-list';
+import PartnerApplicationsPanel from './partner-applications-panel';
+import PartnerProgramSettings from './partner-program-settings';
+import PartnerCommissionsPanel from './partner-commissions-panel';
 import SubTabs from './sub-tabs';
 
 export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -26,6 +29,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
         { id: 'payments', icon: '💳', label: 'المدفوعات', render: () => <PaymentsList onUnauthorized={u} /> },
         { id: 'card-orders', icon: '🧾', label: 'طلبات البطاقة', render: () => <CardOrdersPanel onUnauthorized={u} /> },
         { id: 'kyc', icon: '🪪', label: 'التحقق من الهوية', render: () => <KycPanel onUnauthorized={u} /> },
+        { id: 'partners', icon: '🤝', label: 'الشركاء', render: () => (<><PartnerApplicationsPanel onUnauthorized={u} /><div className="mt-4"><PartnerProgramSettings onUnauthorized={u} /></div><div className="mt-4"><PartnerCommissionsPanel onUnauthorized={u} /></div></>) },
         { id: 'payouts', icon: '💸', label: 'التحويلات والاستردادات', render: () => <PayoutsPanel onUnauthorized={u} /> },
         {
           id: 'bookings', icon: '🛏️', label: 'الحجوزات',
