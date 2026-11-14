@@ -1,461 +1,188 @@
 'use client';
-import { formatNumber } from '@/lib/format';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { TrendingUp, MapPin, Home, DollarSign, ArrowUp, ArrowDown } from 'lucide-react';
-import { useMemo } from 'react';
-import { BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import AIMarketAnalysisDashboard from '@/components/ai-market-analysis-dashboard';
-import { ANALYTICS_I18N } from '@/lib/analytics-i18n';
+import { Home, Globe2, Handshake, BadgeDollarSign } from 'lucide-react';
+import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { useMarketStats } from '@/hooks/use-market-stats';
+import { formatNumber, localeFor } from '@/lib/format';
+import { st, typeLabel, regionName, compact } from '@/lib/market-stats-i18n';
+import type { MarketStats } from '@/lib/market-stats';
 
 interface AnalyticsPageProps {
   language: NavLanguage;
   currency: 'PI' | 'USD';
 }
 
-// Regional statistics data
-const regionalData = [
-  {
-    region: 'Dubai',
-    country: 'AE',
-    totalProperties: 1245,
-    avgPrice: 850000,
-    rentAvg: 2500,
-    demand: 98,
-    priceChange: 2.5,
-    cityFlag: '🇦🇪',
-  },
-  {
-    region: 'New York',
-    country: 'US',
-    totalProperties: 856,
-    avgPrice: 650000,
-    rentAvg: 3200,
-    demand: 92,
-    priceChange: 1.8,
-    cityFlag: '🇺🇸',
-  },
-  {
-    region: 'London',
-    country: 'GB',
-    totalProperties: 723,
-    avgPrice: 750000,
-    rentAvg: 2800,
-    demand: 85,
-    priceChange: 0.5,
-    cityFlag: '🇬🇧',
-  },
-  {
-    region: 'Paris',
-    country: 'FR',
-    totalProperties: 654,
-    avgPrice: 920000,
-    rentAvg: 3500,
-    demand: 88,
-    priceChange: 1.2,
-    cityFlag: '🇫🇷',
-  },
-  {
-    region: 'Tokyo',
-    country: 'JP',
-    totalProperties: 589,
-    avgPrice: 520000,
-    rentAvg: 1600,
-    demand: 79,
-    priceChange: -0.3,
-    cityFlag: '🇯🇵',
-  },
-  {
-    region: 'Bangkok',
-    country: 'TH',
-    totalProperties: 512,
-    avgPrice: 450000,
-    rentAvg: 850,
-    demand: 82,
-    priceChange: 3.2,
-    cityFlag: '🇹🇭',
-  },
-  {
-    region: 'Sydney',
-    country: 'AU',
-    totalProperties: 478,
-    avgPrice: 580000,
-    rentAvg: 2100,
-    demand: 75,
-    priceChange: 1.1,
-    cityFlag: '🇦🇺',
-  },
-  {
-    region: 'Singapore',
-    country: 'SG',
-    totalProperties: 445,
-    avgPrice: 1200000,
-    rentAvg: 4200,
-    demand: 94,
-    priceChange: 2.8,
-    cityFlag: '🇸🇬',
-  },
-];
+// Colours come from the theme (gold and violet first), so every chart follows light and dark mode.
+const PALETTE = ['var(--accent)', 'var(--secondary)', 'oklch(0.68 0.12 190)', 'oklch(0.68 0.16 25)', 'oklch(0.7 0.12 140)', 'oklch(0.62 0.03 285)'];
+const tick = { fill: 'var(--muted-foreground)', fontSize: 11 };
+const tip = {
+  contentStyle: { background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--foreground)', fontSize: 12 },
+  labelStyle: { color: 'var(--muted-foreground)' },
+  itemStyle: { color: 'var(--foreground)' },
+};
+const box = 'rounded-2xl border border-border bg-card p-4';
 
-// Market type distribution
-const marketDistribution = [
-  { name: 'Buy', value: 45, color: '#B8860B' },
-  { name: 'Rent', value: 28, color: '#AA71C2' },
-  { name: 'Hotel', value: 12, color: '#FFD700' },
-  { name: 'Invest', value: 15, color: '#C0C0C0' },
-];
+function Kpi({ icon: Icon, label, value, sub }: { icon: typeof Home; label: string; value: string; sub?: string }) {
+  return (
+    <div className={`${box} min-w-0`}>
+      <div className="flex items-start justify-between gap-2">
+        <span className="text-sm leading-tight text-muted-foreground">{label}</span>
+        <span className="flex h-8 w-8 flex-none items-center justify-center rounded-lg bg-accent/15 text-accent"><Icon className="h-4 w-4" aria-hidden /></span>
+      </div>
+      <p className="mt-2 truncate text-2xl font-bold text-foreground sm:text-3xl">{value}</p>
+      {sub && <p className="mt-1 truncate text-xs text-muted-foreground">{sub}</p>}
+    </div>
+  );
+}
 
-// Price trend data
-const priceTrendData = [
-  { month: 'Jan', avg: 680000 },
-  { month: 'Feb', avg: 695000 },
-  { month: 'Mar', avg: 710000 },
-  { month: 'Apr', avg: 705000 },
-  { month: 'May', avg: 728000 },
-  { month: 'Jun', avg: 745000 },
-  { month: 'Jul', avg: 760000 },
-  { month: 'Aug', avg: 775000 },
-  { month: 'Sep', avg: 785000 },
-  { month: 'Oct', avg: 795000 },
-  { month: 'Nov', avg: 810000 },
-  { month: 'Dec', avg: 825000 },
-];
+function Skeleton() {
+  return (
+    <div className="space-y-4" aria-hidden>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">{[0, 1, 2, 3].map((i) => <div key={i} className="h-28 animate-pulse rounded-2xl bg-muted" />)}</div>
+      <div className="h-64 animate-pulse rounded-2xl bg-muted" />
+    </div>
+  );
+}
 
-// Demand by region
-const demandData = regionalData
-  .sort((a, b) => b.demand - a.demand)
-  .slice(0, 6)
-  .map((r) => ({
-    name: r.region,
-    demand: r.demand,
-  }));
+function Body({ s, language }: { s: MarketStats; language: NavLanguage }) {
+  const locale = localeFor(language);
+  const monthName = (m: string) => new Intl.DateTimeFormat(locale, { month: 'short', timeZone: 'UTC' }).format(new Date(`${m}-01T00:00:00Z`));
+  const months = s.months.map((m) => ({ ...m, label: monthName(m.month) }));
+  const types = s.byType.map((t, i) => ({ ...t, label: typeLabel(t.type, language), color: PALETTE[i % PALETTE.length] }));
+  const countries = s.countries.map((c) => ({ ...c, label: regionName(c.country, language) }));
+  const totalTyped = types.reduce((n, t) => n + t.count, 0) || 1;
+  const empty = s.listings.total === 0 && s.deals12m === 0;
 
-export default function AnalyticsPage({ language, currency }: AnalyticsPageProps) {
-  const t = ANALYTICS_I18N[language];
-  // Sort by demand
-  const topRegions = useMemo(() => {
-    return [...regionalData].sort((a, b) => b.demand - a.demand);
-  }, []);
-
-  // Calculate total statistics
-  const totalStats = useMemo(() => {
-    const total = regionalData.length;
-    const totalProperties = regionalData.reduce((sum, r) => sum + r.totalProperties, 0);
-    const avgPrice = Math.round(
-      regionalData.reduce((sum, r) => sum + r.avgPrice, 0) / total
-    );
-    const avgDemand = Math.round(
-      regionalData.reduce((sum, r) => sum + r.demand, 0) / total
-    );
-
-    return { total, totalProperties, avgPrice, avgDemand };
-  }, []);
+  if (empty) return <p className={`${box} text-sm text-muted-foreground`}>{st('noData', language)}</p>;
 
   return (
-    <div className="px-4 py-6 space-y-6">
-      {/* Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-accent mb-2">
-          {t.marketAnalytics}
-        </h1>
-        <p className="text-muted-foreground">
-          {t.globalStatsDesc}
-        </p>
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+        <Kpi icon={Home} label={st('listings', language)} value={formatNumber(s.listings.total, language, 0)} sub={`${formatNumber(s.listings.available, language, 0)} ${st('available', language)} · ${formatNumber(s.listings.sold, language, 0)} ${st('sold', language)}`} />
+        <Kpi icon={Globe2} label={st('countries', language)} value={formatNumber(s.countryCount, language, 0)} sub={st('countriesNote', language)} />
+        <Kpi icon={Handshake} label={st('deals', language)} value={formatNumber(s.deals12m, language, 0)} sub={st('last12', language)} />
+        <Kpi icon={BadgeDollarSign} label={st('median', language)} value={s.headline ? `${compact(s.headline.median, locale)} ${s.headline.currency}` : '—'} sub={s.headline ? st('basedOn', language).replace('{n}', formatNumber(s.headline.count, language, 0)) : undefined} />
       </div>
 
-      {/* Key Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">
-              {t.totalProperties}
-            </span>
-            <Home className="w-5 h-5 text-accent" />
+      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+        <section className={box}>
+          <h2 className="mb-3 text-base font-semibold text-foreground">{st('chartDeals', language)}</h2>
+          <div dir="ltr" className="h-60">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={months} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="dealsFill" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0%" stopColor="var(--accent)" stopOpacity={0.45} />
+                    <stop offset="100%" stopColor="var(--accent)" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+                <XAxis dataKey="label" tick={tick} tickLine={false} axisLine={{ stroke: 'var(--border)' }} interval="preserveStartEnd" minTickGap={12} />
+                <YAxis allowDecimals={false} width={32} tick={tick} tickLine={false} axisLine={false} />
+                <Tooltip {...tip} formatter={(v) => [formatNumber(v as number, language, 0), st('deals', language)]} />
+                <Area type="monotone" dataKey="deals" stroke="var(--accent)" strokeWidth={2.5} fill="url(#dealsFill)" dot={false} activeDot={{ r: 5 }} />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-          <p className="text-2xl font-bold text-accent">
-            {formatNumber(totalStats.totalProperties, language)}
-          </p>
-          <p className="text-xs text-green-500 mt-1">{t.thisMonthGrowth}</p>
-        </div>
+          {s.volume12m.length > 0 && (
+            <p className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+              <span className="font-medium text-foreground">{st('volume', language)}:</span>
+              {s.volume12m.map((v) => <span key={v.currency} dir="ltr" className="font-semibold text-accent">{compact(v.amount, locale)} {v.currency}</span>)}
+            </p>
+          )}
+        </section>
 
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">
-              {t.avgPriceLabel}
-            </span>
-            <DollarSign className="w-5 h-5 text-accent" />
-          </div>
-          <p className="text-2xl font-bold text-accent">
-            {Math.round(totalStats.avgPrice / 1000)}K {currency}
-          </p>
-          <p className="text-xs text-green-500 mt-1">{t.growthLabel}</p>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">
-              {t.activeRegions}
-            </span>
-            <MapPin className="w-5 h-5 text-accent" />
-          </div>
-          <p className="text-2xl font-bold text-accent">{totalStats.total}</p>
-          <p className="text-xs text-green-500 mt-1">{t.worldwideCoverage}</p>
-        </div>
-
-        <div className="bg-card border border-border rounded-xl p-4">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-muted-foreground text-sm">
-              {t.avgDemand}
-            </span>
-            <TrendingUp className="w-5 h-5 text-accent" />
-          </div>
-          <p className="text-2xl font-bold text-accent">{totalStats.avgDemand}%</p>
-          <p className="text-xs text-green-500 mt-1">{t.highInterest}</p>
-        </div>
-      </div>
-
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        {/* Price Trend Chart */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h2 className="text-lg font-semibold text-accent mb-4">
-            {t.avgPriceTrend}
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <LineChart data={priceTrendData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="month" stroke="#666" />
-              <YAxis stroke="#666" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                }}
-                formatter={(value) => `${Math.round(value as number / 1000)}K`}
-              />
-              <Line
-                type="monotone"
-                dataKey="avg"
-                stroke="#B8860B"
-                dot={false}
-                strokeWidth={2}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Market Distribution */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h2 className="text-lg font-semibold text-accent mb-4">
-            {t.marketDistribution}
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={marketDistribution}
-                cx="50%"
-                cy="50%"
-                labelLine={false}
-                label={({ name, value }) => `${name}: ${value}%`}
-                outerRadius={80}
-                fill="#8884d8"
-                dataKey="value"
-              >
-                {marketDistribution.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip formatter={(value) => `${value}%`} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Demand by Region */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h2 className="text-lg font-semibold text-accent mb-4">
-            {t.topMarketsByDemand}
-          </h2>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={demandData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#333" />
-              <XAxis dataKey="name" stroke="#666" />
-              <YAxis stroke="#666" />
-              <Tooltip
-                contentStyle={{
-                  backgroundColor: '#1a1a1a',
-                  border: '1px solid #333',
-                }}
-                formatter={(value) => `${value}%`}
-              />
-              <Bar dataKey="demand" fill="#B8860B" />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-
-        {/* Regional Summary */}
-        <div className="bg-card border border-border rounded-xl p-4">
-          <h2 className="text-lg font-semibold text-accent mb-4">
-            {t.regionalLeaders}
-          </h2>
-          <div className="space-y-2">
-            {topRegions.slice(0, 5).map((region) => (
-              <div
-                key={region.region}
-                className="flex items-center justify-between p-2 bg-background/50 rounded border border-border/50"
-              >
-                <div className="flex items-center gap-2 flex-1">
-                  <span className="text-lg">{region.cityFlag}</span>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground">
-                      {region.region}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {region.totalProperties} {t.propertiesLabel}
-                    </p>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-semibold text-accent">
-                    {region.demand}%
-                  </p>
-                  <p
-                    className={`text-xs flex items-center justify-end gap-1 ${
-                      region.priceChange >= 0
-                        ? 'text-green-500'
-                        : 'text-red-500'
-                    }`}
-                  >
-                    {region.priceChange >= 0 ? (
-                      <ArrowUp className="w-3 h-3" />
-                    ) : (
-                      <ArrowDown className="w-3 h-3" />
-                    )}
-                    {Math.abs(region.priceChange)}%
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Detailed Regional Table */}
-      <div className="bg-card border border-border rounded-xl p-4">
-        <h2 className="text-lg font-semibold text-accent mb-4">
-          {t.regionalStatistics}
-        </h2>
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
-            <thead>
-              <tr className="border-b border-border">
-                <th className="text-left p-2 text-accent font-semibold">
-                  {t.region}
-                </th>
-                <th className="text-right p-2 text-accent font-semibold">
-                  {t.properties}
-                </th>
-                <th className="text-right p-2 text-accent font-semibold">
-                  {t.avgPriceLabel}
-                </th>
-                <th className="text-right p-2 text-accent font-semibold">
-                  {t.rentAvg}
-                </th>
-                <th className="text-right p-2 text-accent font-semibold">
-                  {t.demand}
-                </th>
-                <th className="text-right p-2 text-accent font-semibold">
-                  {t.change}
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {topRegions.map((region) => (
-                <tr
-                  key={region.region}
-                  className="border-b border-border/50 hover:bg-background/50 transition"
-                >
-                  <td className="p-2">
-                    <div className="flex items-center gap-2">
-                      <span className="text-lg">{region.cityFlag}</span>
-                      <span className="font-semibold text-foreground">
-                        {region.region}
-                      </span>
-                    </div>
-                  </td>
-                  <td className="p-2 text-right text-muted-foreground">
-                    {formatNumber(region.totalProperties, language)}
-                  </td>
-                  <td className="p-2 text-right font-semibold text-accent">
-                    {(region.avgPrice / 1000).toFixed(0)}K {currency}
-                  </td>
-                  <td className="p-2 text-right font-semibold text-secondary">
-                    {formatNumber(region.rentAvg, language)} {currency}
-                  </td>
-                  <td className="p-2 text-right">
-                    <div className="bg-accent/20 rounded px-2 py-1 inline-block">
-                      <span className="text-accent font-semibold">
-                        {region.demand}%
-                      </span>
-                    </div>
-                  </td>
-                  <td
-                    className={`p-2 text-right font-semibold flex items-center justify-end gap-1 ${
-                      region.priceChange >= 0
-                        ? 'text-green-500'
-                        : 'text-red-500'
-                    }`}
-                  >
-                    {region.priceChange >= 0 ? (
-                      <ArrowUp className="w-4 h-4" />
-                    ) : (
-                      <ArrowDown className="w-4 h-4" />
-                    )}
-                    {Math.abs(region.priceChange)}%
-                  </td>
-                </tr>
+        <section className={box}>
+          <h2 className="mb-3 text-base font-semibold text-foreground">{st('chartTypes', language)}</h2>
+          <div className="flex flex-col items-center gap-4 sm:flex-row">
+            <div dir="ltr" className="h-48 w-48 flex-none">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={types} dataKey="count" nameKey="label" innerRadius="58%" outerRadius="95%" paddingAngle={2} stroke="var(--card)" strokeWidth={2}>
+                    {types.map((t) => <Cell key={t.type} fill={t.color} />)}
+                  </Pie>
+                  <Tooltip {...tip} formatter={(v, n) => [formatNumber(v as number, language, 0), n as string]} />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+            <ul className="w-full min-w-0 flex-1 space-y-2">
+              {types.map((t) => (
+                <li key={t.type} className="flex items-center gap-2 text-sm">
+                  <span className="h-3 w-3 flex-none rounded-sm" style={{ background: t.color }} aria-hidden />
+                  <span className="min-w-0 flex-1 truncate text-foreground">{t.label}</span>
+                  <span className="text-muted-foreground">{formatNumber(t.count, language, 0)}</span>
+                  <span className="w-10 text-end font-semibold text-foreground">{Math.round((t.count / totalTyped) * 100)}%</span>
+                </li>
               ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+            </ul>
+          </div>
+        </section>
 
-      {/* AI Market Analysis Dashboard */}
-      <div className="border border-border rounded-xl overflow-hidden">
-        <AIMarketAnalysisDashboard language={language} />
-      </div>
+        {countries.length > 0 && (
+          <section className={box}>
+            <h2 className="mb-3 text-base font-semibold text-foreground">{st('chartCountries', language)}</h2>
+            <div dir="ltr" style={{ height: Math.max(160, countries.length * 36 + 16) }}>
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={countries} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
+                  <CartesianGrid horizontal={false} stroke="var(--border)" strokeDasharray="3 3" />
+                  <XAxis type="number" allowDecimals={false} tick={tick} tickLine={false} axisLine={false} />
+                  <YAxis type="category" dataKey="label" width={92} tick={tick} tickLine={false} axisLine={false} />
+                  <Tooltip {...tip} cursor={{ fill: 'var(--muted)', opacity: 0.4 }} formatter={(v) => [formatNumber(v as number, language, 0), st('listings', language)]} />
+                  <Bar dataKey="count" fill="var(--accent)" radius={[0, 6, 6, 0]} barSize={18} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </section>
+        )}
 
-      {/* Insights */}
-      <div className="bg-background/50 border border-border rounded-xl p-4 space-y-3">
-        <h2 className="text-lg font-semibold text-accent">
-          {t.marketInsights}
-        </h2>
-        <ul className="space-y-2 text-sm text-muted-foreground">
-          <li className="flex items-start gap-2">
-            <span className="text-accent mt-0.5">•</span>
-            <span>
-              {t.insight1}
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-accent mt-0.5">•</span>
-            <span>
-              {t.insight2}
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-accent mt-0.5">•</span>
-            <span>
-              {t.insight3}
-            </span>
-          </li>
-          <li className="flex items-start gap-2">
-            <span className="text-accent mt-0.5">•</span>
-            <span>
-              {t.insight4}
-            </span>
-          </li>
-        </ul>
+        {s.prices.length > 0 && (
+          <section className={box}>
+            <h2 className="mb-3 text-base font-semibold text-foreground">{st('tablePrices', language)}</h2>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="border-b border-border text-xs text-muted-foreground">
+                    <th className="p-2 text-start font-medium">{st('colType', language)}</th>
+                    <th className="p-2 text-end font-medium">{st('colCount', language)}</th>
+                    <th className="p-2 text-end font-medium">{st('colMedian', language)}</th>
+                    <th className="p-2 text-end font-medium">{st('colRange', language)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {s.prices.map((p) => (
+                    <tr key={`${p.type}-${p.currency}`} className="border-b border-border/60 last:border-0">
+                      <td className="p-2 font-medium text-foreground">{typeLabel(p.type, language)}</td>
+                      <td className="p-2 text-end text-muted-foreground">{formatNumber(p.count, language, 0)}</td>
+                      <td className="p-2 text-end font-semibold text-accent" dir="ltr">{compact(p.median, locale)} {p.currency}</td>
+                      <td className="p-2 text-end text-xs text-muted-foreground" dir="ltr">{compact(p.min, locale)} – {compact(p.max, locale)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        )}
       </div>
+      <p className="text-xs text-muted-foreground">{st('note', language)}</p>
     </div>
+  );
+}
+
+export default function AnalyticsPage({ language }: AnalyticsPageProps) {
+  const { data, state, reload } = useMarketStats();
+  return (
+    <main className="mx-auto max-w-5xl space-y-6 px-4 py-6">
+      <header>
+        <h1 className="text-3xl font-bold text-accent">{st('title', language)}</h1>
+        <p className="mt-1 text-muted-foreground">{st('subtitle', language)}</p>
+      </header>
+
+      {state === 'loading' && <Skeleton />}
+      {state === 'error' && (
+        <div className={box}><p className="text-sm text-red-400">{st('loadError', language)}</p><button type="button" onClick={reload} className="mt-2 text-sm text-accent hover:underline">{st('retry', language)}</button></div>
+      )}
+      {state === 'ready' && data && <Body s={data} language={language} />}
+    </main>
   );
 }
