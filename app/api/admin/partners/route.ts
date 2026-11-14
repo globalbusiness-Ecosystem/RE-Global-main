@@ -6,9 +6,12 @@ import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { PARTNER_STATUSES, type PartnerStatus } from '@/lib/partners';
 import { getPartner, publicProfile } from '@/lib/partners-server';
+import { notifyPartner } from '@/lib/partners-notify';
+import type { PartnerMailKind } from '@/lib/partners-mail';
 
 export const dynamic = 'force-dynamic';
 const unauthorized = () => NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
+const MAIL: Record<string, PartnerMailKind> = { approve: 'approved', reject: 'rejected', suspend: 'suspended', reinstate: 'reinstated' };
 const NEXT: Record<string, { from: PartnerStatus[]; to: PartnerStatus }> = {
   approve: { from: ['pending', 'rejected'], to: 'approved' },
   reject: { from: ['pending'], to: 'rejected' },
@@ -49,7 +52,8 @@ export async function PUT(req: NextRequest) {
     if (step.to === 'approved' && !cur.approvedAt) patch.approvedAt = Timestamp.now();
     await adminDb.collection('partners').doc(username).set(patch, { merge: true });
     await logAdmin(`partner.${body.action}`, { username, role: cur.role, from: cur.status, to: step.to });
-    return NextResponse.json({ ok: true, status: step.to });
+    const mailed = await notifyPartner(username, MAIL[body.action], { note });
+    return NextResponse.json({ ok: true, status: step.to, mailed });
   } catch (err) {
     console.error('[admin/partners] update error:', err);
     return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });

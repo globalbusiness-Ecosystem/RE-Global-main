@@ -6,6 +6,7 @@ import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { COMMISSION_STATUSES } from '@/lib/partners';
 import { commissionRow, summarize } from '@/lib/partners-server';
+import { notifyPartner } from '@/lib/partners-notify';
 
 export const dynamic = 'force-dynamic';
 const unauthorized = () => NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
@@ -42,7 +43,8 @@ export async function PUT(req: NextRequest) {
     if (d.status !== 'accrued') return NextResponse.json({ ok: false, error: 'Already settled' }, { status: 409 });
     await ref.set({ status: action, note, ...(action === 'paid' ? { paidAt: Timestamp.now() } : {}) }, { merge: true });
     await logAdmin(`partner.commission.${action}`, { id, partner: d.partner, amount: d.amount, currency: d.currency });
-    return NextResponse.json({ ok: true, status: action });
+    const mailed = action === 'paid' ? await notifyPartner(String(d.partner), 'paid', { amount: `${d.amount} ${d.currency}` }) : false;
+    return NextResponse.json({ ok: true, status: action, mailed });
   } catch (err) {
     console.error('[admin/partner-commissions] update error:', err);
     return NextResponse.json({ ok: false, error: 'Server error' }, { status: 500 });

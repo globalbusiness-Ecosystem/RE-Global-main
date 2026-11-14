@@ -39,13 +39,13 @@ export async function getPartner(username: string): Promise<Doc | null> {
 export type ApplyResult = { ok: true } | { ok: false; status: number; error: 'exists' };
 
 // One application per account. A rejected one can be sent again; a pending, approved or suspended one cannot.
-export async function applyPartner(uid: string, username: string, a: Application): Promise<ApplyResult> {
+export async function applyPartner(uid: string, username: string, a: Application, lang = 'en'): Promise<ApplyResult> {
   const ref = adminDb.collection('partners').doc(username);
   try {
     await adminDb.runTransaction(async (tx: any) => {
       const snap = await tx.get(ref);
       if (snap.exists && (snap.data() as Doc).status !== 'rejected') throw new Error('exists');
-      tx.set(ref, { ...a, username, uid, status: 'pending', note: '', createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
+      tx.set(ref, { ...a, username, uid, lang, status: 'pending', note: '', createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
     });
   } catch (err) {
     if ((err as Error).message === 'exists') return { ok: false, status: 409, error: 'exists' };

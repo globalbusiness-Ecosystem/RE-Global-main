@@ -4,6 +4,8 @@ import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { rateLimited } from '@/lib/rate-guard';
 import { parseApplication } from '@/lib/partners';
 import { applyPartner } from '@/lib/partners-server';
+import { notifyAdminNewApplication } from '@/lib/partners-notify';
+import { pickMailLang } from '@/lib/kyc-mail';
 
 export const dynamic = 'force-dynamic';
 const HEADERS = { 'Cache-Control': 'no-store' };
@@ -22,8 +24,9 @@ export async function POST(req: NextRequest) {
   const parsed = parseApplication(await req.json().catch(() => null));
   if (!parsed.ok) return NextResponse.json({ error: 'invalid', field: parsed.error }, { status: 400, headers: HEADERS });
   try {
-    const r = await applyPartner(user.uid, user.username, parsed.value);
+    const r = await applyPartner(user.uid, user.username, parsed.value, pickMailLang(req.headers.get('accept-language')));
     if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.status, headers: HEADERS });
+    await notifyAdminNewApplication(user.username, parsed.value);
     return NextResponse.json({ ok: true }, { headers: HEADERS });
   } catch (err) {
     console.error('[partners/apply] error:', err);

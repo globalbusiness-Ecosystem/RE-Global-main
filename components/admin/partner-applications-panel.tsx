@@ -23,6 +23,7 @@ export default function PartnerApplicationsPanel({ onUnauthorized }: { onUnautho
   const [counts, setCounts] = useState<Record<string, number>>({});
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
 
   const fail = useCallback((e: unknown) => { if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message); }, [onUnauthorized]);
   const load = useCallback(() => {
@@ -38,7 +39,11 @@ export default function PartnerApplicationsPanel({ onUnauthorized }: { onUnautho
     }
     if (s.action === 'approve' && !window.confirm(`اعتماد ${p.company} كـ ${ROLE_AR[p.role]}؟ العمولة هتتحسب على مشتريات عملائه من اللحظة دي.`)) return;
     setBusy(p.username);
-    try { await adminApi('/api/admin/partners', { method: 'PUT', body: JSON.stringify({ username: p.username, action: s.action, note }) }); load(); }
+    try {
+      const res = await adminApi<{ mailed?: boolean }>('/api/admin/partners', { method: 'PUT', body: JSON.stringify({ username: p.username, action: s.action, note }) });
+      setNotice(res?.mailed ? '✉️ اتبعت إيميل بالقرار للشريك.' : 'القرار اتسجّل. مفيش إيميل اتبعت (الحساب مش بإيميل متأكد، أو الإيميل مش متضبط).');
+      load();
+    }
     catch (e) { fail(e); } finally { setBusy(''); }
   };
 
@@ -52,6 +57,7 @@ export default function PartnerApplicationsPanel({ onUnauthorized }: { onUnautho
           </button>
         ))}
       </div>
+      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
       {error ? <Empty>❌ {error}</Empty> : !rows ? null : rows.length === 0 ? <Empty>مفيش طلبات في الحالة دي.</Empty> : (
         <div className="space-y-2">
           {rows.map((p) => (

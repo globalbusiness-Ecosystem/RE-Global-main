@@ -16,6 +16,7 @@ export default function PartnerCommissionsPanel({ onUnauthorized }: { onUnauthor
   const [totals, setTotals] = useState<Total[]>([]);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
+  const [notice, setNotice] = useState('');
 
   const fail = useCallback((e: unknown) => { if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message); }, [onUnauthorized]);
   const load = useCallback(() => {
@@ -28,7 +29,11 @@ export default function PartnerCommissionsPanel({ onUnauthorized }: { onUnauthor
     if (action === 'void' && !note) return;
     if (!window.confirm(action === 'paid' ? `تأكيد إنك دفعت ${money(r.amount)} ${r.currency} لـ @${r.partner}؟` : `إلغاء عمولة ${money(r.amount)} ${r.currency}؟ مش هتتحسب للشريك.`)) return;
     setBusy(r.id);
-    try { await adminApi('/api/admin/partner-commissions', { method: 'PUT', body: JSON.stringify({ id: r.id, action, note }) }); load(); }
+    try {
+      const res = await adminApi<{ mailed?: boolean }>('/api/admin/partner-commissions', { method: 'PUT', body: JSON.stringify({ id: r.id, action, note }) });
+      setNotice(action === 'paid' ? (res?.mailed ? '✉️ اتبعت إيميل للشريك إن العمولة اتدفعت.' : 'اتسجّلت مدفوعة. مفيش إيميل اتبعت للشريك.') : '');
+      load();
+    }
     catch (e) { fail(e); } finally { setBusy(''); }
   };
 
@@ -52,6 +57,7 @@ export default function PartnerCommissionsPanel({ onUnauthorized }: { onUnauthor
           </button>
         ))}
       </div>
+      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
       {error ? <Empty>❌ {error}</Empty> : !rows ? null : rows.length === 0 ? <Empty>مفيش عمولات في الحالة دي.</Empty> : (
         <div className="space-y-2">
           {rows.map((r) => (
