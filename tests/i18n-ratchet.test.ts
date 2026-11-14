@@ -13,7 +13,6 @@ const BUDGET: Record<string, number> = {
   'components/ai-advisor-chat.tsx': 6,
   'components/ai-advisor-voice-chat.tsx': 5,
   'components/legal-notice.tsx': 2,
-  'components/pages/partners-page.tsx': 2,
   'components/simple-pi-payment-button.tsx': 1,
   'components/unified-payment-button.tsx': 1,
 };

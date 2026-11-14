@@ -8,6 +8,7 @@ import { OfflineBanner } from "./offline-banner";
 import { ErrorReporter } from "./error-reporter";
 import { SkipLink } from "./skip-link";
 import { A11yEnhancer } from "./a11y-enhancer";
+import { RefCapture } from "./ref-capture";
 import { TermsConsentModal } from "./terms-consent-modal";
 import { Toaster } from "sonner";
 import { useServiceWorker } from "@/hooks/use-service-worker";
@@ -36,6 +37,7 @@ function AppContent({ children }: { children: ReactNode }) {
       <SkipLink />
       <A11yEnhancer />
       <ErrorReporter />
+      <RefCapture />
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
       {isInitialized && <TermsConsentModal />}
       <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>
