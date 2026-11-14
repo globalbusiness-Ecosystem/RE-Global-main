@@ -11,6 +11,7 @@ import { parseNameMode, referralCodeOf } from '@/lib/contract-identity';
 import { getHandle } from '@/lib/handle-store';
 import type { CardOrder } from '@/lib/card-pay/order';
 import { getOrder } from '@/lib/card-pay/store';
+import { accrueForContract } from '@/lib/partners-server';
 
 // A card payment gets the same signed contract a Pi payment gets (same collections, same /verify page), and the
 // contract's fingerprint is anchored on the Pi blockchain. The contract is saved first; anchoring is best effort and
@@ -83,6 +84,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
   });
   await anchorContract(o.id).catch(() => {});
   await recordContract(o.id).catch(() => {});
+  await accrueForContract(o.id);
   return contractId || null;
 }
 

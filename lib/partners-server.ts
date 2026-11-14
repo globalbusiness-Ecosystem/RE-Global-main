@@ -65,14 +65,32 @@ export async function ensureInviteCode(username: string, uid: string): Promise<s
   return code;
 }
 
-// Turns the completed purchases of the customers a partner brought in into commission lines. Each contract is counted once
-// (the line has the contract's own id), only purchases made after the partner was approved count, and the percentage is
-// the one in force when the line is first written.
-export async function syncCommissions(username: string, p: Doc, nowMs = Date.now()): Promise<number> {
-  const rules = await getProgramRules();
+// The percentage and the start date that apply to a partner right now, or null when no commission can be earned
+// (program off, rate zero, partner not approved).
+function earning(rules: ProgramRules, p: Doc): { pct: number; since: number } | null {
   const pct = rules.rates[p.role as keyof ProgramRules['rates']] ?? 0;
   const since = ms(p.approvedAt);
-  if (!rules.enabled || p.status !== 'approved' || pct <= 0 || !since) return 0;
+  if (!rules.enabled || p.status !== 'approved' || pct <= 0 || !since) return null;
+  return { pct, since };
+}
+
+// One line per contract: the document has the contract's own id and is only ever created, so it can exist once.
+async function writeCommission(partner: string, p: Doc, referee: string, contractDocId: string, d: Doc, pct: number, nowMs: number): Promise<boolean> {
+  try {
+    await adminDb.collection('partnerCommissions').doc(contractDocId).create({
+      partner, role: p.role, contractId: String(d.contractId ?? contractDocId), referee, base: d.amount, currency: String(d.currency ?? ''),
+      rate: pct, amount: commissionAmount(d.amount, pct), status: 'accrued', createdAt: Timestamp.fromMillis(nowMs),
+    });
+    return true;
+  } catch { return false; /* already written */ }
+}
+
+// Turns the completed purchases of the customers a partner brought in into commission lines. Each contract is counted once,
+// only purchases made after the partner was approved count, and the percentage is the one in force when the line is first
+// written. This is the safety net: accrueForContract writes the line at the moment of the sale, this catches anything missed.
+export async function syncCommissions(username: string, p: Doc, nowMs = Date.now()): Promise<number> {
+  const e = earning(await getProgramRules(), p);
+  if (!e) return 0;
   const invited = await adminDb.collection('referrals').where('referredBy', '==', username).limit(200).get();
   const referees = invited.docs.map((d: any) => String((d.data() as Doc).username ?? '')).filter((u: string) => u && u !== username);
   let created = 0;
@@ -81,18 +99,32 @@ export async function syncCommissions(username: string, p: Doc, nowMs = Date.now
       const cs = await adminDb.collection('contracts').where('buyerUsername', '==', referee).limit(50).get();
       for (const c of cs.docs) {
         const d = c.data() as Doc;
-        if (!isCommissionable(d) || ms(d.createdAt) < since) continue;
-        try {
-          await adminDb.collection('partnerCommissions').doc(c.id).create({
-            partner: username, role: p.role, contractId: String(d.contractId ?? c.id), referee, base: d.amount, currency: String(d.currency ?? ''),
-            rate: pct, amount: commissionAmount(d.amount, pct), status: 'accrued', createdAt: Timestamp.fromMillis(nowMs),
-          });
-          created++;
-        } catch { /* already written */ }
+        if (!isCommissionable(d) || ms(d.createdAt) < e.since) continue;
+        if (await writeCommission(username, p, referee, c.id, d, e.pct, nowMs)) created++;
       }
     }));
   }
   return created;
+}
+
+// Called right after a contract is signed (Pi payment or card): if the buyer came in with a partner's code, the commission line
+// is written now. Best effort: it never throws and never affects the sale. Safe to call again for the same contract.
+export async function accrueForContract(contractDocId: string, nowMs = Date.now()): Promise<boolean> {
+  try {
+    const c = await adminDb.collection('contracts').doc(contractDocId).get();
+    const d = c.exists ? (c.data() as Doc) : null;
+    if (!d || !isCommissionable(d) || typeof d.buyerUsername !== 'string' || !d.buyerUsername) return false;
+    const r = await adminDb.collection('referrals').doc(d.buyerUsername).get();
+    const partner = r.exists ? String((r.data() as Doc).referredBy ?? '') : '';
+    if (!partner || partner === d.buyerUsername) return false;
+    const p = await getPartner(partner);
+    const e = p ? earning(await getProgramRules(), p) : null;
+    if (!p || !e || ms(d.createdAt) < e.since) return false;
+    return await writeCommission(partner, p, d.buyerUsername, contractDocId, d, e.pct, nowMs);
+  } catch (err) {
+    console.error('[partners] accrue failed:', err instanceof Error ? err.message : 'unknown');
+    return false;
+  }
 }
 
 export function commissionRow(id: string, d: Doc) {

@@ -156,7 +156,7 @@ describe('wiring', () => {
   });
   it('a commission line uses the contract id, so it can only exist once, and is created (never overwritten)', () => {
     const s = src('lib/partners-server.ts');
-    expect(s).toContain("collection('partnerCommissions').doc(c.id).create(");
+    expect(s).toContain("collection('partnerCommissions').doc(contractDocId).create(");
   });
   it('the public directory never exposes the account name or phone', () => {
     const s = src('lib/partners-server.ts');

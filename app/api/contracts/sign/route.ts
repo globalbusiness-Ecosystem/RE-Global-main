@@ -11,6 +11,7 @@ import { confirmBooking } from '@/lib/booking-calendar';
 import { confirmShares } from '@/lib/share-inventory';
 import { finalizeSale } from '@/lib/property-reserve';
 import { getLegalProfile } from '@/lib/legal-server';
+import { accrueForContract } from '@/lib/partners-server';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
@@ -199,6 +200,8 @@ export async function POST(req: NextRequest) {
       amount: paidAmount,
       currency: 'Pi',
     });
+    // A partner's commission is written at the moment of the sale (best effort: it never affects the sale).
+    await accrueForContract(paymentId);
     const { uid: _uid, ...publicRecord } = result.record as Record<string, unknown>;
     return NextResponse.json({ ...publicRecord, contractDocId: paymentId });
   } catch (e) {
