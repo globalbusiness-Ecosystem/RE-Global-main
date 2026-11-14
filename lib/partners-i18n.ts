@@ -75,6 +75,9 @@ export const PARTNER_TEXT = {
   loading: r('Loading…', 'جارٍ التحميل…', 'Chargement…', 'Cargando…', 'Carregando…', 'لوڈ ہو رہا ہے…', '加载中…'),
   loadError: r('Could not load. Please try again.', 'تعذّر التحميل. حاول مرة أخرى.', 'Chargement impossible. Réessayez.', 'No se pudo cargar. Inténtalo de nuevo.', 'Não foi possível carregar. Tente novamente.', 'لوڈ نہیں ہو سکا۔ دوبارہ کوشش کریں۔', '无法加载，请重试。'),
   retry: r('Retry', 'إعادة المحاولة', 'Réessayer', 'Reintentar', 'Tentar de novo', 'دوبارہ کوشش کریں', '重试'),
+  refOk: r('Invite accepted. Thanks for joining through a friend!', 'تم قبول الدعوة. شكرًا لانضمامك عن طريق صديق!', 'Invitation acceptée. Merci de nous rejoindre via un ami !', 'Invitación aceptada. ¡Gracias por unirte con un amigo!', 'Convite aceito. Obrigado por entrar por um amigo!', 'دعوت قبول ہو گئی۔ دوست کے ذریعے شامل ہونے کا شکریہ!', '邀请已接受。感谢通过朋友加入！'),
+  refNotNew: r('This invite code is for new customers only, so it was not applied to your account.', 'كود الدعوة للعملاء الجدد فقط، لذلك لم يُطبَّق على حسابك.', 'Ce code d’invitation est réservé aux nouveaux clients ; il n’a pas été appliqué.', 'Este código es solo para clientes nuevos, por lo que no se aplicó.', 'Este código é só para novos clientes, por isso não foi aplicado.', 'یہ کوڈ صرف نئے گاہکوں کے لیے ہے، اس لیے لاگو نہیں ہوا۔', '邀请码仅限新客户，因此未应用到您的账户。'),
+  refNotFound: r('That invite code was not found.', 'كود الدعوة غير موجود.', 'Ce code d’invitation est introuvable.', 'No se encontró ese código de invitación.', 'Esse código de convite não foi encontrado.', 'یہ دعوتی کوڈ نہیں ملا۔', '未找到该邀请码。'),
   back: r('Back', 'رجوع', 'Retour', 'Atrás', 'Voltar', 'واپس', '返回'),
 } satisfies Record<string, Row>;
 
