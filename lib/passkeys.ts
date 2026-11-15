@@ -35,3 +35,11 @@ export function cleanLabel(v: unknown, fallback = 'My device'): string {
 export const isCredentialId = (v: unknown): v is string => typeof v === 'string' && /^[A-Za-z0-9_-]{16,512}$/.test(v);
 
 export const challengeExpired = (expiresAtMs: number, now = Date.now()): boolean => !Number.isFinite(expiresAtMs) || expiresAtMs <= now;
+
+/** A readable default name for this device from the browser's user-agent text, e.g. "Android · Chrome". Never throws. */
+export function deviceNameFromUA(ua: unknown): string {
+  const s = typeof ua === 'string' ? ua : '';
+  const os = /iPhone/i.test(s) ? 'iPhone' : /iPad/i.test(s) ? 'iPad' : /Android/i.test(s) ? 'Android' : /Windows/i.test(s) ? 'Windows' : /Macintosh|Mac OS X/i.test(s) ? 'Mac' : /Linux|X11/i.test(s) ? 'Linux' : '';
+  const browser = /PiBrowser/i.test(s) ? 'Pi Browser' : /EdgA?\//i.test(s) ? 'Edge' : /SamsungBrowser/i.test(s) ? 'Samsung Internet' : /(Chrome|CriOS)\//i.test(s) ? 'Chrome' : /(Firefox|FxiOS)\//i.test(s) ? 'Firefox' : /Safari\//i.test(s) ? 'Safari' : '';
+  return [os, browser].filter(Boolean).join(' · ') || 'My device';
+}

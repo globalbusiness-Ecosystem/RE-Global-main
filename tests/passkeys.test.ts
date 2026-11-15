@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { allowedOrigins, matchOrigin, rpIdOf, cleanLabel, isCredentialId, challengeExpired, MAX_PASSKEYS } from '@/lib/passkeys';
+import { allowedOrigins, matchOrigin, rpIdOf, cleanLabel, isCredentialId, challengeExpired, deviceNameFromUA, MAX_PASSKEYS } from '@/lib/passkeys';
 import { PASSKEY_TEXT, pk, passkeyErrorKey } from '@/lib/passkeys-i18n';
 
 const src = (p: string) => readFileSync(p, 'utf8');
@@ -80,5 +80,26 @@ describe('passkey wiring and safety', () => {
     expect(src('components/passkey-settings.tsx')).toContain('if (!supported || !accessToken) return null');
     expect(src('components/pages/settings-page.tsx')).toContain('<PasskeySettings');
     expect(src('lib/passkey-client.ts')).toContain('platformAuthenticatorIsAvailable');
+  });
+});
+
+describe('device name and the fingerprint scanner', () => {
+  it('names the device from the browser text', () => {
+    expect(deviceNameFromUA('Mozilla/5.0 (Linux; Android 14; SM-S928B) AppleWebKit/537.36 Chrome/126.0 Mobile Safari/537.36')).toBe('Android · Chrome');
+    expect(deviceNameFromUA('Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 Version/17.5 Mobile Safari/604.1')).toBe('iPhone · Safari');
+    expect(deviceNameFromUA('Mozilla/5.0 (Linux; Android 13) Chrome/120 Mobile PiBrowser/1.0')).toBe('Android · Pi Browser');
+    expect(deviceNameFromUA('Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/126 Safari/537.36 Edg/126.0')).toBe('Windows · Edge');
+    expect(deviceNameFromUA('')).toBe('My device');
+    expect(deviceNameFromUA(undefined)).toBe('My device');
+  });
+  it('the settings card uses the scanner button with its four states and the device name', () => {
+    const card = src('components/passkey-settings.tsx');
+    expect(card).toContain('<FingerprintScanner');
+    expect(card).toContain('deviceNameFromUA(navigator.userAgent)');
+    for (const st of ["'scanning'", "'success'", "'error'"]) expect(card).toContain(st);
+    const sc = src('components/fingerprint-scanner.tsx');
+    expect(sc).toContain('prefers-reduced-motion');
+    expect(sc).toContain('aria-live="polite"');
+    expect(sc).toContain('aria-label={label}');
   });
 });
