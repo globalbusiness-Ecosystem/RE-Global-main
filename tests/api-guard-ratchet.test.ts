@@ -10,6 +10,7 @@ const GUARDS = /isAdminRequest|verifyAdminToken|guardApi|ipLimited|consumeRateLi
 const PUBLIC_ON_PURPOSE: Record<string, string> = {
   'app/api/market-stats/route.ts': 'read-only aggregate market figures (counts, medians, deals per month); no personal data; cached',
   'app/api/partners/directory/route.ts': 'read-only list of approved partners who chose to be listed (company, kind, country, short text); cached',
+  'app/api/partners/showcase/route.ts': 'read-only list of approved partner projects the team approved (cards, or one project by id); contact is only what the partner chose to show; cached',
   'app/api/home-features/route.ts': 'read-only home page strip text (one document, plain text only); cached for a minute',
   'app/api/brand/route.ts': 'read-only logo setting (one document, https address only); cached for a minute',
   'app/api/legal/route.ts': 'read-only legal notice; the country is checked against a fixed list and the answer is cached',
