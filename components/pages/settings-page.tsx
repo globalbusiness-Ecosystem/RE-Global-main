@@ -28,7 +28,6 @@ import {
 import { CurrencyPicker } from '@/components/currency-picker';
 import { MyDataPanel } from '@/components/my-data-panel';
 import { PasskeySettings } from '@/components/passkey-settings';
-import { PasskeySettings } from '@/components/passkey-settings';
 import { RewardsPanel } from '@/components/rewards-panel';
 import { IconBadge, RowChevron } from '@/components/ui/icon-badge';
 import { ToggleSwitch } from '@/components/ui/toggle-switch';
@@ -626,8 +625,6 @@ export default function SettingsPage({
               </button>
             )}
           </div>
-
-          <PasskeySettings language={language} />
 
           <PasskeySettings language={language} />
 
