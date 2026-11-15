@@ -12,10 +12,11 @@ export const wasCancelled = (e: unknown): boolean => e instanceof WebAuthnError 
 export type RegisterResult = { ok: true } | { ok: false; reason: 'cancelled' | 'duplicate' | 'limit' | 'origin' | 'generic' };
 
 /** Adds this device as a passkey for the signed-in account (two calls to the server around the device prompt). */
-export async function registerPasskey(token: string, label: string): Promise<RegisterResult> {
-  const headers = { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` };
+export async function registerPasskey(token: string | null, label: string, base = '/api/passkeys'): Promise<RegisterResult> {
+  // The admin panel signs in with a cookie instead of a token (base '/api/admin/passkeys').
+  const headers: Record<string, string> = { 'Content-Type': 'application/json', ...(token ? { Authorization: `Bearer ${token}` } : {}) };
   try {
-    const o = await fetch('/api/passkeys/register/options', { method: 'POST', headers });
+    const o = await fetch(`${base}/register/options`, { method: 'POST', headers });
     const od = await o.json().catch(() => null);
     if (!o.ok || !od?.options) return { ok: false, reason: od?.error === 'limit' ? 'limit' : od?.error === 'origin' ? 'origin' : 'generic' };
     let response;
@@ -24,7 +25,7 @@ export async function registerPasskey(token: string, label: string): Promise<Reg
       if (e instanceof WebAuthnError && e.code === 'ERROR_AUTHENTICATOR_PREVIOUSLY_REGISTERED') return { ok: false, reason: 'duplicate' };
       return { ok: false, reason: wasCancelled(e) ? 'cancelled' : 'generic' };
     }
-    const v = await fetch('/api/passkeys/register/verify', { method: 'POST', headers, body: JSON.stringify({ challengeId: od.challengeId, response, label }) });
+    const v = await fetch(`${base}/register/verify`, { method: 'POST', headers, body: JSON.stringify({ challengeId: od.challengeId, response, label }) });
     const vd = await v.json().catch(() => null);
     if (v.ok) return { ok: true };
     return { ok: false, reason: vd?.error === 'duplicate' ? 'duplicate' : vd?.error === 'limit' ? 'limit' : 'generic' };

@@ -1,74 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
-import crypto from 'crypto';
 import { matchTotp } from '@/lib/totp';
-import { logAdmin } from '@/lib/admin-audit';
-import { spendLoginAttempt } from '@/lib/admin-login-budget';
-import { alertAdmin, adminAlertContext } from '@/lib/admin-alert';
-import {
-  ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken,
-  isAdminSessionConfigured,
-} from '@/lib/admin-session';
+import { ADMIN_COOKIE_NAME, isAdminSessionConfigured } from '@/lib/admin-session';
 import { isAdminRequest } from '@/lib/admin-guard';
+import { clientKey, safeEqual, registerFailure, loginGate, completeAdminLogin, getDb } from '@/lib/admin-login-guard';
+import { adminHasPasskeys } from '@/lib/admin-passkeys';
 
 export const dynamic = 'force-dynamic';
-
-const MAX_FAILURES = 5;
-const LOCK_MINUTES = 15;
-const memoryAttempts = new Map<string, { count: number; lockedUntil: number }>();
-
-function clientKey(req: NextRequest): string {
-  const ip = req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || req.headers.get('x-real-ip') || 'unknown';
-  return crypto.createHash('sha256').update(ip).digest('hex').slice(0, 32);
-}
-function safeEqual(a: string, b: string): boolean {
-  const ha = crypto.createHash('sha256').update(a).digest();
-  const hb = crypto.createHash('sha256').update(b).digest();
-  return crypto.timingSafeEqual(ha, hb);
-}
-async function getDb() {
-  try { return (await import('@/lib/firebase-admin')).adminDb; } catch { return null; }
-}
-async function checkLocked(key: string): Promise<boolean> {
-  const db = await getDb();
-  if (db) {
-    try {
-      const snap = await db.collection('admin_login_attempts').doc(key).get();
-      return (snap.exists ? Number(snap.data()?.lockedUntil || 0) : 0) > Date.now();
-    } catch { /* fall back to memory */ }
-  }
-  return (memoryAttempts.get(key)?.lockedUntil ?? 0) > Date.now();
-}
-async function registerFailure(key: string): Promise<void> {
-  const db = await getDb();
-  if (db) {
-    try {
-      const ref = db.collection('admin_login_attempts').doc(key);
-      await db.runTransaction(async (tx) => {
-        const snap = await tx.get(ref);
-        const prev = snap.exists ? snap.data()! : {};
-        const expired = Number(prev.lockedUntil || 0) && Number(prev.lockedUntil) <= Date.now();
-        const count = (expired ? 0 : Number(prev.count || 0)) + 1;
-        tx.set(ref, {
-          count: count >= MAX_FAILURES ? 0 : count,
-          lockedUntil: count >= MAX_FAILURES ? Date.now() + LOCK_MINUTES * 60000 : 0,
-          updatedAt: Date.now(),
-        });
-      });
-      return;
-    } catch { /* fall back to memory */ }
-  }
-  const prev = memoryAttempts.get(key) ?? { count: 0, lockedUntil: 0 };
-  const count = prev.count + 1;
-  memoryAttempts.set(key, {
-    count: count >= MAX_FAILURES ? 0 : count,
-    lockedUntil: count >= MAX_FAILURES ? Date.now() + LOCK_MINUTES * 60000 : 0,
-  });
-}
-async function clearFailures(key: string): Promise<void> {
-  memoryAttempts.delete(key);
-  const db = await getDb();
-  if (db) { try { await db.collection('admin_login_attempts').doc(key).delete(); } catch { /* ignore */ } }
-}
 
 // A 6-digit code works once: remember the last accepted 30-second step, refuse the same step (or older) again.
 const memoryStep = { v: 0 };
@@ -96,15 +33,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: 'Server not configured' }, { status: 500 });
   }
   const key = clientKey(req);
-  if (await checkLocked(key)) {
-    await alertAdmin('lockout', 'محاولات دخول للأدمن أثناء القفل', adminAlertContext(req));
-    return NextResponse.json({ ok: false, error: `Too many attempts. Try again in ${LOCK_MINUTES} minutes.` }, { status: 429 });
-  }
-  const budget = await spendLoginAttempt();
-  if (!budget.ok) {
-    await alertAdmin('budget', 'محاولات دخول أدمن كتيرة من أجهزة مختلفة', adminAlertContext(req));
-    return NextResponse.json({ ok: false, error: 'Too many attempts. Try again later.' }, { status: 429, headers: { 'Retry-After': String(budget.retryAfter) } });
-  }
+  const gated = await loginGate(req, key);
+  if (gated) return gated;
   const totpSecret = process.env.ADMIN_TOTP_SECRET?.trim();
   let pin: unknown, code: unknown;
   try { ({ pin, code } = await req.json()); }
@@ -121,22 +51,15 @@ export async function POST(req: NextRequest) {
       await registerFailure(key);
       return NextResponse.json({ ok: false }, { status: 401 });
     }
+  } else if (process.env.ADMIN_PASSKEY_REQUIRED === '1' && (await adminHasPasskeys())) {
+    // The owner asked for the fingerprint to be mandatory once one is registered: the PIN alone is no longer enough.
+    await registerFailure(key);
+    return NextResponse.json({ ok: false }, { status: 401 });
   }
-  await clearFailures(key);
-  await logAdmin('admin.login', { twoFactor: !!totpSecret });
-  await alertAdmin('login', 'تسجيل دخول جديد للأدمن', { ...adminAlertContext(req), 'التحقق بخطوتين': totpSecret ? 'شغّال' : 'مقفول' });
-  const token = await createAdminToken();
-  if (!token) return NextResponse.json({ ok: false, error: 'Server not configured' }, { status: 500 });
-
-  const res = NextResponse.json({ ok: true });
-  res.cookies.set(ADMIN_COOKIE_NAME, token, {
-    httpOnly: true, secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict', maxAge: ADMIN_SESSION_TTL_SECONDS, path: '/',
-  });
-  return res;
+  return completeAdminLogin(req, key, totpSecret ? 'totp' : 'pin');
 }
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ ok: await isAdminRequest(req), twoFactor: !!process.env.ADMIN_TOTP_SECRET?.trim() });
+  return NextResponse.json({ ok: await isAdminRequest(req), twoFactor: !!process.env.ADMIN_TOTP_SECRET?.trim(), passkey: await adminHasPasskeys() });
 }
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });

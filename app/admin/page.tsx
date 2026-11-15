@@ -7,6 +7,7 @@ import PaymentsTab from '@/components/admin/payments-tab';
 import UsersTab from '@/components/admin/users-tab';
 import ContentTab from '@/components/admin/content-tab';
 import IdleGuard from '@/components/admin/idle-guard';
+import { passkeysAvailable, answerChallenge } from '@/lib/passkey-client';
 
 const TABS = [
   { id: 'dashboard', icon: '📊', label: 'الرئيسية' },
@@ -21,6 +22,9 @@ export default function AdminDashboard() {
   const [pin, setPin] = useState('');
   const [code, setCode] = useState('');
   const [twoFactor, setTwoFactor] = useState(false);
+  const [hasPasskey, setHasPasskey] = useState(false);
+  const [deviceCanPasskey, setDeviceCanPasskey] = useState(false);
+  const [passkeyBusy, setPasskeyBusy] = useState(false);
   const [authenticated, setAuthenticated] = useState(false);
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
@@ -29,9 +33,10 @@ export default function AdminDashboard() {
   useEffect(() => {
     fetch('/api/admin-auth')
       .then((res) => res.json())
-      .then((data) => { setAuthenticated(!!data.ok); setTwoFactor(!!data.twoFactor); })
+      .then((data) => { setAuthenticated(!!data.ok); setTwoFactor(!!data.twoFactor); setHasPasskey(!!data.passkey); })
       .catch(() => setAuthenticated(false))
       .finally(() => setCheckingSession(false));
+    passkeysAvailable().then(setDeviceCanPasskey);
     try {
       const saved = localStorage.getItem('admin_tab') as TabId | null;
       if (saved && TABS.some((t) => t.id === saved)) setTab(saved);
@@ -60,6 +65,24 @@ export default function AdminDashboard() {
     }
   };
 
+  // PIN + fingerprint: the server checks the PIN on both calls, the device signs the challenge in between.
+  const handlePasskeyLogin = async () => {
+    if (!pin || passkeyBusy) { if (!pin) setLoginError('اكتب الـ PIN الأول، وبعدها اضغط الدخول بالبصمة.'); return; }
+    setLoginError(''); setPasskeyBusy(true);
+    try {
+      const post = (body: object) => fetch('/api/admin-auth/passkey', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pin, ...body }) });
+      const o = await post({ step: 'options' });
+      if (!o.ok) { setLoginError(o.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'PIN غلط أو البصمة مش متاحة!'); return; }
+      const od = await o.json();
+      const response = await answerChallenge(od.options);
+      if (!response) { setLoginError('اتلغت البصمة.'); return; }
+      const v = await post({ step: 'verify', challengeId: od.challengeId, response });
+      if (v.ok) { setAuthenticated(true); setPin(''); setCode(''); }
+      else setLoginError(v.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'البصمة أو الـ PIN مش مقبولين!');
+    } catch { setLoginError('حصل خطأ، حاول تاني.'); }
+    finally { setPasskeyBusy(false); }
+  };
+
   const logout = async () => {
     await fetch('/api/admin-auth', { method: 'DELETE' }).catch(() => undefined);
     setAuthenticated(false);
@@ -80,6 +103,9 @@ export default function AdminDashboard() {
           )}
           {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}
           <button type="submit" className="w-full rounded-lg bg-[#d4af37] py-3 font-bold text-black">دخول</button>
+          {hasPasskey && deviceCanPasskey && (
+            <button type="button" disabled={passkeyBusy} onClick={handlePasskeyLogin} className="mt-3 w-full rounded-lg border border-[#d4af37] py-3 font-bold text-[#d4af37] disabled:opacity-60">{passkeyBusy ? 'في انتظار جهازك…' : '🔑 الدخول بالبصمة (مع الـ PIN)'}</button>
+          )}
         </form>
       </div>
     );
