@@ -11,7 +11,7 @@ import { PartnerDashboard } from './partner-dashboard';
 import { PartnerDirectory } from './partner-directory';
 
 // The partner hub: four partner types, the application (or its status, or the dashboard once approved), and the public directory.
-export function PartnerHub({ language }: { language: string }) {
+export function PartnerHub({ language, showDirectory = true }: { language: string; showDirectory?: boolean }) {
   const { accessToken } = usePiAuth();
   const [me, setMe] = useState<MyPartner | null>(null);
   const [state, setState] = useState<'idle' | 'loading' | 'ready' | 'error'>('idle');
@@ -84,7 +84,7 @@ export function PartnerHub({ language }: { language: string }) {
       {state === 'ready' && me?.profile && status === 'approved' && <PartnerDashboard language={language} me={me} />}
       {showForm && <PartnerApplyForm language={language} role={role} onRole={setRole} onSent={() => { setReapply(false); load(); }} />}
 
-      <PartnerDirectory language={language} />
+      {showDirectory && <PartnerDirectory language={language} />}
     </div>
   );
 }
