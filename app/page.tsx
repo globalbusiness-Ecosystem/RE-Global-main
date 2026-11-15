@@ -193,7 +193,7 @@ export default function App() {
       case 'alerts':
         return <AlertsPage language={language} onBack={() => handlePageChange('home')} />;
       case 'map':
-        return <MapPage language={language} />;
+        return <MapPage language={language} onBack={() => handlePageChange('home')} />;
       case 'profile':
         return (
           <ProfilePage

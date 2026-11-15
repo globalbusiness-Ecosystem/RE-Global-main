@@ -5,11 +5,9 @@ import { useProperties } from '@/lib/useProperties';
 import { useEffect, useRef, useState, useMemo, useCallback } from 'react';
 import { toast } from 'sonner';
 import { 
-  Search, X, 
-  MapPin, Star,
-  Filter, Globe, Bed, Maximize2, TrendingUp,
-  TrendingDown, Activity, DollarSign, Users, Zap, Eye, Home, Video,
-  LocateFixed, Loader2, Car, Footprints, Navigation
+  Search, X, ArrowLeft,
+  MapPin, SlidersHorizontal, Globe, Bed, Maximize2, TrendingUp,
+  Video, LocateFixed, Loader2, Car, Footprints, Navigation
 } from 'lucide-react';
 import { NavigationPanel } from '@/components/navigation-panel';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
@@ -23,11 +21,12 @@ import { CARD_I18N } from '@/lib/card-i18n';
 import { usePiRate } from '@/lib/usePiRate';
 import { useShowDemo } from '@/lib/use-demo-listings';
 import { propertyPaymentAmount } from '@/lib/payment-rules';
+import { clusterPoints, dedupeListings, clusterSize, CLUSTER_MAX_ZOOM } from '@/lib/map-cluster';
+import { mu } from '@/lib/map-ui-i18n';
 
 // Leaflet lazy imports with performance optimization
 let L: any;
 let mapInitialized = false;
-const markerClusterGroup = new Map(); // Cache for performance
 
 interface Property {
   id: number | string;
@@ -78,7 +77,7 @@ const properties: Property[] = [
   { id: 18, lat: 33.3128, lng: 44.3615, title: 'Baghdad Commerce Hub', titleAr: 'مركز بغداد التجاري', price: 2800, city: 'Baghdad', country: 'Iraq', countryFlag: '🇮🇶', type: 'invest', bedrooms: 4, area: 500, appreciation: 18.3, roiScore: 95, marketTrend: 'up', daysListed: 1 },
   { id: 19, lat: 24.4539, lng: 54.3773, title: 'Abu Dhabi Trade Zone', titleAr: 'منطقة تجارة أبوظبي', price: 4200, city: 'Abu Dhabi', country: 'UAE', countryFlag: '🇦🇪', type: 'invest', bedrooms: 6, area: 700, appreciation: 13.7, roiScore: 86, marketTrend: 'up', daysListed: 4 },
   { id: 20, lat: 31.9454, lng: 35.9284, title: 'Amman Business Center', titleAr: 'مركز عمّان للأعمال', price: 2200, city: 'Amman', country: 'Jordan', countryFlag: '🇯🇴', type: 'invest', bedrooms: 4, area: 450, appreciation: 15.2, roiScore: 89, marketTrend: 'up', daysListed: 3 },
-  { id: 21, lat: 33.3157, lng: 44.3661, title: 'Riyadh Corporate Plaza', titleAr: 'بلازا الرياض للشركات', price: 3800, city: 'Riyadh', country: 'Saudi Arabia', countryFlag: '🇸🇦', type: 'invest', bedrooms: 5, area: 550, appreciation: 14.6, roiScore: 88, marketTrend: 'up', daysListed: 5 },
+  { id: 21, lat: 24.7136, lng: 46.6753, title: 'Riyadh Corporate Plaza', titleAr: 'بلازا الرياض للشركات', price: 3800, city: 'Riyadh', country: 'Saudi Arabia', countryFlag: '🇸🇦', type: 'invest', bedrooms: 5, area: 550, appreciation: 14.6, roiScore: 88, marketTrend: 'up', daysListed: 5 },
   { id: 22, lat: 25.2854, lng: 51.5310, title: 'Doha Investment Tower', titleAr: 'برج الدوحة للاستثمار', price: 4600, city: 'Doha', country: 'Qatar', countryFlag: '🇶🇦', type: 'invest', bedrooms: 6, area: 650, appreciation: 11.9, roiScore: 81, marketTrend: 'up', daysListed: 7 },
   { id: 23, lat: 39.7392, lng: -104.9903, title: 'Denver Penthouse', titleAr: 'شقة دنفر الفاخرة', price: 2500, city: 'Denver', country: 'USA', countryFlag: '🇺🇸', type: 'buy', bedrooms: 3, area: 300, appreciation: 10.8, roiScore: 80, marketTrend: 'up', daysListed: 15 },
   { id: 24, lat: 47.6062, lng: -122.3321, title: 'Seattle Modern Home', titleAr: 'منزل سياتل العصري', price: 3200, city: 'Seattle', country: 'USA', countryFlag: '🇺🇸', type: 'buy', bedrooms: 3, area: 320, appreciation: 9.5, roiScore: 77, marketTrend: 'up', daysListed: 20 },
@@ -106,6 +105,9 @@ const properties: Property[] = [
   { id: 46, lat: -1.2864, lng: 36.8172, title: 'Nairobi Elite Residence', titleAr: 'إقامة نيروبي النخبة', price: 85, city: 'Nairobi', country: 'Kenya', countryFlag: '🇰🇪', type: 'hotel', bedrooms: 1, area: 100, appreciation: 14.7, roiScore: 89, marketTrend: 'up', daysListed: 4 },
 ];
 
+// One colour per listing type, shared by the dots, the type chips and the cards.
+const TYPE_COLOR: Record<string, string> = { buy: '#3b82f6', rent: '#a855f7', hotel: '#f59e0b', invest: '#10b981' };
+
 async function initializeMap() {
   if (mapInitialized) return;
   
@@ -122,24 +124,15 @@ async function initializeMap() {
 interface MapPageProps {
   language: NavLanguage;
   onPropertySelect?: (propertyId: number | string) => void;
+  /** Leaves the map (back to the home page). */
+  onBack?: () => void;
 }
 
-interface RegionStats {
-  name: string;
-  count: number;
-  avgPrice: number;
-  avgROI: number;
-  totalValue: number;
-  trend: 'up' | 'down' | 'stable';
-  topCity: string;
-}
-
-export default function MapPage({ language = 'en', onPropertySelect }: MapPageProps) {
+export default function MapPage({ language = 'en', onPropertySelect, onBack }: MapPageProps) {
   const t = MAP_I18N[language];
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const mapInitStarted = useRef(false);
-  const markersRef = useRef<any[]>([]);
   const userMarkerRef = useRef<any>(null);
 
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
@@ -150,19 +143,12 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const [showDetailPanel, setShowDetailPanel] = useState(false);
   const [filterType, setFilterType] = useState<'all' | 'buy' | 'rent' | 'hotel' | 'invest'>('all');
   const [searchTerm, setSearchTerm] = useState('');
-  const [sortBy, setSortBy] = useState<'price' | 'roi' | 'trending'>('price');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000]);
   const [showFilters, setShowFilters] = useState(false);
   const [selectedCountries, setSelectedCountries] = useState<string[]>([]);
-  const [, setViewMode] = useState<'global' | 'regional'>('global');
-  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
-  const [headerVisible, setHeaderVisible] = useState(true);
-  const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
-  const [showStats, setShowStats] = useState(true);
-  const [marketView, setMarketView] = useState<'markers' | 'heatmap' | 'clusters'>('markers');
   const [showPanoramicTour, setShowPanoramicTour] = useState(false);
   const [showNavigation, setShowNavigation] = useState(false);
-  const updateThrottleRef = useRef(0);
+  const layerRef = useRef<any>(null);
+  const renderRef = useRef<(() => void) | null>(null);
 
   const { properties: firebaseProps } = useProperties();
   const piRate = usePiRate();
@@ -172,33 +158,33 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   const [focus, setFocus] = useState<MapFocus | null>(null);
   const focusMarkerRef = useRef<any>(null);
 
-  const filteredProperties = useMemo(() => {
-    const allProperties: Property[] = [...(showDemo === false ? [] : properties), ...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p, titleAr: p.titleAr || p.title, city: p.location || "", country: "", countryFlag: "🏠", bedrooms: p.bedrooms || 0, area: p.area || 0, roiScore: 80, appreciation: 10, marketTrend: "up" as const, daysListed: 1, isAdmin: true} as Property))];
-    const filtered = allProperties.filter((p) => {
-      const matchType = filterType === 'all' || p.type === filterType;
-      const matchSearch =
-        p.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.titleAr.includes(searchTerm) ||
-        p.city.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchPrice = p.isAdmin || (p.price >= priceRange[0] && p.price <= priceRange[1]);
-      const matchCountry = selectedCountries.length === 0 || selectedCountries.includes(p.country);
-      return matchType && matchSearch && matchPrice && matchCountry;
-    });
+  // Sample listings (if the admin allows them) plus the real ones. Real listings carry no invented ROI or trend numbers.
+  const allProperties = useMemo<Property[]>(() => dedupeListings<Property>([
+    ...(showDemo === false ? [] : properties),
+    ...firebaseProps.filter((p) => p.lat && p.lng).map((p) => ({
+      ...p, titleAr: p.titleAr || p.title, city: p.location || '', country: p.country || '', countryFlag: '🏠',
+      bedrooms: p.bedrooms || 0, area: p.area || 0, isAdmin: true,
+    } as Property)),
+  ]), [showDemo, firebaseProps]);
 
-    // Sort
-    if (sortBy === 'roi') {
-      filtered.sort((a, b) => (b.roiScore || 0) - (a.roiScore || 0));
-    } else if (sortBy === 'trending') {
-      filtered.sort((a, b) => {
-        const trendOrder = { up: 0, stable: 1, down: 2 };
-        return (trendOrder[a.marketTrend || 'stable'] || 2) - (trendOrder[b.marketTrend || 'stable'] || 2);
-      });
-    } else {
-      filtered.sort((a, b) => a.price - b.price);
-    }
+  const matchesSearchAndCountry = useCallback((p: Property) => {
+    const q = searchTerm.trim().toLowerCase();
+    const matchSearch = !q || p.title.toLowerCase().includes(q) || p.titleAr.includes(searchTerm.trim()) || p.city.toLowerCase().includes(q);
+    return matchSearch && (selectedCountries.length === 0 || selectedCountries.includes(p.country));
+  }, [searchTerm, selectedCountries]);
 
-    return filtered;
-  }, [properties, showDemo, firebaseProps, filterType, searchTerm, priceRange, selectedCountries, sortBy]);
+  const filteredProperties = useMemo(
+    () => allProperties.filter((p) => (filterType === 'all' || p.type === filterType) && matchesSearchAndCountry(p)),
+    [allProperties, filterType, matchesSearchAndCountry],
+  );
+  // How many listings each type would show with the current search and country choice (the numbers on the type chips).
+  const typeCounts = useMemo(() => {
+    const c: Record<string, number> = { all: 0, buy: 0, rent: 0, hotel: 0, invest: 0 };
+    for (const p of allProperties) if (matchesSearchAndCountry(p)) { c.all++; c[p.type] = (c[p.type] ?? 0) + 1; }
+    return c;
+  }, [allProperties, matchesSearchAndCountry]);
+  const shownCountries = useMemo(() => new Set(filteredProperties.map((p) => p.country).filter(Boolean)).size, [filteredProperties]);
+  const activeFilters = (filterType !== 'all' ? 1 : 0) + selectedCountries.length;
 
   // A listing card sent the visitor here: remember where, then fly to that exact spot once the map is ready.
   useEffect(() => {
@@ -220,181 +206,61 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
   }, [focus, mapReady]);
   const focusProp = useMemo(() => (focus ? filteredProperties.find((p) => String(p.id) === focus.id) ?? null : null), [focus, filteredProperties]);
 
-  const countries = useMemo(() => {
-    const unique = Array.from(new Set(properties.map(p => p.country))).sort();
-    return unique;
-  }, []);
-
-  const mapStats = useMemo(() => {
-    const countries = new Set(filteredProperties.map((p) => p.country));
-    const totalValue = filteredProperties.reduce((sum, p) => sum + (Number(p.price) || 0), 0);
-    const upTrend = filteredProperties.filter(p => p.marketTrend === 'up').length;
-    const downTrend = filteredProperties.filter(p => p.marketTrend === 'down').length;
-    
-    return {
-      totalProperties: filteredProperties.length,
-      countriesAvailable: countries.size,
-      totalValue,
-      avgPrice: filteredProperties.length > 0 ? Math.round(totalValue / filteredProperties.length) : 0,
-      avgROI: filteredProperties.length > 0 ? Math.round(filteredProperties.reduce((sum, p) => sum + (p.roiScore || 0), 0) / filteredProperties.length) : 0,
-      upTrend,
-      downTrend,
-      marketMomentum: upTrend > downTrend ? 'bullish' : downTrend > upTrend ? 'bearish' : 'neutral',
-    };
-  }, [filteredProperties]);
-
-  const regionStats = useMemo(() => {
-    const regionMap = {
-      'asia': ['Thailand', 'Indonesia', 'Japan', 'Vietnam', 'Singapore', 'Hong Kong'],
-      'europe': ['France', 'UK', 'Spain', 'Germany', 'Austria', 'Netherlands', 'Denmark', 'Norway', 'Sweden', 'Belgium', 'Italy', 'Portugal'],
-      'americas': ['USA', 'Brazil'],
-      'africa': ['Egypt', 'Kenya', 'South Africa'],
-      'middle-east': ['UAE', 'Iraq', 'Jordan', 'Saudi Arabia', 'Qatar'],
-    };
-
-    const stats: Record<string, RegionStats> = {};
-    
-    Object.entries(regionMap).forEach(([region, countries]) => {
-      const regionProps = filteredProperties.filter(p => countries.includes(p.country));
-      const totalValue = regionProps.reduce((sum, p) => sum + p.price, 0);
-      const avgROI = regionProps.length > 0 ? Math.round(regionProps.reduce((sum, p) => sum + (p.roiScore || 0), 0) / regionProps.length) : 0;
-      
-      const upCount = regionProps.filter(p => p.marketTrend === 'up').length;
-      const downCount = regionProps.filter(p => p.marketTrend === 'down').length;
-      const trend: 'up' | 'down' | 'stable' = upCount > downCount ? 'up' : downCount > upCount ? 'down' : 'stable';
-      
-      const topCity = regionProps.length > 0 ? regionProps.reduce((a, b) => (b.roiScore || 0) > (a.roiScore || 0) ? b : a).city : '';
-
-      stats[region] = {
-        name: region.charAt(0).toUpperCase() + region.slice(1).replace('-', ' '),
-        count: regionProps.length,
-        avgPrice: regionProps.length > 0 ? Math.round(totalValue / regionProps.length) : 0,
-        avgROI,
-        totalValue,
-        trend,
-        topCity,
-      };
-    });
-
-    return stats;
-  }, [filteredProperties]);
+  const countries = useMemo(() => Array.from(new Set(allProperties.map((p) => p.country).filter(Boolean))).sort(), [allProperties]);
 
   const initMapOnDemand = useCallback(async () => {
     if (!mapContainerRef.current || mapInstanceRef.current || mapInitStarted.current) return;
     mapInitStarted.current = true;
-    
     try {
       await initializeMap();
-      
       if (!L) return;
-      
-      const map = L.map(mapContainerRef.current, {
-        preferCanvas: true,
-        zoomControl: false,
-        renderer: L.canvas(),
-        worldCopyJump: true,
-      }).setView([20, 10], 3);
-
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap',
-        maxZoom: 19,
-        minZoom: 2,
-        crossOrigin: 'anonymous',
-        className: 'map-tile'
-      }).addTo(map);
-
+      const map = L.map(mapContainerRef.current, { zoomControl: false, attributionControl: false, worldCopyJump: true, minZoom: 2 }).setView([25, 15], 3);
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, minZoom: 2, crossOrigin: 'anonymous', className: 'map-tile' }).addTo(map);
       L.control.zoom({ position: 'bottomright' }).addTo(map);
-
-
+      L.control.attribution({ position: 'bottomleft', prefix: false }).addAttribution('© OpenStreetMap').addTo(map);
+      map.on('zoomend', () => renderRef.current?.());
       mapInstanceRef.current = map;
       setMapReady(true);
-      updateMarkers(map);
     } catch (error) {
       console.error('Error initializing map:', error);
       toast.error('Failed to initialize map. Please refresh and try again.');
     }
   }, []);
 
-  const updateMarkers = useCallback((map: any) => {
-    if (!map) return;
-
-    // Throttle updates to prevent excessive redraws
-    const now = Date.now();
-    if (now - updateThrottleRef.current < 300) return;
-    updateThrottleRef.current = now;
-
-    // Remove old markers efficiently
-    markersRef.current.forEach(marker => {
-      try {
-        map.removeLayer(marker);
-      } catch {
-        // Marker already removed
+  // Draws what is on screen: single listings as coloured dots, close ones as one numbered bubble that zooms in when tapped.
+  const renderMarkers = useCallback(() => {
+    const map = mapInstanceRef.current;
+    if (!map || !L) return;
+    if (!layerRef.current) layerRef.current = L.layerGroup().addTo(map);
+    const layer = layerRef.current;
+    layer.clearLayers();
+    const byId = new Map(filteredProperties.map((p) => [String(p.id), p]));
+    const colorOf = (type: string) => TYPE_COLOR[type] ?? '#d4af37';
+    const seenSpot = new Map<string, number>();
+    for (const c of clusterPoints(filteredProperties.map((p) => ({ id: String(p.id), lat: p.lat, lng: p.lng, type: p.type })), map.getZoom())) {
+      if (c.count === 1) {
+        const property = byId.get(c.ids[0]);
+        if (!property) continue;
+        // Two listings on the very same spot are spread on a tiny ring so both can be tapped.
+        const spot = `${c.lat.toFixed(5)}:${c.lng.toFixed(5)}`;
+        const n = seenSpot.get(spot) ?? 0;
+        seenSpot.set(spot, n + 1);
+        const lat = n ? c.lat + Math.sin(n * 2.4) * 0.00018 : c.lat, lng = n ? c.lng + Math.cos(n * 2.4) * 0.00018 : c.lng;
+        const icon = L.divIcon({ className: 'map-dot', iconSize: [22, 22], iconAnchor: [11, 11], html: `<div style="width:22px;height:22px;border-radius:50%;background:${colorOf(c.types && Object.keys(c.types)[0])};border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.5)"></div>` });
+        L.marker([lat, lng], { icon, keyboard: false }).on('click', () => { setSelectedProperty(property); setShowDetailPanel(false); onPropertySelect?.(property.id); }).addTo(layer);
+      } else {
+        const size = clusterSize(c.count);
+        const icon = L.divIcon({ className: 'map-cluster', iconSize: [size, size], iconAnchor: [size / 2, size / 2], html: `<div style="width:${size}px;height:${size}px;border-radius:50%;background:radial-gradient(circle at 30% 30%,#f5d76e,#b8860b);border:3px solid rgba(255,255,255,.9);box-shadow:0 0 0 5px rgba(212,175,55,.28),0 3px 10px rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;color:#111;font-weight:800;font-size:${size > 40 ? 16 : 14}px">${c.count}</div>` });
+        L.marker([c.lat, c.lng], { icon, keyboard: false }).on('click', () => {
+          const [[a, b], [d, e]] = c.bounds;
+          if (Math.abs(d - a) + Math.abs(e - b) < 0.0005) map.flyTo([c.lat, c.lng], Math.max(map.getZoom() + 2, CLUSTER_MAX_ZOOM), { duration: 0.8 });
+          else map.flyToBounds(c.bounds, { padding: [60, 60], maxZoom: CLUSTER_MAX_ZOOM - 1, duration: 0.8 });
+        }).addTo(layer);
       }
-    });
-    markersRef.current = [];
-
-    if (filteredProperties.length === 0) return;
-
-    // Heatmap data for geographic visualization
-    if (heatmapEnabled && L.heatLayer) {
-      const heatData = filteredProperties.map(p => [
-        p.lat,
-        p.lng,
-        p.roiScore ? (p.roiScore / 100) : 0.5
-      ]);
-      
-      if (markerClusterGroup.has('heatmap')) {
-        map.removeLayer(markerClusterGroup.get('heatmap'));
-      }
-      
-      const heatLayer = L.heatLayer(heatData, {
-        radius: 40,
-        blur: 35,
-        maxZoom: 17,
-        gradient: {
-          0.0: '#0000ff',
-          0.5: '#00ff00',
-          1.0: '#ff0000'
-        }
-      }).addTo(map);
-      
-      markerClusterGroup.set('heatmap', heatLayer);
     }
-
-    // Add markers with performance optimization
-    const colorMap = {
-      buy: '#3b82f6',
-      rent: '#a855f7',
-      hotel: '#f59e0b',
-      invest: '#10b981',
-    };
-
-    filteredProperties.forEach((property) => {
-      try {
-        const handleMarkerClick = () => {
-          setSelectedProperty(property);
-          setShowDetailPanel(true);
-          onPropertySelect?.(property.id);
-        };
-        
-        const marker = L.circleMarker([property.lat, property.lng], {
-          radius: 8,
-          fillColor: (colorMap as Record<string, string>)[property.type] ?? '#d4af37',
-          color: '#fff',
-          weight: 2,
-          opacity: 1,
-          fillOpacity: 0.85,
-          className: 'map-marker'
-        }).addTo(map);
-
-        marker.on('click', handleMarkerClick);
-
-        markersRef.current.push(marker);
-      } catch (e) {
-        console.error('Error adding marker:', e);
-      }
-    });
-  }, [filteredProperties, language, onPropertySelect, heatmapEnabled]);
+  }, [filteredProperties, onPropertySelect]);
+  renderRef.current = renderMarkers;
+  useEffect(() => { if (mapReady) renderMarkers(); }, [mapReady, renderMarkers]);
 
   const locateUser = useCallback(() => {
     if (!navigator.geolocation) {
@@ -450,507 +316,56 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
     return R * c;
   }, [userLocation, selectedProperty]);
 
-  useEffect(() => {
-    if (mapInstanceRef.current) {
-      updateMarkers(mapInstanceRef.current);
-    }
-  }, [updateMarkers]);
-
   // Auto-initialize map when component mounts
   useEffect(() => {
     initMapOnDemand();
   }, [initMapOnDemand]);
 
-  // Tour guide navigation functions
   const navigateToRegion = useCallback((region: 'asia' | 'europe' | 'americas' | 'africa' | 'middle-east') => {
     try {
       if (!mapInstanceRef.current) return;
-      
       const regionBounds = {
-        asia: [[5, 70], [55, 150]],
-        europe: [[35, -10], [70, 40]],
-        americas: [[-55, -170], [80, -50]],
-        africa: [[-35, -20], [37, 55]],
-        'middle-east': [[12, 25], [42, 60]],
+        asia: [[5, 70], [55, 150]], europe: [[35, -10], [70, 40]], americas: [[-55, -170], [80, -50]], africa: [[-35, -20], [37, 55]], 'middle-east': [[12, 25], [42, 60]],
       };
-      
-      const bounds = L.latLngBounds(regionBounds[region]);
-      mapInstanceRef.current.fitBounds(bounds, { padding: [50, 50], duration: 1000 });
-      setViewMode('regional');
+      mapInstanceRef.current.flyToBounds(L.latLngBounds(regionBounds[region]), { padding: [30, 30], duration: 1 });
+      setShowFilters(false);
     } catch (error) {
       console.error('Navigation to region error:', error);
-      toast.error('Could not navigate to region. Please try again.');
     }
   }, []);
 
-  const startGlobalTour = useCallback(() => {
-    try {
-      if (!mapInstanceRef.current) return;
-      mapInstanceRef.current.flyTo([20, 0], 3, { duration: 2 });
-      setViewMode('global');
-      setFilterType('all');
-    } catch (error) {
-      console.error('Global tour error:', error);
-      toast.error('Could not start tour. Please try again.');
-    }
+  const worldView = useCallback(() => {
+    try { mapInstanceRef.current?.flyTo([25, 15], 3, { duration: 1.2 }); } catch (e) { console.error('World view error:', e); }
   }, []);
 
-  const focusOnTopProperty = useCallback(() => {
-    try {
-      if (!filteredProperties.length || !mapInstanceRef.current) return;
-      
-      const topProperty = filteredProperties.reduce((a, b) => 
-        (b.roiScore || 0) > (a.roiScore || 0) ? b : a
-      );
-      
-      mapInstanceRef.current.flyTo([topProperty.lat, topProperty.lng], 12, { duration: 1.5 });
-      setSelectedProperty(topProperty);
-    } catch (error) {
-      console.error('Focus on property error:', error);
-      toast.error('Could not focus on property. Please try again.');
-    }
-  }, [filteredProperties]);
+  const resetFilters = () => { setFilterType('all'); setSearchTerm(''); setSelectedCountries([]); };
+  const priceLabel = (p: Property) => `${Number(p.price).toLocaleString('en-US')} ${p.currency || 'π'}`;
 
-  const toggleHeader = useCallback(() => {
-    try {
-      setHeaderVisible(prev => !prev);
-      setTimeout(() => {
-        try {
-          if (mapInstanceRef.current) {
-            mapInstanceRef.current.invalidateSize();
-          }
-        } catch (e) {
-          console.error('Map resize error:', e);
-        }
-      }, 350);
-    } catch (error) {
-      console.error('Toggle header error:', error);
-      toast.error('Could not toggle header. Please try again.');
-    }
-  }, []);
+  const mapHidden = showDetailPanel || showPanoramicTour;
+  const typeLabel = (type: string) => (type === 'all' ? mu('all', language) : type === 'buy' ? t.typeBuy : type === 'rent' ? t.typeRent : type === 'hotel' ? t.typeHotel : t.typeInvest);
 
   return (
     <main className="min-h-screen bg-background text-foreground pb-20 flex flex-col">
-      {/* Toggle Button & Market Status */}
-      <div className="sticky top-0 z-30 bg-gradient-to-b from-black/95 to-black/80 backdrop-blur-lg border-b border-accent/10 p-3 flex justify-between items-center">
-        <button
-          onClick={toggleHeader}
-          className="flex items-center gap-2 px-3 py-1 bg-gray-800/50 hover:bg-gray-700 rounded-lg text-xs transition"
-          title={headerVisible ? 'Collapse header' : 'Expand header'}
-        >
-          <span>{headerVisible ? '▲' : '▼'}</span>
-          <span className="text-gray-300">{headerVisible ? 'Hide' : 'Show'}</span>
-        </button>
-        <div className="flex items-center gap-2 text-xs">
-          <span className="text-gray-400">Market:</span>
-          <span className={`font-semibold flex items-center gap-1 ${
-            mapStats.marketMomentum === 'bullish' ? 'text-green-400' : 
-            mapStats.marketMomentum === 'bearish' ? 'text-red-400' : 
-            'text-yellow-400'
-          }`}>
-            {mapStats.marketMomentum === 'bullish' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-            {mapStats.marketMomentum.toUpperCase()}
-          </span>
-        </div>
-      </div>
-
-      {/* Collapsible Header with Stats & Filters */}
-      <div
-        id="mapHeader"
-        style={{
-          maxHeight: headerVisible ? '300px' : '0px',
-          transition: 'max-height 0.3s ease',
-          overflow: 'hidden',
-        }}
-        className="sticky top-12 z-20 bg-gradient-to-b from-black/95 to-black/80 backdrop-blur-lg border-b border-accent/10"
-      >
-        <div className="p-4">
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-2 text-center text-xs mb-4">
-            <div className="bg-blue-500/10 border border-blue-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Home className="w-3 h-3 text-blue-400" />
-                <span className="text-accent font-bold text-sm">{mapStats.totalProperties}</span>
-              </div>
-              <div className="text-gray-400 text-xs">Properties</div>
-            </div>
-            <div className="bg-purple-500/10 border border-purple-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Globe className="w-3 h-3 text-purple-400" />
-                <span className="text-accent font-bold text-sm">{mapStats.countriesAvailable}</span>
-              </div>
-              <div className="text-gray-400 text-xs">Countries</div>
-            </div>
-            <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <DollarSign className="w-3 h-3 text-amber-400" />
-                <span className="text-accent font-bold text-sm">{Math.floor(mapStats.totalValue / 1000)}K</span>
-              </div>
-              <div className="text-gray-400 text-xs">Volume</div>
-            </div>
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingUp className="w-3 h-3 text-green-400" />
-                <span className="text-accent font-bold text-sm">{mapStats.upTrend}</span>
-              </div>
-              <div className="text-gray-400 text-xs">Bullish</div>
-            </div>
-            <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <TrendingDown className="w-3 h-3 text-red-400" />
-                <span className="text-accent font-bold text-sm">{mapStats.downTrend}</span>
-              </div>
-              <div className="text-gray-400 text-xs">Bearish</div>
-            </div>
-            <div className="bg-pink-500/10 border border-pink-500/20 rounded-lg p-2">
-              <div className="flex items-center justify-center gap-1 mb-1">
-                <Zap className="w-3 h-3 text-pink-400" />
-                <span className="text-accent font-bold text-sm">{mapStats.avgROI}%</span>
-              </div>
-              <div className="text-gray-400 text-xs">Avg ROI</div>
-            </div>
-          </div>
-
-          {/* Regional Performance Cards */}
-          <div className="mb-3 pb-3 border-b border-gray-800">
-            <label className="text-xs text-gray-400 mb-2 block font-semibold">Regional Performance</label>
-            <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-              {Object.entries(regionStats).map(([key, stats]) => {
-                const isSelected = selectedRegion === key;
-                return (
-                  <button
-                    key={key}
-                    onClick={() => setSelectedRegion(isSelected ? null : key)}
-                    className={`p-2 rounded border transition text-xs ${
-                      isSelected
-                        ? 'bg-accent/20 border-accent text-accent'
-                        : 'bg-gray-900/50 border-gray-700 text-gray-300 hover:bg-gray-800'
-                    }`}
-                  >
-                    <div className="font-semibold">{stats.name}</div>
-                    <div className="text-xs">{stats.count} · ROI {stats.avgROI}%</div>
-                    <div className={`text-xs flex items-center justify-center gap-1 ${
-                      stats.trend === 'up' ? 'text-green-400' : stats.trend === 'down' ? 'text-red-400' : 'text-yellow-400'
-                    }`}>
-                      {stats.trend === 'up' ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
-                      {stats.topCity}
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {/* Search & Filters */}
-          <div className="space-y-2">
-            <div className="flex gap-2">
-              <div className="flex-1 relative">
-                <Search className="absolute left-2 top-2 w-4 h-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder={t.searchPlaceholder} aria-label={t.searchPlaceholder}
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full bg-gray-900/50 border border-gray-700 rounded-lg pl-8 pr-3 py-2 text-xs text-white focus:outline-none focus:border-accent"
-                />
-              </div>
-              <button
-                onClick={() => setShowFilters(!showFilters)}
-                className="bg-gray-800 hover:bg-gray-700 border border-gray-700 rounded-lg px-3 py-2 transition"
-              >
-                <Filter className="w-4 h-4" />
-              </button>
-              <button
-                onClick={locateUser}
-                disabled={locatingUser}
-                className={`border rounded-lg px-3 py-2 transition ${
-                  userLocation
-                    ? 'bg-accent/20 border-accent text-accent'
-                    : 'bg-gray-800 hover:bg-gray-700 border-gray-700'
-                }`}
-                title={t.locateMe}
-              >
-                {locatingUser ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <LocateFixed className="w-4 h-4" />
-                )}
-              </button>
-            </div>
-
-            {/* Filter Chips */}
-            <div className="flex gap-1 overflow-x-auto pb-1">
-              {(['all', 'buy', 'rent', 'hotel', 'invest'] as const).map((type) => (
-                <button
-                  key={type}
-                  onClick={() => {
-                    try {
-                      setFilterType(type);
-                    } catch (error) {
-                      console.error('Filter error:', error);
-                      toast.error('Could not apply filter. Please try again.');
-                    }
-                  }}
-                  className={`px-3 py-1 rounded text-xs whitespace-nowrap transition ${
-                    filterType === type
-                      ? 'bg-accent text-black font-semibold'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  {type.charAt(0).toUpperCase() + type.slice(1)}
-                </button>
-              ))}
-            </div>
-
-            {/* Market View Controls */}
-            <div className="flex gap-1 mt-2">
-              {(['markers', 'heatmap', 'clusters'] as const).map((view) => (
-                <button
-                  key={view}
-                  onClick={() => {
-                    try {
-                      setMarketView(view);
-                      if (view === 'heatmap') {
-                        setHeatmapEnabled(true);
-                      } else {
-                        setHeatmapEnabled(false);
-                      }
-                    } catch (error) {
-                      console.error('Market view error:', error);
-                      toast.error('Could not change view. Please try again.');
-                    }
-                  }}
-                  className={`px-3 py-1 rounded text-xs flex-1 transition ${
-                    marketView === view
-                      ? 'bg-purple-600 text-white font-semibold'
-                      : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  }`}
-                >
-                  {view === 'markers' && <MapPin className="w-3 h-3 inline mr-1" />}
-                  {view === 'heatmap' && <Activity className="w-3 h-3 inline mr-1" />}
-                  {view === 'clusters' && <Users className="w-3 h-3 inline mr-1" />}
-                  {view.charAt(0).toUpperCase() + view.slice(1)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Expanded Filters Panel */}
-      {showFilters && (
-        <div className="sticky top-24 z-20 bg-black/90 border-b border-accent/10 p-4 space-y-3">
-          {/* Price Range */}
-          <div>
-            <label className="text-xs text-gray-400 mb-2 block">Price Range: {priceRange[0]} - {priceRange[1]}π</label>
-            <input
-              aria-label="Price Range"
-              type="range"
-              min="0"
-              max="10000"
-              value={priceRange[1]}
-              onChange={(e) => {
-                try {
-                  setPriceRange([priceRange[0], parseInt(e.target.value)]);
-                } catch (error) {
-                  console.error('Price range error:', error);
-                  toast.error('Could not update price range. Please try again.');
-                }
-              }}
-              className="w-full"
-            />
-          </div>
-
-          {/* Sort */}
-          <div>
-            <label className="text-xs text-gray-400 mb-2 block">Sort By</label>
-            <div className="flex gap-2">
-              {(['price', 'roi', 'trending'] as const).map((opt) => (
-                <button
-                  key={opt}
-                  onClick={() => {
-                    try {
-                      setSortBy(opt);
-                    } catch (error) {
-                      console.error('Sort error:', error);
-                      toast.error('Could not apply sort. Please try again.');
-                    }
-                  }}
-                  className={`px-2 py-1 rounded text-xs ${
-                    sortBy === opt ? 'bg-accent text-black' : 'bg-gray-800 text-gray-300'
-                  }`}
-                >
-                  {opt.toUpperCase()}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Countries */}
-          <div>
-            <label className="text-xs text-gray-400 mb-2 block">Countries</label>
-            <div className="grid grid-cols-3 gap-1">
-              {countries.map((country) => (
-                <button
-                  key={country}
-                  onClick={() => {
-                    try {
-                      setSelectedCountries(prev =>
-                        prev.includes(country)
-                          ? prev.filter(c => c !== country)
-                          : [...prev, country]
-                      );
-                    } catch (error) {
-                      console.error('Country selection error:', error);
-                      toast.error('Could not update country selection. Please try again.');
-                    }
-                  }}
-                  className={`px-2 py-1 rounded text-xs ${
-                    selectedCountries.includes(country)
-                      ? 'bg-accent text-black'
-                      : 'bg-gray-800 text-gray-300'
-                  }`}
-                >
-                  {country.substring(0, 3)}
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Global Tour Controls */}
-      <div className="sticky top-24 md:top-32 z-20 bg-gradient-to-r from-black/90 to-black/80 backdrop-blur-lg border-b border-accent/10 p-3 overflow-x-auto">
-        <div className="flex gap-2 items-center min-w-max flex-wrap">
-          <button
-            onClick={startGlobalTour}
-            className="flex items-center gap-1 px-3 py-2 bg-gradient-to-r from-accent to-purple-600 text-black rounded-lg text-xs font-semibold hover:shadow-lg hover:shadow-accent/50 transition"
-          >
-            <Globe className="w-4 h-4" />
-            {t.globalTour}
-          </button>
-
-          <button
-            onClick={focusOnTopProperty}
-            className="flex items-center gap-1 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-xs transition"
-          >
-            <Star className="w-4 h-4 text-yellow-400" />
-            {t.topRoi}
-          </button>
-
-          {/* Region Quick Navigation */}
-          <div className="border-l border-gray-700 pl-2 ml-2 flex gap-1 flex-wrap">
-            {(['asia', 'europe', 'americas', 'africa', 'middle-east'] as const).map((region) => {
-              const stats = regionStats[region];
-              return (
-                <button
-                  key={region}
-                  onClick={() => navigateToRegion(region)}
-                  className={`px-2 py-1 rounded text-xs transition ${
-                    selectedRegion === region
-                      ? 'bg-accent text-black font-semibold'
-                      : 'bg-gray-800/50 hover:bg-gray-700 text-gray-300'
-                  }`}
-                  title={`${region}: ${stats.count} properties, ${stats.avgROI}% ROI`}
-                >
-                  {region.substring(0, 2).toUpperCase()}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Market View Controls */}
-          <div className="border-l border-gray-700 pl-2 ml-2 flex gap-1">
-            <button
-              onClick={() => {
-                try {
-                  setMarketView('markers');
-                  setHeatmapEnabled(false);
-                } catch (error) {
-                  console.error('View error:', error);
-                  toast.error('Could not change view.');
-                }
-              }}
-              className={`px-2 py-1 rounded text-xs transition ${
-                marketView === 'markers'
-                  ? 'bg-blue-600 text-white font-semibold'
-                  : 'bg-gray-800/50 hover:bg-gray-700 text-gray-300'
-              }`}
-              title="Marker view"
-            >
-              📍
-            </button>
-            <button
-              onClick={() => {
-                try {
-                  setMarketView('heatmap');
-                  setHeatmapEnabled(true);
-                } catch (error) {
-                  console.error('View error:', error);
-                  toast.error('Could not change view.');
-                }
-              }}
-              className={`px-2 py-1 rounded text-xs transition ${
-                marketView === 'heatmap'
-                  ? 'bg-red-600 text-white font-semibold'
-                  : 'bg-gray-800/50 hover:bg-gray-700 text-gray-300'
-              }`}
-              title="Heatmap view"
-            >
-              🔥
-            </button>
-            <button
-              onClick={() => {
-                try {
-                  setMarketView('clusters');
-                  setHeatmapEnabled(false);
-                } catch (error) {
-                  console.error('View error:', error);
-                  toast.error('Could not change view.');
-                }
-              }}
-              className={`px-2 py-1 rounded text-xs transition ${
-                marketView === 'clusters'
-                  ? 'bg-green-600 text-white font-semibold'
-                  : 'bg-gray-800/50 hover:bg-gray-700 text-gray-300'
-              }`}
-              title="Cluster view"
-            >
-              👥
-            </button>
-          </div>
-
-          {/* Stats Toggle */}
-          <button
-            onClick={() => setShowStats(!showStats)}
-            className={`border-l border-gray-700 pl-2 ml-2 px-2 py-1 rounded text-xs transition ${
-              showStats ? 'text-accent' : 'text-gray-400'
-            }`}
-          >
-            <Eye className="w-4 h-4 inline mr-1" />
-            {t.stats}
-          </button>
-        </div>
-      </div>
-
       {/* Map Container */}
       <div className="flex-1 relative flex flex-col overflow-hidden">
         {/* Property Marker Popup */}
         {selectedProperty && showDetailPanel === false && (
-          <div className="fixed inset-0 z-50 bg-black/40 backdrop-blur-sm flex items-center justify-center pointer-events-auto">
+          <div className="pointer-events-none fixed inset-x-0 bottom-20 z-50 flex justify-center px-3">
             <div 
-              className="bg-gradient-to-b from-[#1a1410]/95 to-[#0f0b08]/95 backdrop-blur-md border border-[#F59E0B]/30 rounded-lg shadow-2xl p-6 max-w-sm w-full mx-4"
+              className="pointer-events-auto relative w-full max-w-sm rounded-2xl border border-[#F59E0B]/30 bg-gradient-to-b from-[#1a1410]/95 to-[#0f0b08]/95 p-4 shadow-2xl backdrop-blur-md"
               onClick={(e) => e.stopPropagation()}
             >
               {/* Close button */}
               <button
                 onClick={() => setSelectedProperty(null)}
-                className="absolute top-4 right-4 p-1 hover:bg-[#F59E0B]/10 rounded transition-colors"
+                aria-label={mu('close', language)}
+                className="absolute end-3 top-3 p-1 hover:bg-[#F59E0B]/10 rounded transition-colors"
               >
                 <X className="w-5 h-5 text-[#F59E0B]" />
               </button>
 
               {/* Property Info */}
-              <div className="mb-6">
+              <div className="mb-4 pe-8">
                 <h3 className="text-lg font-bold text-white mb-2">
                   {getMapPropertyTitle(selectedProperty, language)}
                 </h3>
@@ -958,7 +373,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                   {getMapPropertyCity(selectedProperty, language)}, {selectedProperty.country}
                 </p>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="text-2xl font-bold text-[#F59E0B]">{selectedProperty.price}π</span>
+                  <span className="text-2xl font-bold text-[#F59E0B]">{priceLabel(selectedProperty)}</span>
                   <span className="text-xs bg-[#F59E0B]/10 text-[#F59E0B] px-2 py-1 rounded">
                     {selectedProperty.type.toUpperCase()}
                   </span>
@@ -1065,18 +480,108 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
           />
         )}
 
-        {/* Map Div - Hidden when detail panel is open */}
-        <div
-          ref={mapContainerRef}
-          className="w-full bg-gray-950 flex-1 transition-all duration-300 ease-in-out"
-          style={{
-            height: (showDetailPanel || showPanoramicTour) ? '0' : 'calc(100vh - 160px)',
-            opacity: (showDetailPanel || showPanoramicTour) ? 0 : 1,
-            visibility: showPanoramicTour ? 'hidden' : 'visible',
-            transition: 'height 0.3s ease, opacity 0.3s ease',
-            pointerEvents: (showDetailPanel || showPanoramicTour) ? 'none' : 'auto',
-          }}
-        />
+        {/* The map fills the screen; its controls float on top of it. Hidden while a panel covers it (the map layers sit above fixed panels otherwise). */}
+        <div className="relative isolate w-full" style={{ height: 'calc(100dvh - 128px)', minHeight: 420, visibility: mapHidden ? 'hidden' : 'visible' }}>
+          <div ref={mapContainerRef} className="absolute inset-0 bg-gray-950" />
+
+          <div className="pointer-events-none absolute inset-x-0 top-0 z-[1100] space-y-2 p-2">
+            <div className="pointer-events-auto flex items-center gap-2">
+              {onBack && (
+                <button type="button" onClick={onBack} aria-label={mu('back', language)} className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-accent/40 bg-black/80 text-white shadow-lg backdrop-blur hover:bg-black">
+                  <ArrowLeft className="h-5 w-5 rtl:rotate-180" />
+                </button>
+              )}
+              <div className="relative min-w-0 flex-1">
+                <input
+                  type="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)}
+                  placeholder={t.searchPlaceholder} aria-label={mu('searchLabel', language)}
+                  className="h-10 w-full rounded-full border border-white/10 bg-black/80 ps-9 pe-9 text-start text-sm text-white shadow-lg backdrop-blur placeholder:text-gray-500 focus:border-accent focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+                />
+                <Search className="pointer-events-none absolute start-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                {searchTerm && (
+                  <button type="button" onClick={() => setSearchTerm('')} aria-label={mu('close', language)} className="absolute end-2 top-1/2 -translate-y-1/2 rounded-full p-1 text-gray-300 hover:bg-white/10">
+                    <X className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+              <button type="button" onClick={() => setShowFilters((v) => !v)} aria-expanded={showFilters} aria-label={mu('filters', language)}
+                className={`relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full border shadow-lg backdrop-blur ${showFilters || activeFilters ? 'border-accent bg-accent text-black' : 'border-white/10 bg-black/80 text-white'}`}>
+                <SlidersHorizontal className="h-5 w-5" />
+                {activeFilters > 0 && <span className="absolute -end-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">{activeFilters}</span>}
+              </button>
+            </div>
+
+            <div className="pointer-events-auto flex gap-1.5 overflow-x-auto pb-1" role="group" aria-label={mu('filters', language)}>
+              {(['all', 'buy', 'rent', 'hotel', 'invest'] as const).map((type) => {
+                const on = filterType === type;
+                return (
+                  <button key={type} type="button" aria-pressed={on} onClick={() => setFilterType(type)}
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold shadow backdrop-blur ${on ? 'border-accent bg-accent text-black' : 'border-white/10 bg-black/80 text-gray-100'}`}>
+                    {type !== 'all' && <span className="h-2.5 w-2.5 rounded-full" style={{ background: TYPE_COLOR[type] }} />}
+                    {typeLabel(type)}
+                    <span className={on ? 'text-black/70' : 'text-gray-400'}>{typeCounts[type] ?? 0}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            <p className="pointer-events-none inline-block rounded-full bg-black/70 px-3 py-1 text-[11px] text-gray-200 backdrop-blur">
+              {filteredProperties.length} {mu('properties', language)}{shownCountries > 0 ? ` · ${shownCountries} ${mu('countries', language)}` : ''}
+            </p>
+          </div>
+
+          {showFilters && (
+            <div className="absolute inset-x-2 top-[7.5rem] z-[1150] max-h-[60%] space-y-4 overflow-y-auto rounded-2xl border border-white/10 bg-black/90 p-4 pt-0 shadow-2xl backdrop-blur">
+              <div className="sticky top-0 z-10 -mx-4 flex items-center justify-between gap-2 border-b border-white/10 bg-black/95 px-4 py-3">
+                <p className="text-sm font-semibold text-white">{mu('filters', language)}</p>
+                <div className="flex gap-2">
+                  <button type="button" onClick={resetFilters} className="rounded-lg border border-white/10 px-3 py-1.5 text-xs text-gray-200 hover:bg-white/10">{mu('reset', language)}</button>
+                  <button type="button" onClick={() => setShowFilters(false)} aria-label={mu('close', language)} className="rounded-lg bg-accent px-3 py-1.5 text-xs font-semibold text-black"><X className="h-4 w-4" /></button>
+                </div>
+              </div>
+              <div>
+                <p className="mb-2 text-xs font-semibold text-gray-300">{mu('regions', language)}</p>
+                <div className="flex flex-wrap gap-2">
+                  {([['africa', 'africa'], ['asia', 'asia'], ['europe', 'europe'], ['americas', 'americas'], ['middle-east', 'middleEast']] as const).map(([key, label]) => (
+                    <button key={key} type="button" onClick={() => navigateToRegion(key)} className="rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-gray-100 hover:bg-white/10">{mu(label, language)}</button>
+                  ))}
+                </div>
+              </div>
+              {countries.length > 0 && (
+                <div>
+                  <p className="mb-2 text-xs font-semibold text-gray-300">{mu('countriesTitle', language)}</p>
+                  <div className="flex flex-wrap gap-2">
+                    {countries.map((country) => {
+                      const on = selectedCountries.includes(country);
+                      return (
+                        <button key={country} type="button" aria-pressed={on} onClick={() => setSelectedCountries((prev) => (on ? prev.filter((c) => c !== country) : [...prev, country]))}
+                          className={`rounded-full border px-3 py-1.5 text-xs ${on ? 'border-accent bg-accent text-black' : 'border-white/10 bg-white/5 text-gray-100'}`}>{country}</button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="absolute bottom-28 end-3 z-[1100] flex flex-col gap-2">
+            <button type="button" onClick={worldView} aria-label={mu('worldView', language)} title={mu('worldView', language)} className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-black/80 text-white shadow-lg backdrop-blur hover:bg-black">
+              <Globe className="h-5 w-5" />
+            </button>
+            <button type="button" onClick={locateUser} disabled={locatingUser} aria-label={t.locateMe} title={t.locateMe}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-lg backdrop-blur ${userLocation ? 'border-accent bg-accent/20 text-accent' : 'border-white/10 bg-black/80 text-white'}`}>
+              {locatingUser ? <Loader2 className="h-5 w-5 animate-spin" /> : <LocateFixed className="h-5 w-5" />}
+            </button>
+          </div>
+
+          {filteredProperties.length === 0 && mapReady && (
+            <div className="absolute inset-x-6 top-1/2 z-[1100] -translate-y-1/2 rounded-2xl border border-white/10 bg-black/85 p-4 text-center backdrop-blur">
+              <p className="text-sm text-gray-200">{mu('noResults', language)}</p>
+              {activeFilters > 0 || searchTerm ? <button type="button" onClick={resetFilters} className="mt-3 rounded-lg bg-accent px-4 py-2 text-xs font-semibold text-black">{mu('reset', language)}</button> : null}
+            </div>
+          )}
+          {locateError && <p className="absolute inset-x-6 bottom-4 z-[1100] rounded-lg bg-red-900/80 p-2 text-center text-xs text-white" role="alert">{locateError}</p>}
+        </div>
 
         {/* Property Detail Panel - Slides in from right */}
         {selectedProperty && (
@@ -1146,19 +651,21 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                 </div>
 
                 {/* Price & ROI */}
-                <div className="grid grid-cols-2 gap-3">
+                <div className={`grid gap-3 ${selectedProperty.roiScore !== undefined ? 'grid-cols-2' : 'grid-cols-1'}`}>
                   <div className="bg-gradient-to-br from-accent/20 to-accent/5 rounded-lg p-3 border border-accent/20">
                     <div className="text-xs text-gray-400 mb-1">{t.price}</div>
-                    <div className="text-2xl font-bold text-accent">{selectedProperty.price}π</div>
+                    <div className="text-2xl font-bold text-accent">{priceLabel(selectedProperty)}</div>
                   </div>
-                  <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-lg p-3 border border-green-500/20">
-                    <div className="text-xs text-gray-400 mb-1">{t.expRoi}</div>
-                    <div className="text-2xl font-bold text-green-400">{selectedProperty.roiScore}%</div>
-                  </div>
+                  {selectedProperty.roiScore !== undefined && (
+                    <div className="bg-gradient-to-br from-green-500/20 to-green-500/5 rounded-lg p-3 border border-green-500/20">
+                      <div className="text-xs text-gray-400 mb-1">{t.expRoi}</div>
+                      <div className="text-2xl font-bold text-green-400">{selectedProperty.roiScore}%</div>
+                    </div>
+                  )}
                 </div>
 
                 {/* Property Details */}
-                <div className="grid grid-cols-3 gap-2">
+                <div className={`grid gap-2 ${selectedProperty.marketTrend ? 'grid-cols-3' : 'grid-cols-2'}`}>
                   <div className="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-800">
                     <Bed className="w-4 h-4 text-accent mx-auto mb-1" />
                     <div className="text-sm font-semibold">{selectedProperty.bedrooms}</div>
@@ -1169,14 +676,16 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     <div className="text-sm font-semibold">{selectedProperty.area}m²</div>
                     <div className="text-xs text-gray-500">{t.area}</div>
                   </div>
+                  {selectedProperty.marketTrend && (
                   <div className="bg-gray-900/50 rounded-lg p-3 text-center border border-gray-800">
                     <TrendingUp className="w-4 h-4 mx-auto mb-1" style={{ color: selectedProperty.marketTrend === 'up' ? '#10b981' : selectedProperty.marketTrend === 'down' ? '#ef4444' : '#6b7280' }} />
                     <div className="text-sm font-semibold capitalize">{selectedProperty.marketTrend}</div>
                     <div className="text-xs text-gray-500">{t.trend}</div>
                   </div>
+                  )}
                 </div>
 
-                {/* Market Stats */}
+                {selectedProperty.roiScore !== undefined && selectedProperty.appreciation !== undefined && (
                 <div className="bg-gray-900/50 rounded-lg p-4 border border-gray-800">
                   <h4 className="font-semibold mb-3">{t.marketStats}</h4>
                   <div className="space-y-2 text-sm">
@@ -1198,6 +707,7 @@ export default function MapPage({ language = 'en', onPropertySelect }: MapPagePr
                     </div>
                   </div>
                 </div>
+                )}
 
                 {/* Distance from user */}
                 {userLocation && distanceToProperty !== null && (

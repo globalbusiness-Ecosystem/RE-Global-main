@@ -23,7 +23,7 @@ describe('map titles use the admin translation of the listing', () => {
   it('the map page keeps the translations on admin listings', () => {
     const src = readFileSync('components/pages/map-page.tsx', 'utf8');
     expect(src).toContain('translations?: Record<string');
-    expect(src).toContain('...firebaseProps.filter(p => p.lat && p.lng).map(p => ({...p,');
+    expect(src).toMatch(/\.\.\.firebaseProps\.filter\(\(p\) => p\.lat && p\.lng\)\.map\(\(p\) => \(\{\s*\.\.\.p,/);
   });
 });
 

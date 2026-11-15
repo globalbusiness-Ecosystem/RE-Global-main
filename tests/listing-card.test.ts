@@ -70,7 +70,9 @@ describe('wiring', () => {
   it('the map reads the saved spot and always shows admin properties', () => {
     const m = read('components/pages/map-page.tsx');
     expect(m).toContain('parseFocus');
-    expect(m).toContain('p.isAdmin ||');
+    // admin listings are always shown: there is no price filter that could hide them, and they are marked as admin listings
+    expect(m).toContain('isAdmin: true');
+    expect(m).not.toContain('priceRange');
     expect(m).toContain('PanoramaModal');
     expect(m).toContain('mapInitStarted');
   });
