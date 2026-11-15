@@ -1,0 +1,96 @@
+import type { NavLanguage } from './nav-i18n';
+
+type Row = Record<NavLanguage, string>;
+const r = (en: string, ar: string, fr: string, es: string, pt: string, ur: string, zh: string): Row => ({ en, ar, fr, es, pt, ur, zh });
+
+// Text of the partner "My projects" workspace (and the public showcase that follows it).
+export const PROJECT_TEXT = {
+  myProjects: r('My projects', 'أعمالي', 'Mes projets', 'Mis proyectos', 'Meus projetos', 'میرے پراجیکٹس', '我的项目'),
+  myProjectsHint: r('Add your projects with photos and instalment plans. The team reviews each one before it is shown to everyone.', 'أضف مشاريعك بالصور وخطط التقسيط. يراجعها الفريق قبل ظهورها للجميع.', 'Ajoutez vos projets avec photos et plans de paiement. L’équipe les vérifie avant publication.', 'Añade tus proyectos con fotos y planes de pago. El equipo los revisa antes de mostrarlos.', 'Adicione seus projetos com fotos e planos de parcelamento. A equipe revisa antes de exibir.', 'تصاویر اور قسطوں کے پلان کے ساتھ پراجیکٹ شامل کریں۔ ٹیم جائزے کے بعد انہیں دکھاتی ہے۔', '添加带照片和分期方案的项目，团队审核后才会公开展示。'),
+  addProject: r('Add a project', 'إضافة مشروع', 'Ajouter un projet', 'Añadir proyecto', 'Adicionar projeto', 'پراجیکٹ شامل کریں', '添加项目'),
+  editProject: r('Edit project', 'تعديل المشروع', 'Modifier le projet', 'Editar proyecto', 'Editar projeto', 'پراجیکٹ میں ترمیم', '编辑项目'),
+  noProjects: r('No projects yet.', 'لا توجد مشاريع بعد.', 'Aucun projet pour le moment.', 'Aún no hay proyectos.', 'Nenhum projeto ainda.', 'ابھی کوئی پراجیکٹ نہیں۔', '暂无项目。'),
+  st_draft: r('Draft', 'مسودة', 'Brouillon', 'Borrador', 'Rascunho', 'مسودہ', '草稿'),
+  st_pending: r('Under review', 'قيد المراجعة', 'En vérification', 'En revisión', 'Em revisão', 'زیر جائزہ', '审核中'),
+  st_approved: r('Published', 'منشور', 'Publié', 'Publicado', 'Publicado', 'شائع شدہ', '已发布'),
+  st_rejected: r('Rejected', 'مرفوض', 'Refusé', 'Rechazado', 'Rejeitado', 'مسترد', '已拒绝'),
+  st_hidden: r('Hidden by the team', 'مخفي بقرار الفريق', 'Masqué par l’équipe', 'Oculto por el equipo', 'Oculto pela equipe', 'ٹیم نے چھپایا', '已被团队隐藏'),
+  teamNote: r('Team note', 'ملاحظة الفريق', 'Note de l’équipe', 'Nota del equipo', 'Nota da equipe', 'ٹیم کا نوٹ', '团队备注'),
+  editWarn: r('Editing a published project sends it back to review.', 'تعديل مشروع منشور يعيده للمراجعة.', 'Modifier un projet publié le renvoie en vérification.', 'Editar un proyecto publicado lo devuelve a revisión.', 'Editar um projeto publicado o envia de volta à revisão.', 'شائع شدہ پراجیکٹ میں ترمیم اسے دوبارہ جائزے میں بھیجتی ہے۔', '修改已发布的项目会重新进入审核。'),
+  lockedMsg: r('This project is hidden by the team and cannot be edited.', 'هذا المشروع مخفي بقرار الفريق ولا يمكن تعديله.', 'Ce projet est masqué par l’équipe et ne peut pas être modifié.', 'Este proyecto está oculto por el equipo y no se puede editar.', 'Este projeto está oculto pela equipe e não pode ser editado.', 'یہ پراجیکٹ ٹیم نے چھپایا ہے اور اس میں ترمیم نہیں ہو سکتی۔', '此项目已被团队隐藏，无法编辑。'),
+  edit: r('Edit', 'تعديل', 'Modifier', 'Editar', 'Editar', 'ترمیم', '编辑'),
+  del: r('Delete', 'حذف', 'Supprimer', 'Eliminar', 'Excluir', 'حذف', '删除'),
+  delConfirm: r('Delete this project permanently?', 'حذف المشروع نهائيًا؟', 'Supprimer ce projet définitivement ?', '¿Eliminar este proyecto definitivamente?', 'Excluir este projeto permanentemente?', 'کیا یہ پراجیکٹ مستقل طور پر حذف کریں؟', '永久删除此项目？'),
+  fTitle: r('Project name', 'اسم المشروع', 'Nom du projet', 'Nombre del proyecto', 'Nome do projeto', 'پراجیکٹ کا نام', '项目名称'),
+  fDesc: r('Description', 'الوصف', 'Description', 'Descripción', 'Descrição', 'تفصیل', '描述'),
+  fDescHint: r('At least 20 characters: location, finishing, facilities, delivery date.', '20 حرفًا على الأقل: الموقع، التشطيب، المرافق، موعد التسليم.', 'Au moins 20 caractères : emplacement, finitions, équipements, livraison.', 'Al menos 20 caracteres: ubicación, acabados, instalaciones, entrega.', 'Pelo menos 20 caracteres: local, acabamento, instalações, entrega.', 'کم از کم 20 حروف: مقام، فنشنگ، سہولیات، حوالگی۔', '至少20个字符：位置、装修、配套、交付时间。'),
+  fKind: r('Type', 'النوع', 'Type', 'Tipo', 'Tipo', 'قسم', '类型'),
+  k_apartment: r('Apartment', 'شقة', 'Appartement', 'Apartamento', 'Apartamento', 'اپارٹمنٹ', '公寓'),
+  k_villa: r('Villa', 'فيلا', 'Villa', 'Villa', 'Villa', 'ولا', '别墅'),
+  k_land: r('Land', 'أرض', 'Terrain', 'Terreno', 'Terreno', 'زمین', '土地'),
+  k_commercial: r('Commercial', 'تجاري', 'Commercial', 'Comercial', 'Comercial', 'تجارتی', '商业'),
+  k_hotel: r('Hotel', 'فندق', 'Hôtel', 'Hotel', 'Hotel', 'ہوٹل', '酒店'),
+  k_other: r('Other', 'أخرى', 'Autre', 'Otro', 'Outro', 'دیگر', '其他'),
+  fCountry: r('Country', 'الدولة', 'Pays', 'País', 'País', 'ملک', '国家'),
+  fCity: r('City', 'المدينة', 'Ville', 'Ciudad', 'Cidade', 'شہر', '城市'),
+  fPrice: r('Price', 'السعر', 'Prix', 'Precio', 'Preço', 'قیمت', '价格'),
+  fCurrency: r('Currency', 'العملة', 'Devise', 'Moneda', 'Moeda', 'کرنسی', '币种'),
+  fContact: r('Contact for buyers (optional)', 'وسيلة تواصل للمشترين (اختياري)', 'Contact pour les acheteurs (facultatif)', 'Contacto para compradores (opcional)', 'Contato para compradores (opcional)', 'خریداروں کے لیے رابطہ (اختیاری)', '买家联系方式（可选）'),
+  fContactHint: r('A phone number or an e-mail. Shown publicly after approval.', 'رقم هاتف أو إيميل. يظهر للجميع بعد الاعتماد.', 'Un téléphone ou un e-mail. Affiché publiquement après validation.', 'Un teléfono o correo. Se muestra públicamente tras la aprobación.', 'Um telefone ou e-mail. Exibido publicamente após aprovação.', 'فون نمبر یا ای میل۔ منظوری کے بعد سب کو نظر آئے گا۔', '电话或邮箱，审核通过后公开显示。'),
+  photos: r('Photos', 'الصور', 'Photos', 'Fotos', 'Fotos', 'تصاویر', '照片'),
+  photosHint: r('Up to 8 photos (JPG, PNG or WebP, 4 MB each). The first one is the cover.', 'حتى 8 صور (JPG أو PNG أو WebP، 4 ميجا لكل صورة). الأولى هي الغلاف.', 'Jusqu’à 8 photos (JPG, PNG ou WebP, 4 Mo). La première sert de couverture.', 'Hasta 8 fotos (JPG, PNG o WebP, 4 MB). La primera es la portada.', 'Até 8 fotos (JPG, PNG ou WebP, 4 MB). A primeira é a capa.', '8 تک تصاویر (JPG، PNG یا WebP، ہر ایک 4 MB)۔ پہلی کور ہے۔', '最多8张照片（JPG、PNG或WebP，每张4MB），第一张为封面。'),
+  addPhotos: r('Add photos', 'إضافة صور', 'Ajouter des photos', 'Añadir fotos', 'Adicionar fotos', 'تصاویر شامل کریں', '添加照片'),
+  uploading: r('Uploading…', 'جارٍ الرفع…', 'Envoi…', 'Subiendo…', 'Enviando…', 'اپ لوڈ ہو رہا ہے…', '上传中…'),
+  makeCover: r('Make cover', 'اجعلها الغلاف', 'Définir comme couverture', 'Hacer portada', 'Tornar capa', 'کور بنائیں', '设为封面'),
+  cover: r('Cover', 'الغلاف', 'Couverture', 'Portada', 'Capa', 'کور', '封面'),
+  remove: r('Remove', 'إزالة', 'Retirer', 'Quitar', 'Remover', 'ہٹائیں', '移除'),
+  plans: r('Instalment plans', 'خطط التقسيط', 'Plans de paiement', 'Planes de pago', 'Planos de parcelamento', 'قسطوں کے پلان', '分期方案'),
+  plansHint: r('Optional. Up to 3 plans. Buyers see the monthly payment calculated from your price.', 'اختياري. حتى 3 خطط. يرى المشتري القسط الشهري محسوبًا من سعرك.', 'Facultatif. Jusqu’à 3 plans. L’acheteur voit la mensualité calculée sur votre prix.', 'Opcional. Hasta 3 planes. El comprador ve la cuota mensual calculada con tu precio.', 'Opcional. Até 3 planos. O comprador vê a parcela calculada pelo seu preço.', 'اختیاری۔ زیادہ سے زیادہ 3 پلان۔ خریدار آپ کی قیمت سے ماہانہ قسط دیکھتا ہے۔', '可选，最多3个方案，买家会看到按您的价格计算的月供。'),
+  addPlan: r('Add a plan', 'إضافة خطة', 'Ajouter un plan', 'Añadir plan', 'Adicionar plano', 'پلان شامل کریں', '添加方案'),
+  pLabel: r('Plan name', 'اسم الخطة', 'Nom du plan', 'Nombre del plan', 'Nome do plano', 'پلان کا نام', '方案名称'),
+  pDown: r('Down payment %', 'الدفعة المقدمة %', 'Apport %', 'Pago inicial %', 'Entrada %', 'ڈاؤن پیمنٹ %', '首付 %'),
+  pMonths: r('Months', 'عدد الأشهر', 'Mois', 'Meses', 'Meses', 'مہینے', '月数'),
+  pExtra: r('Extra % on the financed part', 'زيادة % على المبلغ المقسّط', 'Majoration % sur la partie financée', 'Recargo % sobre lo financiado', 'Acréscimo % sobre o financiado', 'قسطوں والی رقم پر اضافی %', '分期部分加价 %'),
+  down: r('Down payment', 'الدفعة المقدمة', 'Apport', 'Pago inicial', 'Entrada', 'ڈاؤن پیمنٹ', '首付'),
+  financed: r('Financed', 'المبلغ المقسّط', 'Financé', 'Financiado', 'Financiado', 'قسطوں والی رقم', '分期金额'),
+  monthly: r('Monthly', 'القسط الشهري', 'Mensualité', 'Cuota mensual', 'Parcela mensal', 'ماہانہ قسط', '月供'),
+  total: r('Total', 'الإجمالي', 'Total', 'Total', 'Total', 'کل', '总额'),
+  extra: r('Extra', 'الزيادة', 'Majoration', 'Recargo', 'Acréscimo', 'اضافی', '加价'),
+  months: r('months', 'شهر', 'mois', 'meses', 'meses', 'مہینے', '个月'),
+  fromMonthly: r('From {n} / month', 'من {n} / شهر', 'Dès {n} / mois', 'Desde {n} / mes', 'A partir de {n} / mês', '{n} / ماہ سے', '每月 {n} 起'),
+  saveDraft: r('Save as draft', 'حفظ كمسودة', 'Enregistrer en brouillon', 'Guardar borrador', 'Salvar rascunho', 'مسودہ محفوظ کریں', '保存草稿'),
+  submitReview: r('Send for review', 'إرسال للمراجعة', 'Envoyer pour vérification', 'Enviar a revisión', 'Enviar para revisão', 'جائزے کے لیے بھیجیں', '提交审核'),
+  saving: r('Saving…', 'جارٍ الحفظ…', 'Enregistrement…', 'Guardando…', 'Salvando…', 'محفوظ ہو رہا ہے…', '保存中…'),
+  cancel: r('Cancel', 'إلغاء', 'Annuler', 'Cancelar', 'Cancelar', 'منسوخ', '取消'),
+  savedDraft: r('Saved as a draft.', 'تم الحفظ كمسودة.', 'Enregistré en brouillon.', 'Guardado como borrador.', 'Salvo como rascunho.', 'مسودے کے طور پر محفوظ ہو گیا۔', '已保存为草稿。'),
+  sentReview: r('Sent for review. You will see the decision here.', 'تم الإرسال للمراجعة. ستجد القرار هنا.', 'Envoyé. Vous verrez la décision ici.', 'Enviado a revisión. Verás la decisión aquí.', 'Enviado para revisão. Você verá a decisão aqui.', 'جائزے کے لیے بھیج دیا گیا۔ فیصلہ یہیں نظر آئے گا۔', '已提交审核，结果将显示在这里。'),
+  e_title: r('Enter a project name (3+ characters).', 'اكتب اسم المشروع (3 أحرف أو أكثر).', 'Saisissez un nom de projet (3+ caractères).', 'Escribe el nombre del proyecto (3+ caracteres).', 'Informe o nome do projeto (3+ caracteres).', 'پراجیکٹ کا نام لکھیں (3+ حروف)۔', '请输入项目名称（至少3个字符）。'),
+  e_description: r('The description is too short (20+ characters).', 'الوصف قصير (20 حرفًا على الأقل).', 'Description trop courte (20+ caractères).', 'La descripción es muy corta (20+ caracteres).', 'Descrição muito curta (20+ caracteres).', 'تفصیل بہت مختصر ہے (20+ حروف)۔', '描述太短（至少20个字符）。'),
+  e_kind: r('Pick the project type.', 'اختر نوع المشروع.', 'Choisissez le type.', 'Elige el tipo.', 'Escolha o tipo.', 'قسم منتخب کریں۔', '请选择类型。'),
+  e_country: r('Pick the country.', 'اختر الدولة.', 'Choisissez le pays.', 'Elige el país.', 'Escolha o país.', 'ملک منتخب کریں۔', '请选择国家。'),
+  e_city: r('Enter the city.', 'اكتب المدينة.', 'Saisissez la ville.', 'Escribe la ciudad.', 'Informe a cidade.', 'شہر لکھیں۔', '请输入城市。'),
+  e_price: r('Enter a valid price.', 'اكتب سعرًا صحيحًا.', 'Saisissez un prix valide.', 'Escribe un precio válido.', 'Informe um preço válido.', 'درست قیمت لکھیں۔', '请输入有效价格。'),
+  e_currency: r('Pick the currency.', 'اختر العملة.', 'Choisissez la devise.', 'Elige la moneda.', 'Escolha a moeda.', 'کرنسی منتخب کریں۔', '请选择币种。'),
+  e_images: r('There is a problem with the photos.', 'في مشكلة في الصور.', 'Problème avec les photos.', 'Hay un problema con las fotos.', 'Há um problema com as fotos.', 'تصاویر میں مسئلہ ہے۔', '照片有问题。'),
+  e_contact: r('The contact must be a phone number or an e-mail.', 'وسيلة التواصل لازم تكون رقم هاتف أو إيميل.', 'Le contact doit être un téléphone ou un e-mail.', 'El contacto debe ser un teléfono o correo.', 'O contato deve ser um telefone ou e-mail.', 'رابطہ فون نمبر یا ای میل ہونا چاہیے۔', '联系方式必须是电话或邮箱。'),
+  e_plan: r('Check the plans: down payment 0–90%, 2–240 months, extra 0–100%.', 'راجع الخطط: المقدمة 0–90%، المدة 2–240 شهرًا، الزيادة 0–100%.', 'Vérifiez les plans : apport 0–90 %, 2–240 mois, majoration 0–100 %.', 'Revisa los planes: inicial 0–90 %, 2–240 meses, recargo 0–100 %.', 'Revise os planos: entrada 0–90%, 2–240 meses, acréscimo 0–100%.', 'پلان چیک کریں: ڈاؤن 0–90%، 2–240 مہینے، اضافی 0–100%۔', '请检查方案：首付0–90%，2–240个月，加价0–100%。'),
+  e_limit: r('You reached the maximum number of projects.', 'وصلت للحد الأقصى من المشاريع.', 'Nombre maximal de projets atteint.', 'Has llegado al máximo de proyectos.', 'Você atingiu o máximo de projetos.', 'پراجیکٹس کی زیادہ سے زیادہ تعداد پوری ہو گئی۔', '已达项目数量上限。'),
+  e_no_images: r('Add at least one photo before sending for review.', 'أضف صورة واحدة على الأقل قبل الإرسال للمراجعة.', 'Ajoutez au moins une photo avant l’envoi.', 'Añade al menos una foto antes de enviar.', 'Adicione ao menos uma foto antes de enviar.', 'بھیجنے سے پہلے کم از کم ایک تصویر شامل کریں۔', '提交前请至少添加一张照片。'),
+  e_too_large: r('That photo is larger than 4 MB.', 'الصورة أكبر من 4 ميجا.', 'Cette photo dépasse 4 Mo.', 'La foto supera 4 MB.', 'A foto passa de 4 MB.', 'تصویر 4 MB سے بڑی ہے۔', '照片超过4MB。'),
+  e_bad_type: r('Only JPG, PNG or WebP photos are allowed.', 'مسموح بصور JPG أو PNG أو WebP فقط.', 'Seulement JPG, PNG ou WebP.', 'Solo fotos JPG, PNG o WebP.', 'Apenas fotos JPG, PNG ou WebP.', 'صرف JPG، PNG یا WebP تصاویر۔', '仅支持JPG、PNG或WebP。'),
+  e_locked: r('This project can no longer be edited.', 'لا يمكن تعديل هذا المشروع الآن.', 'Ce projet ne peut plus être modifié.', 'Este proyecto ya no se puede editar.', 'Este projeto não pode mais ser editado.', 'اس پراجیکٹ میں اب ترمیم نہیں ہو سکتی۔', '此项目已无法编辑。'),
+  e_generic: r('Something went wrong. Please try again.', 'حصل خطأ. حاول مرة أخرى.', 'Une erreur est survenue. Réessayez.', 'Algo salió mal. Inténtalo de nuevo.', 'Algo deu errado. Tente novamente.', 'کچھ غلط ہو گیا۔ دوبارہ کوشش کریں۔', '出错了，请重试。'),
+} satisfies Record<string, Row>;
+
+export type ProjectTextKey = keyof typeof PROJECT_TEXT;
+export const pp = (key: ProjectTextKey, language: string): string => {
+  const row = PROJECT_TEXT[key] as Row;
+  return row[language as NavLanguage] ?? row.en;
+};
+
+/** API error code (or field name) → message key. */
+export const projectErrorKey = (code: string | undefined, field?: string): ProjectTextKey => {
+  if (code === 'invalid' && field) { const k = `e_${field}` as ProjectTextKey; return k in PROJECT_TEXT ? k : 'e_generic'; }
+  const map: Record<string, ProjectTextKey> = { limit: 'e_limit', no_images: 'e_no_images', bad_images: 'e_images', locked: 'e_locked', too_large: 'e_too_large', bad_type: 'e_bad_type' };
+  return map[code ?? ''] ?? 'e_generic';
+};

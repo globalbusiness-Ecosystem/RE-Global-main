@@ -6,6 +6,7 @@ import { inviteLink } from '@/lib/ref-code';
 import { pt } from '@/lib/partners-i18n';
 import { ROLE_META, type MyPartner } from './partner-types';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { PartnerProjects } from './partner-projects';
 
 // What an approved partner sees: personal invite link, how many came and bought, and the commission lines.
 export function PartnerDashboard({ language, me }: { language: string; me: MyPartner }) {
@@ -37,6 +38,8 @@ export function PartnerDashboard({ language, me }: { language: string; me: MyPar
         <p className="mt-2 text-xs text-muted-foreground">{rate > 0 ? pt('ratePer', language) : pt('rateNone', language)}</p>
         {!program.enabled && <p className="mt-2 text-sm text-amber-500">{pt('programOff', language)}</p>}
       </div>
+
+      <PartnerProjects language={language} />
 
       <div className={box}>
         <p className="text-sm text-muted-foreground">{pt('inviteLink', language)}</p>
