@@ -1,11 +1,13 @@
 'use client';
 import { Fingerprint, Check, X } from 'lucide-react';
+import { useLockImage } from '@/hooks/use-lock-image';
 
 export type ScanState = 'idle' | 'scanning' | 'success' | 'error';
 
 // A big round fingerprint button in the style of banking / wallet apps: pulses while waiting, sweeps a scan line and sends out rings while the
 // device is reading, turns green with a tick on success and shakes red on failure. The animation stops for people who asked for less motion.
 export function FingerprintScanner({ state, onPress, label, disabled, size = 128 }: { state: ScanState; onPress: () => void; label: string; disabled?: boolean; size?: number }) {
+  const { imageUrl } = useLockImage(); // the admin's picture (e.g. the key) instead of the plain fingerprint icon
   const tone = state === 'success' ? 'var(--scan-ok)' : state === 'error' ? 'var(--scan-bad)' : 'var(--scan-accent)';
   return (
     <div className="flex flex-col items-center gap-3">
@@ -31,6 +33,7 @@ export function FingerprintScanner({ state, onPress, label, disabled, size = 128
           style={{ borderColor: tone, color: tone }}>
           {state === 'success' ? <Check key="ok" className="fp-pop" style={{ width: size * 0.5, height: size * 0.5 }} strokeWidth={3} aria-hidden />
             : state === 'error' ? <X style={{ width: size * 0.45, height: size * 0.45 }} strokeWidth={3} aria-hidden />
+            : imageUrl ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={imageUrl} alt="" aria-hidden draggable={false} className="h-full w-full rounded-full object-cover" />
             : <Fingerprint style={{ width: size * 0.55, height: size * 0.55 }} strokeWidth={1.4} aria-hidden />}
           {state === 'scanning' && <span aria-hidden className="fp-sweep absolute inset-x-3 h-0.5 rounded-full" style={{ background: tone, boxShadow: `0 0 10px ${tone}` }} />}
         </button>

@@ -6,15 +6,17 @@ import { flattenTexts, type TextLang, type TextPage } from '@/lib/site-texts';
 import { INSPECTIONS_I18N } from '@/lib/inspections-i18n';
 import { RE_TOKEN_I18N } from '@/lib/re-token-i18n';
 import { WHITEPAPER_I18N } from '@/lib/whitepaper-i18n';
+import { ABOUT_I18N } from '@/lib/about-i18n';
 
 const PAGES: Record<TextPage, { label: string; defaults: Record<string, any> }> = {
   inspections: { label: '🔍 الفحوصات', defaults: INSPECTIONS_I18N },
   retoken: { label: '🪙 توكن RE', defaults: RE_TOKEN_I18N },
   whitepaper: { label: '📄 الورقة البيضاء', defaults: WHITEPAPER_I18N },
+  about: { label: 'ℹ️ نبذة عنا', defaults: ABOUT_I18N },
 };
 
-export default function TextsEditor({ onUnauthorized }: { onUnauthorized: () => void }) {
-  const [page, setPage] = useState<TextPage>('inspections');
+export default function TextsEditor({ onUnauthorized, initialPage = 'inspections' }: { onUnauthorized: () => void; initialPage?: TextPage }) {
+  const [page, setPage] = useState<TextPage>(initialPage);
   const [lang, setLang] = useState<TextLang>('ar');
   const [saved, setSaved] = useState<Record<string, string> | null>(null);
   const [edits, setEdits] = useState<Record<string, string>>({});

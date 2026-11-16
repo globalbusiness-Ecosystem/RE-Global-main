@@ -1,7 +1,7 @@
 // Admin-editable page texts. The built-in i18n objects stay the defaults; the admin stores
 // only the strings it changed, keyed by a dotted path (e.g. "roadmap.0.title"), per language.
 
-export const TEXT_PAGES = ['inspections', 'retoken', 'whitepaper'] as const;
+export const TEXT_PAGES = ['inspections', 'retoken', 'whitepaper', 'about'] as const;
 export type TextPage = (typeof TEXT_PAGES)[number];
 export const isTextPage = (v: unknown): v is TextPage => typeof v === 'string' && (TEXT_PAGES as readonly string[]).includes(v);
 

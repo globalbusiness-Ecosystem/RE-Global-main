@@ -13,6 +13,7 @@ export const LANGUAGE_OPTIONS: { code: NavLanguage; label: string; native: strin
 export const NAV_DICTIONARY: Record<NavLanguage, {
   menu: string;
   whitepaper: string;
+  about: string;
   hotel: string;
   invest: string;
   tokenized: string;
@@ -34,7 +35,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
   notSignedIn: string;
 }> = {
   en: {
-    menu: 'Menu', whitepaper: 'White Paper 📄', hotel: 'Hotel', invest: 'Invest', tokenized: 'Tokenized',
+    menu: 'Menu', whitepaper: 'White Paper 📄', about: 'About us ℹ️', hotel: 'Hotel', invest: 'Invest', tokenized: 'Tokenized',
     abroad: 'Abroad', offplan: 'Off-Plan', partners: 'Partners', sell: 'Sell Property', help: 'Help',
     dashboard: 'Dashboard', contracts: 'My Contracts', favorites: 'Favorites', settings: 'Settings',
     displayLanguage: 'Display Language', theme: 'Appearance', darkMode: 'Dark', lightMode: 'Light',
@@ -42,7 +43,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'Signed in as', notSignedIn: 'Not signed in',
   },
   ar: {
-    menu: 'القائمة', whitepaper: 'الورقة البيضاء 📄', hotel: 'فندق', invest: 'استثمر', tokenized: 'معمّم',
+    menu: 'القائمة', whitepaper: 'الورقة البيضاء 📄', about: 'نبذة عنا ℹ️', hotel: 'فندق', invest: 'استثمر', tokenized: 'معمّم',
     abroad: 'بالخارج', offplan: 'قيد الإنشاء', partners: 'الشركاء', sell: 'بيع العقار', help: 'مساعدة',
     dashboard: 'لوحة التحكم', contracts: 'عقودي', favorites: 'المفضلات', settings: 'الإعدادات',
     displayLanguage: 'لغة العرض', theme: 'المظهر', darkMode: 'ليلي', lightMode: 'نهاري',
@@ -50,7 +51,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'مسجل دخول باسم', notSignedIn: 'غير مسجل دخول',
   },
   fr: {
-    menu: 'Menu', whitepaper: 'Livre blanc 📄', hotel: 'Hôtel', invest: 'Investir', tokenized: 'Tokenisé',
+    menu: 'Menu', whitepaper: 'Livre blanc 📄', about: 'À propos ℹ️', hotel: 'Hôtel', invest: 'Investir', tokenized: 'Tokenisé',
     abroad: 'À l\'étranger', offplan: 'Sur plan', partners: 'Partenaires', sell: 'Vendre un bien', help: 'Aide',
     dashboard: 'Tableau de bord', contracts: 'Mes contrats', favorites: 'Favoris', settings: 'Paramètres',
     displayLanguage: "Langue d'affichage", theme: 'Apparence', darkMode: 'Sombre', lightMode: 'Clair',
@@ -58,7 +59,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'Connecté en tant que', notSignedIn: 'Non connecté',
   },
   es: {
-    menu: 'Menú', whitepaper: 'Libro blanco 📄', hotel: 'Hotel', invest: 'Invertir', tokenized: 'Tokenizado',
+    menu: 'Menú', whitepaper: 'Libro blanco 📄', about: 'Sobre nosotros ℹ️', hotel: 'Hotel', invest: 'Invertir', tokenized: 'Tokenizado',
     abroad: 'En el extranjero', offplan: 'Sobre plano', partners: 'Socios', sell: 'Vender propiedad', help: 'Ayuda',
     dashboard: 'Panel', contracts: 'Mis contratos', favorites: 'Favoritos', settings: 'Configuración',
     displayLanguage: 'Idioma de la interfaz', theme: 'Apariencia', darkMode: 'Oscuro', lightMode: 'Claro',
@@ -66,7 +67,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'Conectado como', notSignedIn: 'No conectado',
   },
   pt: {
-    menu: 'Menu', whitepaper: 'Livro branco 📄', hotel: 'Hotel', invest: 'Investir', tokenized: 'Tokenizado',
+    menu: 'Menu', whitepaper: 'Livro branco 📄', about: 'Sobre nós ℹ️', hotel: 'Hotel', invest: 'Investir', tokenized: 'Tokenizado',
     abroad: 'No exterior', offplan: 'Na planta', partners: 'Parceiros', sell: 'Vender imóvel', help: 'Ajuda',
     dashboard: 'Painel', contracts: 'Meus contratos', favorites: 'Favoritos', settings: 'Configurações',
     displayLanguage: 'Idioma de exibição', theme: 'Aparência', darkMode: 'Escuro', lightMode: 'Claro',
@@ -74,7 +75,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'Conectado como', notSignedIn: 'Não conectado',
   },
   ur: {
-    menu: 'مینو', whitepaper: 'وائٹ پیپر 📄', hotel: 'ہوٹل', invest: 'سرمایہ کاری', tokenized: 'ٹوکنائزڈ',
+    menu: 'مینو', whitepaper: 'وائٹ پیپر 📄', about: 'ہمارے بارے میں ℹ️', hotel: 'ہوٹل', invest: 'سرمایہ کاری', tokenized: 'ٹوکنائزڈ',
     abroad: 'بیرون ملک', offplan: 'زیر تعمیر', partners: 'شراکت دار', sell: 'جائیداد بیچیں', help: 'مدد',
     dashboard: 'ڈیش بورڈ', contracts: 'میرے معاہدے', favorites: 'پسندیدہ', settings: 'ترتیبات',
     displayLanguage: 'ڈسپلے زبان', theme: 'شکل', darkMode: 'ڈارک', lightMode: 'لائٹ',
@@ -82,7 +83,7 @@ export const NAV_DICTIONARY: Record<NavLanguage, {
     signedInAs: 'بطور سائن ان', notSignedIn: 'سائن ان نہیں',
   },
   zh: {
-    menu: '菜单', whitepaper: '白皮书 📄', hotel: '酒店', invest: '投资', tokenized: '代币化',
+    menu: '菜单', whitepaper: '白皮书 📄', about: '关于我们 ℹ️', hotel: '酒店', invest: '投资', tokenized: '代币化',
     abroad: '海外', offplan: '期房', partners: '合作伙伴', sell: '出售房产', help: '帮助',
     dashboard: '仪表盘', contracts: '我的合同', favorites: '收藏', settings: '设置',
     displayLanguage: '显示语言', theme: '外观', darkMode: '深色', lightMode: '浅色',

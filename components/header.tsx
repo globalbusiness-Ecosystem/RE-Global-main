@@ -77,6 +77,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
         { id: 'partners', labelKey: 'partners' },
         { id: 'sell', labelKey: 'sell' },
         { id: 'whitepaper', labelKey: 'whitepaper' },
+        { id: 'about', labelKey: 'about' },
         { id: 'help', labelKey: 'help' },
         { id: 'settings', labelKey: 'settings' },
       ],
