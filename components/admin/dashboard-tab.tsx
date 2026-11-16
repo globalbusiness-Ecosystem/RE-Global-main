@@ -10,6 +10,7 @@ import ClientErrorsPanel from './client-errors-panel';
 import ListingReportsPanel from './listing-reports-panel';
 import RevokeSessions from './revoke-sessions';
 import AdminPasskeysPanel from './admin-passkeys-panel';
+import UserPasskeyReset from './user-passkey-reset';
 import BackupPanel from './backup-panel';
 import SubTabs from './sub-tabs';
 import { auditLabel, auditSummary } from '@/lib/audit-labels';
@@ -104,6 +105,7 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
                 <CspPanel onUnauthorized={onUnauthorized} />
                 <ClientErrorsPanel onUnauthorized={onUnauthorized} />
                 <AdminPasskeysPanel onUnauthorized={onUnauthorized} />
+                <UserPasskeyReset onUnauthorized={onUnauthorized} />
                 <RevokeSessions onUnauthorized={onUnauthorized} />
               </>
             ),

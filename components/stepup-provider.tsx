@@ -15,7 +15,12 @@ type Ctx = {
   ensureStepUp: () => Promise<EnsureResult>;
   /** fetch(), and when the server answers "stepup_required" it asks for the fingerprint and retries once. */
   stepUpFetch: (input: RequestInfo | URL, init?: RequestInit) => Promise<Response>;
+  /** Tell the app the lock was switched on or off (it just verified a fingerprint, so it does not lock again at once). */
+  protectionChanged: (on: boolean) => void;
 };
+
+const UNLOCK_KEY = 'rg_unlocked_v1';
+const RELOCK_AFTER_MS = 60_000; // away from the app for a minute -> locked again, like a banking app
 const StepUpContext = createContext<Ctx | null>(null);
 
 export function useStepUp(): Ctx {
@@ -31,6 +36,43 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
   const [scan, setScan] = useState<ScanState>('idle');
   const waiter = useRef<((t: string | null) => void) | null>(null);
   const pending = useRef<Promise<string | null> | null>(null);
+  const [locked, setLocked] = useState(false);
+  const [lockScan, setLockScan] = useState<ScanState>('idle');
+  const lockOn = useRef(false);
+  const hiddenAt = useRef(0);
+  const autoLock = useRef(false);
+  const autoModal = useRef(false);
+
+  const flag = (v: boolean) => { try { if (v) sessionStorage.setItem(UNLOCK_KEY, '1'); else sessionStorage.removeItem(UNLOCK_KEY); } catch { /* private mode */ } };
+  const protectionChanged = useCallback((on: boolean) => { lockOn.current = on; if (on) flag(true); else setLocked(false); }, []);
+
+  // Opening the platform: when this account turned the lock on (and this device can answer), the fingerprint is asked first.
+  useEffect(() => {
+    if (!accessToken) { lockOn.current = false; setLocked(false); return; }
+    let alive = true;
+    (async () => {
+      const p = await fetchPrefs(accessToken);
+      if (!alive || !p) return;
+      const on = p.requireStepUp && p.passkeys > 0 && (await passkeysAvailable());
+      lockOn.current = on;
+      if (!on) return;
+      let unlocked = false;
+      try { unlocked = sessionStorage.getItem(UNLOCK_KEY) === '1'; } catch { /* private mode */ }
+      if (!unlocked && alive) setLocked(true);
+    })();
+    return () => { alive = false; };
+  }, [accessToken]);
+
+  // Coming back after a minute away locks it again.
+  useEffect(() => {
+    const onVis = () => {
+      if (document.visibilityState === 'hidden') { hiddenAt.current = Date.now(); return; }
+      if (lockOn.current && hiddenAt.current && Date.now() - hiddenAt.current > RELOCK_AFTER_MS) { flag(false); setLocked(true); }
+      hiddenAt.current = 0;
+    };
+    document.addEventListener('visibilitychange', onVis);
+    return () => document.removeEventListener('visibilitychange', onVis);
+  }, []);
 
   const finish = useCallback((t: string | null) => {
     const w = waiter.current; waiter.current = null; pending.current = null;
@@ -81,7 +123,21 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [open, finish]);
 
-  const value = useMemo(() => ({ requestStepUp, ensureStepUp, stepUpFetch }), [requestStepUp, ensureStepUp, stepUpFetch]);
+  const unlock = async () => {
+    if (!accessToken || lockScan === 'scanning') return;
+    setLockScan('scanning');
+    const r = await fetchStepUpToken(accessToken);
+    if (r.ok) { try { navigator.vibrate?.(40); } catch { /* not supported */ } flag(true); setLockScan('success'); setTimeout(() => { setLocked(false); setLockScan('idle'); }, 600); return; }
+    if (r.reason === 'cancelled') { setLockScan('idle'); return; }
+    setLockScan('error'); setTimeout(() => setLockScan('idle'), 1800);
+  };
+
+  // The device's own fingerprint sheet opens by itself (no extra tap) - the button stays as the fallback when a browser insists on a tap.
+  useEffect(() => { if (open && !autoModal.current) { autoModal.current = true; void scanNow(); } if (!open) autoModal.current = false; }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (locked && !autoLock.current) { autoLock.current = true; void unlock(); } if (!locked) autoLock.current = false; }, [locked]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const value = useMemo(() => ({ requestStepUp, ensureStepUp, stepUpFetch, protectionChanged }), [requestStepUp, ensureStepUp, stepUpFetch, protectionChanged]);
+  const lockLabel = lockScan === 'scanning' ? pk('scanning', language) : lockScan === 'success' ? pk('scanOk', language) : lockScan === 'error' ? pk('scanFail', language) : pk('scanIdle', language);
   const label = scan === 'scanning' ? pk('scanning', language) : scan === 'success' ? pk('scanOk', language) : scan === 'error' ? pk('scanFail', language) : pk('scanIdle', language);
 
   return (
@@ -97,6 +153,14 @@ export function StepUpProvider({ children }: { children: ReactNode }) {
             <p className="text-xs text-muted-foreground">{pk('confirmTapHint', language)}</p>
             <button type="button" onClick={() => finish(null)} className="mt-4 w-full rounded-lg border border-border px-4 py-2 text-sm text-foreground hover:border-accent">{pk('cancel', language)}</button>
           </div>
+        </div>
+      )}
+      {locked && (
+        <div role="dialog" aria-modal="true" aria-label={pk('lockTitle', language)} className="fixed inset-0 z-[120] flex flex-col items-center justify-center gap-2 bg-background p-6 text-center">
+          <h2 className="text-xl font-bold text-foreground">{pk('lockTitle', language)}</h2>
+          <p className="text-sm text-muted-foreground">{pk('lockBody', language)}</p>
+          <div className="py-6"><FingerprintScanner state={lockScan} onPress={() => void unlock()} label={lockLabel} size={160} /></div>
+          <p className="max-w-xs text-xs text-muted-foreground">{pk('lockHelp', language)}</p>
         </div>
       )}
     </StepUpContext.Provider>

@@ -21,7 +21,7 @@ export function PasskeySettings({ language }: { language: string }) {
   const [err, setErr] = useState('');
   const [require, setRequire] = useState(false);
   const [note, setNote] = useState('');
-  const { requestStepUp } = useStepUp();
+  const { requestStepUp, protectionChanged } = useStepUp();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { let alive = true; passkeysAvailable().then((v) => { if (alive) setSupported(v); }); return () => { alive = false; if (timer.current) clearTimeout(timer.current); }; }, []);
@@ -49,7 +49,18 @@ export function PasskeySettings({ language }: { language: string }) {
   };
   const remove = async (id: string) => {
     if (!window.confirm(pk('removeConfirm', language))) return;
-    try { await fetch(`/api/passkeys?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch { /* reloaded below */ }
+    setErr(''); setNote('');
+    try {
+      const url = `/api/passkeys?id=${encodeURIComponent(id)}`;
+      let res = await fetch(url, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } });
+      if (res.status === 403) { // the lock is on: a fresh fingerprint is needed to remove a device
+        const token = await requestStepUp();
+        if (!token) return;
+        res = await fetch(url, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}`, 'X-Stepup-Token': token } });
+      }
+      if (res.status === 409) setErr(pk('lastProtected', language));
+      else if (!res.ok) setErr(pk('notConfirmed', language));
+    } catch { /* reloaded below */ }
     void load();
   };
   const toggleRequire = async () => {
@@ -63,7 +74,7 @@ export function PasskeySettings({ language }: { language: string }) {
         body: JSON.stringify({ requireStepUp: !require }),
       });
       if (!res.ok) { setErr(pk('notConfirmed', language)); return; }
-      setRequire(!require); setNote(pk(!require ? 'requireOnDone' : 'requireOffDone', language));
+      protectionChanged(!require); setRequire(!require); setNote(pk(!require ? 'requireOnDone' : 'requireOffDone', language));
     } catch { setErr(pk('notConfirmed', language)); }
   };
   const label = scan === 'scanning' ? pk('scanning', language) : scan === 'success' ? pk('scanOk', language) : scan === 'error' ? pk('scanFail', language) : pk(items.length ? 'scanIdleMore' : 'scanIdle', language);

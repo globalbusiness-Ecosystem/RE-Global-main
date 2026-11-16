@@ -4,6 +4,7 @@ import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { rateLimited } from '@/lib/rate-guard';
 import { deletePasskey, listPasskeys } from '@/lib/passkeys-server';
 import { isCredentialId } from '@/lib/passkeys';
+import { passkeyCount, requiresStepUp, stepUpGate } from '@/lib/stepup-server';
 
 export const dynamic = 'force-dynamic';
 const HEADERS = { 'Cache-Control': 'no-store' };
@@ -39,6 +40,12 @@ export async function DELETE(req: NextRequest) {
   const id = req.nextUrl.searchParams.get('id') ?? '';
   if (!isCredentialId(id)) return NextResponse.json({ error: 'Bad request' }, { status: 400, headers: HEADERS });
   try {
+    // While the fingerprint lock is on: the last device cannot be removed, and removing any needs a fresh fingerprint.
+    if (await requiresStepUp(a.user.uid)) {
+      if ((await passkeyCount(a.user.uid)) <= 1) return NextResponse.json({ error: 'last_protected' }, { status: 409, headers: HEADERS });
+      const gate = await stepUpGate(a.user, req);
+      if (gate) return gate;
+    }
     return (await deletePasskey(a.user.uid, id))
       ? NextResponse.json({ ok: true }, { headers: HEADERS })
       : NextResponse.json({ error: 'not_found' }, { status: 404, headers: HEADERS });
