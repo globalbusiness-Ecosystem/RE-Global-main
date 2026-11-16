@@ -4,6 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { verifyPiAccessToken, AuthError } from '@/lib/pi-auth';
 import { rateLimited } from '@/lib/rate-guard';
+import { stepUpGate, eraseStepUpData } from '@/lib/stepup-server';
 import { uploadedKinds } from '@/lib/kyc-files-store';
 import { serializeValue } from '@/lib/backup';
 import { EXPORT_LIMIT, KEPT_NOTE, buildExport, exportFilename, isEraseConfirm, isSafeId } from '@/lib/my-data';
@@ -77,6 +78,8 @@ export async function DELETE(req: NextRequest) {
   if (!user) return NextResponse.json({ error: 'Not authenticated' }, { status: 401, headers: HEADERS });
   const limited = await rateLimited('my-data-erase', user.uid, 3, 24 * 60 * 60 * 1000);
   if (limited) return limited;
+  const gate = await stepUpGate(user, req);
+  if (gate) return gate;
   let body: unknown = null;
   try { body = await req.json(); } catch { /* handled below */ }
   if (!isEraseConfirm(body)) return NextResponse.json({ error: 'Confirmation required' }, { status: 400, headers: HEADERS });
@@ -86,6 +89,7 @@ export async function DELETE(req: NextRequest) {
     for (const col of ['profiles', 'preferences', 'referrals', 'avatars']) batch.delete(adminDb.collection(col).doc(user.username));
     for (const d of favs.docs) batch.delete(d.ref);
     await batch.commit();
+    await eraseStepUpData(user.uid); // passkeys (public keys), the fingerprint setting
     // Guest reviews stay on the listing (they are masked already) but are cut loose from the account.
     const revs = await adminDb.collection('stay_reviews').where('uid', '==', user.uid).limit(EXPORT_LIMIT).get();
     for (let i = 0; i < revs.docs.length; i += 400) {

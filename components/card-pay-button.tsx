@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { authHeaders } from '@/lib/api-token';
+import { useStepUp } from '@/components/stepup-provider';
 import { pm } from '@/lib/pay-method-labels';
 import { kl } from '@/lib/kyc-labels';
 
@@ -15,6 +16,7 @@ function money(minor: number, currency: string, language: string): string {
 export function CardPayButton({ propertyId, transactionType, language, className = '', booking }: { propertyId: string; transactionType: string; language: string; className?: string; booking?: { start: string; end: string; guests?: number } }) {
   const [available, setAvailable] = useState(false);
   const [busy, setBusy] = useState(false);
+  const { stepUpFetch } = useStepUp();
   const [failed, setFailed] = useState(false);
   const [needKyc, setNeedKyc] = useState(false);
   const isStay = transactionType === 'rent' || transactionType === 'hotel';
@@ -52,7 +54,7 @@ export function CardPayButton({ propertyId, transactionType, language, className
     setBusy(true);
     setFailed(false);
     try {
-      const r = await fetch('/api/card/checkout', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ propertyId, ...(isStay && booking ? { booking: { start: booking.start, end: booking.end, ...(booking.guests ? { guests: booking.guests } : {}) } } : {}) }) });
+      const r = await stepUpFetch('/api/card/checkout', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ propertyId, ...(isStay && booking ? { booking: { start: booking.start, end: booking.end, ...(booking.guests ? { guests: booking.guests } : {}) } } : {}) }) });
       const j = await r.json().catch(() => ({}));
       if (r.status === 403 && j?.code === 'kyc_required') { setNeedKyc(true); setBusy(false); return; }
       if (!r.ok || typeof j?.redirectUrl !== 'string') throw new Error('checkout');

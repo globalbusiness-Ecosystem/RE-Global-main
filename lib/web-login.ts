@@ -1,6 +1,7 @@
 // Sign-in outside the Pi Browser (Google, e-mail link). Client side only.
 import {
   GoogleAuthProvider,
+  signInWithCustomToken,
   isSignInWithEmailLink,
   sendSignInLinkToEmail,
   signInWithEmailLink,
@@ -8,6 +9,7 @@ import {
   signOut,
 } from 'firebase/auth';
 import { auth } from '@/lib/firebase';
+import { answerChallenge } from '@/lib/passkey-client';
 
 const EMAIL_KEY = 're_login_email_v1';
 const EMAIL_SHAPE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{2,}$/;
@@ -47,6 +49,20 @@ export async function finishLinkLogin(email?: string): Promise<'done' | 'needs-e
   if (!isValidEmail(e)) return 'needs-email';
   await signInWithEmailLink(auth, e, window.location.href);
   remember(null);
+  return 'done';
+}
+
+/** Fingerprint sign-in for a web account that added a device in Settings. 'cancelled' when the person closes the device prompt. */
+export async function loginWithPasskey(): Promise<'done' | 'cancelled'> {
+  const o = await fetch('/api/auth/passkey-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'options' }) });
+  const od = await o.json().catch(() => null);
+  if (!o.ok || !od?.options) throw new Error('passkey-options');
+  const response = await answerChallenge(od.options);
+  if (!response) return 'cancelled';
+  const v = await fetch('/api/auth/passkey-login', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ step: 'verify', challengeId: od.challengeId, response }) });
+  const vd = await v.json().catch(() => null);
+  if (!v.ok || typeof vd?.token !== 'string') throw new Error('passkey-verify');
+  await signInWithCustomToken(auth, vd.token);
   return 'done';
 }
 

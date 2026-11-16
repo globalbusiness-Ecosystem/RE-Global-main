@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { guardApi } from '@/lib/api-guard';
+import { stepUpGate } from '@/lib/stepup-server';
 import { ensureProviders } from '@/lib/card-pay/registry';
 import { providerFor } from '@/lib/card-pay/provider';
 import { planCheckout } from '@/lib/card-pay/checkout';
@@ -20,6 +21,8 @@ const H = { 'Cache-Control': 'no-store' };
 export async function POST(req: NextRequest) {
   const user = await guardApi(req, { scope: 'card-checkout', limit: 10, windowMs: 10 * 60 * 1000 });
   if (user instanceof NextResponse) return user;
+  const gate = await stepUpGate(user, req);
+  if (gate) return gate;
   // People who signed in outside the Pi Browser must have their identity verified before paying (fails closed).
   if (needsKyc(user.uid)) {
     let k;

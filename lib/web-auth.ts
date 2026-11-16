@@ -9,7 +9,7 @@ export const looksLikeJwt = (t: string): boolean => JWT_SHAPE.test(t);
 
 interface WebIdentity { uid: string; username: string }
 
-type Claims = { uid?: unknown; email_verified?: unknown; firebase?: { sign_in_provider?: unknown } };
+type Claims = { uid?: unknown; email_verified?: unknown; passkeyLogin?: unknown; firebase?: { sign_in_provider?: unknown } };
 
 /** Turns the checked Firebase claims into an identity, or null when the account must not be accepted. */
 export function webIdentityFromClaims(c: Claims): WebIdentity | null {
@@ -17,7 +17,12 @@ export function webIdentityFromClaims(c: Claims): WebIdentity | null {
   if (!uid || uid.length > 128 || uid.includes('/')) return null;
   const provider = typeof c.firebase?.sign_in_provider === 'string' ? c.firebase.sign_in_provider : '';
   // Pi users also hold Firebase tokens (provider "custom") - those are identified through Pi itself, never here.
-  if (!provider || provider === 'custom' || provider === 'anonymous') return null;
+  if (!provider || provider === 'anonymous') return null;
+  if (provider === 'custom') {
+    // The only custom token a web account may hold is the one /api/auth/passkey-login mints after a fingerprint check
+    // (it carries the claim `passkeyLogin`, which only our server can put there). Pi sessions never carry it.
+    return c.passkeyLogin === true ? { uid: `web_${uid}`, username: webUsername(uid) } : null;
+  }
   // An address nobody has proven is theirs is not an identity (phone sign-in has no e-mail, so it is exempt).
   if (provider !== 'phone' && c.email_verified !== true) return null;
   return { uid: `web_${uid}`, username: webUsername(uid) };

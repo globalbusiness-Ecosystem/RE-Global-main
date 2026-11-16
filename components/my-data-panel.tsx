@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Download, Trash2 } from 'lucide-react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useStepUp } from '@/components/stepup-provider';
 import { useLanguage } from '@/contexts/language-context';
 import { MY_DATA_I18N } from '@/lib/my-data-i18n';
 import { ERASE_WORD, exportFilename } from '@/lib/my-data';
@@ -10,6 +11,7 @@ import { ERASE_WORD, exportFilename } from '@/lib/my-data';
 // Settings card: download everything the platform holds about the user, or delete the personal data.
 export function MyDataPanel() {
   const { accessToken } = usePiAuth();
+  const { stepUpFetch } = useStepUp();
   const { language } = useLanguage();
   const t = MY_DATA_I18N[language] ?? MY_DATA_I18N.en;
   const [busy, setBusy] = useState(false);
@@ -36,7 +38,7 @@ export function MyDataPanel() {
     if (!accessToken || busy || word !== ERASE_WORD) return;
     setBusy(true); setMsg('');
     try {
-      const res = await fetch('/api/my-data', {
+      const res = await stepUpFetch('/api/my-data', {
         method: 'DELETE',
         headers: { Authorization: `Bearer ${accessToken}`, 'Content-Type': 'application/json' },
         body: JSON.stringify({ confirm: ERASE_WORD }),

@@ -10,6 +10,7 @@ import { SHARE_ERRORS } from '@/lib/share-rules';
 import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { reserveForPayment } from '@/lib/property-reserve';
 import { RESERVE_ERRORS } from '@/lib/property-lifecycle';
+import { stepUpGate } from '@/lib/stepup-server';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,6 +18,9 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const ctx = await authorizePayment(req, body?.paymentId);
   if (ctx instanceof NextResponse) return ctx;
+  // Accounts that asked for it must confirm with their fingerprint before any payment is approved.
+  const gate = await stepUpGate(ctx.user, req);
+  if (gate) return gate;
   // Resale of shares between users: the amount is the listing's price, and the listing is held for this buyer.
   if (ctx.payment.metadata?.transactionType === 'resale') {
     try {

@@ -229,7 +229,7 @@ export function PiAuthProvider({ children }: { children: ReactNode }) {
         }
         try {
           const res = await u.getIdTokenResult();
-          if (res.signInProvider === "custom") return;
+          if (res.signInProvider === "custom" && res.claims.passkeyLogin !== true) return; // Pi sessions only; a fingerprint sign-in carries passkeyLogin
           const name = `web_${u.uid.slice(0, 10)}`;
           // The Firestore rules read the name from the sign-in token: have the server store it once, then refresh the token.
           if (res.claims.username !== name && webClaimsAsked.current !== u.uid) {

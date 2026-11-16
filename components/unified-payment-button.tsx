@@ -10,6 +10,9 @@ import { payMethod } from '@/lib/pay-method';
 import { pm } from '@/lib/pay-method-labels';
 import { CardPayButton } from '@/components/card-pay-button';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { useStepUp } from '@/components/stepup-provider';
+import { pk } from '@/lib/passkeys-i18n';
+import { STEPUP_HEADER } from '@/lib/stepup-header';
 import { ShoppingCart, Loader2, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface UnifiedPaymentButtonProps {
@@ -51,6 +54,7 @@ export function UnifiedPaymentButton({
   onError,
 }: UnifiedPaymentButtonProps) {
   const { accessToken, isInitialized } = usePiAuth();
+  const { ensureStepUp } = useStepUp();
   const [paymentState, setPaymentState] = useState<PaymentState>({ status: 'idle' });
   const [showPaymentModal, setShowPaymentModal] = useState(false);
   const isPiAvailable = true; // Check at payment time, not load time
@@ -65,6 +69,13 @@ export function UnifiedPaymentButton({
         status: 'error',
         message: pay('piUnavailable', language),
       });
+      return;
+    }
+
+    // Accounts that asked for a fingerprint confirm it BEFORE the Pi sheet opens (a tap is needed for the device prompt).
+    const stepUp = await ensureStepUp();
+    if (!stepUp.ok) {
+      setPaymentState({ status: 'error', message: pk(stepUp.reason === 'unsupported' ? 'needDevice' : 'notConfirmed', language) });
       return;
     }
 
@@ -105,7 +116,7 @@ export function UnifiedPaymentButton({
               try {
                 const approveRes = await fetch('/api/payments/approve', {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}` },
+                  headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken ?? ''}`, ...(stepUp.token ? { [STEPUP_HEADER]: stepUp.token } : {}) },
                   body: JSON.stringify({ paymentId }),
                 });
                 if (!approveRes.ok) {

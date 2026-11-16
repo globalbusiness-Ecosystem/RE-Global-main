@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useEffect, useState } from "react";
 import { PiAuthProvider, usePiAuth } from "@/contexts/pi-auth-context";
 import { LanguageProvider } from "@/contexts/language-context";
+import { StepUpProvider } from "./stepup-provider";
 import { OfflineBanner } from "./offline-banner";
 import { ErrorReporter } from "./error-reporter";
 import { SkipLink } from "./skip-link";
@@ -60,7 +61,9 @@ export function AppWrapper({ children }: { children: ReactNode }) {
   return (
     <PiAuthProvider>
       <LanguageProvider>
-        <AppContent>{children}</AppContent>
+        <StepUpProvider>
+          <AppContent>{children}</AppContent>
+        </StepUpProvider>
       </LanguageProvider>
     </PiAuthProvider>
   );

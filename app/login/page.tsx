@@ -6,7 +6,10 @@ import { BrandMark } from '@/components/brand-mark';
 import { useLanguage } from '@/contexts/language-context';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { ll } from '@/lib/login-labels';
-import { finishLinkLogin, isLoginLink, isValidEmail, loginWithGoogle, logout, sendLoginLink } from '@/lib/web-login';
+import { finishLinkLogin, isLoginLink, isValidEmail, loginWithGoogle, loginWithPasskey, logout, sendLoginLink } from '@/lib/web-login';
+import { passkeysAvailable } from '@/lib/passkey-client';
+import { pk } from '@/lib/passkeys-i18n';
+import { Fingerprint } from 'lucide-react';
 
 export default function LoginPage() {
   const { language } = useLanguage();
@@ -17,6 +20,8 @@ export default function LoginPage() {
   const [needsEmail, setNeedsEmail] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [canFinger, setCanFinger] = useState(false);
+  useEffect(() => { let alive = true; passkeysAvailable().then((v) => { if (alive) setCanFinger(v); }); return () => { alive = false; }; }, []);
 
   useEffect(() => {
     if (!isLoginLink()) return;
@@ -30,6 +35,12 @@ export default function LoginPage() {
     setError(null);
     setBusy(true);
     try { await fn(); } catch { setError(ll('failed', language)); } finally { setBusy(false); }
+  };
+
+  const fingerprint = async () => {
+    setError(null);
+    setBusy(true);
+    try { await loginWithPasskey(); } catch { setError(pk('signInFingerFail', language)); } finally { setBusy(false); }
   };
 
   const submitEmail = () => {
@@ -58,6 +69,14 @@ export default function LoginPage() {
       ) : (
         <>
           <p className="text-sm text-foreground/80">{ll('intro', language)}</p>
+          {canFinger && (
+            <div className="flex flex-col gap-1">
+              <button type="button" className={`${btn} flex items-center justify-center gap-2 bg-accent text-accent-foreground`} onClick={() => void fingerprint()} disabled={busy}>
+                <Fingerprint className="h-5 w-5" aria-hidden />{pk('signInFinger', language)}
+              </button>
+              <p className="text-center text-xs text-muted-foreground">{pk('signInFingerHint', language)}</p>
+            </div>
+          )}
           <button type="button" className={`${btn} bg-white text-black`} onClick={() => run(loginWithGoogle)} disabled={busy}>{ll('google', language)}</button>
           <div className="text-center text-xs text-muted-foreground">{ll('or', language)}</div>
           {needsEmail && <p className="text-sm text-foreground/80">{ll('confirmEmail', language)}</p>}

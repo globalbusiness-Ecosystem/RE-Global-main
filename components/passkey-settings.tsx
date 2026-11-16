@@ -6,6 +6,8 @@ import { formatDate } from '@/lib/format';
 import { pk, passkeyErrorKey } from '@/lib/passkeys-i18n';
 import { deviceNameFromUA } from '@/lib/passkeys';
 import { passkeysAvailable, registerPasskey } from '@/lib/passkey-client';
+import { fetchPrefs } from '@/lib/stepup-client';
+import { useStepUp } from '@/components/stepup-provider';
 import { FingerprintScanner, type ScanState } from '@/components/fingerprint-scanner';
 
 type Item = { id: string; label: string; backedUp: boolean; createdAt: string | null; lastUsedAt: string | null };
@@ -17,6 +19,9 @@ export function PasskeySettings({ language }: { language: string }) {
   const [items, setItems] = useState<Item[]>([]);
   const [scan, setScan] = useState<ScanState>('idle');
   const [err, setErr] = useState('');
+  const [require, setRequire] = useState(false);
+  const [note, setNote] = useState('');
+  const { requestStepUp } = useStepUp();
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => { let alive = true; passkeysAvailable().then((v) => { if (alive) setSupported(v); }); return () => { alive = false; if (timer.current) clearTimeout(timer.current); }; }, []);
@@ -29,6 +34,7 @@ export function PasskeySettings({ language }: { language: string }) {
     } catch { /* the list stays as it was */ }
   }, [accessToken]);
   useEffect(() => { if (supported) void load(); }, [supported, load]);
+  useEffect(() => { if (supported && accessToken) void fetchPrefs(accessToken).then((p) => { if (p) setRequire(p.requireStepUp); }); }, [supported, accessToken, items.length]);
 
   if (!supported || !accessToken) return null;
 
@@ -46,6 +52,20 @@ export function PasskeySettings({ language }: { language: string }) {
     try { await fetch(`/api/passkeys?id=${encodeURIComponent(id)}`, { method: 'DELETE', headers: { Authorization: `Bearer ${accessToken}` } }); } catch { /* reloaded below */ }
     void load();
   };
+  const toggleRequire = async () => {
+    setErr(''); setNote('');
+    const token = await requestStepUp(); // turning it on or off needs a fresh fingerprint
+    if (!token) return;
+    try {
+      const res = await fetch('/api/passkeys/prefs', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${accessToken}`, 'X-Stepup-Token': token },
+        body: JSON.stringify({ requireStepUp: !require }),
+      });
+      if (!res.ok) { setErr(pk('notConfirmed', language)); return; }
+      setRequire(!require); setNote(pk(!require ? 'requireOnDone' : 'requireOffDone', language));
+    } catch { setErr(pk('notConfirmed', language)); }
+  };
   const label = scan === 'scanning' ? pk('scanning', language) : scan === 'success' ? pk('scanOk', language) : scan === 'error' ? pk('scanFail', language) : pk(items.length ? 'scanIdleMore' : 'scanIdle', language);
 
   return (
@@ -56,6 +76,11 @@ export function PasskeySettings({ language }: { language: string }) {
       {err && <p role="alert" className="mt-1 text-center text-xs text-red-400">{err}</p>}
       {items.length > 0 && (
         <div className="mt-4 border-t border-border pt-3">
+          <label className="mb-3 flex cursor-pointer items-start gap-3">
+            <input type="checkbox" checked={require} onChange={() => void toggleRequire()} className="mt-1 h-4 w-4 accent-[var(--accent)]" />
+            <span className="text-sm text-foreground">{pk('requireTitle', language)}<span className="mt-1 block text-xs text-muted-foreground">{pk('requireWarn', language)}</span></span>
+          </label>
+          {note && <p role="status" className="mb-3 text-xs text-green-500">{note}</p>}
           <p className="mb-1 text-xs font-medium text-muted-foreground">{pk('thisDevice', language)}</p>
           <ul className="divide-y divide-border">
             {items.map((p) => (
