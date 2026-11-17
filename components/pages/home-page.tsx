@@ -10,6 +10,7 @@ import { FirestoreListings } from '@/components/firestore-listings';
 import { FEATURE_ICONS, DEFAULT_ICON_ORDER } from '@/components/home-feature-icon';
 import { useHomeFeatures } from '@/hooks/use-home-features';
 import { pickText } from '@/lib/home-features';
+import type { HomeFeatureCard } from '@/lib/home-features';
 import AIAdvisorChat from '@/components/ai-advisor-chat';
 import AIAdvisorVoiceChat from '@/components/ai-advisor-voice-chat';
 import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
@@ -128,6 +129,22 @@ export default function HomePage({
               <span className="w-1.5 h-1.5 rounded-full bg-accent shadow-[0_0_8px_var(--accent)]" />
               {homeFeatures.title ? pickText(homeFeatures.title, language) : tt(HOME_UI.whyChoose, language)}
             </h3>
+
+            {homeFeatures.cards && (
+              <div className="mb-5 flex snap-x snap-mandatory gap-3 overflow-x-auto px-6 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="list">
+                {homeFeatures.cards.map((c: HomeFeatureCard, i: number) => (
+                  <figure key={`card-${i}`} role="listitem" className="relative h-44 w-64 shrink-0 snap-start overflow-hidden rounded-xl border border-accent/30 bg-card">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={c.img} alt="" loading="lazy" draggable={false} className="absolute inset-0 h-full w-full object-cover" />
+                    <div aria-hidden className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-transparent" />
+                    <figcaption className="absolute inset-x-0 bottom-0 p-3 text-white">
+                      <p className="text-base font-bold leading-tight drop-shadow">{pickText(c.t, language)}</p>
+                      {c.d && <p className="mt-0.5 text-xs leading-snug text-white/85 drop-shadow">{pickText(c.d, language)}</p>}
+                    </figcaption>
+                  </figure>
+                ))}
+              </div>
+            )}
 
             <div className="relative">
               <div className="absolute left-0 top-0 bottom-0 w-10 z-10 pointer-events-none bg-gradient-to-r from-card to-transparent" />

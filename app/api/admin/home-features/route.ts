@@ -5,7 +5,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { getHomeFeatures } from '@/lib/home-features-server';
-import { parseHomeFeatures } from '@/lib/home-features';
+import { parseHomeFeatures, MAX_FEATURE_CARDS } from '@/lib/home-features';
 
 export const dynamic = 'force-dynamic';
 const unauthorized = () => NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
@@ -23,6 +23,9 @@ export async function PUT(req: NextRequest) {
   if (typeof body.enabled !== 'boolean') return NextResponse.json({ ok: false, error: 'enabled must be true or false' }, { status: 400 });
   if (Array.isArray(body.items) && body.items.length > 0 && parseHomeFeatures(body).items === null) {
     return NextResponse.json({ ok: false, error: 'Each item needs a text in English or Arabic (80 characters at most)' }, { status: 400 });
+  }
+  if (Array.isArray(body.cards) && body.cards.length > 0 && (parseHomeFeatures(body).cards?.length ?? 0) < Math.min(body.cards.length, MAX_FEATURE_CARDS)) {
+    return NextResponse.json({ ok: false, error: 'Each picture card needs an https picture and a title (60 characters at most; the line under it 140)' }, { status: 400 });
   }
   const next = parseHomeFeatures(body);
   try {
