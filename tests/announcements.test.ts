@@ -78,3 +78,12 @@ describe('video upload', () => {
     expect(src('components/admin/announcements-settings.tsx')).toContain('/api/admin/video-upload-url');
   });
 });
+
+describe('video upload', () => {
+  it('upload address is admin only and limited to video types; admin screen uses it', () => {
+    const r = src('app/api/admin/video-upload-url/route.ts');
+    expect(r).toContain('isAdminRequest(req)');
+    expect(r).toMatch(/video\/mp4[\s\S]*video\/webm[\s\S]*video\/quicktime/);
+    expect(src('components/admin/announcements-settings.tsx')).toContain('/api/admin/video-upload-url');
+  });
+});
