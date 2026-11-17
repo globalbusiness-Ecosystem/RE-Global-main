@@ -7,12 +7,14 @@ import { INSPECTIONS_I18N } from '@/lib/inspections-i18n';
 import { RE_TOKEN_I18N } from '@/lib/re-token-i18n';
 import { WHITEPAPER_I18N } from '@/lib/whitepaper-i18n';
 import { ABOUT_I18N } from '@/lib/about-i18n';
+import { GUIDE_I18N } from '@/lib/guide-i18n';
 
 const PAGES: Record<TextPage, { label: string; defaults: Record<string, any> }> = {
   inspections: { label: '🔍 الفحوصات', defaults: INSPECTIONS_I18N },
   retoken: { label: '🪙 توكن RE', defaults: RE_TOKEN_I18N },
   whitepaper: { label: '📄 الورقة البيضاء', defaults: WHITEPAPER_I18N },
   about: { label: 'ℹ️ نبذة عنا', defaults: ABOUT_I18N },
+  guide: { label: '🧭 دليل البداية', defaults: GUIDE_I18N },
 };
 
 export default function TextsEditor({ onUnauthorized, initialPage = 'inspections' }: { onUnauthorized: () => void; initialPage?: TextPage }) {

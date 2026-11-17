@@ -10,7 +10,7 @@ import { adminApi, UnauthorizedError, Btn, Card } from './admin-ui';
 const KIND_AR: Record<Announcement['kind'], string> = { offer: 'عرض', partnership: 'شراكة', event: 'فعالية', news: 'خبر', video: 'فيديو' };
 const PAGE_AR: Record<string, string> = {
   buy: 'شراء', rent: 'إيجار', hotel: 'فنادق', invest: 'استثمار', tokenized: 'توكنز عقاري', 'share-market': 'سوق الحصص', abroad: 'عقارات بالخارج',
-  offplan: 'على الخريطة', map: 'الخريطة', partners: 'الشركاء', analytics: 'التحليلات', contracts: 'العقود', 're-token': 'RE Token', about: 'نبذة عنا', whitepaper: 'الورقة البيضاء',
+  offplan: 'على الخريطة', map: 'الخريطة', partners: 'الشركاء', analytics: 'التحليلات', contracts: 'العقود', 're-token': 'RE Token', about: 'نبذة عنا', whitepaper: 'الورقة البيضاء', guide: 'دليل البداية',
 };
 const same = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b);
 const blank = (kind: Announcement['kind'] = 'offer'): Announcement => ({ kind, active: true, img: null, t: { en: '', ar: '' }, d: null, date: null, link: null, linkLabel: null, video: null });

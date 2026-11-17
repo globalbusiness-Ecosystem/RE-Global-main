@@ -7,7 +7,7 @@ import { parseVideoUrl } from './video-embed';
 export const ANNOUNCEMENT_KINDS = ['offer', 'partnership', 'event', 'news', 'video'] as const;
 export type AnnouncementKind = (typeof ANNOUNCEMENT_KINDS)[number];
 // Pages a card may open inside the app ("page:buy"). Anything else must be an https address.
-export const LINK_PAGES = ['buy', 'rent', 'hotel', 'invest', 'tokenized', 'share-market', 'abroad', 'offplan', 'map', 'partners', 'analytics', 'contracts', 're-token', 'about', 'whitepaper'] as const;
+export const LINK_PAGES = ['buy', 'rent', 'hotel', 'invest', 'tokenized', 'share-market', 'abroad', 'offplan', 'map', 'partners', 'analytics', 'contracts', 're-token', 'about', 'whitepaper', 'guide'] as const;
 
 export type Announcement = {
   kind: AnnouncementKind;

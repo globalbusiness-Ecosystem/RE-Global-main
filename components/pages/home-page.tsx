@@ -9,6 +9,7 @@ import PanoramicBanner from '@/components/panoramic-banner';
 import { FirestoreListings } from '@/components/firestore-listings';
 import { FEATURE_ICONS, DEFAULT_ICON_ORDER } from '@/components/home-feature-icon';
 import { useHomeFeatures } from '@/hooks/use-home-features';
+import { GUIDE_I18N } from '@/lib/guide-i18n';
 import { useAnnouncements } from '@/hooks/use-announcements';
 import { HomeAnnouncements } from '@/components/home-announcements';
 import { pickText } from '@/lib/home-features';
@@ -71,6 +72,14 @@ export default function HomePage({
       <div className="px-4 py-8 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto relative z-10">
 
         {/* Offers, partnerships, events and videos the admin writes. The old stat boxes only come back if the admin switches them on. */}
+        <button type="button" onClick={() => onCategoryClick?.('guide')} className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-start transition hover:bg-accent/15">
+          <span aria-hidden className="text-2xl">🧭</span>
+          <span className="min-w-0 flex-1">
+            <span className="block text-sm font-bold text-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).heroTitle}</span>
+            <span className="block text-xs text-muted-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).headerTitle}</span>
+          </span>
+          <span aria-hidden className="text-accent">›</span>
+        </button>
         <HomeAnnouncements language={language} onCategoryClick={onCategoryClick} />
         {announcements.showStats && (
         <div className="mb-12 overflow-x-auto">

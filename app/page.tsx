@@ -58,6 +58,9 @@ const RETokenPage = dynamic(() => import('@/components/pages/re-token-page'), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-background" />
 });
+const GuidePage = dynamic(() => import('@/components/pages/guide-page'), {
+  loading: () => <div className="p-6 text-center text-muted-foreground">...</div>,
+});
 const AboutPage = dynamic(() => import('@/components/pages/about-page'), {
   ssr: false,
   loading: () => <div className="w-full h-full bg-background" />
@@ -174,7 +177,7 @@ export default function App() {
 
   // Memoize category pages list to prevent unnecessary recalculations
   const categoryPages = useMemo(() => 
-    ['hotel', 'invest', 'tokenized', 'abroad', 'offplan', 'partners', 'whitepaper', 'about', 'sell', 'help', 'analytics'],
+    ['hotel', 'invest', 'tokenized', 'abroad', 'offplan', 'partners', 'whitepaper', 'about', 'guide', 'sell', 'help', 'analytics'],
     []
   );
 
@@ -282,6 +285,12 @@ export default function App() {
               language={language}
               onBack={goBack}
             />
+          </div>
+        );
+      case 'guide':
+        return (
+          <div className="animate-in slide-in-from-right duration-300">
+            <GuidePage language={language} onBack={goBack} onNavigate={handlePageChange} showBackButton={true} />
           </div>
         );
       case 'about':
