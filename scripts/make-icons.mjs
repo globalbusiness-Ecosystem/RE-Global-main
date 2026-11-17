@@ -2,9 +2,10 @@
 //   node scripts/make-icons.mjs
 import sharp from 'sharp';
 import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
 
 const svg = readFileSync(new URL('../public/icon.svg', import.meta.url));
-const out = (name) => new URL(`../public/${name}`, import.meta.url).pathname;
+const out = (name) => fileURLToPath(new URL(`../public/${name}`, import.meta.url)); // not .pathname: it keeps %20 for folders with spaces
 const sizes = [
   ['icon-192.png', 192],
   ['icon-512.png', 512],
