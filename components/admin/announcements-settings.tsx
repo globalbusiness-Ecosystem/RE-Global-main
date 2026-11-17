@@ -67,6 +67,27 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
       upd(i, (x) => ({ ...x, img: d.url }));
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
+  const MAX_VIDEO_MB = 50;
+  const uploadVideo = async (i: number, file: File) => {
+    const type = file.type === 'video/quicktime' || file.type === 'video/webm' ? file.type : 'video/mp4';
+    if (!/^video\/(mp4|webm|quicktime)$/.test(file.type)) { setMsg('❌ الفيديو لازم يكون MP4 أو WebM أو MOV'); return; }
+    if (file.size > MAX_VIDEO_MB * 1024 * 1024) { setMsg(`❌ الفيديو أكبر من ${MAX_VIDEO_MB}MB. ضغطه أو حطه على يوتيوب وحط الرابط.`); return; }
+    setBusy(true); setMsg('جاري تجهيز الرفع...');
+    try {
+      const d = await adminApi<{ uploadUrl: string; publicUrl: string }>('/api/admin/video-upload-url', { method: 'POST', body: JSON.stringify({ type }) });
+      await new Promise<void>((resolve, reject) => {
+        const x = new XMLHttpRequest();
+        x.open('PUT', d.uploadUrl);
+        x.setRequestHeader('Content-Type', type);
+        x.upload.onprogress = (e) => { if (e.lengthComputable) setMsg(`⬆️ جاري رفع الفيديو ${Math.round((e.loaded / e.total) * 100)}%`); };
+        x.onload = () => (x.status >= 200 && x.status < 300 ? resolve() : reject(new Error('فشل رفع الفيديو (' + x.status + ')')));
+        x.onerror = () => reject(new Error('فشل رفع الفيديو: مشكلة اتصال'));
+        x.send(file);
+      });
+      upd(i, (x) => ({ ...x, video: d.publicUrl }));
+      setMsg('✅ الفيديو اترفع. اضغط "حفظ".');
+    } catch (e) { fail(e); } finally { setBusy(false); }
+  };
   const inp = 'w-full rounded-lg border border-[#3a3a3a] bg-[#161616] px-2 py-1.5 text-sm text-gray-100';
   const linkMode = (l: string | null) => (l === null ? 'none' : l.startsWith('page:') ? l : 'url');
 
@@ -102,6 +123,10 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
                 <input className={inp} dir="rtl" maxLength={MAX_ANN_TEXT} aria-label="الوصف بالعربي" placeholder="وصف قصير (اختياري)" value={a.d?.ar ?? ''} onChange={(e) => upd(i, (x) => ({ ...x, d: { en: x.d?.en, ar: e.target.value } }))} />
                 <div className="sm:col-span-2">
                   <input className={inp} dir="ltr" aria-label="رابط الفيديو" placeholder={a.kind === 'video' ? 'رابط الفيديو (مطلوب): YouTube / Vimeo / .mp4' : 'رابط فيديو (اختياري)'} value={a.video ?? ''} onChange={(e) => upd(i, (x) => ({ ...x, video: e.target.value || null }))} />
+                  <label className="mt-1 inline-block cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-1.5 text-xs text-gray-200 hover:bg-[#1f1f1f]">
+                    أو ارفع ملف فيديو (MP4/WebM/MOV حتى 50MB)
+                    <input type="file" accept="video/mp4,video/webm,video/quicktime" aria-label="رفع فيديو" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadVideo(i, f); e.target.value = ''; }} />
+                  </label>
                   {a.video && <p className={`mt-1 text-xs ${vOk ? 'text-green-400' : 'text-red-400'}`}>{vOk ? '✓ رابط فيديو صالح' : '✗ لازم رابط https ليوتيوب أو فيمو أو ملف mp4/webm'}</p>}
                 </div>
                 <select aria-label="الرابط" className={inp} value={linkMode(a.link)} onChange={(e) => { const v = e.target.value; upd(i, (x) => ({ ...x, link: v === 'none' ? null : v === 'url' ? 'https://' : v })); }}>
