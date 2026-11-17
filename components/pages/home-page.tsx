@@ -9,6 +9,8 @@ import PanoramicBanner from '@/components/panoramic-banner';
 import { FirestoreListings } from '@/components/firestore-listings';
 import { FEATURE_ICONS, DEFAULT_ICON_ORDER } from '@/components/home-feature-icon';
 import { useHomeFeatures } from '@/hooks/use-home-features';
+import { useAnnouncements } from '@/hooks/use-announcements';
+import { HomeAnnouncements } from '@/components/home-announcements';
 import { pickText } from '@/lib/home-features';
 import type { HomeFeatureCard } from '@/lib/home-features';
 import AIAdvisorChat from '@/components/ai-advisor-chat';
@@ -53,6 +55,7 @@ export default function HomePage({
   const [useVoiceAdvisor, setUseVoiceAdvisor] = useState(false);
   const [showVRTour, setShowVRTour] = useState(false);
   const homeFeatures = useHomeFeatures();
+  const announcements = useAnnouncements();
   const stripItems = (homeFeatures.items ?? HOME_FEATURES.map((t, i) => ({ icon: DEFAULT_ICON_ORDER[i % DEFAULT_ICON_ORDER.length], t }))).map((it) => ({ icon: it.icon, text: pickText(it.t, language) }));
   const router = useRouter();
 
@@ -67,7 +70,9 @@ export default function HomePage({
 
       <div className="px-4 py-8 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto relative z-10">
 
-        {/* Stats */}
+        {/* Offers, partnerships, events and videos the admin writes. The old stat boxes only come back if the admin switches them on. */}
+        <HomeAnnouncements language={language} onCategoryClick={onCategoryClick} />
+        {announcements.showStats && (
         <div className="mb-12 overflow-x-auto">
           <div className="flex gap-3 pb-2 min-w-min">
             {[
@@ -83,6 +88,8 @@ export default function HomePage({
             ))}
           </div>
         </div>
+
+        )}
 
         <FirestoreListings featuredOnly language={language} />
 

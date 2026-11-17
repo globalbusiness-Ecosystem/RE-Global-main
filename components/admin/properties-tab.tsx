@@ -8,6 +8,7 @@ import BrandingSettings from './branding-settings';
 import AppIconSettings from './app-icon-settings';
 import LockImageSettings from './lock-image-settings';
 import HomeFeaturesSettings from './home-features-settings';
+import AnnouncementsSettings from './announcements-settings';
 import SubTabs from './sub-tabs';
 import { listingGaps, hasCriticalGap, GAP_LABELS, CRITICAL_GAPS } from '@/lib/listing-quality';
 
@@ -117,6 +118,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
           ),
         },
         { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => <DisplaySettings onUnauthorized={onUnauthorized} /> },
+        { id: 'announcements', icon: '📣', label: 'الإعلانات والفيديو', render: () => <AnnouncementsSettings onUnauthorized={onUnauthorized} /> },
         { id: 'homefeatures', icon: '✨', label: 'شريط الرئيسية', render: () => <HomeFeaturesSettings onUnauthorized={onUnauthorized} /> },
         { id: 'branding', icon: '🎨', label: 'اللوجو', render: () => (<><BrandingSettings onUnauthorized={onUnauthorized} /><div className="mt-4"><AppIconSettings onUnauthorized={onUnauthorized} /></div><div className="mt-4"><LockImageSettings onUnauthorized={onUnauthorized} /></div></>) },
       ]}
