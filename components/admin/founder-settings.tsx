@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import { MAX_FOUNDER_NAME, MAX_FOUNDER_ROLE, MAX_FOUNDER_BIO, MAX_FOUNDER_QUOTE, type Founder } from '@/lib/founder';
+import { VerifiedBadge } from '@/components/verified-badge';
+import { BADGE_LEVELS, badgeLevelName } from '@/lib/badge-level';
 import { shrinkImage } from '@/lib/shrink-image';
 import { authHeaders } from '@/lib/api-token';
 import { adminApi, UnauthorizedError, Btn, Card, inputCls } from './admin-ui';
@@ -11,7 +13,7 @@ type Draft = Omit<Founder, 'role' | 'bio' | 'quote'> & { role: { en: string; ar:
 const t2 = (v: { en?: string; ar?: string } | null) => ({ en: v?.en ?? '', ar: v?.ar ?? '' });
 const toDraft = (f: Founder): Draft => ({ ...f, role: t2(f.role), bio: t2(f.bio), quote: t2(f.quote) });
 const pack = (v: { en: string; ar: string }) => (v.en.trim() || v.ar.trim() ? { en: v.en, ar: v.ar } : null);
-const payload = (d: Draft) => ({ enabled: d.enabled, name: d.name ?? '', photoUrl: d.photoUrl ?? '', role: pack(d.role), bio: pack(d.bio), quote: pack(d.quote), linkedin: d.linkedin ?? '', website: d.website ?? '' });
+const payload = (d: Draft) => ({ enabled: d.enabled, name: d.name ?? '', photoUrl: d.photoUrl ?? '', role: pack(d.role), bio: pack(d.bio), quote: pack(d.quote), linkedin: d.linkedin ?? '', website: d.website ?? '', badgeLevel: d.badgeLevel });
 
 // "المؤسس" on the About page: photo and words, and which account is the founder (the platform then shows it a 👑 Founder label).
 export default function FounderSettings({ onUnauthorized }: { onUnauthorized: () => void }) {
@@ -93,6 +95,14 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
             <input aria-label="اقتباس بالإنجليزي" dir="ltr" placeholder="Short quote (English)" maxLength={MAX_FOUNDER_QUOTE} value={draft.quote.en} onChange={(e) => setLang('quote', 'en', e.target.value)} className={inputCls} />
             <input aria-label="لينكدإن" dir="ltr" placeholder="https://www.linkedin.com/in/..." maxLength={300} value={draft.linkedin ?? ''} onChange={(e) => set('linkedin', e.target.value || null)} className={inputCls} />
             <input aria-label="الموقع" dir="ltr" placeholder="https://الموقع" maxLength={300} value={draft.website ?? ''} onChange={(e) => set('website', e.target.value || null)} className={inputCls} />
+          </div>
+          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
+            <VerifiedBadge language="ar" size={30} level={draft.badgeLevel} />
+            <label className="text-sm text-gray-100" htmlFor="founder-badge-level">لون وترقية شارتك (المستوى)</label>
+            <select id="founder-badge-level" className={inputCls + ' max-w-[220px]'} value={draft.badgeLevel} onChange={(e) => set('badgeLevel', Number(e.target.value))}>
+              {BADGE_LEVELS.map((l) => <option key={l} value={l}>{l} · {badgeLevelName(l, 'ar')}</option>)}
+            </select>
+            <p className="w-full text-xs text-gray-400">الشارة اللي جنب اسمك في «نبذة عنا» وفي الإعدادات بتاخد اللون ده. اختار 7 (الياقوتي الأحمر) لأعلى مستوى.</p>
           </div>
           <Btn onClick={() => void save()} disabled={busy || !changed}>{busy ? '...' : '💾 حفظ'}</Btn>
         </>

@@ -26,7 +26,7 @@ export function FounderCard({ language }: { language: NavLanguage }) {
             <div aria-hidden className="flex h-24 w-24 shrink-0 items-center justify-center rounded-full border-2 border-[#d4af37] bg-card text-3xl">👤</div>
           )}
           <div className="min-w-0">
-            <h3 className="flex min-w-0 items-center gap-1.5 text-lg font-bold text-foreground"><span className="truncate">{f.name}</span><VerifiedBadge language={language} size={20} /></h3>
+            <h3 className="flex min-w-0 items-center gap-1.5 text-lg font-bold text-foreground"><span className="truncate">{f.name}</span><VerifiedBadge language={language} size={20} level={f.badgeLevel} /></h3>
             <span className="mt-1 inline-block rounded-full bg-[#d4af37] px-2.5 py-0.5 text-[11px] font-bold text-black">👑 {founderText(FOUNDER_UI.chip, language)}</span>
             {role && <p className="mt-1 text-sm text-muted-foreground" dir="auto">{role}</p>}
           </div>

@@ -6,8 +6,10 @@ import { usePiAuth } from '@/contexts/pi-auth-context';
 import { TIER_IDS, rewardStrings, tierName, type Counts, type Rules, type TierId } from '@/lib/rewards';
 import { formatNumber } from '@/lib/format';
 import { IconBadge } from '@/components/ui/icon-badge';
+import { BadgeLadder } from '@/components/badge-ladder';
+import { BADGE_THRESHOLDS, badgeLevelFor, parseBadgeLevel, parseThresholds } from '@/lib/badge-level';
 
-type Data = { points: number; counts: Counts; rules: Rules; referral: { invited: number; qualified: number; referredBy: boolean }; tier: TierId; next: TierId | null; remaining: number; pct: number };
+type Data = { points: number; counts: Counts; rules: Rules; referral: { invited: number; qualified: number; referredBy: boolean }; tier: TierId; next: TierId | null; remaining: number; pct: number; badgeLevel?: number; badgeThresholds?: number[] };
 
 const TIER_COLOR: Record<TierId, string> = { bronze: '#cd7f32', silver: '#9ca3af', gold: '#d4af37', platinum: '#7dd3fc' };
 
@@ -65,6 +67,8 @@ export function RewardsPanel({ language }: { language: string }) {
     { icon: UserPlus, label: t.referral, each: data.rules.points.referral, count: data.counts.referrals },
   ];
   const benefit = data.rules.benefits[data.tier];
+  const badgeThresholds = parseThresholds(data.badgeThresholds) ?? [...BADGE_THRESHOLDS];
+  const badgeLevel = data.badgeLevel ? parseBadgeLevel(data.badgeLevel) : badgeLevelFor(data.points, badgeThresholds);
 
   return (
     <div className="space-y-4">
@@ -87,6 +91,7 @@ export function RewardsPanel({ language }: { language: string }) {
         </p>
         {data.points === 0 && <p className="mt-2 text-xs text-muted-foreground">{t.start}</p>}
         {benefit && <p className="mt-3 rounded-lg bg-muted p-3 text-xs text-foreground"><span className="font-semibold">{t.benefits}: </span>{benefit}</p>}
+        <BadgeLadder language={language} level={badgeLevel} points={data.points} thresholds={badgeThresholds} rules={data.rules} />
       </div>
 
       <div className={card}>

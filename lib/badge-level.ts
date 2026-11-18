@@ -34,17 +34,29 @@ export const badgeLevelName = (level: BadgeLevel, language?: string): string => 
 export const badgeLevelLabel = (level: BadgeLevel, language?: string): string => `${LEVEL_WORD[language ?? 'en'] ?? LEVEL_WORD.en} ${level} · ${badgeLevelName(level, language)}`;
 
 /** Level 1 to 7 for an activity score. Bad input counts as no activity (level 1). */
-export function badgeLevelFor(points: unknown): BadgeLevel {
+export function badgeLevelFor(points: unknown, thresholds: readonly number[] = BADGE_THRESHOLDS): BadgeLevel {
   const p = typeof points === 'number' && Number.isFinite(points) ? points : 0;
   let lvl = 1;
-  BADGE_THRESHOLDS.forEach((t, i) => { if (p >= t) lvl = i + 1; });
+  thresholds.forEach((t, i) => { if (p >= t) lvl = i + 1; });
   return lvl as BadgeLevel;
 }
 
+export const MAX_BADGE_POINTS = 10_000_000;
+
+/** The admin's seven thresholds: whole numbers, the first is 0, each one higher than the one before. null when anything is wrong. */
+export function parseThresholds(raw: unknown): number[] | null {
+  if (!Array.isArray(raw) || raw.length !== 7) return null;
+  const n = raw.map((v) => (typeof v === 'number' ? v : typeof v === 'string' && v.trim() !== '' ? Number(v) : NaN));
+  if (n.some((x) => !Number.isInteger(x) || x < 0 || x > MAX_BADGE_POINTS)) return null;
+  if (n[0] !== 0) return null;
+  for (let i = 1; i < 7; i++) if (n[i] <= n[i - 1]) return null;
+  return n;
+}
+
 /** Points left to the next level, or null at the top. */
-export const pointsToNextBadge = (points: number): number | null => {
-  const lvl = badgeLevelFor(points);
-  return lvl >= 7 ? null : BADGE_THRESHOLDS[lvl] - Math.max(0, points);
+export const pointsToNextBadge = (points: number, thresholds: readonly number[] = BADGE_THRESHOLDS): number | null => {
+  const lvl = badgeLevelFor(points, thresholds);
+  return lvl >= 7 ? null : thresholds[lvl] - Math.max(0, points);
 };
 
 export const parseBadgeLevel = (v: unknown): BadgeLevel => (typeof v === 'number' && Number.isInteger(v) && v >= 1 && v <= 7 ? (v as BadgeLevel) : 1);

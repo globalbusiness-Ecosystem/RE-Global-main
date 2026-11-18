@@ -67,11 +67,12 @@ export async function PUT(req: NextRequest) {
       await logAdmin('founder.link', { linked: false, all: true });
       did += 1;
     }
-    const profileKeys = ['enabled', 'name', 'photoUrl', 'role', 'bio', 'quote', 'linkedin', 'website'].filter((k) => k in body);
+    const profileKeys = ['enabled', 'name', 'photoUrl', 'role', 'bio', 'quote', 'linkedin', 'website', 'badgeLevel'].filter((k) => k in body);
     if (profileKeys.length > 0) {
       if ('photoUrl' in body && body.photoUrl && !parseLogoUrl(body.photoUrl)) return bad('photoUrl must be an https image address');
       if ('linkedin' in body && body.linkedin && !parseLinkedIn(body.linkedin)) return bad('linkedin must be a https://…linkedin.com address');
       if ('website' in body && body.website && !parseLogoUrl(body.website)) return bad('website must start with https://');
+      if ('badgeLevel' in body && !(Number.isInteger(body.badgeLevel) && body.badgeLevel >= 1 && body.badgeLevel <= 7)) return bad('badgeLevel must be a whole number from 1 to 7');
       if ('enabled' in body && typeof body.enabled !== 'boolean') return bad('enabled must be true or false');
       const merged = parseFounder({ ...(await getFounder()), ...Object.fromEntries(profileKeys.map((k) => [k, body[k] === '' ? null : body[k]])) });
       await adminDb.collection('settings').doc('founder').set({ ...merged, updatedAt: Timestamp.now() });

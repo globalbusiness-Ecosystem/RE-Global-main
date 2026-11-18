@@ -39,7 +39,7 @@ describe('badge levels', () => {
   it('is wired into the seal, rewards endpoint and settings', () => {
     expect(src('components/verified-badge.tsx')).toContain('BADGE_COLORS');
     expect(src('lib/rewards-server.ts')).toContain('badgeLevel');
-    expect(src('components/pages/settings-page.tsx')).toContain('level={myBadge.level}');
+    expect(src('components/pages/settings-page.tsx')).toContain('level={shownLevel}');
   });
 });
 

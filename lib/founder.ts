@@ -12,8 +12,10 @@ export type Founder = {
   quote: FeatureText | null;
   linkedin: string | null;
   website: string | null;
+  // Colour level (1 to 7) of the seal beside the founder's name. The admin sets it; it starts at the top level.
+  badgeLevel: number;
 };
-export const DEFAULT_FOUNDER: Founder = { enabled: true, name: null, photoUrl: null, role: null, bio: null, quote: null, linkedin: null, website: null };
+export const DEFAULT_FOUNDER: Founder = { enabled: true, name: null, photoUrl: null, role: null, bio: null, quote: null, linkedin: null, website: null, badgeLevel: 7 };
 
 export const MAX_FOUNDER_NAME = 60;
 export const MAX_FOUNDER_ROLE = 90;
@@ -51,6 +53,7 @@ export function parseFounder(data: unknown): Founder {
     quote: parseText(d.quote, MAX_FOUNDER_QUOTE),
     linkedin: parseLinkedIn(d.linkedin),
     website: parseLogoUrl(d.website),
+    badgeLevel: typeof d.badgeLevel === 'number' && Number.isInteger(d.badgeLevel) && d.badgeLevel >= 1 && d.badgeLevel <= 7 ? d.badgeLevel : 7,
   };
 }
 
