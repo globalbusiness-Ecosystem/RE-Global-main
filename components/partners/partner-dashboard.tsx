@@ -1,4 +1,5 @@
 'use client';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { useState } from 'react';
 import { Copy, Check, Users, ShoppingBag } from 'lucide-react';
 import { formatNumber } from '@/lib/format';
@@ -28,7 +29,7 @@ export function PartnerDashboard({ language, me }: { language: string; me: MyPar
           <IconBadge icon={ROLE_META[profile.role].icon} />
           <div className="min-w-0 flex-1">
             <h2 className="font-semibold text-foreground">{pt('approvedT', language)}</h2>
-            <p className="truncate text-sm text-muted-foreground">{profile.company} · {pt(ROLE_META[profile.role].name, language)}</p>
+            <p className="flex min-w-0 items-center gap-1.5 text-sm text-muted-foreground"><span className="truncate">{profile.company} · {pt(ROLE_META[profile.role].name, language)}</span>{profile.status === 'approved' && <VerifiedBadge language={language} size={15} />}</p>
           </div>
           <div className="text-end">
             <p className="text-xs text-muted-foreground">{pt('rate', language)}</p>

@@ -9,8 +9,8 @@ const SEAL = Array.from({ length: 16 }, (_, k) => {
 }).join(' ');
 
 /** The gold "verified" seal that sits right after a person's name, like on the big global platforms. */
-export function VerifiedBadge({ language = 'en', size = 18, className = '' }: { language?: NavLanguage; size?: number; className?: string }) {
-  const label = kl('verifiedBadge', language);
+export function VerifiedBadge({ language = 'en', size = 18, className = '' }: { language?: string; size?: number; className?: string }) {
+  const label = kl('verifiedBadge', language as NavLanguage);
   return (
     <svg role="img" aria-label={label} width={size} height={size} viewBox="0 0 24 24" className={`inline-block shrink-0 ${className}`}>
       <title>{label}</title>

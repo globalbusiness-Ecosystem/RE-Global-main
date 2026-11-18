@@ -1,4 +1,5 @@
 'use client';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { useEffect, useRef, useState } from 'react';
 import { X, MapPin, Phone, Mail } from 'lucide-react';
 import { formatMoney } from '@/lib/format';
@@ -72,7 +73,7 @@ export function ProjectDetailModal({ id, language, onClose }: { id: string; lang
                 </div>
                 <h2 className="mt-2 text-xl font-bold text-foreground">{p.title}</h2>
                 <p className="mt-1 text-2xl font-bold text-accent">{formatMoney(p.price, p.currency, language)}</p>
-                <p className="mt-1 text-sm text-muted-foreground">{pp('byPartner', language)} <span className="font-medium text-foreground">{p.company}</span> · {pt(meta.name, language)}</p>
+                <p className="mt-1 text-sm text-muted-foreground">{pp('byPartner', language)} <span className="font-medium text-foreground">{p.company}</span> <VerifiedBadge language={language} size={15} className="align-[-3px]" /> · {pt(meta.name, language)}</p>
               </div>
               <p className="whitespace-pre-line text-sm leading-relaxed text-foreground">{p.description}</p>
               <section>

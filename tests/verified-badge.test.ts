@@ -9,7 +9,7 @@ describe('verified badge', () => {
     const b = src('components/verified-badge.tsx');
     expect(b.toLowerCase()).toContain('#d4af37');
     expect(b).toContain('role="img"');
-    expect(b).toContain("kl('verifiedBadge', language)");
+    expect(b).toContain("kl('verifiedBadge', language as NavLanguage)");
     expect(kl('verifiedBadge', 'en')).toBe('Verified');
     expect(kl('verifiedBadge', 'ar')).toBe('تم التحقق');
   });

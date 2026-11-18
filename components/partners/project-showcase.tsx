@@ -1,4 +1,5 @@
 'use client';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { useEffect, useMemo, useState } from 'react';
 import { MapPin, Search } from 'lucide-react';
 import { formatMoney } from '@/lib/format';
@@ -69,7 +70,7 @@ export function ProjectShowcase({ language, onLoaded }: { language: string; onLo
                 <h3 className="truncate font-semibold text-foreground">{p.title}</h3>
                 <p className="flex items-center gap-1 text-xs text-muted-foreground"><MapPin className="h-3.5 w-3.5 shrink-0" aria-hidden /><span className="truncate">{p.city}, {countryName(p.country, language)}</span></p>
                 <p className="text-lg font-bold text-accent">{formatMoney(p.price, p.currency, language)}</p>
-                <p className="truncate text-xs text-muted-foreground">{pp('byPartner', language)} {p.company}</p>
+                <p className="flex min-w-0 items-center gap-1 text-xs text-muted-foreground"><span className="truncate">{pp('byPartner', language)} {p.company}</span><VerifiedBadge language={language} size={14} /></p>
               </div>
             </button>
           ))}
