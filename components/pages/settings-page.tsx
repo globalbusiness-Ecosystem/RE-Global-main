@@ -45,6 +45,7 @@ import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
+import { VerifiedBadge } from '@/components/verified-badge';
 import { getOrCreateReferralCode, getReferralCount } from '@/lib/referrals';
 import { authHeaders } from '@/lib/api-token';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
@@ -284,8 +285,9 @@ export default function SettingsPage({
             </button>
           </div>
           <div className="min-w-0 max-w-full">
-            <p className="font-bold text-foreground text-lg truncate">
-              {username ? (shownName ?? sl('guest', language)) : sl('guest', language)}
+            <p className="flex min-w-0 items-center gap-1.5 text-lg font-bold text-foreground">
+              <span className="truncate">{username ? (shownName ?? sl('guest', language)) : sl('guest', language)}</span>
+              {level === 'full' && <VerifiedBadge language={language} />}
             </p>
             {isWebAccount && handle && handle !== shownName && (
               <p dir="ltr" className="text-xs text-muted-foreground">@{handle}</p>

@@ -149,16 +149,6 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
           </Link>
         )}
 
-        {isInitialized && accessToken && !isPiBrowser() && kycRequired && kycStatus === 'approved' && (
-          <Link
-            href="/kyc"
-            className="flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold"
-            style={{ color: 'rgb(74, 222, 128)', borderColor: 'rgb(74, 222, 128)' }}
-          >
-            ✓ {kl('verifiedBadge', navLang)}
-          </Link>
-        )}
-
         <button
           className="p-1 hover:opacity-70 transition flex-shrink-0"
           onClick={onSettingsClick}
