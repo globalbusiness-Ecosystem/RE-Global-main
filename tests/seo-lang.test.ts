@@ -63,6 +63,6 @@ describe('robots + sitemap', () => {
   it('lists only public routes with absolute URLs', async () => {
     process.env.NEXT_PUBLIC_BASE_URL = 'https://example.com';
     const urls = (await sitemap()).map((s) => s.url);
-    expect(urls).toEqual(['https://example.com/', 'https://example.com/privacy', 'https://example.com/terms']);
+    expect(urls).toEqual(['https://example.com/about', 'https://example.com/', 'https://example.com/privacy', 'https://example.com/terms']);
   });
 });

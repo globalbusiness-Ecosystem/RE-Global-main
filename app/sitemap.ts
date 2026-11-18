@@ -9,5 +9,7 @@ export const revalidate = 3600;
 // real server-rendered pages: one per visible listing and one per country that has listings,
 // each with links to its versions in every language.
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  return sitemapEntries(siteUrl(), await listPublicListings());
+  const base = siteUrl();
+  // The About page (founder and platform) is a real address search engines can read.
+  return [{ url: `${base}/about`, changeFrequency: 'monthly', priority: 0.6 }, ...sitemapEntries(base, await listPublicListings())];
 }

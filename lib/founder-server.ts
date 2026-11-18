@@ -1,4 +1,5 @@
 import 'server-only';
+import { unstable_cache } from 'next/cache';
 import { adminDb } from '@/lib/firebase-admin';
 import { DEFAULT_FOUNDER, parseFounder, type Founder } from '@/lib/founder';
 
@@ -26,3 +27,6 @@ export async function getFounderUid(): Promise<string | null> {
 }
 
 export const isFounderUid = async (uid: string) => (await getFounderUid()) === uid;
+
+// Search-engine pages read the founder often; one database read an hour is plenty.
+export const getFounderCached = unstable_cache(getFounder, ['founder-public'], { revalidate: 3600 });
