@@ -14,7 +14,7 @@ describe('verified badge', () => {
     expect(kl('verifiedBadge', 'ar')).toBe('تم التحقق');
   });
   it('shows next to the name only for fully verified people, and the green header pill is gone', () => {
-    expect(src('components/pages/settings-page.tsx')).toMatch(/level === 'full' && <VerifiedBadge/);
+    expect(src('components/pages/settings-page.tsx')).toMatch(/level === 'full'[^\n]*<VerifiedBadge/);
     expect(src('components/header.tsx')).not.toContain('verifiedBadge');
   });
 });

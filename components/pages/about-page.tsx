@@ -7,6 +7,7 @@ import { ABOUT_I18N } from '@/lib/about-i18n';
 import { DEFAULT_ABOUT, parseAbout, type AboutSettings } from '@/lib/about-settings';
 import { useTexts } from '@/lib/useTexts';
 import { BrandLogo } from '@/components/brand-logo';
+import { FounderCard } from '@/components/founder-card';
 
 interface AboutPageProps {
   language: NavLanguage;
@@ -61,6 +62,8 @@ export default function AboutPage({ language, onBack, showBackButton = true }: A
           <h2 className="mb-2 text-xl font-bold text-foreground">{t.missionTitle}</h2>
           <p className="leading-relaxed text-muted-foreground">{t.missionBody}</p>
         </section>
+
+        <FounderCard language={language} />
 
         <section>
           <h2 className="mb-4 text-xl font-bold text-foreground">{t.whatTitle}</h2>

@@ -5,6 +5,7 @@ import TextsEditor from './texts-editor';
 import PricingSettings from './pricing-settings';
 import LegalSettings from './legal-settings';
 import AboutSettingsPanel from './about-settings';
+import FounderSettings from './founder-settings';
 import RewardsSettings from './rewards-settings';
 import RewardsLeaderboard from './rewards-leaderboard';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
@@ -214,7 +215,7 @@ export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => v
         <Btn small kind={kind === 'rewards' ? 'gold' : 'ghost'} onClick={() => setKind('rewards')}>🎁 المكافآت</Btn>
         <Btn small kind={kind === 'about' ? 'gold' : 'ghost'} onClick={() => setKind('about')}>ℹ️ نبذة عنا</Btn>
       </div>
-      {kind === 'about' ? <><AboutSettingsPanel onUnauthorized={onUnauthorized} /><TextsEditor key="about-texts" initialPage="about" onUnauthorized={onUnauthorized} /></> : kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : kind === 'rewards' ? <><RewardsSettings onUnauthorized={onUnauthorized} /><RewardsLeaderboard onUnauthorized={onUnauthorized} /></> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
+      {kind === 'about' ? <><AboutSettingsPanel onUnauthorized={onUnauthorized} /><FounderSettings onUnauthorized={onUnauthorized} /><TextsEditor key="about-texts" initialPage="about" onUnauthorized={onUnauthorized} /></> : kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <LegalSettings onUnauthorized={onUnauthorized} /> : kind === 'rewards' ? <><RewardsSettings onUnauthorized={onUnauthorized} /><RewardsLeaderboard onUnauthorized={onUnauthorized} /></> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
     </div>
   );
 }
