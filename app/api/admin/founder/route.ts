@@ -8,6 +8,7 @@ import { guardApi } from '@/lib/api-guard';
 import { verifyPiAccessToken } from '@/lib/pi-auth';
 import { getFounder, getFounderUids } from '@/lib/founder-server';
 import { parseFounder, parseLinkedIn } from '@/lib/founder';
+import { consumeStepUp, passkeyCount, STEPUP_HEADER } from '@/lib/stepup-server';
 import { parseFounderUids, MAX_FOUNDER_ACCOUNTS } from '@/lib/founder-accounts';
 import { parseLogoUrl } from '@/lib/branding';
 
@@ -48,6 +49,9 @@ export async function PUT(req: NextRequest) {
         const user = await guardApi(req, { scope: 'founder-link', limit: 10 });
         if (user instanceof NextResponse) return NextResponse.json({ ok: false, error: 'سجّل الدخول في التطبيق من نفس المتصفح الأول' }, { status: 401 });
         const ref = adminDb.collection('settings').doc('founderAccount');
+        // The device must prove it is you: a fresh fingerprint / face check (passkey) of THIS account is required to link it.
+        if ((await passkeyCount(user.uid)) === 0) return NextResponse.json({ ok: false, error: 'passkey_required' }, { status: 409 });
+        if (!(await consumeStepUp(user.uid, req.headers.get(STEPUP_HEADER)))) return NextResponse.json({ ok: false, error: 'stepup_required' }, { status: 403 });
         const cur = await getFounderUids();
         if (!cur.includes(user.uid) && cur.length >= MAX_FOUNDER_ACCOUNTS) return bad('Too many linked accounts');
         await ref.set({ uids: parseFounderUids({ uids: [...cur, user.uid] }), updatedAt: Timestamp.now() });

@@ -6,6 +6,7 @@ import { VerifiedBadge } from '@/components/verified-badge';
 import { BADGE_LEVELS, badgeLevelName } from '@/lib/badge-level';
 import { shrinkImage } from '@/lib/shrink-image';
 import { authHeaders } from '@/lib/api-token';
+import { fetchPrefs, fetchStepUpToken } from '@/lib/stepup-client';
 import { adminApi, UnauthorizedError, Btn, Card, inputCls } from './admin-ui';
 
 type Status = { linked: boolean; linkedCount: number; linkedToMe: boolean; signedIn: boolean };
@@ -50,7 +51,24 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
   };
   const link = async (on: boolean) => {
     setBusy(true); setMsg('');
-    try { apply(await call({ method: 'PUT', body: JSON.stringify({ linkMe: on }) })); setMsg(on ? '✅ حسابك الحالي اتربط كمؤسس.' : '✅ اتفك الربط.'); } catch (e) { fail(e); } finally { setBusy(false); }
+    try {
+      const headers: Record<string, string> = {};
+      if (on) {
+        // Linking an account as the founder needs a fingerprint / face check on this device (a passkey), so nobody else can claim it.
+        const bearer = (authHeaders().Authorization || '').replace(/^Bearer\s+/i, '');
+        const prefs = bearer ? await fetchPrefs(bearer) : null;
+        if (prefs && prefs.passkeys === 0) { setMsg('⚠️ لازم تضيف بصمة أو Face ID لحسابك الأول: الإعدادات ← الأمان ← مفاتيح المرور، وبعدها ارجع اضغط اربط.'); return; }
+        const t = bearer ? await fetchStepUpToken(bearer) : null;
+        if (!t || !t.ok) { setMsg(t && t.reason === 'cancelled' ? 'اتلغى التأكيد بالبصمة.' : '❌ التأكيد بالبصمة ما نجحش. جرّب تاني من جهازك.'); return; }
+        headers['X-Stepup-Token'] = t.token;
+      }
+      apply(await call({ method: 'PUT', headers, body: JSON.stringify({ linkMe: on }) }));
+      setMsg(on ? '✅ حسابك الحالي اتربط كمؤسس.' : '✅ اتفك الربط.');
+    } catch (e) {
+      if (e instanceof Error && e.message === 'passkey_required') setMsg('⚠️ لازم تضيف بصمة أو Face ID لحسابك الأول: الإعدادات ← الأمان ← مفاتيح المرور.');
+      else if (e instanceof Error && e.message === 'stepup_required') setMsg('❌ لازم تأكد ببصمة جهازك الأول. جرّب تاني.');
+      else fail(e);
+    } finally { setBusy(false); }
   };
 
   const changed = !!draft && JSON.stringify(payload(draft)) !== saved;
@@ -65,6 +83,7 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
           <div className="mb-4 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
             <p className="mb-2 text-sm text-gray-100">{(status.linkedToMe ? '✅ حسابك الحالي هو المؤسس' : status.linked ? 'فيه حسابات مربوطة كمؤسس (مش الحساب اللي مسجّل بيه حالياً)' : 'مفيش حساب مربوط كمؤسس لسه') + (status.linkedCount > 0 ? ` — عدد الحسابات المربوطة: ${status.linkedCount}` : '')}</p>
             {!status.signedIn && <p className="mb-2 text-xs text-amber-400">لازم تكون مسجّل دخول في التطبيق من نفس المتصفح عشان تربط حسابك.</p>}
+            <p className="mb-2 text-xs text-gray-400">🔐 الربط بيتأكد ببصمة أو Face ID جهازك (مفتاح مرور). المنصة ما بتشوفش ولا بتخزّن وشك أو بصمتك أبداً.</p>
             <div className="flex flex-wrap gap-2">
               <Btn small onClick={() => void link(true)} disabled={busy || !status.signedIn || status.linkedToMe}>اربط حسابي الحالي كمؤسس</Btn>
               {status.linkedToMe && <Btn small kind="ghost" onClick={() => void link(false)} disabled={busy}>فك ربط حسابي الحالي</Btn>}
