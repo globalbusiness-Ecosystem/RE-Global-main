@@ -7,7 +7,8 @@ const src = (p: string) => readFileSync(p, 'utf8');
 describe('verified badge', () => {
   it('is a gold seal with an accessible label in the person\'s language', () => {
     const b = src('components/verified-badge.tsx');
-    expect(b.toLowerCase()).toContain('#d4af37');
+    expect(b.toLowerCase()).toContain('badge_colors');
+    expect(readFileSync('lib/badge-level.ts', 'utf8').toLowerCase()).toContain('#d4af37');
     expect(b).toContain('role="img"');
     expect(b).toContain("kl('verifiedBadge', language as NavLanguage)");
     expect(kl('verifiedBadge', 'en')).toBe('Verified');

@@ -1,6 +1,7 @@
 import 'server-only';
 import { adminDb } from '@/lib/firebase-admin';
 import { referralStats } from '@/lib/referrals-server';
+import { badgeLevelFor } from '@/lib/badge-level';
 import { DEFAULT_RULES, countPurchases, countStays, pointsFor, progress, readRules, type Counts, type Rules } from '@/lib/rewards';
 
 const LIMIT = 1000;
@@ -33,5 +34,5 @@ export async function myRewards(uid: string, username: string, nowMs = Date.now(
     referrals: referral.qualified,
   };
   const points = pointsFor(counts, rules);
-  return { points, counts, rules, referral, ...progress(points, rules) };
+  return { points, counts, rules, referral, badgeLevel: badgeLevelFor(points), ...progress(points, rules) };
 }

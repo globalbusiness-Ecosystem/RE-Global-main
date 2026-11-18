@@ -2,6 +2,7 @@ import 'server-only';
 import { unstable_cache } from 'next/cache';
 import { adminDb } from '@/lib/firebase-admin';
 import { DEFAULT_FOUNDER, parseFounder, type Founder } from '@/lib/founder';
+import { parseFounderUids } from '@/lib/founder-accounts';
 
 // settings/founder holds what visitors may see. settings/founderAccount holds which account is the founder; it is only
 // ever compared on the server, so the account id never reaches a visitor.
@@ -16,17 +17,18 @@ export async function getFounder(): Promise<Founder> {
   }
 }
 
-export async function getFounderUid(): Promise<string | null> {
+// One person can have several accounts (a web account and a Pi account), so the founder is a short list of ids.
+// Older data kept a single `uid`; it is still read.
+export async function getFounderUids(): Promise<string[]> {
   try {
     const snap = await withTimeout(adminDb.collection('settings').doc('founderAccount').get());
-    const uid = snap.exists ? snap.data()?.uid : null;
-    return typeof uid === 'string' && uid.length > 0 && uid.length <= 200 ? uid : null;
+    return snap.exists ? parseFounderUids(snap.data()) : [];
   } catch {
-    return null;
+    return [];
   }
 }
 
-export const isFounderUid = async (uid: string) => (await getFounderUid()) === uid;
+export const isFounderUid = async (uid: string) => (await getFounderUids()).includes(uid);
 
 // Search-engine pages read the founder often; one database read an hour is plenty.
 export const getFounderCached = unstable_cache(getFounder, ['founder-public'], { revalidate: 3600 });

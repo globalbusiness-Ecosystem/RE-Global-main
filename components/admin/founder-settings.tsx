@@ -6,7 +6,7 @@ import { shrinkImage } from '@/lib/shrink-image';
 import { authHeaders } from '@/lib/api-token';
 import { adminApi, UnauthorizedError, Btn, Card, inputCls } from './admin-ui';
 
-type Status = { linked: boolean; linkedToMe: boolean; signedIn: boolean };
+type Status = { linked: boolean; linkedCount: number; linkedToMe: boolean; signedIn: boolean };
 type Draft = Omit<Founder, 'role' | 'bio' | 'quote'> & { role: { en: string; ar: string }; bio: { en: string; ar: string }; quote: { en: string; ar: string } };
 const t2 = (v: { en?: string; ar?: string } | null) => ({ en: v?.en ?? '', ar: v?.ar ?? '' });
 const toDraft = (f: Founder): Draft => ({ ...f, role: t2(f.role), bio: t2(f.bio), quote: t2(f.quote) });
@@ -17,7 +17,7 @@ const payload = (d: Draft) => ({ enabled: d.enabled, name: d.name ?? '', photoUr
 export default function FounderSettings({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [draft, setDraft] = useState<Draft | null>(null);
   const [saved, setSaved] = useState('');
-  const [status, setStatus] = useState<Status>({ linked: false, linkedToMe: false, signedIn: false });
+  const [status, setStatus] = useState<Status>({ linked: false, linkedCount: 0, linkedToMe: false, signedIn: false });
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState('');
 
@@ -25,7 +25,7 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
     if (e instanceof UnauthorizedError) onUnauthorized();
     else setMsg('❌ ' + (e instanceof Error ? e.message : 'حصل خطأ'));
   };
-  const apply = (d: Founder & Status) => { const x = toDraft(d); setDraft(x); setSaved(JSON.stringify(payload(x))); setStatus({ linked: d.linked, linkedToMe: d.linkedToMe, signedIn: d.signedIn }); };
+  const apply = (d: Founder & Status) => { const x = toDraft(d); setDraft(x); setSaved(JSON.stringify(payload(x))); setStatus({ linked: d.linked, linkedCount: d.linkedCount ?? (d.linked ? 1 : 0), linkedToMe: d.linkedToMe, signedIn: d.signedIn }); };
   const call = (init?: RequestInit) => adminApi<Founder & Status>('/api/admin/founder', { ...init, headers: { ...(init?.headers as Record<string, string>), ...authHeaders() } });
 
   useEffect(() => { call().then(apply).catch(fail); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -61,11 +61,11 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
       {draft ? (
         <>
           <div className="mb-4 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
-            <p className="mb-2 text-sm text-gray-100">{status.linkedToMe ? '✅ حسابك الحالي هو المؤسس' : status.linked ? 'فيه حساب مربوط كمؤسس (مش الحساب اللي مسجّل بيه حالياً)' : 'مفيش حساب مربوط كمؤسس لسه'}</p>
+            <p className="mb-2 text-sm text-gray-100">{(status.linkedToMe ? '✅ حسابك الحالي هو المؤسس' : status.linked ? 'فيه حسابات مربوطة كمؤسس (مش الحساب اللي مسجّل بيه حالياً)' : 'مفيش حساب مربوط كمؤسس لسه') + (status.linkedCount > 0 ? ` — عدد الحسابات المربوطة: ${status.linkedCount}` : '')}</p>
             {!status.signedIn && <p className="mb-2 text-xs text-amber-400">لازم تكون مسجّل دخول في التطبيق من نفس المتصفح عشان تربط حسابك.</p>}
             <div className="flex flex-wrap gap-2">
               <Btn small onClick={() => void link(true)} disabled={busy || !status.signedIn || status.linkedToMe}>اربط حسابي الحالي كمؤسس</Btn>
-              {status.linked && <Btn small kind="ghost" onClick={() => void link(false)} disabled={busy}>فك الربط</Btn>}
+              {status.linkedToMe && <Btn small kind="ghost" onClick={() => void link(false)} disabled={busy}>فك ربط حسابي الحالي</Btn>}
             </div>
           </div>
 

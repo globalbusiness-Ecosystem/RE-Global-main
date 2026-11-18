@@ -46,6 +46,9 @@ import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { VerifiedBadge } from '@/components/verified-badge';
+import { useMyBadgeLevel } from '@/hooks/use-badge-level';
+import { rewardStrings } from '@/lib/rewards';
+import { badgeLevelLabel, pointsToNextBadge, BADGE_COLORS } from '@/lib/badge-level';
 import { useIsFounder } from '@/hooks/use-founder';
 import { FOUNDER_UI, founderText } from '@/lib/founder-i18n';
 import { getOrCreateReferralCode, getReferralCount } from '@/lib/referrals';
@@ -104,6 +107,7 @@ export default function SettingsPage({
   const t = SETTINGS_I18N[language];
   const { username, isPiVerified, accessToken } = usePiAuth();
   const isFounder = useIsFounder(accessToken);
+  const myBadge = useMyBadgeLevel(accessToken);
   const { name: shownName, isWebAccount, kycApproved } = useIdentity();
   const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
   const [profileVerified, setProfileVerified] = useState(false);
@@ -290,13 +294,14 @@ export default function SettingsPage({
           <div className="min-w-0 max-w-full">
             <p className="flex min-w-0 items-center gap-1.5 text-lg font-bold text-foreground">
               <span className="truncate">{username ? (shownName ?? sl('guest', language)) : sl('guest', language)}</span>
-              {(level === 'full' || isFounder) && <VerifiedBadge language={language} />}
+              {(level === 'full' || isFounder) && <VerifiedBadge language={language} level={myBadge.level} />}
             </p>
             {isFounder && <span className="mb-0.5 inline-block rounded-full bg-[#d4af37] px-2.5 py-0.5 text-[11px] font-bold text-black">👑 {founderText(FOUNDER_UI.chip, language)}</span>}
             {isWebAccount && handle && handle !== shownName && (
               <p dir="ltr" className="text-xs text-muted-foreground">@{handle}</p>
             )}
             <p className="text-xs text-muted-foreground">{statusLine}</p>
+            {(level === 'full' || isFounder) && <p className="mt-0.5 text-[11px] font-semibold" style={{ color: BADGE_COLORS[myBadge.level].main }}>{badgeLevelLabel(myBadge.level, language)}{pointsToNextBadge(myBadge.points) !== null ? ` · ${pointsToNextBadge(myBadge.points)} ${rewardStrings(language).unit}` : ''}</p>}
           </div>
           <button type="button" onClick={() => setPickerOpen(true)} className="text-xs font-medium text-accent border border-accent/40 rounded-full px-3 py-1 hover:bg-accent/10 transition">
             {(AVATAR_I18N[language] ?? AVATAR_I18N.en).change}

@@ -6,8 +6,9 @@ import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { guardApi } from '@/lib/api-guard';
 import { verifyPiAccessToken } from '@/lib/pi-auth';
-import { getFounder, getFounderUid } from '@/lib/founder-server';
+import { getFounder, getFounderUids } from '@/lib/founder-server';
 import { parseFounder, parseLinkedIn } from '@/lib/founder';
+import { parseFounderUids, MAX_FOUNDER_ACCOUNTS } from '@/lib/founder-accounts';
 import { parseLogoUrl } from '@/lib/branding';
 
 export const dynamic = 'force-dynamic';
@@ -23,8 +24,8 @@ async function myUid(req: NextRequest): Promise<string | null> {
 }
 
 async function view(req: NextRequest) {
-  const [founder, uid, me] = await Promise.all([getFounder(), getFounderUid(), myUid(req)]);
-  return { ok: true, ...founder, linked: !!uid, linkedToMe: !!uid && !!me && uid === me, signedIn: !!me };
+  const [founder, uids, me] = await Promise.all([getFounder(), getFounderUids(), myUid(req)]);
+  return { ok: true, ...founder, linked: uids.length > 0, linkedCount: uids.length, linkedToMe: !!me && uids.includes(me), signedIn: !!me };
 }
 
 export async function GET(req: NextRequest) {
@@ -46,12 +47,24 @@ export async function PUT(req: NextRequest) {
       if (body.linkMe) {
         const user = await guardApi(req, { scope: 'founder-link', limit: 10 });
         if (user instanceof NextResponse) return NextResponse.json({ ok: false, error: 'سجّل الدخول في التطبيق من نفس المتصفح الأول' }, { status: 401 });
-        await adminDb.collection('settings').doc('founderAccount').set({ uid: user.uid, updatedAt: Timestamp.now() });
+        const ref = adminDb.collection('settings').doc('founderAccount');
+        const cur = await getFounderUids();
+        if (!cur.includes(user.uid) && cur.length >= MAX_FOUNDER_ACCOUNTS) return bad('Too many linked accounts');
+        await ref.set({ uids: parseFounderUids({ uids: [...cur, user.uid] }), updatedAt: Timestamp.now() });
         await logAdmin('founder.link', { linked: true });
       } else {
-        await adminDb.collection('settings').doc('founderAccount').delete();
+        const ref = adminDb.collection('settings').doc('founderAccount');
+        const me = await myUid(req);
+        const next = me ? (await getFounderUids()).filter((u) => u !== me) : [];
+        if (next.length > 0) await ref.set({ uids: next, updatedAt: Timestamp.now() });
+        else await ref.delete();
         await logAdmin('founder.link', { linked: false });
       }
+      did += 1;
+    }
+    if (body.unlinkAll === true) {
+      await adminDb.collection('settings').doc('founderAccount').delete();
+      await logAdmin('founder.link', { linked: false, all: true });
       did += 1;
     }
     const profileKeys = ['enabled', 'name', 'photoUrl', 'role', 'bio', 'quote', 'linkedin', 'website'].filter((k) => k in body);
