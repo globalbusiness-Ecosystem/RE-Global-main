@@ -32,6 +32,7 @@ export default function BottomNav({ currentPage, setCurrentPage, language = 'en'
         return (
           <button
             key={item.id}
+            data-tour={`nav-${item.id}`}
             onClick={() => {
               try {
                 setCurrentPage(item.id);

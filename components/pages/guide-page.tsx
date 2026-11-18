@@ -4,6 +4,8 @@ import type { NavLanguage } from '@/lib/nav-i18n';
 import { ArrowLeft, UserCheck, ShieldCheck, TriangleAlert, BookOpen, Rocket, HelpCircle, LifeBuoy } from 'lucide-react';
 import { GUIDE_I18N } from '@/lib/guide-i18n';
 import { useTexts } from '@/lib/useTexts';
+import { TOUR_I18N } from '@/lib/tour-i18n';
+import { startTour } from '@/lib/tour';
 
 interface GuidePageProps {
   language: NavLanguage;
@@ -82,6 +84,7 @@ export default function GuidePage({ language, onBack, onNavigate, showBackButton
 
         <div className="mb-8 flex flex-wrap gap-2">
           <button type="button" onClick={() => onNavigate?.('buy')} className="rounded-full bg-accent px-5 py-2 text-sm font-semibold text-black">{t.browseCta}</button>
+          <button type="button" onClick={() => { onNavigate?.('home'); window.setTimeout(startTour, 400); }} className="rounded-full border border-border px-5 py-2 text-sm text-foreground hover:bg-accent/10">🧭 {(TOUR_I18N[language] ?? TOUR_I18N.en).replay}</button>
           <button type="button" onClick={() => onNavigate?.('tokenized')} className="rounded-full border border-accent px-5 py-2 text-sm font-semibold text-accent">{t.tokenizedCta}</button>
         </div>
 

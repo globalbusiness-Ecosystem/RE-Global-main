@@ -108,6 +108,7 @@ export default function Header({ language, onSettingsClick, onMenuItemClick, cur
       <div className="bg-[#100c24]/90 backdrop-blur-md border-b border-white/5 h-12 px-3 flex items-center justify-between gap-2">
         <button
           className="p-1 hover:opacity-70 transition flex-shrink-0"
+          data-tour="menu"
           onClick={() => setMenuOpen(!menuOpen)}
         >
           <Menu className="w-4 h-4 text-gray-400" strokeWidth={1.5} />

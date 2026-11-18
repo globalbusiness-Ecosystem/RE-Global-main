@@ -2,7 +2,7 @@
 import type { NavLanguage } from '@/lib/nav-i18n';
 
 import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
 import PanoramicBanner from '@/components/panoramic-banner';
@@ -10,6 +10,9 @@ import { FirestoreListings } from '@/components/firestore-listings';
 import { FEATURE_ICONS, DEFAULT_ICON_ORDER } from '@/components/home-feature-icon';
 import { useHomeFeatures } from '@/hooks/use-home-features';
 import { GUIDE_I18N } from '@/lib/guide-i18n';
+import { TOUR_I18N } from '@/lib/tour-i18n';
+import { hideGuideCard, isGuideCardHidden } from '@/lib/tour';
+import AppTour from '@/components/app-tour';
 import { useAnnouncements } from '@/hooks/use-announcements';
 import { HomeAnnouncements } from '@/components/home-announcements';
 import { pickText } from '@/lib/home-features';
@@ -57,6 +60,9 @@ export default function HomePage({
   const [showVRTour, setShowVRTour] = useState(false);
   const homeFeatures = useHomeFeatures();
   const announcements = useAnnouncements();
+  // null until the browser has been asked, so a card someone hid never flashes back
+  const [guideCardHidden, setGuideCardHidden] = useState<boolean | null>(null);
+  useEffect(() => { setGuideCardHidden(isGuideCardHidden()); }, []);
   const stripItems = (homeFeatures.items ?? HOME_FEATURES.map((t, i) => ({ icon: DEFAULT_ICON_ORDER[i % DEFAULT_ICON_ORDER.length], t }))).map((it) => ({ icon: it.icon, text: pickText(it.t, language) }));
   const router = useRouter();
 
@@ -68,18 +74,24 @@ export default function HomePage({
         onTokenizedClick={() => onCategoryClick?.('tokenized')}
       />
       <PanoramicBanner />
+      <AppTour language={language} />
 
       <div className="px-4 py-8 max-w-md md:max-w-2xl lg:max-w-5xl mx-auto relative z-10">
 
         {/* Offers, partnerships, events and videos the admin writes. The old stat boxes only come back if the admin switches them on. */}
-        <button type="button" onClick={() => onCategoryClick?.('guide')} className="mb-6 flex w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 text-start transition hover:bg-accent/15">
-          <span aria-hidden className="text-2xl">🧭</span>
-          <span className="min-w-0 flex-1">
-            <span className="block text-sm font-bold text-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).heroTitle}</span>
-            <span className="block text-xs text-muted-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).headerTitle}</span>
-          </span>
-          <span aria-hidden className="text-accent">›</span>
-        </button>
+        {guideCardHidden === false && (
+          <div data-tour="guide-card" className="relative mb-6">
+            <button type="button" onClick={() => onCategoryClick?.('guide')} className="flex w-full items-center gap-3 rounded-2xl border border-accent/40 bg-accent/10 p-4 pe-12 text-start transition hover:bg-accent/15">
+              <span aria-hidden className="text-2xl">🧭</span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold text-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).heroTitle}</span>
+                <span className="block text-xs text-muted-foreground">{(GUIDE_I18N[language] ?? GUIDE_I18N.en).headerTitle}</span>
+              </span>
+              <span aria-hidden className="text-accent">›</span>
+            </button>
+            <button type="button" aria-label={(TOUR_I18N[language] ?? TOUR_I18N.en).hideCard} title={(TOUR_I18N[language] ?? TOUR_I18N.en).hideCard} onClick={() => { hideGuideCard(); setGuideCardHidden(true); }} className="absolute end-2 top-2 flex h-8 w-8 items-center justify-center rounded-full text-muted-foreground hover:bg-black/20 hover:text-foreground">✕</button>
+          </div>
+        )}
         <HomeAnnouncements language={language} onCategoryClick={onCategoryClick} />
         {announcements.showStats && (
         <div className="mb-12 overflow-x-auto">
