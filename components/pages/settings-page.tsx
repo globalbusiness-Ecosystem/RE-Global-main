@@ -284,7 +284,7 @@ export default function SettingsPage({
         <div className="flex flex-col items-center text-center gap-3 -mt-14">
           <div className="relative rounded-full ring-4 ring-card shadow-xl">
             {isFounder && <FounderRing />}
-            <button onClick={handleLogoTap} className="block rounded-full" aria-label={shownName ?? 'Profile'}>
+            <button onClick={handleLogoTap} className="relative z-10 block rounded-full" aria-label={shownName ?? 'Profile'}>
               <UserAvatar avatar={avatar} username={shownName} size={88} />
             </button>
             <button
