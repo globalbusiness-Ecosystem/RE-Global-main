@@ -15,6 +15,7 @@ import {
   Timestamp,
 } from 'firebase/firestore';
 import { db, waitForFirebaseAuth } from './firebase';
+import { authHeaders } from './api-token';
 import { toast } from 'sonner';
 
 interface Property {
@@ -355,6 +356,19 @@ class FirebaseDatabase {
   }
 
   async getContractsForUser(username: string): Promise<SmartContract[]> {
+    // The server also returns the contracts of accounts linked to this person (Pi and web). If it cannot answer, the direct query below still works.
+    try {
+      const res = await fetch('/api/my-contracts', { headers: authHeaders(), cache: 'no-store' });
+      if (res.ok) {
+        const j = await res.json();
+        if (Array.isArray(j?.contracts)) {
+          const when = (v: unknown) => { const d = typeof v === 'string' ? new Date(v) : null; return d && !isNaN(d.getTime()) ? d : new Date(); };
+          return (j.contracts as Record<string, unknown>[])
+            .map((c) => ({ ...c, createdAt: when(c.createdAt), updatedAt: when(c.updatedAt) }) as unknown as SmartContract)
+            .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+        }
+      }
+    } catch { /* fall back to the direct query */ }
     try {
       const buyerQuery = query(collection(db, 'contracts'), where('buyerUsername', '==', username));
       const sellerQuery = query(collection(db, 'contracts'), where('sellerUsername', '==', username));
