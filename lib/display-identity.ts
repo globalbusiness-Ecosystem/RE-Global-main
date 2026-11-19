@@ -4,7 +4,10 @@ export function isTechnicalName(name: string | null | undefined): boolean {
   return typeof name === 'string' && name.startsWith('web_');
 }
 
-export function friendlyName(input: { username: string | null; displayName?: string | null; handle?: string | null }): string | null {
+export function friendlyName(input: { username: string | null; displayName?: string | null; handle?: string | null; customName?: string | null }): string | null {
+  // A name the person chose inside the platform (unique, see lib/display-name.ts) comes first.
+  const chosen = input.customName?.trim();
+  if (chosen) return chosen;
   if (input.username && !isTechnicalName(input.username)) return input.username;
   const shown = input.displayName?.trim();
   if (shown) return shown;

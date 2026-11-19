@@ -47,6 +47,6 @@ describe('wiring', () => {
     expect(src('components/admin/content-tab.tsx')).toContain('<FounderSettings');
     const s = src('components/pages/settings-page.tsx');
     expect(s).toContain('useIsFounder(accessToken)');
-    expect(s).toContain('(level === \'full\' || isFounder) && <VerifiedBadge');
+    expect(s).toContain('showBadge={level === \'full\' || isFounder}');
   });
 });

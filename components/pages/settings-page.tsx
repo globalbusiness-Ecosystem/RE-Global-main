@@ -45,7 +45,7 @@ import { getStoredTheme, applyTheme } from '@/lib/theme';
 import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
-import { VerifiedBadge } from '@/components/verified-badge';
+import { ProfileIdentityLine } from '@/components/profile-identity-line';
 import { useMyBadgeLevel } from '@/hooks/use-badge-level';
 import { rewardStrings } from '@/lib/rewards';
 import { badgeLevelLabel, pointsToNextBadge, BADGE_COLORS, type BadgeLevel } from '@/lib/badge-level';
@@ -294,10 +294,7 @@ export default function SettingsPage({
             </button>
           </div>
           <div className="min-w-0 max-w-full">
-            <p className="flex min-w-0 items-center gap-1.5 text-lg font-bold text-foreground">
-              <span className="truncate">{username ? (shownName ?? sl('guest', language)) : sl('guest', language)}</span>
-              {(level === 'full' || isFounder) && <VerifiedBadge language={language} level={shownLevel} />}
-            </p>
+            <ProfileIdentityLine language={language} name={username ? (shownName ?? sl('guest', language)) : sl('guest', language)} code={referralCode} showBadge={level === 'full' || isFounder} level={shownLevel} canEdit={!!username && !!accessToken} />
             {isFounder && <span className="mb-0.5 inline-block rounded-full bg-[#d4af37] px-2.5 py-0.5 text-[11px] font-bold text-black">👑 {founderText(FOUNDER_UI.chip, language)}</span>}
             {isWebAccount && handle && handle !== shownName && (
               <p dir="ltr" className="text-xs text-muted-foreground">@{handle}</p>
