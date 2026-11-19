@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { authHeaders } from '@/lib/api-token';
 import { friendlyName } from '@/lib/display-identity';
+import { linkedLevel, type LinkedVerification, type VerifyLevel } from '@/lib/verification-level';
 
 // One place that says who the signed-in person is, so the header, the menu, the dashboard and Settings agree.
 const CHANGED = 're-identity-changed';
@@ -20,6 +21,18 @@ export function useIdentity() {
   const [handle, setHandle] = useState<string | null>(null);
   const [kycStatus, setKycStatus] = useState<string | null>(null);
   const [customName, setCustomName] = useState<string | null>(null);
+  const [linkedVerification, setLinkedVerification] = useState<LinkedVerification | null>(null);
+
+  // What all the accounts linked to this person prove together (a Pi sign-in, an approved identity check).
+  useEffect(() => {
+    if (!isInitialized || !accessToken) { setLinkedVerification(null); return; }
+    let off = false;
+    fetch('/api/identity', { headers: authHeaders(), cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => { if (!off && j?.verification) setLinkedVerification({ pi: !!j.verification.pi, kyc: !!j.verification.kyc }); })
+      .catch(() => {});
+    return () => { off = true; };
+  }, [isInitialized, accessToken]);
 
   // The name chosen inside the platform (any account type).
   useEffect(() => {
@@ -58,5 +71,6 @@ export function useIdentity() {
   }, []);
 
   const name = friendlyName({ username, displayName, handle, customName });
-  return { name, handle, isWebAccount, kycStatus, kycApproved: kycStatus === 'approved' };
+  const linkedVerifyLevel: VerifyLevel = linkedLevel(linkedVerification);
+  return { name, handle, isWebAccount, kycStatus, kycApproved: kycStatus === 'approved', linkedVerification, linkedVerifyLevel };
 }

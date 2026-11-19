@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
 import { redeemLinkCode } from '@/lib/person-store';
+import { markPiVerified } from '@/lib/pi-verified';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -11,6 +12,7 @@ export async function POST(req: NextRequest) {
   if (user instanceof NextResponse) return user;
   const body = (await req.json().catch(() => null)) as Record<string, unknown> | null;
   try {
+    await markPiVerified(user.uid, user.username);
     const r = await redeemLinkCode(user.uid, user.username, body?.code);
     if (!r.ok) return NextResponse.json({ error: r.error }, { status: r.error === 'invalid' ? 400 : 409, headers: H });
     return NextResponse.json({ ok: true }, { headers: H });

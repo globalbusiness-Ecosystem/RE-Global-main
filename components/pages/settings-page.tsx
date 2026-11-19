@@ -55,6 +55,7 @@ import { FOUNDER_UI, founderText } from '@/lib/founder-i18n';
 import { getReferralCount } from '@/lib/referrals';
 import { inviteUrl } from '@/lib/invite-code';
 import { LinkedAccounts } from '@/components/linked-accounts';
+import { maxLevel } from '@/lib/verification-level';
 import { authHeaders } from '@/lib/api-token';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 
@@ -113,7 +114,7 @@ export default function SettingsPage({
   const myBadge = useMyBadgeLevel(accessToken);
   const founderInfo = useFounder();
   const shownLevel = (isFounder ? founderInfo.badgeLevel : myBadge.level) as BadgeLevel;
-  const { name: shownName, isWebAccount, kycApproved } = useIdentity();
+  const { name: shownName, isWebAccount, kycApproved, linkedVerifyLevel } = useIdentity();
   const { getPreferences, savePreferences, getProfile } = useFirebaseDatabase();
   const [profileVerified, setProfileVerified] = useState(false);
   const [darkMode, setDarkMode] = useState(() => getStoredTheme() === 'dark');
@@ -259,7 +260,9 @@ export default function SettingsPage({
   };
 
   // Web accounts are verified by the identity check (KYC); Pi accounts by Pi, and fully once the e-mail is verified too.
-  const level: 'none' | 'pi' | 'full' = isWebAccount ? (kycApproved ? 'full' : 'none') : !isPiVerified ? 'none' : profileVerified ? 'full' : 'pi';
+  // Linked accounts count together: the person is as verified as their best linked account.
+  const ownLevel: 'none' | 'pi' | 'full' = isWebAccount ? (kycApproved ? 'full' : 'none') : !isPiVerified ? 'none' : profileVerified ? 'full' : 'pi';
+  const level = maxLevel(ownLevel, linkedVerifyLevel);
   const securityScore = level === 'none' ? 30 : level === 'pi' ? 65 : 95;
   const securityLabel = sl(level === 'none' ? 'secBasic' : level === 'pi' ? 'secGood' : 'secExcellent', language);
   const securityColor = level === 'none' ? '#f59e0b' : level === 'pi' ? '#3b82f6' : '#22c55e';
