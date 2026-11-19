@@ -47,6 +47,7 @@ export function ProfileIdentityLine({ language, name, code, showBadge, level, ca
       if (r.ok && typeof j?.name === 'string') { announceName(j.name); setMsg({ ok: true, text: t.saved }); setTimeout(() => setOpen(false), 700); return; }
       if (j?.error === 'invalid') setMsg({ ok: false, text: t.invalid });
       else if (j?.error === 'taken') setMsg({ ok: false, text: t.taken });
+      else if (j?.error === 'use_primary') setMsg({ ok: false, text: t.usePrimary });
       else if (j?.error === 'cooldown') {
         const left = Math.max(0, (Number(j.nextChangeAt) || Date.now()) - Date.now());
         setMsg({ ok: false, text: left < 2 * 86_400_000 ? t.cooldownH.replace('{h}', String(Math.max(1, Math.ceil(left / 3_600_000)))) : t.cooldown.replace('{d}', String(Math.ceil(left / 86_400_000))) });

@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { cooldownLeftMs, nameCooldownMs, nameKey, parseDisplayName } from '@/lib/display-name';
 import { getFounder, getFounderUids } from '@/lib/founder-server';
 import { getPerson } from '@/lib/person-store';
+import { accountKind, primaryOf } from '@/lib/person-link';
 
 const BY_USER = 'userNames';      // userNames/{uid} -> { name, key, changedAt }
 const BY_KEY = 'displayNames';    // displayNames/{key} -> { uid, name }
@@ -16,23 +17,23 @@ export async function getDisplayName(uid: string): Promise<MyName> {
   const d = snap.data();
   const isFounder = founderUids.includes(uid);
   let name = typeof d?.name === 'string' && d.name ? d.name : null;
-  if (!name) {
-    // A linked account shows the person's name from another account that has chosen one.
-    try {
-      const person = await getPerson(uid);
-      for (const a of person?.accounts ?? []) {
-        if (a.uid === uid) continue;
-        const n = (await adminDb.collection(BY_USER).doc(a.uid).get()).data()?.name;
-        if (typeof n === 'string' && n) { name = n; break; }
-      }
-    } catch { /* keep no name */ }
-  }
+  // One investor, one name: accounts linked to the same person show the main account's name (the name it chose,
+  // or, for a Pi account, its verified Pi name). If the main account is a web account with no chosen name, each keeps its own.
+  try {
+    const person = await getPerson(uid);
+    const primary = person ? primaryOf(person.accounts, person.primaryUid) : null;
+    if (primary && primary.uid !== uid) {
+      const n = (await adminDb.collection(BY_USER).doc(primary.uid).get()).data()?.name;
+      if (typeof n === 'string' && n) name = n;
+      else if (accountKind(primary.uid) === 'pi') name = primary.username;
+    }
+  } catch { /* keep the own name */ }
   const at = d?.changedAt?.toMillis?.() ?? null;
   const left = cooldownLeftMs(at, Date.now(), nameCooldownMs(isFounder));
   return { name, nextChangeAt: left > 0 ? Date.now() + left : null, isFounder };
 }
 
-export type ClaimNameResult = { ok: true; name: string } | { ok: false; error: 'invalid' | 'taken' | 'cooldown'; nextChangeAt?: number };
+export type ClaimNameResult = { ok: true; name: string } | { ok: false; error: 'invalid' | 'taken' | 'cooldown' | 'use_primary'; nextChangeAt?: number };
 
 /**
  * Chooses (or changes) the name. Inside one transaction: the name must be free, the person must not have changed it in
@@ -42,6 +43,13 @@ export async function claimDisplayName(uid: string, raw: unknown): Promise<Claim
   if (!uid || uid.includes('/')) return { ok: false, error: 'invalid' };
   const p = parseDisplayName(raw);
   if (!p) return { ok: false, error: 'invalid' };
+
+  // Linked accounts share the main account's name: change it from the main account (or make this one the main account).
+  try {
+    const person = await getPerson(uid);
+    const primary = person ? primaryOf(person.accounts, person.primaryUid) : null;
+    if (primary && primary.uid !== uid) return { ok: false, error: 'use_primary' };
+  } catch { /* if the check fails, do not block */ }
 
   // The founder's name belongs to the founder's accounts only.
   const [founder, founderUids] = await Promise.all([getFounder(), getFounderUids()]);

@@ -5,6 +5,8 @@ import { guardApi } from '@/lib/api-guard';
 import { isSafeId } from '@/lib/my-data';
 import { detectImage } from '@/lib/image-validate';
 import { decodePhoto, validateAvatarPayload } from '@/lib/avatar';
+import { getPerson } from '@/lib/person-store';
+import { primaryOf } from '@/lib/person-link';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,7 +19,21 @@ export async function GET(req: NextRequest) {
   if (!isSafeId(user.username)) return NextResponse.json({ error: 'Bad user' }, { status: 400, headers: HEADERS });
   try {
     const snap = await adminDb.collection('avatars').doc(user.username).get();
-    const d = snap.exists ? (snap.data() as Record<string, unknown>) : null;
+    let d = snap.exists ? (snap.data() as Record<string, unknown>) : null;
+    // No picture of its own: a linked account shows the picture of the main account (or of another linked account that has one).
+    if (!d || (typeof d.preset !== 'string' && typeof d.photo !== 'string')) {
+      const person = await getPerson(user.uid);
+      if (person) {
+        const accounts = person.accounts;
+        const main = primaryOf(accounts, person.primaryUid);
+        for (const a of [...accounts].sort((x, y) => (x.uid === main?.uid ? -1 : y.uid === main?.uid ? 1 : 0))) {
+          if (a.uid === user.uid || !isSafeId(a.username)) continue;
+          const s2 = await adminDb.collection('avatars').doc(a.username).get();
+          const d2 = s2.exists ? (s2.data() as Record<string, unknown>) : null;
+          if (d2 && (typeof d2.preset === 'string' || typeof d2.photo === 'string')) { d = d2; break; }
+        }
+      }
+    }
     if (d && typeof d.preset === 'string') return NextResponse.json({ avatar: { preset: d.preset } }, { headers: HEADERS });
     if (d && typeof d.photo === 'string') return NextResponse.json({ avatar: { photo: d.photo } }, { headers: HEADERS });
     return NextResponse.json({ avatar: null }, { headers: HEADERS });

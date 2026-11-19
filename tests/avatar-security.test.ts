@@ -22,8 +22,9 @@ describe('avatar privacy and security', () => {
     }
   });
   it('the route only reads or writes the signed-in user\'s own document', () => {
-    expect([...route.matchAll(/\.collection\('([a-z_]+)'\)/g)].map((m) => m[1])).toEqual(['avatars', 'avatars', 'avatars']);
-    expect([...route.matchAll(/\.doc\(([^)]+)\)/g)].map((m) => m[1])).toEqual(['user.username', 'user.username', 'user.username']);
+    // Reading may also look at the person's other linked accounts (same person, proved by the link); writing and deleting only ever touch user.username.
+    expect([...route.matchAll(/\.collection\('([a-z_]+)'\)/g)].map((m) => m[1])).toEqual(['avatars', 'avatars', 'avatars', 'avatars']);
+    expect([...route.matchAll(/\.doc\(([^)]+)\)/g)].map((m) => m[1])).toEqual(['user.username', 'a.username', 'user.username', 'user.username']);
   });
   it('the response is never cached and the photo type is checked by its real bytes', () => {
     expect(route).toContain("'Cache-Control': 'no-store'");
