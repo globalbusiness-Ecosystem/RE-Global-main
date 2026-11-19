@@ -114,4 +114,18 @@ export async function unlinkAccount(uid: string): Promise<boolean> {
   });
 }
 
+/** Makes this account the main one: the invite code of the main account is the code the whole person shares. */
+export async function setPrimary(uid: string): Promise<boolean> {
+  return adminDb.runTransaction(async (tx): Promise<boolean> => {
+    const link = await tx.get(adminDb.collection(OF).doc(uid));
+    const pid = link.exists ? String(link.data()?.personId ?? '') : '';
+    if (!pid) return false;
+    const pRef = adminDb.collection(PERSONS).doc(pid);
+    const ps = await tx.get(pRef);
+    if (!readAccounts(ps.data()?.accounts).some((a) => a.uid === uid)) return false;
+    tx.set(pRef, { primaryUid: uid, updatedAt: Timestamp.now() }, { merge: true });
+    return true;
+  });
+}
+
 export { primaryOf };

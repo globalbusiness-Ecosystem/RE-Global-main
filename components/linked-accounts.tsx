@@ -57,6 +57,17 @@ export function LinkedAccounts({ language }: { language: string }) {
     setBusy(false);
   };
 
+  const makeMain = async () => {
+    setBusy(true); setMsg(null);
+    try {
+      const r = await fetch('/api/identity/primary', { method: 'POST', headers: authHeaders() });
+      if (r.ok) { setMsg({ ok: true, text: t.madeMain }); load(); } else setMsg({ ok: false, text: t.failed });
+    } catch { setMsg({ ok: false, text: t.failed }); }
+    setBusy(false);
+  };
+
+  const me = accounts.find((a) => a.isMe);
+
   return (
     <div className="bg-card border border-border rounded-lg p-4">
       <div className="flex items-center gap-2 text-sm font-semibold text-foreground"><Link2 className="w-4 h-4 text-accent" aria-hidden />{t.title}</div>
@@ -87,6 +98,7 @@ export function LinkedAccounts({ language }: { language: string }) {
           <input dir="ltr" aria-label={t.enterCode} placeholder={t.enterCode} value={input} onChange={(e) => setInput(e.target.value)} maxLength={12} autoCapitalize="characters" autoComplete="off" className="flex-1 min-w-0 rounded-lg border border-border bg-background px-3 py-2 text-sm font-mono" />
           <button type="button" disabled={busy || input.trim().length < 8} onClick={submit} className="rounded-lg bg-accent px-3 py-2 text-xs font-semibold text-accent-foreground disabled:opacity-50">{t.link}</button>
         </div>
+        {linked && me && !me.isPrimary && <button type="button" disabled={busy} onClick={makeMain} className="block text-xs font-medium text-accent underline">{t.makeMain}</button>}
         {linked && <button type="button" disabled={busy} onClick={unlink} className="text-xs text-red-400 underline">{t.unlink}</button>}
         {msg && <p role="status" className={`text-xs ${msg.ok ? 'text-green-500' : 'text-red-400'}`}>{msg.text}</p>}
       </div>
