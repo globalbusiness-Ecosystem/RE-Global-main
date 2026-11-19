@@ -11,6 +11,7 @@ import { SkipLink } from "./skip-link";
 import { A11yEnhancer } from "./a11y-enhancer";
 import { RefCapture } from "./ref-capture";
 import { TermsConsentModal } from "./terms-consent-modal";
+import { CelebrationHost } from "./celebration-host";
 import { Toaster } from "sonner";
 import { useServiceWorker } from "@/hooks/use-service-worker";
 import { useOnlineStatus } from "@/hooks/use-online-status";
@@ -41,6 +42,7 @@ function AppContent({ children }: { children: ReactNode }) {
       <RefCapture />
       <OfflineBanner isVisible={showBanner} onClose={() => setShowBanner(false)} />
       {isInitialized && <TermsConsentModal />}
+      {isInitialized && <CelebrationHost />}
       <main id="main-content" tabIndex={-1} className="outline-none">{children}</main>
       <Toaster
         position="top-center"
