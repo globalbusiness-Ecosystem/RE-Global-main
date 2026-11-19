@@ -23,9 +23,18 @@ type RedeemResult = { ok: true } | { ok: false; status: number; error: ReferralE
 export async function redeemReferral(uid: string, username: string, rawCode: unknown): Promise<RedeemResult> {
   const code = normalizeReferralCode(rawCode);
   if (!code) return { ok: false, status: 400, error: 'invalid' };
-  const found = await adminDb.collection('referrals').where('code', '==', code).limit(2).get();
-  if (found.docs.length === 0) return { ok: false, status: 404, error: 'notFound' };
-  const owner = found.docs[0];
+  // The reserved-code list answers exactly; the old lookup by field stays for codes made before it existed.
+  const reserved = await adminDb.collection('inviteCodes').doc(code).get();
+  let owner: { id: string; data(): unknown } | null = null;
+  if (reserved.exists) {
+    const od = await adminDb.collection('referrals').doc(String(reserved.data()?.username ?? '')).get();
+    if (od.exists) owner = od;
+  }
+  if (!owner) {
+    const found = await adminDb.collection('referrals').where('code', '==', code).limit(2).get();
+    owner = found.docs[0] ?? null;
+  }
+  if (!owner) return { ok: false, status: 404, error: 'notFound' };
   const ownerName = String((owner.data() as Record<string, unknown>).username ?? owner.id);
   if (ownerName === username) return { ok: false, status: 400, error: 'own' };
   if ((owner.data() as Record<string, unknown>).referredBy === username) return { ok: false, status: 400, error: 'mutual' };

@@ -52,7 +52,8 @@ import { rewardStrings } from '@/lib/rewards';
 import { badgeLevelLabel, pointsToNextBadge, BADGE_COLORS, type BadgeLevel } from '@/lib/badge-level';
 import { useFounder, useIsFounder } from '@/hooks/use-founder';
 import { FOUNDER_UI, founderText } from '@/lib/founder-i18n';
-import { getOrCreateReferralCode, getReferralCount } from '@/lib/referrals';
+import { getReferralCount } from '@/lib/referrals';
+import { inviteUrl } from '@/lib/invite-code';
 import { authHeaders } from '@/lib/api-token';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
 
@@ -144,7 +145,10 @@ export default function SettingsPage({
 
   useEffect(() => {
     if (!username) return;
-    getOrCreateReferralCode(username).then(setReferralCode).catch(() => setReferralCode(null));
+    fetch('/api/invite', { headers: authHeaders(), cache: 'no-store' })
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => setReferralCode(j && typeof j.code === 'string' ? j.code : null))
+      .catch(() => setReferralCode(null));
     getReferralCount(username).then(setReferralCount).catch(() => setReferralCount(0));
     if (username.startsWith('web_')) {
       fetch('/api/handle', { headers: authHeaders(), cache: 'no-store' })
@@ -246,7 +250,8 @@ export default function SettingsPage({
 
   const handleCopyReferral = () => {
     if (!referralCode) return;
-    navigator.clipboard?.writeText(referralCode).then(() => {
+    // Share the whole link (it opens the app and records the code), not just the word.
+    navigator.clipboard?.writeText(inviteUrl(window.location.origin, referralCode)).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });

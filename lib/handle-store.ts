@@ -25,9 +25,14 @@ export async function claimHandle(uid: string, username: string, raw: unknown): 
   const rRef = adminDb.collection('referrals').doc(username);
   const sameCode = adminDb.collection('referrals').where('code', '==', p.code).limit(2);
   return adminDb.runTransaction(async (tx): Promise<ClaimResult> => {
-    const [h, r, c] = await Promise.all([tx.get(hRef), tx.get(rRef), tx.get(sameCode)]);
+    const codeRef = adminDb.collection('inviteCodes').doc(p.code);
+    const [h, r, c, held] = await Promise.all([tx.get(hRef), tx.get(rRef), tx.get(sameCode), tx.get(codeRef)]);
     if (r.exists && r.data()?.handle) return { ok: false, error: 'already' };
-    if (h.exists || c.docs.some((d) => d.id !== username)) return { ok: false, error: 'taken' };
+    if (h.exists || c.docs.some((d) => d.id !== username) || (held.exists && held.data()?.username !== username)) return { ok: false, error: 'taken' };
+    // The same code list the Pi accounts use (inviteCodes): reserve the new word, release the old code.
+    const oldCode = typeof r.data()?.code === 'string' ? (r.data()?.code as string) : null;
+    if (oldCode && oldCode !== p.code) tx.delete(adminDb.collection('inviteCodes').doc(oldCode));
+    tx.set(codeRef, { username, uid, createdAt: Timestamp.now() });
     tx.set(hRef, { uid, username, handle: p.handle, createdAt: Timestamp.now() });
     tx.set(rRef, { username, uid, code: p.code, handle: p.handle, ...(r.exists ? {} : { createdAt: Timestamp.now() }) }, { merge: true });
     return { ok: true, handle: p.handle, code: p.code };
