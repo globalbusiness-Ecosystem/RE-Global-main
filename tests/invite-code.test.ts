@@ -19,7 +19,7 @@ describe('invite code', () => {
     expect(legacyInviteCode('Elsayed777x')).toMatch(/^[A-Z0-9]{1,8}$/);
   });
   it('builds the share link', () => {
-    expect(inviteUrl('https://a.app/', 'ABC12345')).toBe('https://a.app/?ref=ABC12345');
+    expect(inviteUrl('https://a.app/', 'ABC12345')).toBe('https://a.app/r/ABC12345');
   });
 });
 

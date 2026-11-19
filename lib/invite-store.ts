@@ -4,6 +4,8 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { legacyInviteCode, randomInviteCode } from '@/lib/invite-code';
 import { parseRefCode } from '@/lib/ref-code';
+import { primaryOf } from '@/lib/person-link';
+import { getPerson } from '@/lib/person-store';
 
 export const CODES = 'inviteCodes';
 const MAX_TRIES = 8;
@@ -15,6 +17,10 @@ const MAX_TRIES = 8;
  */
 export async function ensureInviteCode(uid: string, username: string): Promise<string> {
   if (!uid || !username || username.includes('/')) throw new Error('bad account');
+  // Linked accounts share one invite code: the primary account's.
+  const person = await getPerson(uid);
+  const primary = person ? primaryOf(person.accounts, person.primaryUid) : null;
+  if (primary && primary.uid !== uid) return ensureInviteCode(primary.uid, primary.username);
   const rRef = adminDb.collection('referrals').doc(username);
   const rand = () => randomInt(0, 1_000_000) / 1_000_000;
 

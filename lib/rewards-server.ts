@@ -1,6 +1,7 @@
 import 'server-only';
 import { adminDb } from '@/lib/firebase-admin';
 import { referralStats } from '@/lib/referrals-server';
+import { personAccounts } from '@/lib/person-store';
 import { badgeLevelFor } from '@/lib/badge-level';
 import { getBadgeThresholds } from '@/lib/badge-server';
 import { DEFAULT_RULES, countPurchases, countStays, pointsFor, progress, readRules, type Counts, type Rules } from '@/lib/rewards';
@@ -24,14 +25,26 @@ export async function myRewards(uid: string, username: string, nowMs = Date.now(
     const s = await adminDb.collection(col).where(field, '==', value).limit(LIMIT).get();
     return s.docs.map((d: { data(): unknown }) => d.data() as Record<string, unknown>);
   };
-  const [rules, bookings, contracts, reviews, referral] = await Promise.all([
-    getRewardRules(), by('bookings', 'uid', uid), by('contracts', 'buyerUsername', username), by('stay_reviews', 'uid', uid),
-    referralStats(username, nowMs),
+  // Accounts linked to one person count together: the points, the level and the invited friends are the person's.
+  const accounts = await personAccounts(uid, username);
+  const [rules, ...parts] = await Promise.all([
+    getRewardRules(),
+    ...accounts.map(async (a) => {
+      const [bookings, contracts, reviews, ref] = await Promise.all([
+        by('bookings', 'uid', a.uid), by('contracts', 'buyerUsername', a.username), by('stay_reviews', 'uid', a.uid), referralStats(a.username, nowMs),
+      ]);
+      return { bookings, contracts, reviews, ref };
+    }),
   ]);
+  const referral = {
+    invited: parts.reduce((n, p) => n + p.ref.invited, 0),
+    qualified: parts.reduce((n, p) => n + p.ref.qualified, 0),
+    referredBy: parts.some((p) => p.ref.referredBy),
+  };
   const counts: Counts = {
-    stays: countStays(bookings, today),
-    purchases: countPurchases(contracts),
-    reviews: reviews.filter((r) => r.hidden !== true).length,
+    stays: parts.reduce((n, p) => n + countStays(p.bookings, today), 0),
+    purchases: parts.reduce((n, p) => n + countPurchases(p.contracts), 0),
+    reviews: parts.reduce((n, p) => n + p.reviews.filter((r) => r.hidden !== true).length, 0),
     referrals: referral.qualified,
   };
   const points = pointsFor(counts, rules);

@@ -3,6 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { cooldownLeftMs, nameCooldownMs, nameKey, parseDisplayName } from '@/lib/display-name';
 import { getFounder, getFounderUids } from '@/lib/founder-server';
+import { getPerson } from '@/lib/person-store';
 
 const BY_USER = 'userNames';      // userNames/{uid} -> { name, key, changedAt }
 const BY_KEY = 'displayNames';    // displayNames/{key} -> { uid, name }
@@ -14,7 +15,18 @@ export async function getDisplayName(uid: string): Promise<MyName> {
   const [snap, founderUids] = await Promise.all([adminDb.collection(BY_USER).doc(uid).get(), getFounderUids()]);
   const d = snap.data();
   const isFounder = founderUids.includes(uid);
-  const name = typeof d?.name === 'string' && d.name ? d.name : null;
+  let name = typeof d?.name === 'string' && d.name ? d.name : null;
+  if (!name) {
+    // A linked account shows the person's name from another account that has chosen one.
+    try {
+      const person = await getPerson(uid);
+      for (const a of person?.accounts ?? []) {
+        if (a.uid === uid) continue;
+        const n = (await adminDb.collection(BY_USER).doc(a.uid).get()).data()?.name;
+        if (typeof n === 'string' && n) { name = n; break; }
+      }
+    } catch { /* keep no name */ }
+  }
   const at = d?.changedAt?.toMillis?.() ?? null;
   const left = cooldownLeftMs(at, Date.now(), nameCooldownMs(isFounder));
   return { name, nextChangeAt: left > 0 ? Date.now() + left : null, isFounder };

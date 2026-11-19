@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { personAccounts } from '@/lib/person-store';
 import { REFERRAL_CAP, countPurchases, countStays, normalizeReferralCode, type ReferralError } from '@/lib/rewards';
 
 const LIMIT = 1000;
@@ -36,9 +37,12 @@ export async function redeemReferral(uid: string, username: string, rawCode: unk
   }
   if (!owner) return { ok: false, status: 404, error: 'notFound' };
   const ownerName = String((owner.data() as Record<string, unknown>).username ?? owner.id);
-  if (ownerName === username) return { ok: false, status: 400, error: 'own' };
-  if ((owner.data() as Record<string, unknown>).referredBy === username) return { ok: false, status: 400, error: 'mutual' };
-  if (await hasActivity(uid, username)) return { ok: false, status: 409, error: 'notNew' };
+  // Accounts linked to the same person count as one: no inviting yourself, and no "new customer" through a second account.
+  const mine = await personAccounts(uid, username);
+  const names = mine.map((a) => a.username);
+  if (names.includes(ownerName)) return { ok: false, status: 400, error: 'own' };
+  if (names.includes(String((owner.data() as Record<string, unknown>).referredBy ?? ''))) return { ok: false, status: 400, error: 'mutual' };
+  if ((await Promise.all(mine.map((a) => hasActivity(a.uid, a.username)))).some(Boolean)) return { ok: false, status: 409, error: 'notNew' };
 
   const ref = adminDb.collection('referrals').doc(username);
   try {

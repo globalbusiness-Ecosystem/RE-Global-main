@@ -15,5 +15,5 @@ export function randomInviteCode(rand: () => number): string {
 /** The first code tried for an account: the code a Pi account has always had, so codes already shared keep working. */
 export const legacyInviteCode = (username: string): string | null => parseRefCode(referralCodeOf(username));
 
-/** The share link: https://site/?ref=CODE. */
-export const inviteUrl = (origin: string, code: string): string => `${origin.replace(/\/+$/, '')}/?ref=${encodeURIComponent(code)}`;
+/** The share link: https://site/r/CODE (it redirects to the app with the code kept). */
+export const inviteUrl = (origin: string, code: string): string => `${origin.replace(/\/+$/, '')}/r/${encodeURIComponent(code)}`;
