@@ -46,6 +46,7 @@ import { LANGUAGE_OPTIONS, type NavLanguage } from '@/lib/nav-i18n';
 import { SETTINGS_I18N } from '@/lib/settings-i18n';
 import { usePiAuth } from '@/contexts/pi-auth-context';
 import { ProfileIdentityLine } from '@/components/profile-identity-line';
+import { FounderCoverSheen, FounderRing, FOUNDER_CARD_CLASS } from '@/components/founder-aura';
 import { useMyBadgeLevel } from '@/hooks/use-badge-level';
 import { rewardStrings } from '@/lib/rewards';
 import { badgeLevelLabel, pointsToNextBadge, BADGE_COLORS, type BadgeLevel } from '@/lib/badge-level';
@@ -274,13 +275,15 @@ export default function SettingsPage({
         <div className="w-6" />
       </div>
 
-      <div className="bg-card border border-border rounded-xl overflow-hidden">
+      <div className={`bg-card border rounded-xl overflow-hidden ${isFounder ? FOUNDER_CARD_CLASS : 'border-border'}`}>
         <div className="relative h-28" style={{ background: coverCss(cover) }} aria-hidden>
+          {isFounder && <FounderCoverSheen />}
           <div className="absolute inset-0 opacity-40" style={{ backgroundImage: 'radial-gradient(circle at 15% 25%, rgba(255,255,255,0.35) 0, transparent 35%), radial-gradient(circle at 80% 80%, rgba(255,255,255,0.15) 0, transparent 40%)' }} />
         </div>
         <div className="px-5 pb-5">
         <div className="flex flex-col items-center text-center gap-3 -mt-14">
           <div className="relative rounded-full ring-4 ring-card shadow-xl">
+            {isFounder && <FounderRing />}
             <button onClick={handleLogoTap} className="block rounded-full" aria-label={shownName ?? 'Profile'}>
               <UserAvatar avatar={avatar} username={shownName} size={88} />
             </button>
@@ -294,7 +297,7 @@ export default function SettingsPage({
             </button>
           </div>
           <div className="min-w-0 max-w-full">
-            <ProfileIdentityLine language={language} name={username ? (shownName ?? sl('guest', language)) : sl('guest', language)} code={referralCode} showBadge={level === 'full' || isFounder} level={shownLevel} canEdit={!!username && !!accessToken} />
+            <ProfileIdentityLine language={language} name={username ? (shownName ?? sl('guest', language)) : sl('guest', language)} code={referralCode} showBadge={level === 'full' || isFounder} level={shownLevel} canEdit={!!username && !!accessToken} isFounder={isFounder} />
             {isFounder && <span className="mb-0.5 inline-block rounded-full bg-[#d4af37] px-2.5 py-0.5 text-[11px] font-bold text-black">👑 {founderText(FOUNDER_UI.chip, language)}</span>}
             {isWebAccount && handle && handle !== shownName && (
               <p dir="ltr" className="text-xs text-muted-foreground">@{handle}</p>

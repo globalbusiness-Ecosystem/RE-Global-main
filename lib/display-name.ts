@@ -6,6 +6,9 @@ export const NAME_MIN = 2;
 export const NAME_MAX = 40;
 export const NAME_COOLDOWN_DAYS = 7;
 export const NAME_COOLDOWN_MS = NAME_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+// The founder may change the name every 24 hours.
+export const FOUNDER_NAME_COOLDOWN_MS = 24 * 60 * 60 * 1000;
+export const nameCooldownMs = (isFounder: boolean): number => (isFounder ? FOUNDER_NAME_COOLDOWN_MS : NAME_COOLDOWN_MS);
 
 /** The comparison form of a name: the same for every spelling that looks the same. */
 export function nameKey(name: string): string {
@@ -38,5 +41,5 @@ export function parseDisplayName(raw: unknown): ParsedName | null {
 }
 
 /** Milliseconds left before this person may change the name again (0 when they may). */
-export const cooldownLeftMs = (changedAtMs: number | null, now = Date.now()): number =>
-  changedAtMs && Number.isFinite(changedAtMs) ? Math.max(0, changedAtMs + NAME_COOLDOWN_MS - now) : 0;
+export const cooldownLeftMs = (changedAtMs: number | null, now = Date.now(), windowMs = NAME_COOLDOWN_MS): number =>
+  changedAtMs && Number.isFinite(changedAtMs) ? Math.max(0, changedAtMs + windowMs - now) : 0;

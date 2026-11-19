@@ -8,6 +8,7 @@ import { announceName } from '@/hooks/use-identity';
 import { nameStrings } from '@/lib/display-name-i18n';
 import { NAME_MAX } from '@/lib/display-name';
 import type { BadgeLevel } from '@/lib/badge-level';
+import { FOUNDER_NAME_CLASS } from '@/components/founder-aura';
 
 const VIEW_KEY = 'rg_profile_line_v1';
 
@@ -15,7 +16,7 @@ const VIEW_KEY = 'rg_profile_line_v1';
  * The line under the profile picture: the person's name, or their invite code. The round two-arrow button switches between
  * them (remembered on this device); the pencil edits the name. The seal stays beside whatever is shown.
  */
-export function ProfileIdentityLine({ language, name, code, showBadge, level, canEdit }: { language: string; name: string; code: string | null; showBadge: boolean; level: BadgeLevel; canEdit: boolean }) {
+export function ProfileIdentityLine({ language, name, code, showBadge, level, canEdit, isFounder = false }: { language: string; name: string; code: string | null; showBadge: boolean; level: BadgeLevel; canEdit: boolean; isFounder?: boolean }) {
   const t = nameStrings(language);
   const [view, setView] = useState<'name' | 'code'>('name');
   const [open, setOpen] = useState(false);
@@ -46,7 +47,10 @@ export function ProfileIdentityLine({ language, name, code, showBadge, level, ca
       if (r.ok && typeof j?.name === 'string') { announceName(j.name); setMsg({ ok: true, text: t.saved }); setTimeout(() => setOpen(false), 700); return; }
       if (j?.error === 'invalid') setMsg({ ok: false, text: t.invalid });
       else if (j?.error === 'taken') setMsg({ ok: false, text: t.taken });
-      else if (j?.error === 'cooldown') setMsg({ ok: false, text: t.cooldown.replace('{d}', String(Math.max(1, Math.ceil(((Number(j.nextChangeAt) || Date.now()) - Date.now()) / 86_400_000)))) });
+      else if (j?.error === 'cooldown') {
+        const left = Math.max(0, (Number(j.nextChangeAt) || Date.now()) - Date.now());
+        setMsg({ ok: false, text: left < 2 * 86_400_000 ? t.cooldownH.replace('{h}', String(Math.max(1, Math.ceil(left / 3_600_000)))) : t.cooldown.replace('{d}', String(Math.ceil(left / 86_400_000))) });
+      }
       else setMsg({ ok: false, text: t.failed });
     } catch { setMsg({ ok: false, text: t.failed }); } finally { setBusy(false); }
   };
@@ -57,7 +61,7 @@ export function ProfileIdentityLine({ language, name, code, showBadge, level, ca
       <p className="flex min-w-0 items-center justify-center gap-1.5 text-lg font-bold text-foreground">
         {showing === 'code'
           ? <span dir="ltr" className="truncate font-mono tracking-wider" aria-label={t.inviteCode}>{code}</span>
-          : <span className="truncate">{name}</span>}
+          : <span className={`truncate ${isFounder ? FOUNDER_NAME_CLASS : ''}`}>{name}</span>}
         {showBadge && <VerifiedBadge language={language} level={level} />}
       </p>
       <div className="mt-1 flex items-center justify-center gap-2">
@@ -77,7 +81,7 @@ export function ProfileIdentityLine({ language, name, code, showBadge, level, ca
             <h3 className="mb-3 text-base font-bold text-foreground">{t.title}</h3>
             <label htmlFor="display-name-input" className="mb-1 block text-xs text-muted-foreground">{t.label}</label>
             <input id="display-name-input" value={input} maxLength={NAME_MAX} onChange={(e) => setInput(e.target.value)} dir="auto" autoFocus className="w-full rounded-lg bg-muted px-3 py-2.5 text-sm text-foreground" />
-            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{t.hint}</p>
+            <p className="mt-2 text-[11px] leading-relaxed text-muted-foreground">{isFounder ? t.hintFounder : t.hint}</p>
             {msg && <p role="status" className={`mt-2 text-xs ${msg.ok ? 'text-emerald-500' : 'text-red-400'}`}>{msg.text}</p>}
             <div className="mt-4 flex gap-2">
               <button type="button" onClick={() => void save()} disabled={busy || input.trim().length < 2} className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-foreground disabled:opacity-50">{t.save}</button>

@@ -1,21 +1,23 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { cooldownLeftMs, nameKey, parseDisplayName } from '@/lib/display-name';
+import { cooldownLeftMs, nameCooldownMs, nameKey, parseDisplayName } from '@/lib/display-name';
 import { getFounder, getFounderUids } from '@/lib/founder-server';
 
 const BY_USER = 'userNames';      // userNames/{uid} -> { name, key, changedAt }
 const BY_KEY = 'displayNames';    // displayNames/{key} -> { uid, name }
 
-export type MyName = { name: string | null; nextChangeAt: number | null };
+export type MyName = { name: string | null; nextChangeAt: number | null; isFounder: boolean };
 
 export async function getDisplayName(uid: string): Promise<MyName> {
-  if (!uid || uid.includes('/')) return { name: null, nextChangeAt: null };
-  const d = (await adminDb.collection(BY_USER).doc(uid).get()).data();
+  if (!uid || uid.includes('/')) return { name: null, nextChangeAt: null, isFounder: false };
+  const [snap, founderUids] = await Promise.all([adminDb.collection(BY_USER).doc(uid).get(), getFounderUids()]);
+  const d = snap.data();
+  const isFounder = founderUids.includes(uid);
   const name = typeof d?.name === 'string' && d.name ? d.name : null;
   const at = d?.changedAt?.toMillis?.() ?? null;
-  const left = cooldownLeftMs(at);
-  return { name, nextChangeAt: left > 0 ? Date.now() + left : null };
+  const left = cooldownLeftMs(at, Date.now(), nameCooldownMs(isFounder));
+  return { name, nextChangeAt: left > 0 ? Date.now() + left : null, isFounder };
 }
 
 export type ClaimNameResult = { ok: true; name: string } | { ok: false; error: 'invalid' | 'taken' | 'cooldown'; nextChangeAt?: number };
@@ -33,6 +35,7 @@ export async function claimDisplayName(uid: string, raw: unknown): Promise<Claim
   const [founder, founderUids] = await Promise.all([getFounder(), getFounderUids()]);
   if (founder.name && nameKey(founder.name) === p.key && !founderUids.includes(uid)) return { ok: false, error: 'taken' };
 
+  const isFounder = founderUids.includes(uid);
   const userRef = adminDb.collection(BY_USER).doc(uid);
   const keyRef = adminDb.collection(BY_KEY).doc(p.key);
   return adminDb.runTransaction(async (tx): Promise<ClaimNameResult> => {
@@ -45,7 +48,7 @@ export async function claimDisplayName(uid: string, raw: unknown): Promise<Claim
       tx.set(keyRef, { uid, name: p.name });
       return { ok: true, name: p.name };
     }
-    const left = cooldownLeftMs(cur?.changedAt?.toMillis?.() ?? null);
+    const left = cooldownLeftMs(cur?.changedAt?.toMillis?.() ?? null, Date.now(), nameCooldownMs(isFounder));
     if (left > 0) return { ok: false, error: 'cooldown', nextChangeAt: Date.now() + left };
     if (typeof cur?.key === 'string' && cur.key) tx.delete(adminDb.collection(BY_KEY).doc(cur.key));
     tx.set(keyRef, { uid, name: p.name });
