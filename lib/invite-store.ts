@@ -2,7 +2,7 @@ import 'server-only';
 import { randomInt } from 'node:crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { legacyInviteCode, randomInviteCode } from '@/lib/invite-code';
+import { legacyInviteCode, piNameCode, randomInviteCode } from '@/lib/invite-code';
 import { parseRefCode } from '@/lib/ref-code';
 import { primaryOf } from '@/lib/person-link';
 import { getPerson } from '@/lib/person-store';
@@ -27,14 +27,20 @@ export async function ensureInviteCode(uid: string, username: string): Promise<s
   for (let attempt = 0; attempt < MAX_TRIES; attempt++) {
     const done = await adminDb.runTransaction(async (tx): Promise<string | null> => {
       const r = await tx.get(rRef);
-      const mine = parseRefCode(r.data()?.code) ?? (attempt === 0 ? legacyInviteCode(username) : null);
-      const candidate = attempt === 0 && mine ? mine : randomInviteCode(rand);
+      const existing = parseRefCode(r.data()?.code);
+      // Best first: a Pi account gets its own Pi name; then the code it already has; then the code it always had; then a random one.
+      const order = [uid.startsWith('web_') ? null : piNameCode(username), existing, legacyInviteCode(username)].filter((c, i, a): c is string => !!c && a.indexOf(c) === i);
+      const candidate = order[attempt] ?? randomInviteCode(rand);
       const cRef = adminDb.collection(CODES).doc(candidate);
       const [c, same] = await Promise.all([tx.get(cRef), tx.get(adminDb.collection('referrals').where('code', '==', candidate).limit(2))]);
       const heldByOther = (c.exists && c.data()?.username !== username) || same.docs.some((d) => d.id !== username);
       if (heldByOther) return null;
-      const oldCode = parseRefCode(r.data()?.code);
-      if (oldCode && oldCode !== candidate) tx.delete(adminDb.collection(CODES).doc(oldCode));
+      // The code it had before keeps working as an alias, so links already shared are not broken.
+      if (existing && existing !== candidate) {
+        const oldRef = adminDb.collection(CODES).doc(existing);
+        const old = await tx.get(oldRef);
+        if (!old.exists || old.data()?.username === username) tx.set(oldRef, { username, uid, alias: true, createdAt: old.data()?.createdAt ?? Timestamp.now() });
+      }
       tx.set(cRef, { username, uid, createdAt: c.exists ? c.data()?.createdAt ?? Timestamp.now() : Timestamp.now() });
       tx.set(rRef, { username, uid, code: candidate, ...(r.exists ? {} : { createdAt: Timestamp.now() }) }, { merge: true });
       return candidate;

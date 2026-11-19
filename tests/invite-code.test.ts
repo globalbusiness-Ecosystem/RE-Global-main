@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { INVITE_CODE_LENGTH, inviteUrl, legacyInviteCode, randomInviteCode } from '@/lib/invite-code';
+import { INVITE_CODE_LENGTH, inviteUrl, legacyInviteCode, piNameCode, randomInviteCode } from '@/lib/invite-code';
 import { parseRefCode } from '@/lib/ref-code';
 
 const src = (p: string) => readFileSync(p, 'utf8');
@@ -39,5 +39,23 @@ describe('one invite network for Pi and web', () => {
   it('redeem resolves the owner from the reserved list first; web handles reserve their code too', () => {
     expect(src('lib/referrals-server.ts')).toContain("collection('inviteCodes').doc(code)");
     expect(src('lib/handle-store.ts')).toContain("collection('inviteCodes')");
+  });
+});
+
+describe('a Pi account\'s invite code is its Pi name', () => {
+  it('uses capitals and digits, at most 12 characters', () => {
+    expect(piNameCode('Elsayed777x')).toBe('ELSAYED777X');
+    expect(piNameCode('a_b.c-d1')).toBe('ABCD1');
+    expect(piNameCode('averyveryverylongpiname')).toBe('AVERYVERYVER');
+    expect(piNameCode('averyveryverylongpiname')).toHaveLength(12);
+  });
+  it('is not made for names that are too short once cleaned', () => {
+    expect(piNameCode('ab')).toBeNull();
+    expect(piNameCode('_a_')).toBeNull();
+  });
+  it('the store tries the Pi name first for Pi accounts and keeps the old code as an alias', () => {
+    const s = readFileSync('lib/invite-store.ts', 'utf8');
+    expect(s).toContain("uid.startsWith('web_') ? null : piNameCode(username)");
+    expect(s).toContain('alias: true');
   });
 });
