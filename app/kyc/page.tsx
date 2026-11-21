@@ -123,6 +123,7 @@ export default function KycPage() {
           <p className="text-sm text-foreground/80">{kl('intro', language)}</p>
           {me.status === 'pending' && <p className={note}>{kl('pending', language)}</p>}
           {me.status === 'approved' && <p className={note}>{kl('approved', language)}</p>}
+          {(me.status === 'pending' || me.status === 'approved') && <p className="text-xs text-muted-foreground">{kl('privacy', language)}</p>}
           {me.status === 'rejected' && <p className={note}>{kl('rejected', language, { reason: me.rejectReason ?? '' })}</p>}
           {(me.status === 'pending' || me.status === 'approved') && (
             <div className="flex flex-col gap-2">
