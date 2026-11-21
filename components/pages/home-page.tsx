@@ -49,6 +49,7 @@ const categories = [
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
   { id: 'explorer', titleEn: 'Blockchain', titleAr: 'البلوك تشين', icon: Link2 },
   { id: 're-token', titleEn: 'Platform Credits', titleAr: 'رصيد المنصة', icon: Coins },
+  { id: 'kyc', titleEn: 'Verify identity', titleAr: 'توثيق الهوية', icon: ShieldCheck },
 ];
 
 export default function HomePage({
@@ -131,6 +132,8 @@ export default function HomePage({
                     setShowAdvisor(true);
                   } else if (cat.id === 'explorer') {
                     router.push('/explorer');
+                  } else if (cat.id === 'kyc') {
+                    router.push('/kyc');
                   } else if (cat.id === 'share-market') {
                     router.push('/market');
                   } else {
