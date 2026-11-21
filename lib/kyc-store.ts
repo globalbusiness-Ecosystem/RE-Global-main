@@ -4,6 +4,8 @@ import { adminDb } from '@/lib/firebase-admin';
 import { requiredKinds } from './kyc-files';
 import { parseNameMode, type NameMode } from './contract-identity';
 import { encryptField, decryptField, idFingerprint } from './field-crypto';
+import { getWatchlist } from './kyc-watchlist';
+import { screenName } from './kyc-screening';
 import { canMoveKyc, type KycRequestInput, type KycStatus } from './kyc-rules';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 140;
@@ -26,13 +28,29 @@ export async function submitKyc(uid: string, input: KycRequestInput, lang = 'en'
   // The same ID number on another account is flagged for the reviewer (not blocked: a person may own a Pi and a web account).
   const idHash = idFingerprint(input.idNumber);
   const dup = idHash ? (await col().where('idHash', '==', idHash).limit(3).get().catch(() => null))?.docs.find((d) => d.id !== uid && d.data().status !== 'rejected') : undefined;
-  return adminDb.runTransaction(async (tx) => {
+  const saved = await adminDb.runTransaction(async (tx) => {
     const s = await tx.get(ref);
     const cur = (s.exists ? s.data()?.status : 'none') as KycStatus;
     if (!canMoveKyc(cur === 'pending' || cur === 'approved' || cur === 'rejected' ? cur : 'none', 'pending')) return false;
     tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: encryptField(input.phone), docType: input.docType, idNumber: encryptField(input.idNumber), idHash: idHash ?? null, dupOf: dup?.id ?? null, files: requiredKinds(input.docType), lang, submittedAt: Timestamp.now(), rejectReason: null });
     return true;
   });
+  // The name is checked against the team's watchlist; a hit is only a flag for the reviewer.
+  if (saved) await ref.update({ screen: { hits: screenName(input.legalName, await getWatchlist()) }, review: null }).catch(() => {});
+  return saved;
+}
+
+/** True when the request's name matched the team's watchlist. */
+export async function hasScreenHit(uid: string): Promise<boolean> {
+  if (!okId(uid)) return false;
+  const h = (await col().doc(uid).get()).data()?.screen?.hits;
+  return Array.isArray(h) && h.length > 0;
+}
+
+/** Marks a pending request as needing a person (the identity company's signals were doubtful). It stays pending. */
+export async function flagForReview(uid: string, reasons: string[], signals?: unknown): Promise<void> {
+  if (!okId(uid)) return;
+  await col().doc(uid).set({ review: { reasons, signals: signals ?? null, at: Timestamp.now() } }, { merge: true });
 }
 
 /** How the person wants to be named in contracts: "alias" (account name + invite code, the default) or "real" (legal name). */
@@ -64,6 +82,6 @@ export async function listKyc(status?: KycStatus): Promise<Record<string, unknow
   const snap = await q.limit(200).get();
   const iso = (v: any) => (v?.toDate ? v.toDate().toISOString() : null);
   return snap.docs
-    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
+    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, screenHits: Array.isArray(x.screen?.hits) ? x.screen.hits : [], reviewReasons: Array.isArray(x.review?.reasons) ? x.review.reasons : [], files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
     .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
 }

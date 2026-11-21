@@ -1,6 +1,8 @@
 // A company that checks identity documents for us (Sumsub, Veriff...). Every company gets one adapter that fits this
 // shape, so nothing else changes when one is added. With no company configured the team reviews by hand (the default).
 
+import type { KycSignals } from '@/lib/kyc-engine';
+
 export interface KycStartInput { uid: string; legalName: string; country: string; docType: string; returnUrl: string }
 
 export interface KycProvider {
@@ -8,7 +10,7 @@ export interface KycProvider {
   /** Opens a check at the company; the person is sent to `url` to take photos there. `uid` is the company's external user id. */
   start(input: KycStartInput): Promise<{ url: string }>;
   /** Checks the company's signature on a callback and says what it decided; null when the call is not genuine. */
-  parseWebhook(raw: string, headers: Record<string, string | undefined>): { uid: string; decision: 'approved' | 'rejected'; reason?: string } | null;
+  parseWebhook(raw: string, headers: Record<string, string | undefined>): { uid: string; decision: 'approved' | 'rejected'; reason?: string; signals?: KycSignals } | null;
 }
 
 const providers = new Map<string, KycProvider>();

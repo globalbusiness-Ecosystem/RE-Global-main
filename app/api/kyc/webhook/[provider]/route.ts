@@ -4,6 +4,8 @@ import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { getKycProvider } from '@/lib/kyc-provider/provider';
 import { applyKycDecision } from '@/lib/kyc-decision';
 import { cleanNote } from '@/lib/kyc-rules';
+import { decideFromVerdict, cleanSignals } from '@/lib/kyc-engine';
+import { hasScreenHit, flagForReview } from '@/lib/kyc-store';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
@@ -23,9 +25,17 @@ export async function POST(req: NextRequest, ctx: { params: Promise<{ provider: 
   req.headers.forEach((v, k) => { headers[k.toLowerCase()] = v; });
   const ev = p.parseWebhook(raw, headers);
   if (!ev || !ev.uid.startsWith('web_')) return NextResponse.json({ ok: false }, { status: 401, headers: H });
-  const reason = cleanNote(ev.reason) || (ev.decision === 'rejected' ? 'Rejected by the identity check' : '');
+  const signals = cleanSignals(ev.signals);
   try {
-    const r = await applyKycDecision(ev.uid, ev.decision, reason, `provider:${p.id}`);
+    // Clear passes are approved here; doubtful ones (no live person, face mismatch, sanctions or PEP hit, watchlist hit, expired document) wait for a person.
+    const verdict = decideFromVerdict({ decision: ev.decision, signals }, await hasScreenHit(ev.uid));
+    if (verdict.action === 'review') {
+      await flagForReview(ev.uid, verdict.reasons, signals);
+      return NextResponse.json({ ok: true, applied: false, review: true }, { headers: H });
+    }
+    const decision = verdict.action === 'approve' ? 'approved' : 'rejected';
+    const reason = cleanNote(ev.reason) || (decision === 'rejected' ? (verdict.reasons[0] === 'document_invalid' ? 'The document could not be verified' : 'Rejected by the identity check') : '');
+    const r = await applyKycDecision(ev.uid, decision, reason, `provider:${p.id}`);
     // 404/409 are final answers (unknown person, already decided): replying 200 stops the company from retrying forever.
     return NextResponse.json({ ok: true, applied: r.code === 200 }, { headers: H });
   } catch {
