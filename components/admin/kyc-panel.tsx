@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate } from './admin-ui';
 
-type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; dupOf?: string | null; screenHits?: string[]; reviewReasons?: string[]; files?: string[] };
+type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; dupOf?: string | null; hold?: boolean; consentAt?: string | null; screenHits?: string[]; reviewReasons?: string[]; files?: string[] };
 
 const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | 'blue' }> = {
   pending: { label: 'في الانتظار', tone: 'gold' },
@@ -18,6 +18,7 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
   const [requireAll, setRequireAll] = useState<boolean | null>(null);
+  const [ret, setRet] = useState<{ years: number; autoDelete: boolean; due: number } | null>(null);
 
   const load = useCallback(() => {
     adminApi<{ requests: Req[] }>('/api/admin/kyc')
@@ -28,6 +29,37 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   useEffect(() => {
     adminApi<{ policy: { requireAll: boolean } }>('/api/admin/kyc-policy').then((d) => setRequireAll(!!d.policy?.requireAll)).catch(() => {});
   }, []);
+
+  const loadRet = useCallback(() => {
+    adminApi<{ policy: { years: number; autoDelete: boolean }; due: number }>('/api/admin/kyc-retention').then((d) => setRet({ ...d.policy, due: d.due })).catch(() => {});
+  }, []);
+  useEffect(() => { loadRet(); }, [loadRet]);
+
+  const saveRet = async (next: { years: number; autoDelete: boolean }) => {
+    try {
+      const d = await adminApi<{ policy: { years: number; autoDelete: boolean }; due: number }>('/api/admin/kyc-retention', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(next) });
+      setRet({ ...d.policy, due: d.due });
+    } catch (e) {
+      if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
+    }
+  };
+  const retPost = async (body: Record<string, unknown>, okMsg: string) => {
+    try {
+      await adminApi('/api/admin/kyc-retention', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      setNotice(okMsg); loadRet(); load();
+    } catch (e) {
+      if (e instanceof UnauthorizedError) onUnauthorized(); else setNotice(`تعذّر التنفيذ: ${(e as Error).message}`);
+    }
+  };
+  const runNow = () => {
+    if (!ret || !window.confirm(`حذف نهائي لبيانات ${ret.due} شخص عدّت عليهم مدة الاحتفاظ (${ret.years} سنين)؟ مفيش رجوع. اللي عليهم تجميد قانوني مش هيتحذفوا.`)) return;
+    retPost({ action: 'run', confirm: true }, 'اتنفّذ حذف البيانات المنتهية مدتها.');
+  };
+  const purgeOne = (uid: string) => {
+    if (!window.confirm('حذف نهائي لبيانات الهوية والصور بتاعة الشخص ده؟ مفيش رجوع (هيحتاج يوثّق من جديد).')) return;
+    retPost({ action: 'purge', uid, confirm: true }, 'اتحذفت بيانات الشخص.');
+  };
+  const toggleHold = (uid: string, hold: boolean) => retPost({ action: 'hold', uid, hold }, hold ? 'اتفعّل التجميد القانوني: البيانات مش هتتحذف.' : 'اتشال التجميد القانوني.');
 
   const toggleAll = async () => {
     if (requireAll === null) return;
@@ -70,6 +102,23 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
         <input type="checkbox" checked={requireAll === true} disabled={requireAll === null} onChange={toggleAll} />
         إلزام توثيق الهوية لكل المستخدمين قبل الدفع (Pi كمان). حسابات الويب ملزمة دايمًا.
       </label>
+      {ret ? (
+        <div className="mb-3 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-sm text-gray-200">
+          <p className="mb-2 font-semibold text-white">🗄️ الاحتفاظ ببيانات الهوية</p>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2">مدة الاحتفاظ (سنين)
+              <input type="number" min={1} max={30} value={ret.years} onChange={(e) => setRet({ ...ret, years: Number(e.target.value) })} onBlur={() => saveRet({ years: ret.years, autoDelete: ret.autoDelete })} className="w-16 rounded-lg border border-[#2a2a2a] bg-[#0d0d0d] px-2 py-1 text-white" />
+            </label>
+            <label className="flex items-center gap-2">
+              <input type="checkbox" checked={ret.autoDelete} onChange={() => saveRet({ years: ret.years, autoDelete: !ret.autoDelete })} />
+              حذف تلقائي يومي
+            </label>
+            <span className="text-xs text-gray-400">منتهية المدة دلوقتي: {ret.due}</span>
+            <Btn small onClick={runNow} disabled={ret.due === 0}>🗑 حذف المنتهي الآن</Btn>
+          </div>
+          <p className="mt-2 text-xs text-gray-500">المدة بتتحسب من تاريخ القرار. الحذف التلقائي مقفول افتراضيًا. اللي عليه تجميد قانوني عمره ما بيتحذف.</p>
+        </div>
+      ) : null}
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };
@@ -84,6 +133,8 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 {r.screenHits?.length ? <span className="text-red-500">⚠ watchlist: {r.screenHits.join(', ')}</span> : null}
                 {r.reviewReasons?.length ? <span className="text-amber-500" dir="ltr">⚑ review: {r.reviewReasons.join(', ')}</span> : null}
                 {r.dupOf ? <span className="text-amber-500" dir="ltr">⚠ same ID as {r.dupOf}</span> : null}
+                {r.hold ? <span className="text-sky-400">🔒 تجميد قانوني</span> : null}
+                {r.consentAt ? <span className="text-gray-500">✔ موافقة {fmtDate(r.consentAt)}</span> : null}
                 <span>{fmtDate(r.submittedAt)}</span>
                 <span className="truncate" dir="ltr">{r.uid}</span>
               </div>
@@ -99,6 +150,10 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 </div>
               ) : null}
               {r.rejectReason ? <p className="mt-1 text-xs text-gray-500" dir="auto">❌ {r.rejectReason}</p> : null}
+              <div className="mt-2 flex flex-wrap gap-2">
+                <Btn small onClick={() => toggleHold(r.uid, !r.hold)}>{r.hold ? '🔓 شيل التجميد' : '🔒 تجميد قانوني'}</Btn>
+                {!r.hold && <Btn small onClick={() => purgeOne(r.uid)}>🗑 حذف بياناته</Btn>}
+              </div>
               {(r.status === 'pending' || r.status === 'approved') && (
                 <div className="mt-2 flex gap-2">
                   {r.status === 'pending' && <Btn small onClick={() => decide(r.uid, 'approved')} disabled={busy === r.uid}>✅ موافقة</Btn>}

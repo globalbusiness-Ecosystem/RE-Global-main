@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
-import { setContractName, submitKyc } from '@/lib/kyc-store';
+import { setContractName, submitKyc, recordConsent } from '@/lib/kyc-store';
 import { uploadedKinds } from '@/lib/kyc-files-store';
 import { hasAllPhotos } from '@/lib/kyc-files';
 import { pickMailLang } from '@/lib/kyc-mail';
@@ -20,6 +20,8 @@ export async function POST(req: NextRequest) {
   if (!canKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
   const raw = await req.json().catch(() => null);
   const input = parseKycRequest(raw);
+  // Consent to the privacy notice is required, and its version and time are saved with the request.
+  if (input && (raw as Record<string, unknown> | null)?.consent !== true) return NextResponse.json({ error: 'Consent is required', code: 'consent_required' }, { status: 400, headers: H });
   if (!input) return NextResponse.json({ error: 'Please check your details' }, { status: 400, headers: H });
   try {
     ensureKycProviders();
@@ -30,6 +32,7 @@ export async function POST(req: NextRequest) {
     const session = provider ? await provider.start({ uid: user.uid, legalName: input.legalName, country: input.country, docType: input.docType, returnUrl: `${siteUrl().replace(/\/+$/, '')}/kyc` }) : null;
     const ok = await submitKyc(user.uid, input, pickMailLang(req.headers.get('accept-language')));
     if (!ok) return NextResponse.json({ error: 'A request already exists' }, { status: 409, headers: H });
+    await recordConsent(user.uid);
     await setContractName(user.uid, parseNameMode((raw as Record<string, unknown> | null)?.contractName));
     return NextResponse.json({ ok: true, ...(session ? { url: session.url } : {}) }, { headers: H });
   } catch {

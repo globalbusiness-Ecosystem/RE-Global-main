@@ -33,7 +33,8 @@ export default function KycPage() {
   const [idNumber, setIdNumber] = useState('');
   const [docType, setDocType] = useState<DocType>('id');
   const [photos, setPhotos] = useState<Partial<Record<FileKind, File>>>({});
-  const [msg, setMsg] = useState<'invalid' | 'failed' | 'photosMissing' | 'photoBad' | null>(null);
+  const [msg, setMsg] = useState<'invalid' | 'failed' | 'photosMissing' | 'photoBad' | 'consentMissing' | null>(null);
+  const [consent, setConsent] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [nameMode, setNameMode] = useState<NameMode>('alias');
   const [nameSaved, setNameSaved] = useState(false);
@@ -49,6 +50,7 @@ export default function KycPage() {
 
   const submit = async () => {
     setMsg(null);
+    if (!consent) { setMsg('consentMissing'); return; }
     const kinds = me?.hosted ? [] : requiredKinds(docType);
     if (kinds.some((k) => !photos[k])) { setMsg('photosMissing'); return; }
     setBusy(true);
@@ -60,7 +62,7 @@ export default function KycPage() {
         if (!small || !(await uploadPhoto(k, small))) { setMsg('photoBad'); setUploading(false); return; }
       }
       setUploading(false);
-      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType, idNumber, contractName: nameMode }) });
+      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType, idNumber, contractName: nameMode, consent: true }) });
       if (r.status === 400) setMsg((await r.json().catch(() => null))?.code === 'photos_missing' ? 'photosMissing' : 'invalid');
       else if (!r.ok && r.status !== 409) setMsg('failed');
       else {
@@ -190,6 +192,7 @@ export default function KycPage() {
                 {stepHead(me.hosted ? 2 : 3, 'stepName')}
                 {nameChoice}
               </div>
+              <label className="flex items-start gap-2 text-xs text-foreground/80"><input type="checkbox" checked={consent} onChange={(e) => setConsent(e.target.checked)} className="mt-0.5" /><span>{kl('consent', language)}</span></label>
               {uploading && <p className="text-sm text-foreground/80">{kl('uploading', language)}</p>}
               {msg && <p role="alert" className="text-sm text-red-400">{kl(msg, language)}</p>}
               <button type="submit" disabled={busy} className="w-full rounded-xl bg-accent px-4 py-3 text-base font-semibold text-accent-foreground shadow-[0_8px_28px_-10px_var(--accent)] disabled:opacity-50">{kl('submit', language)}</button>

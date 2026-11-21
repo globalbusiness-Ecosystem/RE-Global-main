@@ -6,6 +6,7 @@ import { parseNameMode, type NameMode } from './contract-identity';
 import { encryptField, decryptField, idFingerprint } from './field-crypto';
 import { getWatchlist } from './kyc-watchlist';
 import { screenName } from './kyc-screening';
+import { KYC_CONSENT_VERSION } from './kyc-retention';
 import { canMoveKyc, type KycRequestInput, type KycStatus } from './kyc-rules';
 
 const okId = (id: string) => !!id && !id.includes('/') && id.length <= 140;
@@ -38,6 +39,12 @@ export async function submitKyc(uid: string, input: KycRequestInput, lang = 'en'
   // The name is checked against the team's watchlist; a hit is only a flag for the reviewer.
   if (saved) await ref.update({ screen: { hits: screenName(input.legalName, await getWatchlist()) }, review: null }).catch(() => {});
   return saved;
+}
+
+/** Saves that the person agreed to the privacy notice (its version and the time). */
+export async function recordConsent(uid: string): Promise<void> {
+  if (!okId(uid)) return;
+  await col().doc(uid).set({ consent: { version: KYC_CONSENT_VERSION, at: Timestamp.now() } }, { merge: true });
 }
 
 /** True when the request's name matched the team's watchlist. */
@@ -82,6 +89,7 @@ export async function listKyc(status?: KycStatus): Promise<Record<string, unknow
   const snap = await q.limit(200).get();
   const iso = (v: any) => (v?.toDate ? v.toDate().toISOString() : null);
   return snap.docs
-    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, screenHits: Array.isArray(x.screen?.hits) ? x.screen.hits : [], reviewReasons: Array.isArray(x.review?.reasons) ? x.review.reasons : [], files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
+    .filter((d) => d.data().status !== 'none') // a deleted (purged) person is only an empty stub
+    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, hold: x.hold === true, consentAt: iso(x.consent?.at), consentVersion: x.consent?.version ?? null, screenHits: Array.isArray(x.screen?.hits) ? x.screen.hits : [], reviewReasons: Array.isArray(x.review?.reasons) ? x.review.reasons : [], files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
     .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
 }
