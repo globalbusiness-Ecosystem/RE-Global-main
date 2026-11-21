@@ -7,13 +7,16 @@ export type KycStatus = 'none' | 'pending' | 'approved' | 'rejected';
 
 export const needsKyc = (uid: string): boolean => typeof uid === 'string' && uid.startsWith('web_');
 
+// Anyone can send an identity request (Pi accounts too). needsKyc says who MUST (web sign-ins, or everyone when the team turns it on).
+export const canKyc = (uid: string): boolean => typeof uid === 'string' && uid.length > 0 && uid.length <= 140 && !uid.includes('/');
+
 export const canMoveKyc = (from: KycStatus, to: KycStatus): boolean => {
   if (to === 'pending') return from === 'none' || from === 'rejected';
   if (to === 'approved' || to === 'rejected') return from === 'pending' || (from === 'approved' && to === 'rejected');
   return false;
 };
 
-export interface KycRequestInput { legalName: string; country: string; phone: string; docType: DocType }
+export interface KycRequestInput { legalName: string; country: string; phone: string; docType: DocType; idNumber: string }
 
 const clean = (v: unknown, max: number) => (typeof v === 'string' ? v.replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, max) : '');
 
@@ -28,7 +31,10 @@ export function parseKycRequest(b: unknown): KycRequestInput | null {
   if (!isCountry(country)) return null;
   if (!/^\+?[0-9 ()-]{7,20}$/.test(phone)) return null;
   if (!isDocType(docType)) return null;
-  return { legalName, country, phone, docType };
+  // The number on the document, typed by the person and checked by the team against the photo. Letters and digits only.
+  const idNumber = clean(o.idNumber, 40).replace(/[\s-]+/g, '').toUpperCase();
+  if (!/^[A-Z0-9]{5,30}$/.test(idNumber)) return null;
+  return { legalName, country, phone, docType, idNumber };
 }
 
 export const cleanNote = (v: unknown): string => clean(v, 300);

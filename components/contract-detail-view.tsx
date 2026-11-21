@@ -10,6 +10,7 @@ import QRCode from 'qrcode';
 import type { NavLanguage } from '@/lib/nav-i18n';
 import { buyerDisplayFromText, buyerHandleFromText, isCardContractText } from '@/lib/contract-identity';
 import { translateContract, contractDir, CONTRACT_LANGS } from '@/lib/contract-translations';
+import { ContractPrivateCard } from '@/components/contract-private-card';
 import { cv, kindPartyLabel, kindTitleLabel, contractStatusLabel } from '@/lib/contract-view-labels';
 
 function CopyField({ label, value }: { label: string; value: string }) {
@@ -327,6 +328,8 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
             )}
           </div>
         </div>
+
+        {isSigned && contract.id && <ContractPrivateCard contractId={contract.id} language={language} />}
 
         {contract.contractText && (
           <div className="px-6 pb-5">

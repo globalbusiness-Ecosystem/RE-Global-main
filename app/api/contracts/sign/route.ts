@@ -12,6 +12,7 @@ import { confirmShares } from '@/lib/share-inventory';
 import { finalizeSale } from '@/lib/property-reserve';
 import { getLegalProfile } from '@/lib/legal-server';
 import { accrueForContract } from '@/lib/partners-server';
+import { identityFor, privateRef } from '@/lib/contract-private-store';
 import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
@@ -98,6 +99,7 @@ export async function POST(req: NextRequest) {
   }
   if (!propertyTitle) propertyTitle = `Property ${propertyId}`;
   const legal = await getLegalProfile(propertyCountry);
+  const identity = await identityFor(user.uid); // null unless this buyer passed the Platform's KYC
 
   // 4) One payment -> one signed contract. Repeat calls return the stored one.
   const ref = adminDb.collection('signed_contracts').doc(paymentId);
@@ -148,6 +150,7 @@ export async function POST(req: NextRequest) {
         booking: quote.booking ? { start: quote.booking.start, end: quote.booking.end, nights: quote.booking.nights } : undefined,
         shares: quote.shares ? { count: quote.shares.count, totalShares: quote.shares.totalShares } : undefined,
         legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
+        identity: identity?.proof,
       });
       const contractHash = hashContract(contractText);
       const record = {
@@ -167,6 +170,7 @@ export async function POST(req: NextRequest) {
         txid,
       };
       tx.set(ref, record);
+      if (identity) tx.set(privateRef(paymentId), identity.record);
       tx.set(publicRef, toPublicDoc(record));
       return { record };
     });

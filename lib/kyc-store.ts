@@ -26,7 +26,7 @@ export async function submitKyc(uid: string, input: KycRequestInput, lang = 'en'
     const s = await tx.get(ref);
     const cur = (s.exists ? s.data()?.status : 'none') as KycStatus;
     if (!canMoveKyc(cur === 'pending' || cur === 'approved' || cur === 'rejected' ? cur : 'none', 'pending')) return false;
-    tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: input.phone, docType: input.docType, files: requiredKinds(input.docType), lang, submittedAt: Timestamp.now(), rejectReason: null });
+    tx.set(ref, { uid, status: 'pending', legalName: input.legalName, country: input.country, phone: input.phone, docType: input.docType, idNumber: input.idNumber, files: requiredKinds(input.docType), lang, submittedAt: Timestamp.now(), rejectReason: null });
     return true;
   });
 }
@@ -60,6 +60,6 @@ export async function listKyc(status?: KycStatus): Promise<Record<string, unknow
   const snap = await q.limit(200).get();
   const iso = (v: any) => (v?.toDate ? v.toDate().toISOString() : null);
   return snap.docs
-    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: x.phone ?? '', docType: x.docType ?? '', files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
+    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: x.phone ?? '', docType: x.docType ?? '', idNumber: x.idNumber ?? '', files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
     .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
 }

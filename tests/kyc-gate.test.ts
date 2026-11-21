@@ -4,9 +4,9 @@ import { readFileSync } from 'node:fs';
 const src = (p: string) => readFileSync(p, 'utf8');
 
 describe('identity gate on money routes', () => {
-  it('the shared gate passes Pi users, blocks unless approved, and fails closed', () => {
+  it('the shared gate passes Pi users unless the team requires it for everyone, blocks unless approved, and fails closed', () => {
     const s = src('lib/kyc-gate.ts');
-    expect(s).toContain('if (!needsKyc(uid)) return null');
+    expect(s).toContain('if (!needsKyc(uid) && !(await getKycPolicy()).requireAll) return null');
     expect(s).toContain("status !== 'approved'");
     expect(s).toContain("code: 'kyc_required'");
     expect(s).toContain('status: 503');

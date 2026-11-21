@@ -18,6 +18,7 @@ rules_version = '2';
 //   card_orders (card payments), kyc and kyc_files (identity verification requests and the identity photos of web sign-ins; personal data, server only),
 //   csp_reports (counters from the report-only content security policy),
 //   avatars (private profile pictures; only /api/my-avatar reads and writes them, only for their owner)
+//   contract_private (legal name, ID number, phone behind a contract's public masked line; no client rule: only /api/contracts/private reads it, only for the owner)
 // Money and share state must never be client-writable: every change goes
 // through an API route that checks the Pi payment first.
 

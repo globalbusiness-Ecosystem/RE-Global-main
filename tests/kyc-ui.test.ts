@@ -37,9 +37,9 @@ describe('wiring', () => {
     expect(src('components/admin/kyc-panel.tsx')).toContain("/api/admin/kyc");
     expect(src('components/admin/kyc-panel.tsx')).toContain('if (!reason) return');
   });
-  it('the page only shows the form to people who must verify and can (none or rejected)', () => {
+  it('the page shows the form to anyone who can send a request (none or rejected); Pi accounts see it as optional', () => {
     const s = src('app/kyc/page.tsx');
-    expect(s).toContain('me.required');
+    expect(s).toContain('!me.required');
     expect(s).toContain("me.status === 'none' || me.status === 'rejected'");
   });
 });

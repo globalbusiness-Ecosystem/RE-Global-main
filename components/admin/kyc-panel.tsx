@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate } from './admin-ui';
 
-type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; files?: string[] };
+type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; files?: string[] };
 
 const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | 'blue' }> = {
   pending: { label: 'في الانتظار', tone: 'gold' },
@@ -11,12 +11,13 @@ const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | '
   rejected: { label: 'مرفوض', tone: 'red' },
 };
 
-// Identity verification requests of people who signed in outside the Pi Browser. Pending ones come first.
+// Identity verification requests (Pi and web accounts). Pending ones come first.
 export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [rows, setRows] = useState<Req[] | null>(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState('');
   const [notice, setNotice] = useState('');
+  const [requireAll, setRequireAll] = useState<boolean | null>(null);
 
   const load = useCallback(() => {
     adminApi<{ requests: Req[] }>('/api/admin/kyc')
@@ -24,6 +25,21 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
       .catch((e) => (e instanceof UnauthorizedError ? onUnauthorized() : setError(e.message)));
   }, [onUnauthorized]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    adminApi<{ policy: { requireAll: boolean } }>('/api/admin/kyc-policy').then((d) => setRequireAll(!!d.policy?.requireAll)).catch(() => {});
+  }, []);
+
+  const toggleAll = async () => {
+    if (requireAll === null) return;
+    const next = !requireAll;
+    if (!window.confirm(next ? 'تفعيل إلزام التوثيق لكل المستخدمين (Pi كمان): أي حد مش موثّق مش هيقدر يدفع. متأكد؟' : 'إيقاف الإلزام لمستخدمي Pi؟ (حسابات الويب هتفضل ملزمة)')) return;
+    try {
+      await adminApi('/api/admin/kyc-policy', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requireAll: next }) });
+      setRequireAll(next);
+    } catch (e) {
+      if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message);
+    }
+  };
 
   const decide = async (uid: string, decision: 'approved' | 'rejected') => {
     let reason = '';
@@ -50,6 +66,10 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   return (
     <Card title={`🪪 التحقق من الهوية (${pending.length} في الانتظار)`}>
       {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
+      <label className="mb-3 flex items-center gap-2 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-sm text-gray-200">
+        <input type="checkbox" checked={requireAll === true} disabled={requireAll === null} onChange={toggleAll} />
+        إلزام توثيق الهوية لكل المستخدمين قبل الدفع (Pi كمان). حسابات الويب ملزمة دايمًا.
+      </label>
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };
@@ -60,6 +80,7 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 <Badge tone={st.tone}>{st.label}</Badge>
                 <span dir="ltr">{r.country}</span>
                 <span dir="ltr">{r.phone}</span>
+                {r.idNumber ? <span dir="ltr">🪪 {r.idNumber}</span> : null}
                 <span>{fmtDate(r.submittedAt)}</span>
                 <span className="truncate" dir="ltr">{r.uid}</span>
               </div>

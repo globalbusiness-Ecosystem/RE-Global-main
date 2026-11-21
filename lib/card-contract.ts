@@ -12,6 +12,7 @@ import { getHandle } from '@/lib/handle-store';
 import type { CardOrder } from '@/lib/card-pay/order';
 import { getOrder } from '@/lib/card-pay/store';
 import { accrueForContract } from '@/lib/partners-server';
+import { identityFor, privateRef } from '@/lib/contract-private-store';
 
 // A card payment gets the same signed contract a Pi payment gets (same collections, same /verify page), and the
 // contract's fingerprint is anchored on the Pi blockchain. The contract is saved first; anchoring is best effort and
@@ -55,6 +56,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
   const inviteCode = nameMode === 'alias' ? await inviteCodeOf(buyerUsername, o.uid) : undefined;
   const type = typeof o.booking?.type === 'string' && o.booking.type ? o.booking.type : String(p.type ?? 'buy');
   const amount = o.amountMinor / 100;
+  const identity = await identityFor(o.uid); // masked proof for the public text + private record (null without an approved KYC)
 
   const ref = adminDb.collection('signed_contracts').doc(o.id);
   const publicRef = adminDb.collection('contracts').doc(o.id);
@@ -67,7 +69,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
       type, amount, currency: o.currency, paymentId: o.id, txid: '',
       booking: o.booking ? { start: o.booking.start, end: o.booking.end, nights: o.booking.nights } : undefined,
       legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
-      card: { orderId: o.id, buyerName, nameMode, inviteCode },
+      card: { orderId: o.id, buyerName, nameMode, inviteCode, proof: identity?.proof },
     });
     const hash = hashContract(text);
     const signedAt = new Date().toISOString();
@@ -79,6 +81,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
       registryPending: !!process.env.REGISTRY_CONTRACT_ID,
     };
     tx.set(ref, { uid: o.uid, ...base });
+    if (identity) tx.set(privateRef(o.id), identity.record);
     tx.set(publicRef, { ...base, sellerUsername: 'RE-Global-Platform', status: 'completed', paymentId: o.id, createdAt: Timestamp.now(), updatedAt: Timestamp.now() });
     return id;
   });

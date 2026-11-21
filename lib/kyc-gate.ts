@@ -2,14 +2,15 @@ import 'server-only';
 import { NextResponse } from 'next/server';
 import { getKyc } from '@/lib/kyc-store';
 import { needsKyc } from '@/lib/kyc-rules';
+import { getKycPolicy } from '@/lib/kyc-policy';
 
 /**
  * For routes that move money: people who signed in outside the Pi Browser must be verified first.
  * Returns the response to send back when the person is blocked, or null when they may go on.
- * Pi users pass (Pi verified them). A failed lookup blocks (fails closed).
+ * Pi users pass unless the team turned on "everyone must verify" (settings/kyc). A failed lookup blocks (fails closed).
  */
 export async function kycBlock(uid: string): Promise<NextResponse | null> {
-  if (!needsKyc(uid)) return null;
+  if (!needsKyc(uid) && !(await getKycPolicy()).requireAll) return null;
   const H = { 'Cache-Control': 'no-store' };
   let status: string;
   try { status = (await getKyc(uid)).status; } catch { return NextResponse.json({ error: 'Try again' }, { status: 503, headers: H }); }

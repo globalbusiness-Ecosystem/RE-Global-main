@@ -30,6 +30,7 @@ export default function KycPage() {
   const [legalName, setLegalName] = useState('');
   const [country, setCountry] = useState('');
   const [phone, setPhone] = useState('');
+  const [idNumber, setIdNumber] = useState('');
   const [docType, setDocType] = useState<DocType>('id');
   const [photos, setPhotos] = useState<Partial<Record<FileKind, File>>>({});
   const [msg, setMsg] = useState<'invalid' | 'failed' | 'photosMissing' | 'photoBad' | null>(null);
@@ -59,7 +60,7 @@ export default function KycPage() {
         if (!small || !(await uploadPhoto(k, small))) { setMsg('photoBad'); setUploading(false); return; }
       }
       setUploading(false);
-      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType, contractName: nameMode }) });
+      const r = await fetch('/api/kyc/request', { method: 'POST', headers: authHeaders({ 'Content-Type': 'application/json' }), body: JSON.stringify({ legalName, country, phone, docType, idNumber, contractName: nameMode }) });
       if (r.status === 400) setMsg((await r.json().catch(() => null))?.code === 'photos_missing' ? 'photosMissing' : 'invalid');
       else if (!r.ok && r.status !== 409) setMsg('failed');
       else {
@@ -102,7 +103,8 @@ export default function KycPage() {
   ));
   const input = 'w-full rounded-xl border border-border bg-muted/60 px-4 py-3 text-base text-foreground outline-none focus:border-accent';
   const note = 'rounded-xl border border-border bg-muted/60 p-3 text-sm text-foreground/80';
-  const canSend = me && me.required && (me.status === 'none' || me.status === 'rejected');
+  // Anyone may send a request (Pi accounts too); the note below says when it is optional.
+  const canSend = me && (me.status === 'none' || me.status === 'rejected');
 
   return (
     <main dir={rtl ? 'rtl' : 'ltr'} className="mx-auto flex min-h-screen max-w-md flex-col justify-center gap-4 px-4 py-10 text-foreground">
@@ -115,10 +117,9 @@ export default function KycPage() {
         </>
       ) : !me ? (
         msg === 'failed' ? <p role="alert" className="text-sm text-red-400">{kl('failed', language)}</p> : null
-      ) : !me.required ? (
-        <p className={note}>{kl('notRequired', language)}</p>
       ) : (
         <>
+          {!me.required && <p className={note}>{kl('notRequired', language)}</p>}
           <p className="text-sm text-foreground/80">{kl('intro', language)}</p>
           {me.status === 'pending' && <p className={note}>{kl('pending', language)}</p>}
           {me.status === 'approved' && <p className={note}>{kl('approved', language)}</p>}
@@ -145,6 +146,10 @@ export default function KycPage() {
                 </label>
                 <label className="text-sm">{kl('phone', language)}
                   <input className={`${input} mt-1`} dir="ltr" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={20} inputMode="tel" autoComplete="tel" />
+                </label>
+                <label className="text-sm">{kl('idNumber', language)}
+                  <input className={`${input} mt-1`} dir="ltr" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} maxLength={40} autoComplete="off" autoCapitalize="characters" />
+                  <span className="mt-1 block text-xs text-muted-foreground">{kl('idNumberHint', language)}</span>
                 </label>
               </div>
               {!me.hosted && (

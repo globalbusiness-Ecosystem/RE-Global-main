@@ -4,15 +4,16 @@ import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
 import { getKycFile } from '@/lib/kyc-files-store';
 import { isFileKind } from '@/lib/kyc-files';
+import { canKyc } from '@/lib/kyc-rules';
 
 export const dynamic = 'force-dynamic';
 
-// The team opens one identity photo (?uid=web_...&kind=front|back|selfie). Every view is written to the admin log.
+// The team opens one identity photo (?uid=...&kind=front|back|selfie). Every view is written to the admin log.
 export async function GET(req: NextRequest) {
   if (!(await isAdminRequest(req))) return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   const uid = req.nextUrl.searchParams.get('uid') ?? '';
   const kind = req.nextUrl.searchParams.get('kind');
-  if (!uid.startsWith('web_') || !isFileKind(kind)) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
+  if (!canKyc(uid) || !isFileKind(kind)) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
   try {
     const f = await getKycFile(uid, kind);
     if (!f) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });

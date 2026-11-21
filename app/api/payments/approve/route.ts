@@ -11,6 +11,7 @@ import { authorizePayment, piPaymentAction } from '@/lib/pi-payment-guard';
 import { reserveForPayment } from '@/lib/property-reserve';
 import { RESERVE_ERRORS } from '@/lib/property-lifecycle';
 import { stepUpGate } from '@/lib/stepup-server';
+import { kycBlock } from '@/lib/kyc-gate';
 
 export const dynamic = 'force-dynamic';
 
@@ -21,6 +22,9 @@ export async function POST(req: NextRequest) {
   // Accounts that asked for it must confirm with their fingerprint before any payment is approved.
   const gate = await stepUpGate(ctx.user, req);
   if (gate) return gate;
+  // Before any money moves: when the team requires an identity check for everyone, Pi accounts need it too.
+  const kycStop = await kycBlock(ctx.user.uid);
+  if (kycStop) return kycStop;
   // Resale of shares between users: the amount is the listing's price, and the listing is held for this buyer.
   if (ctx.payment.metadata?.transactionType === 'resale') {
     try {

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { guardApi } from '@/lib/api-guard';
 import { getContractName, getKyc } from '@/lib/kyc-store';
 import { needsKyc } from '@/lib/kyc-rules';
+import { getKycPolicy } from '@/lib/kyc-policy';
 import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { activeKycProvider } from '@/lib/kyc-provider/provider';
 
@@ -12,11 +13,13 @@ const H = { 'Cache-Control': 'no-store' };
 export async function GET(req: NextRequest) {
   const user = await guardApi(req, { scope: 'kyc-me', limit: 60 });
   if (user instanceof NextResponse) return user;
-  const required = needsKyc(user.uid);
-  ensureKycProviders();
-  const hosted = activeKycProvider() !== null;
-  if (!required) return NextResponse.json({ required, hosted, status: 'approved' }, { headers: H });
   try {
+    // Web sign-ins must verify; Pi accounts may, and must when the team turns the rule on for everyone.
+    const web = needsKyc(user.uid);
+    const required = web || (await getKycPolicy()).requireAll;
+    ensureKycProviders();
+    // An identity company's page is only used for web sign-ins (its callbacks are for them); Pi accounts are reviewed by the team.
+    const hosted = web && activeKycProvider() !== null;
     const [k, contractName] = await Promise.all([getKyc(user.uid), getContractName(user.uid)]);
     return NextResponse.json({ required, hosted, status: k.status, rejectReason: k.rejectReason ?? null, contractName }, { headers: H });
   } catch {

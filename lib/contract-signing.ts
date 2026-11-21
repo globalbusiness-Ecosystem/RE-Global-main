@@ -1,6 +1,7 @@
 import { Keypair } from '@stellar/stellar-sdk';
 import crypto from 'crypto';
-import { cardParty, type NameMode } from '@/lib/contract-identity';
+import { cardParty, piParty, type NameMode } from '@/lib/contract-identity';
+import type { IdentityProof } from '@/lib/contract-privacy';
 
 interface ContractInput {
   contractId: string;
@@ -19,7 +20,9 @@ interface ContractInput {
   shares?: { count: number; totalShares: number };
   legal?: { statusLine: string; governingLaw: string; extraClause?: string };
   /** Paid by card: the order id and the buyer's name as verified by the platform's identity check. Omitted = paid with Pi. */
-  card?: { orderId: string; buyerName: string; nameMode?: NameMode; inviteCode?: string };
+  card?: { orderId: string; buyerName: string; nameMode?: NameMode; inviteCode?: string; proof?: IdentityProof | null };
+  /** Pi payment: the buyer's masked identity proof (only when the buyer passed the Platform's KYC). */
+  identity?: IdentityProof | null;
 }
 
 // Extra SUBJECT lines for dated stays and share purchases. Empty for a plain sale, so those contracts read as before.
@@ -44,7 +47,7 @@ Contract ID: ${c.contractId}
 Date: ${new Date().toISOString()}
 
 PARTIES
-Party A (Buyer): ${c.card ? cardParty(c.buyerUsername, c.card) : `@${c.buyerUsername} — identity verified via Pi Network payment`}
+Party A (Buyer): ${c.card ? cardParty(c.buyerUsername, c.card) : piParty(c.buyerUsername, c.identity)}
 Party B (Platform): RE Global (${c.sellerUsername})
 
 SUBJECT

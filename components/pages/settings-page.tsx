@@ -55,6 +55,7 @@ import { FOUNDER_UI, founderText } from '@/lib/founder-i18n';
 import { getReferralCount } from '@/lib/referrals';
 import { inviteUrl } from '@/lib/invite-code';
 import { LinkedAccounts } from '@/components/linked-accounts';
+import { KycStatusCard } from '@/components/kyc-status-card';
 import { maxLevel } from '@/lib/verification-level';
 import { authHeaders } from '@/lib/api-token';
 import { useFirebaseDatabase } from '@/lib/firebase-database';
@@ -386,6 +387,8 @@ export default function SettingsPage({
               else if (id === 'invite') handleCopyReferral();
             }}
           />
+
+          <KycStatusCard language={language} />
 
           <LinkedAccounts language={language} />
 

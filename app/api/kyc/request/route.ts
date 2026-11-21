@@ -7,7 +7,7 @@ import { pickMailLang } from '@/lib/kyc-mail';
 import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { activeKycProvider } from '@/lib/kyc-provider/provider';
 import { siteUrl } from '@/lib/site-url';
-import { needsKyc, parseKycRequest } from '@/lib/kyc-rules';
+import { canKyc, needsKyc, parseKycRequest } from '@/lib/kyc-rules';
 import { parseNameMode } from '@/lib/contract-identity';
 
 export const dynamic = 'force-dynamic';
@@ -17,13 +17,13 @@ const H = { 'Cache-Control': 'no-store' };
 export async function POST(req: NextRequest) {
   const user = await guardApi(req, { scope: 'kyc-request', limit: 5, windowMs: 60 * 60 * 1000 });
   if (user instanceof NextResponse) return user;
-  if (!needsKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
+  if (!canKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
   const raw = await req.json().catch(() => null);
   const input = parseKycRequest(raw);
   if (!input) return NextResponse.json({ error: 'Please check your details' }, { status: 400, headers: H });
   try {
     ensureKycProviders();
-    const provider = activeKycProvider();
+    const provider = needsKyc(user.uid) ? activeKycProvider() : null;
     // Manual review: the photos this document type needs must already be uploaded. With an identity company the
     // person takes the photos on the company's page instead.
     if (!provider && !hasAllPhotos(input.docType, await uploadedKinds(user.uid))) return NextResponse.json({ error: 'Photos missing', code: 'photos_missing' }, { status: 400, headers: H });

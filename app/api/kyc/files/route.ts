@@ -3,18 +3,18 @@ import { guardApi } from '@/lib/api-guard';
 import { detectImage } from '@/lib/image-validate';
 import { getKyc } from '@/lib/kyc-store';
 import { putKycFile, uploadedKinds } from '@/lib/kyc-files-store';
-import { needsKyc } from '@/lib/kyc-rules';
+import { canKyc } from '@/lib/kyc-rules';
 import { MAX_PHOTO_BYTES, isFileKind } from '@/lib/kyc-files';
 
 export const dynamic = 'force-dynamic';
 const H = { 'Cache-Control': 'no-store' };
 
-// A web sign-in uploads one identity photo (?kind=front|back|selfie) as the raw picture. Only while no request is
+// A person uploads one identity photo (?kind=front|back|selfie) as the raw picture. Only while no request is
 // waiting for review or approved; the photo is kept privately and only the team can open it.
 export async function PUT(req: NextRequest) {
   const user = await guardApi(req, { scope: 'kyc-files', limit: 20, windowMs: 60 * 60 * 1000 });
   if (user instanceof NextResponse) return user;
-  if (!needsKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
+  if (!canKyc(user.uid)) return NextResponse.json({ error: 'Not needed' }, { status: 400, headers: H });
   const kind = req.nextUrl.searchParams.get('kind');
   if (!isFileKind(kind)) return NextResponse.json({ error: 'Invalid photo' }, { status: 400, headers: H });
   if (Number(req.headers.get('content-length') || 0) > MAX_PHOTO_BYTES) return NextResponse.json({ error: 'Too large' }, { status: 413, headers: H });

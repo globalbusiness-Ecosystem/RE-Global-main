@@ -2,6 +2,8 @@
 //  - "alias": the unique account name plus the personal invite code (the legal name stays private with the platform)
 //  - "real":  the legal name from the identity check is written in the contract
 // Contracts are public (anyone with the link can open one), so "alias" is the default for new contracts.
+import { proofText, type IdentityProof } from '@/lib/contract-privacy';
+
 export type NameMode = 'real' | 'alias';
 
 export const parseNameMode = (v: unknown): NameMode => (v === 'real' ? 'real' : 'alias');
@@ -35,8 +37,14 @@ export const isCardContractText = (text: string | undefined): boolean => /by car
 
 const KYC = "identity verified by the Platform's KYC/AML review";
 
-/** The Party A line of a card contract. Without a name mode it reads exactly as it always did (real name). */
-export function cardParty(handle: string, card: { buyerName: string; nameMode?: NameMode; inviteCode?: string }): string {
-  if (card.nameMode === 'alias') return `@${handle}${card.inviteCode ? ` (personal invite code ${card.inviteCode})` : ''} — ${KYC} (legal name held privately by the Platform)`;
-  return `@${handle} — ${KYC} (name on record: ${card.buyerName})`;
+/** The Party A line of a card contract. Without a name mode it reads exactly as it always did (real name). The proof adds the masked ID and the commitment (never the full ID number). */
+export function cardParty(handle: string, card: { buyerName: string; nameMode?: NameMode; inviteCode?: string; proof?: IdentityProof | null }): string {
+  const proof = card.proof ? ` [${proofText(card.proof)}]` : '';
+  if (card.nameMode === 'alias') return `@${handle}${card.inviteCode ? ` (personal invite code ${card.inviteCode})` : ''} — ${KYC}${proof} (legal name held privately by the Platform)`;
+  return `@${handle} — ${KYC} (name on record: ${card.buyerName})${proof}`;
+}
+
+/** The Party A line of a Pi contract. With an approved KYC it also carries the masked ID and the commitment. */
+export function piParty(handle: string, proof?: IdentityProof | null): string {
+  return `@${handle} — identity verified via Pi Network payment${proof ? ` and the Platform's KYC review [${proofText(proof)}] (details held privately by the Platform)` : ''}`;
 }
