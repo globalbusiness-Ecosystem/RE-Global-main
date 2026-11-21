@@ -23,7 +23,7 @@ describe('platform KYC for Pi and web accounts', () => {
     expect(src('app/api/kyc/me/route.ts')).toContain('web && activeKycProvider()');
   });
   it('the ID number is stored privately and shown to the team', () => {
-    expect(src('lib/kyc-store.ts')).toContain('idNumber: input.idNumber');
+    expect(src('lib/kyc-store.ts')).toContain('idNumber: encryptField(input.idNumber)');
     expect(src('components/admin/kyc-panel.tsx')).toContain('r.idNumber');
   });
 });

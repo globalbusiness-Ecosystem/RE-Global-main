@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { encryptField, decryptField } from '@/lib/field-crypto';
 import { newSalt, proofOf, matchesCommitment, proofFromText, type IdentityProof } from '@/lib/contract-privacy';
 
 // The private side of a contract: legal name, ID number, phone and the salt of the public commitment.
@@ -16,13 +17,13 @@ export async function identityFor(uid: string): Promise<PrivateIdentity | null> 
   try {
     const d = (await adminDb.collection('kyc').doc(uid).get()).data();
     if (!d || d.status !== 'approved') return null;
-    const legalName = String(d.legalName ?? ''), idNumber = String(d.idNumber ?? '');
+    const legalName = String(d.legalName ?? ''), idNumber = decryptField(d.idNumber), phone = decryptField(d.phone);
     const salt = newSalt();
     const proof = proofOf(salt, legalName, idNumber);
     if (!proof) return null;
     return {
       proof,
-      record: { uid, legalName, idNumber, phone: String(d.phone ?? ''), country: String(d.country ?? ''), docType: String(d.docType ?? ''), salt, commitment: proof.commitment, createdAt: Timestamp.now() },
+      record: { uid, legalName: encryptField(legalName), idNumber: encryptField(idNumber), phone: encryptField(phone), country: String(d.country ?? ''), docType: String(d.docType ?? ''), salt, commitment: proof.commitment, createdAt: Timestamp.now() },
     };
   } catch {
     return null; // a lookup failure never blocks a signed sale; the contract is then simply written without the proof
@@ -40,10 +41,11 @@ export async function privateForOwner(docId: string, uids: string[]): Promise<Ow
   const d = priv.data()!;
   if (!uids.includes(String(d.uid ?? ''))) return { ok: false, status: 403 };
   const proof = proofFromText(String(pub.data()?.contractText ?? ''));
+  const legalName = decryptField(d.legalName), idNumber = decryptField(d.idNumber);
   return {
     ok: true,
-    legalName: String(d.legalName ?? ''), idNumber: String(d.idNumber ?? ''), phone: String(d.phone ?? ''), country: String(d.country ?? ''),
-    commitmentValid: matchesCommitment(proof, String(d.salt ?? ''), String(d.legalName ?? ''), String(d.idNumber ?? '')),
+    legalName, idNumber, phone: decryptField(d.phone), country: String(d.country ?? ''),
+    commitmentValid: matchesCommitment(proof, String(d.salt ?? ''), legalName, idNumber),
     idLast4: proof?.idLast4 ?? '',
   };
 }

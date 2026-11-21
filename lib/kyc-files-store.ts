@@ -1,6 +1,7 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
+import { encryptField, decryptField } from './field-crypto';
 import { FILE_KINDS, type FileKind } from './kyc-files';
 
 // Identity photos: one Firestore document per photo (kyc_files/{uid}__{kind}), written and read by the server only.
@@ -10,7 +11,7 @@ const col = () => adminDb.collection('kyc_files');
 
 export async function putKycFile(uid: string, kind: FileKind, mime: string, bytes: Uint8Array): Promise<void> {
   if (!okUid(uid)) throw new Error('bad uid');
-  await col().doc(id(uid, kind)).set({ uid, kind, mime, data: Buffer.from(bytes).toString('base64'), bytes: bytes.length, at: Timestamp.now() });
+  await col().doc(id(uid, kind)).set({ uid, kind, mime, data: encryptField(Buffer.from(bytes).toString('base64')), bytes: bytes.length, at: Timestamp.now() });
 }
 
 export async function getKycFile(uid: string, kind: FileKind): Promise<{ mime: string; bytes: Buffer } | null> {
@@ -18,7 +19,8 @@ export async function getKycFile(uid: string, kind: FileKind): Promise<{ mime: s
   const s = await col().doc(id(uid, kind)).get();
   const d = s.exists ? (s.data() as { mime?: string; data?: string }) : null;
   if (!d || typeof d.data !== 'string' || (d.mime !== 'image/jpeg' && d.mime !== 'image/webp')) return null;
-  return { mime: d.mime, bytes: Buffer.from(d.data, 'base64') };
+  const b64 = decryptField(d.data);
+  return b64 ? { mime: d.mime, bytes: Buffer.from(b64, 'base64') } : null;
 }
 
 /** Which photos this person has uploaded so far (names only, never the pictures). */

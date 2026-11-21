@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate } from './admin-ui';
 
-type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; files?: string[] };
+type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; dupOf?: string | null; files?: string[] };
 
 const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | 'blue' }> = {
   pending: { label: 'في الانتظار', tone: 'gold' },
@@ -81,6 +81,7 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 <span dir="ltr">{r.country}</span>
                 <span dir="ltr">{r.phone}</span>
                 {r.idNumber ? <span dir="ltr">🪪 {r.idNumber}</span> : null}
+                {r.dupOf ? <span className="text-amber-500" dir="ltr">⚠ same ID as {r.dupOf}</span> : null}
                 <span>{fmtDate(r.submittedAt)}</span>
                 <span className="truncate" dir="ltr">{r.uid}</span>
               </div>
