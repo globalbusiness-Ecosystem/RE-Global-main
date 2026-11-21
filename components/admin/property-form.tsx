@@ -178,7 +178,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
   };
 
   const fileBtn = (label: string, accept: string, onFile: (f: File) => void) => (
-    <label className={`cursor-pointer rounded-lg bg-[#d4af37] px-3 py-2 text-xs font-bold text-black ${busy ? 'opacity-50' : ''}`}>
+    <label className={`cursor-pointer rounded-lg bg-accent px-3 py-2 text-xs font-bold text-black ${busy ? 'opacity-50' : ''}`}>
       {busy ? '...جاري الرفع' : label}
       <input type="file" accept={accept} disabled={busy} className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onFile(f); }} />
@@ -213,9 +213,9 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <div className="sm:col-span-2 flex flex-wrap items-center gap-2">
           <Btn small onClick={findOnMap} disabled={geoBusy}>{geoBusy ? '...بدوّر' : '📍 حدّد المكان من الموقع (English)'}</Btn>
           {osmLink(form.lat, form.lng) && (
-            <a href={osmLink(form.lat, form.lng) as string} target="_blank" rel="noopener noreferrer" className="text-xs text-[#d4af37] underline">راجع المكان على الخريطة</a>
+            <a href={osmLink(form.lat, form.lng) as string} target="_blank" rel="noopener noreferrer" className="text-xs text-accent underline">راجع المكان على الخريطة</a>
           )}
-          {geoNote && <span className="text-xs text-gray-300">{geoNote}</span>}
+          {geoNote && <span className="text-xs text-foreground/80">{geoNote}</span>}
         </div>
         <div className="sm:col-span-2">
           <Field label="الوصف (English)">
@@ -224,12 +224,12 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         </div>
       </div>
 
-      <div className="mt-4 rounded-xl border border-[#3a3a1a] p-3">
+      <div className="mt-4 rounded-xl border border-accent/30 p-3">
         <p className="mb-2 text-sm font-bold" style={{ color: GOLD }}>🌍 الترجمات</p>
         <Btn small onClick={autoTranslate} disabled={trBusy}>{trBusy ? '...جاري الترجمة' : '✨ ترجمة تلقائية لـ 6 لغات'}</Btn>
         <div className="mt-3 space-y-2">
           {TR_LANGS.map((l) => (
-            <details key={l.code} className="rounded-lg bg-[#0d0d0d] p-2">
+            <details key={l.code} className="rounded-lg bg-input p-2">
               <summary className="cursor-pointer text-sm" style={{ color: GOLD }}>{l.label} {tr[l.code]?.title ? '✅' : ''}</summary>
               <div dir={l.code === 'ar' || l.code === 'ur' ? 'rtl' : 'ltr'} className="mt-2 space-y-2">
                 <input className={inputCls} placeholder={`title (${l.code})`} aria-label={`title (${l.code})`} value={tr[l.code]?.title || ''} onChange={(e) => setTrField(l.code, 'title', e.target.value)} />
@@ -252,7 +252,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         {form.image && (
           <div className="relative w-full max-w-xs">
             <img src={form.image} alt="" className="h-40 w-full rounded-lg object-cover" />
-            <button type="button" onClick={() => set({ image: '' })} className="absolute left-1 top-1 rounded bg-black/70 px-2 text-sm text-white">✕</button>
+            <button type="button" onClick={() => set({ image: '' })} className="absolute left-1 top-1 rounded bg-black/70 px-2 text-sm text-foreground">✕</button>
           </div>
         )}
         {form.images.length > 0 && (
@@ -260,7 +260,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
             {form.images.map((u, i) => (
               <div key={u + i} className="relative">
                 <img src={u} alt="" className="h-20 w-28 rounded-lg object-cover" />
-                <button type="button" onClick={() => set({ images: form.images.filter((_, j) => j !== i) })} className="absolute left-1 top-1 rounded bg-black/70 px-1.5 text-xs text-white">✕</button>
+                <button type="button" onClick={() => set({ images: form.images.filter((_, j) => j !== i) })} className="absolute left-1 top-1 rounded bg-black/70 px-1.5 text-xs text-foreground">✕</button>
               </div>
             ))}
           </div>
@@ -269,7 +269,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
           {form.vrUrl && <span className="text-green-400">✅ بانوراما مرفوعة <button type="button" className="text-red-400" onClick={() => set({ vrUrl: '' })}>(حذف)</button></span>}
           {form.contractUrl && <span className="text-green-400">✅ عقد مرفوع <button type="button" className="text-red-400" onClick={() => set({ contractUrl: '' })}>(حذف)</button></span>}
         </div>
-        <details className="text-sm text-gray-400">
+        <details className="text-sm text-muted-foreground">
           <summary className="cursor-pointer">روابط يدوية (اختياري)</summary>
           <div className="mt-2 space-y-2">
             <input className={inputCls} placeholder="رابط الصورة الرئيسية" aria-label="رابط الصورة الرئيسية" value={form.image} onChange={(e) => set({ image: e.target.value })} />
@@ -278,7 +278,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         </details>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-white">
+      <div className="mt-4 flex flex-wrap gap-x-5 gap-y-2 text-sm text-foreground">
         {AMENITIES.map(([k, l]) => (
           <label key={k} className="flex items-center gap-1.5">
             <input type="checkbox" checked={!!form.amenities[k]} onChange={(e) => set({ amenities: { ...form.amenities, [k]: e.target.checked } })} />{l}
@@ -286,9 +286,9 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         ))}
       </div>
       <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-        <label className="flex items-center gap-1.5 text-white"><input type="checkbox" checked={form.tokenized} onChange={(e) => set({ tokenized: e.target.checked })} />عقار مرمّز (Tokenized)</label>
-        <label className="flex items-center gap-1.5 text-white"><input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} />⭐ مميز</label>
-        <label className="flex items-center gap-1.5 text-white"><input type="checkbox" checked={form.hidden} onChange={(e) => set({ hidden: e.target.checked })} />🙈 مخفي عن الزوار</label>
+        <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.tokenized} onChange={(e) => set({ tokenized: e.target.checked })} />عقار مرمّز (Tokenized)</label>
+        <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} />⭐ مميز</label>
+        <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.hidden} onChange={(e) => set({ hidden: e.target.checked })} />🙈 مخفي عن الزوار</label>
       </div>
 
       <div className="mt-5 flex gap-2">

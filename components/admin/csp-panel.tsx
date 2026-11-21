@@ -24,12 +24,12 @@ export default function CspPanel({ onUnauthorized }: { onUnauthorized: () => voi
   if (!rows) return <Empty>...جاري التحميل</Empty>;
   return (
     <Card title="🛡️ تقرير سياسة الأمان (تجريبي)">
-      <p className="mb-2 text-[11px] text-gray-500">المتصفحات بتبلّغ هنا عن المصادر اللي الموقع بيحمّل منها (سكريبتات، صور، اتصالات). مفيش حاجة بتتحجب. الهدف نعرف القائمة الحقيقية قبل ما نفعّل سياسة صارمة.</p>
+      <p className="mb-2 text-[11px] text-muted-foreground">المتصفحات بتبلّغ هنا عن المصادر اللي الموقع بيحمّل منها (سكريبتات، صور، اتصالات). مفيش حاجة بتتحجب. الهدف نعرف القائمة الحقيقية قبل ما نفعّل سياسة صارمة.</p>
       {rows.length === 0 ? <Empty>لسه مفيش بلاغات.</Empty> : rows.map((r) => (
-        <div key={r.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-          <span className="text-white" dir="ltr">{r.blocked}</span>
-          <span className="mx-2 text-xs text-gray-500" dir="ltr">{r.directive} · {r.count}×</span>
-          <span className="block text-xs text-gray-600" dir="ltr">{r.page} · {fmtDate(r.lastAt)}</span>
+        <div key={r.id} className="border-b border-border py-2 text-sm last:border-0">
+          <span className="text-foreground" dir="ltr">{r.blocked}</span>
+          <span className="mx-2 text-xs text-muted-foreground" dir="ltr">{r.directive} · {r.count}×</span>
+          <span className="block text-xs text-muted-foreground/70" dir="ltr">{r.page} · {fmtDate(r.lastAt)}</span>
         </div>
       ))}
     </Card>

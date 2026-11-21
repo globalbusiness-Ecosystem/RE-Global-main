@@ -10,9 +10,9 @@ function Section({ title, rows, line }: { title: string; rows: Row[]; line: (r: 
   if (rows.length === 0) return null;
   return (
     <div>
-      <p className="mb-1 text-xs font-bold text-gray-300">{title} ({rows.length})</p>
+      <p className="mb-1 text-xs font-bold text-foreground/80">{title} ({rows.length})</p>
       {rows.slice(0, 10).map((r) => (
-        <p key={r.id} className="border-b border-[#222] py-1 text-xs text-gray-400 last:border-0">{line(r)} <span className="text-gray-600">· {fmtDate(r.createdAt)}</span></p>
+        <p key={r.id} className="border-b border-border py-1 text-xs text-muted-foreground last:border-0">{line(r)} <span className="text-muted-foreground/70">· {fmtDate(r.createdAt)}</span></p>
       ))}
     </div>
   );
@@ -30,12 +30,12 @@ export default function UserDetail({ username, onUnauthorized }: { username: str
   }, [username, onUnauthorized]);
 
   if (error) return <p className="text-xs text-red-300">❌ {error}</p>;
-  if (!d) return <p className="text-xs text-gray-500">...جاري التحميل</p>;
+  if (!d) return <p className="text-xs text-muted-foreground">...جاري التحميل</p>;
   const empty = !d.contracts.length && !d.bookings.length && !d.holdings.length && !d.listings.length && !d.payouts.length;
   return (
-    <div className="mt-3 space-y-3 rounded-xl border border-[#2a2a2a] bg-[#0f0f0f] p-3">
+    <div className="mt-3 space-y-3 rounded-xl border border-border bg-sidebar p-3">
       {d.owed > 0 && <Badge tone="gold">مستحق له {d.owed} π (قيد التحويل)</Badge>}
-      {empty && <p className="text-xs text-gray-500">مفيش نشاط مسجّل للمستخدم ده.</p>}
+      {empty && <p className="text-xs text-muted-foreground">مفيش نشاط مسجّل للمستخدم ده.</p>}
       <Section title="العقود" rows={d.contracts} line={(r) => `${TYPE_LABELS[r.type] ?? r.type} · ${r.propertyTitle} · ${r.amount} π`} />
       <Section title="الحجوزات" rows={d.bookings} line={(r) => `${r.propertyTitle} · ${r.start} → ${r.end} · ${r.amount} π · ${r.status}`} />
       <Section title="مشتريات الحصص" rows={d.holdings} line={(r) => `${r.propertyTitle} · ${r.shares} حصة · ${r.amount} π · ${r.status}`} />

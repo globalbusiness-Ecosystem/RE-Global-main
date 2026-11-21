@@ -31,12 +31,12 @@ export default function MarketFeeSettings({ onUnauthorized }: { onUnauthorized: 
 
   return (
     <Card title="📈 عمولة سوق الحصص">
-      <p className="mb-3 text-xs text-gray-400">النسبة اللي المنصة بتاخدها من سعر بيع الحصص بين المستخدمين (من 0 لـ 20%). العروض اللي معروضة بالفعل بتفضل على النسبة اللي اتعرضت بيها.</p>
+      <p className="mb-3 text-xs text-muted-foreground">النسبة اللي المنصة بتاخدها من سعر بيع الحصص بين المستخدمين (من 0 لـ 20%). العروض اللي معروضة بالفعل بتفضل على النسبة اللي اتعرضت بيها.</p>
       <Field label="العمولة %">
         <input className={inputCls} type="number" step="0.01" min="0" max="20" dir="ltr" value={pct} onChange={(e) => setPct(e.target.value)} disabled={!loaded} />
       </Field>
       <div className="mt-3"><Btn onClick={save} disabled={busy || n === null || !loaded}>{busy ? '...' : '💾 حفظ'}</Btn></div>
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

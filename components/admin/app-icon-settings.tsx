@@ -115,44 +115,44 @@ export default function AppIconSettings({ onUnauthorized }: { onUnauthorized: ()
 
   const changed = !!saved && !!draft && JSON.stringify(saved) !== JSON.stringify(draft);
   const prev = draft?.icon512 ?? '/icon-512.png';
-  const chip = (on: boolean) => `rounded-full border px-3 py-1 text-xs font-semibold ${on ? 'border-[#d4af37] bg-[#d4af37] text-black' : 'border-[#3a3a3a] text-gray-300'}`;
+  const chip = (on: boolean) => `rounded-full border px-3 py-1 text-xs font-semibold ${on ? 'border-accent bg-accent text-black' : 'border-border text-foreground/80'}`;
 
   return (
     <Card title="📱 أيقونة التطبيق بعد التثبيت">
-      <p className="mb-3 text-xs text-gray-400">دي الأيقونة اللي بتظهر على شاشة الموبايل لما حد يثبّت التطبيق. ارفع الشعار (الأفضل 512×512 أو أكبر) واختار "ملء كامل" عشان الشعار يملا الأيقونة زي أيقونة Pi، وهنقص الحواف الفاضية تلقائياً ونجهّز كل الأحجام. لو شلتها بيرجع الشكل الأصلي.</p>
+      <p className="mb-3 text-xs text-muted-foreground">دي الأيقونة اللي بتظهر على شاشة الموبايل لما حد يثبّت التطبيق. ارفع الشعار (الأفضل 512×512 أو أكبر) واختار "ملء كامل" عشان الشعار يملا الأيقونة زي أيقونة Pi، وهنقص الحواف الفاضية تلقائياً ونجهّز كل الأحجام. لو شلتها بيرجع الشكل الأصلي.</p>
       {draft ? (
         <>
           <div className="mb-4 flex flex-wrap items-center gap-5">
             {img ? (
               <>
-                <div className="text-center"><canvas ref={anyRef} aria-label="معاينة الأيقونة" className="h-24 w-24 rounded-[22%] border border-[#3a3a3a]" /><p className="mt-1 text-[10px] text-gray-400">مربع مدوّر</p></div>
-                <div className="text-center"><canvas ref={maskRef} aria-label="معاينة الأيقونة الدائرية" className="h-24 w-24 rounded-full border border-[#3a3a3a]" /><p className="mt-1 text-[10px] text-gray-400">دائري (أندرويد)</p></div>
+                <div className="text-center"><canvas ref={anyRef} aria-label="معاينة الأيقونة" className="h-24 w-24 rounded-[22%] border border-border" /><p className="mt-1 text-[10px] text-muted-foreground">مربع مدوّر</p></div>
+                <div className="text-center"><canvas ref={maskRef} aria-label="معاينة الأيقونة الدائرية" className="h-24 w-24 rounded-full border border-border" /><p className="mt-1 text-[10px] text-muted-foreground">دائري (أندرويد)</p></div>
               </>
             ) : (
               <>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={prev} alt="" className="h-24 w-24 rounded-[22%] border border-[#3a3a3a] object-cover" />
+                <img src={prev} alt="" className="h-24 w-24 rounded-[22%] border border-border object-cover" />
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={prev} alt="" className="h-14 w-14 rounded-full border border-[#3a3a3a] object-cover" />
+                <img src={prev} alt="" className="h-14 w-14 rounded-full border border-border object-cover" />
               </>
             )}
           </div>
-          <label className="mb-3 flex items-center gap-2 text-sm text-gray-100">
+          <label className="mb-3 flex items-center gap-2 text-sm text-foreground">
             لون الخلفية
             <input type="color" aria-label="لون خلفية الأيقونة" value={draft.themeColor} onChange={(e) => setDraft({ ...draft, themeColor: e.target.value })} />
-            <span className="text-xs text-gray-400" dir="ltr">{draft.themeColor}</span>
+            <span className="text-xs text-muted-foreground" dir="ltr">{draft.themeColor}</span>
             <Btn small kind="ghost" onClick={() => setDraft({ ...draft, themeColor: DEFAULT_THEME_COLOR })}>الأصلي</Btn>
           </label>
           {img && (
-            <div className="mb-3 space-y-2 rounded-xl border border-[#2a2a2a] bg-[#101010] p-3">
+            <div className="mb-3 space-y-2 rounded-xl border border-border bg-input p-3">
               <div className="flex flex-wrap gap-2" role="group" aria-label="طريقة ملء الأيقونة">
                 <button type="button" aria-pressed={mode === 'fill'} onClick={() => setMode('fill')} className={chip(mode === 'fill')}>ملء كامل (زي Pi)</button>
                 <button type="button" aria-pressed={mode === 'fit'} onClick={() => setMode('fit')} className={chip(mode === 'fit')}>الشعار كامل داخل الخلفية</button>
               </div>
-              <label className="flex items-center gap-2 text-xs text-gray-200">
+              <label className="flex items-center gap-2 text-xs text-foreground">
                 <input type="checkbox" checked={trim} onChange={(e) => setTrim(e.target.checked)} aria-label="قص الحواف الفاضية" /> قص الحواف الفاضية حوالين الشعار
               </label>
-              <label className="flex items-center gap-2 text-xs text-gray-200">
+              <label className="flex items-center gap-2 text-xs text-foreground">
                 تكبير
                 <input type="range" min={1} max={1.5} step={0.01} value={zoom} onChange={(e) => setZoom(Number(e.target.value))} aria-label="تكبير الشعار" />
                 <span dir="ltr">{Math.round(zoom * 100)}%</span>
@@ -162,7 +162,7 @@ export default function AppIconSettings({ onUnauthorized }: { onUnauthorized: ()
             </div>
           )}
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-2 text-sm text-gray-200 hover:bg-[#1f1f1f]">
+            <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
               {draft.icon512 ? 'اختيار شعار جديد' : 'اختيار شعار'}
               <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="اختيار شعار الأيقونة" className="hidden" disabled={busy}
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) pick(f); e.target.value = ''; }} />
@@ -171,8 +171,8 @@ export default function AppIconSettings({ onUnauthorized }: { onUnauthorized: ()
           </div>
           <Btn onClick={() => save(draft)} disabled={busy || !changed}>{busy ? '...' : '💾 حفظ'}</Btn>
         </>
-      ) : <p className="text-sm text-gray-400">...</p>}
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      ) : <p className="text-sm text-muted-foreground">...</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

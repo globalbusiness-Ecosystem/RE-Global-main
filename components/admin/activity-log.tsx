@@ -39,10 +39,10 @@ export default function ActivityLog({ onUnauthorized }: { onUnauthorized: () => 
       </select>
       <div className="mt-2">
         {shown.length === 0 ? <Empty>مفيش عمليات مطابقة.</Empty> : shown.map((r) => (
-          <div key={r.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-            <span className="text-white">{auditLabel(r.action)}</span>
-            <span className="mx-2 text-xs text-gray-500">{auditSummary(r.action, r.detail)}</span>
-            <span className="block text-xs text-gray-600">{fmtDate(r.at)}</span>
+          <div key={r.id} className="border-b border-border py-2 text-sm last:border-0">
+            <span className="text-foreground">{auditLabel(r.action)}</span>
+            <span className="mx-2 text-xs text-muted-foreground">{auditSummary(r.action, r.detail)}</span>
+            <span className="block text-xs text-muted-foreground/70">{fmtDate(r.at)}</span>
           </div>
         ))}
       </div>

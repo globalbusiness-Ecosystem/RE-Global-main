@@ -47,7 +47,7 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
   return (
     <div className="space-y-3">
       <Card title="🎁 برنامج المكافآت">
-        <p className="mb-3 text-xs text-gray-400">النقاط بتتحسب أوتوماتيك من حاجات حصلت فعلاً: إقامة خلصت ومؤكدة، شراء عقار اتم، وتقييم ظاهر. الحجز الملغي أو اللي تحت المراجعة مالوش نقاط. الإحالة بتتحسب لما الصديق اللي استخدم كود العضو (قبل أول حجز أو شراء ليه) يخلّص إقامة أو شراء فعلاً، وبحد أقصى 50 صديق للعضو.</p>
+        <p className="mb-3 text-xs text-muted-foreground">النقاط بتتحسب أوتوماتيك من حاجات حصلت فعلاً: إقامة خلصت ومؤكدة، شراء عقار اتم، وتقييم ظاهر. الحجز الملغي أو اللي تحت المراجعة مالوش نقاط. الإحالة بتتحسب لما الصديق اللي استخدم كود العضو (قبل أول حجز أو شراء ليه) يخلّص إقامة أو شراء فعلاً، وبحد أقصى 50 صديق للعضو.</p>
         <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
           {num('stay', 'نقاط كل إقامة مكتملة')}
           {num('purchase', 'نقاط كل شراء عقار')}
@@ -56,13 +56,13 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
         </div>
       </Card>
       <Card title="🏅 المستويات">
-        <p className="mb-3 text-xs text-gray-400">البرونزي بيبدأ من 0. كل مستوى لازم يكون أعلى من اللي قبله.</p>
+        <p className="mb-3 text-xs text-muted-foreground">البرونزي بيبدأ من 0. كل مستوى لازم يكون أعلى من اللي قبله.</p>
         <div className="grid gap-2 sm:grid-cols-3">
           {num('silver', 'الفضي يبدأ من (نقطة)')}
           {num('gold', 'الذهبي يبدأ من (نقطة)')}
           {num('platinum', 'البلاتيني يبدأ من (نقطة)')}
         </div>
-        <p className="mb-2 mt-4 text-xs text-gray-400">مزايا كل مستوى (نص عادي اختياري، لحد {BENEFIT_MAX} حرف). اكتب بس المزايا اللي هتنفذها فعلاً، لو سبته فاضي مفيش حاجة بتظهر للمستخدم.</p>
+        <p className="mb-2 mt-4 text-xs text-muted-foreground">مزايا كل مستوى (نص عادي اختياري، لحد {BENEFIT_MAX} حرف). اكتب بس المزايا اللي هتنفذها فعلاً، لو سبته فاضي مفيش حاجة بتظهر للمستخدم.</p>
         <div className="grid gap-2 sm:grid-cols-2">
           {TIER_IDS.map((id) => (
             <Field key={id} label={NAMES[id]}>
@@ -72,7 +72,7 @@ export default function RewardsSettings({ onUnauthorized }: { onUnauthorized: ()
         </div>
         {f && !rules && <p className="mt-2 text-xs text-red-400">راجع الأرقام: أعداد صحيحة، والفضي &lt; الذهبي &lt; البلاتيني.</p>}
         <div className="mt-3"><Btn onClick={save} disabled={busy || !rules || !f}>{busy ? '...' : '💾 حفظ'}</Btn></div>
-        {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+        {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
       </Card>
     </div>
   );

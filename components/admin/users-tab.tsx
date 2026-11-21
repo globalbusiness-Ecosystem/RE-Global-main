@@ -62,21 +62,21 @@ export default function UsersTab({ onUnauthorized }: { onUnauthorized: () => voi
             <option value="all">الكل</option><option value="buyers">لديهم عقود</option><option value="verified">إيميل موثّق</option><option value="banned">محظورون</option>
           </select>
         </div>
-        <p className="mt-2 text-[11px] text-gray-500">القائمة تضم من لديه ملف شخصي أو وقّع عقداً أو تم حظره. الحظر يسري خلال 30 ثانية.</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">القائمة تضم من لديه ملف شخصي أو وقّع عقداً أو تم حظره. الحظر يسري خلال 30 ثانية.</p>
       </Card>
       {filtered.length === 0 && <Empty>مفيش مستخدمين مطابقين.</Empty>}
       {filtered.slice(0, shown).map((u) => (
-        <div key={u.username} className={`rounded-2xl border bg-[#141414] p-3 ${u.banned ? 'border-red-900' : 'border-[#2a2a2a]'}`}>
+        <div key={u.username} className={`rounded-2xl border bg-card p-3 ${u.banned ? 'border-red-900' : 'border-border'}`}>
         <div className="flex items-center justify-between gap-3">
           <div className="min-w-0">
-            <p className="truncate font-bold text-white">@{u.username}</p>
-            {u.email && <p className="truncate text-xs text-gray-400" dir="ltr">{u.email}</p>}
+            <p className="truncate font-bold text-foreground">@{u.username}</p>
+            {u.email && <p className="truncate text-xs text-muted-foreground" dir="ltr">{u.email}</p>}
             <div className="mt-1 flex flex-wrap gap-1">
               {u.banned && <Badge tone="red">محظور{u.banReason ? `: ${u.banReason}` : ''}</Badge>}
               {u.emailVerified && <Badge tone="green">إيميل موثّق</Badge>}
               {u.contracts > 0 && <Badge tone="gold">{u.contracts} عقد · {u.spent} π</Badge>}
             </div>
-            {u.lastActivity && <p className="mt-1 text-[11px] text-gray-600">آخر نشاط: {fmtDate(u.lastActivity)}</p>}
+            {u.lastActivity && <p className="mt-1 text-[11px] text-muted-foreground/70">آخر نشاط: {fmtDate(u.lastActivity)}</p>}
           </div>
           <div className="flex shrink-0 flex-col gap-1">
             <Btn small kind="ghost" onClick={() => setOpen(open === u.username ? '' : u.username)}>{open === u.username ? 'إخفاء' : '📂 تفاصيل'}</Btn>

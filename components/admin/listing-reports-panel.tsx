@@ -29,13 +29,13 @@ export default function ListingReportsPanel({ onUnauthorized }: { onUnauthorized
   if (!rows) return <Empty>...جاري التحميل</Empty>;
   return (
     <Card title="🚩 بلاغات العقارات">
-      <p className="mb-2 text-[11px] text-gray-500">أي زائر يقدر يبلّغ عن عقار من صفحته العامة. افتح العقار، قرر، وبعدين اقفل البلاغ (بيتسجل في سجل النشاط).</p>
+      <p className="mb-2 text-[11px] text-muted-foreground">أي زائر يقدر يبلّغ عن عقار من صفحته العامة. افتح العقار، قرر، وبعدين اقفل البلاغ (بيتسجل في سجل النشاط).</p>
       {rows.length === 0 ? <Empty>مفيش بلاغات مفتوحة. 👌</Empty> : rows.map((r) => (
-        <div key={r.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-          <a href={`/p/${r.listingId}`} target="_blank" rel="noopener noreferrer" className="text-white underline" dir="ltr">{r.listingId}</a>
-          <span className="mx-2 text-xs text-gray-500">{REASON[r.reason] ?? r.reason} · {fmtDate(r.createdAt)}</span>
-          {r.details && <p className="mt-1 text-xs text-gray-400">{r.details}</p>}
-          {r.email && <p className="text-xs text-gray-600" dir="ltr">{r.email}</p>}
+        <div key={r.id} className="border-b border-border py-2 text-sm last:border-0">
+          <a href={`/p/${r.listingId}`} target="_blank" rel="noopener noreferrer" className="text-foreground underline" dir="ltr">{r.listingId}</a>
+          <span className="mx-2 text-xs text-muted-foreground">{REASON[r.reason] ?? r.reason} · {fmtDate(r.createdAt)}</span>
+          {r.details && <p className="mt-1 text-xs text-muted-foreground">{r.details}</p>}
+          {r.email && <p className="text-xs text-muted-foreground/70" dir="ltr">{r.email}</p>}
           <div className="mt-2 flex gap-2">
             <Btn small onClick={() => close(r.id, 'resolved')}>تم التعامل</Btn>
             <Btn small kind="ghost" onClick={() => close(r.id, 'dismissed')}>تجاهل</Btn>

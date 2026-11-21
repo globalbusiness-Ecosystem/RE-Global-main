@@ -77,27 +77,27 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
 
   return (
     <Card title="👑 المؤسس: صورتك وكلمتك في «نبذة عنا»">
-      <p className="mb-3 text-xs text-gray-400">بيظهر كارت «تعرّف على المؤسس» في صفحة «نبذة عنا» لما تكتب الاسم. وبعد ما تربط حسابك، المنصة بتعرفك وبتظهر لك علامة 👑 المؤسس مع الشارة الذهبية جنب اسمك.</p>
+      <p className="mb-3 text-xs text-muted-foreground">بيظهر كارت «تعرّف على المؤسس» في صفحة «نبذة عنا» لما تكتب الاسم. وبعد ما تربط حسابك، المنصة بتعرفك وبتظهر لك علامة 👑 المؤسس مع الشارة الذهبية جنب اسمك.</p>
       {draft ? (
         <>
-          <div className="mb-4 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
-            <p className="mb-2 text-sm text-gray-100">{(status.linkedToMe ? '✅ حسابك الحالي هو المؤسس' : status.linked ? 'فيه حسابات مربوطة كمؤسس (مش الحساب اللي مسجّل بيه حالياً)' : 'مفيش حساب مربوط كمؤسس لسه') + (status.linkedCount > 0 ? ` — عدد الحسابات المربوطة: ${status.linkedCount}` : '')}</p>
+          <div className="mb-4 rounded-xl border border-border bg-input p-3">
+            <p className="mb-2 text-sm text-foreground">{(status.linkedToMe ? '✅ حسابك الحالي هو المؤسس' : status.linked ? 'فيه حسابات مربوطة كمؤسس (مش الحساب اللي مسجّل بيه حالياً)' : 'مفيش حساب مربوط كمؤسس لسه') + (status.linkedCount > 0 ? ` — عدد الحسابات المربوطة: ${status.linkedCount}` : '')}</p>
             {!status.signedIn && <p className="mb-2 text-xs text-amber-400">لازم تكون مسجّل دخول في التطبيق من نفس المتصفح عشان تربط حسابك.</p>}
-            <p className="mb-2 text-xs text-gray-400">🔐 الربط بيتأكد ببصمة أو Face ID جهازك (مفتاح مرور). المنصة ما بتشوفش ولا بتخزّن وشك أو بصمتك أبداً.</p>
+            <p className="mb-2 text-xs text-muted-foreground">🔐 الربط بيتأكد ببصمة أو Face ID جهازك (مفتاح مرور). المنصة ما بتشوفش ولا بتخزّن وشك أو بصمتك أبداً.</p>
             <div className="flex flex-wrap gap-2">
               <Btn small onClick={() => void link(true)} disabled={busy || !status.signedIn || status.linkedToMe}>اربط حسابي الحالي كمؤسس</Btn>
               {status.linkedToMe && <Btn small kind="ghost" onClick={() => void link(false)} disabled={busy}>فك ربط حسابي الحالي</Btn>}
             </div>
           </div>
 
-          <label className="mb-3 flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={draft.enabled} onChange={(e) => set('enabled', e.target.checked)} /> إظهار كارت المؤسس</label>
+          <label className="mb-3 flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={draft.enabled} onChange={(e) => set('enabled', e.target.checked)} /> إظهار كارت المؤسس</label>
           <div className="mb-4 flex items-center gap-4">
-            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-[#d4af37] bg-[#101010]">
+            <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-accent bg-input">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {draft.photoUrl ? <img src={draft.photoUrl} alt="" className="h-full w-full object-cover" /> : <span className="text-[11px] text-gray-500">من غير صورة</span>}
+              {draft.photoUrl ? <img src={draft.photoUrl} alt="" className="h-full w-full object-cover" /> : <span className="text-[11px] text-muted-foreground">من غير صورة</span>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-2 text-center text-sm text-gray-200 hover:bg-[#1f1f1f]">
+              <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-center text-sm text-foreground hover:bg-muted">
                 {draft.photoUrl ? 'تغيير الصورة' : 'ارفع صورتك'}
                 <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="رفع صورة المؤسس" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); e.target.value = ''; }} />
               </label>
@@ -115,18 +115,18 @@ export default function FounderSettings({ onUnauthorized }: { onUnauthorized: ()
             <input aria-label="لينكدإن" dir="ltr" placeholder="https://www.linkedin.com/in/..." maxLength={300} value={draft.linkedin ?? ''} onChange={(e) => set('linkedin', e.target.value || null)} className={inputCls} />
             <input aria-label="الموقع" dir="ltr" placeholder="https://الموقع" maxLength={300} value={draft.website ?? ''} onChange={(e) => set('website', e.target.value || null)} className={inputCls} />
           </div>
-          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
+          <div className="mb-3 flex flex-wrap items-center gap-3 rounded-xl border border-border bg-input p-3">
             <VerifiedBadge language="ar" size={30} level={draft.badgeLevel} />
-            <label className="text-sm text-gray-100" htmlFor="founder-badge-level">لون وترقية شارتك (المستوى)</label>
+            <label className="text-sm text-foreground" htmlFor="founder-badge-level">لون وترقية شارتك (المستوى)</label>
             <select id="founder-badge-level" className={inputCls + ' max-w-[220px]'} value={draft.badgeLevel} onChange={(e) => set('badgeLevel', Number(e.target.value))}>
               {BADGE_LEVELS.map((l) => <option key={l} value={l}>{l} · {badgeLevelName(l, 'ar')}</option>)}
             </select>
-            <p className="w-full text-xs text-gray-400">الشارة اللي جنب اسمك في «نبذة عنا» وفي الإعدادات بتاخد اللون ده. اختار 7 (الياقوتي الأحمر) لأعلى مستوى.</p>
+            <p className="w-full text-xs text-muted-foreground">الشارة اللي جنب اسمك في «نبذة عنا» وفي الإعدادات بتاخد اللون ده. اختار 7 (الياقوتي الأحمر) لأعلى مستوى.</p>
           </div>
           <Btn onClick={() => void save()} disabled={busy || !changed}>{busy ? '...' : '💾 حفظ'}</Btn>
         </>
-      ) : <p className="text-sm text-gray-400">...</p>}
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      ) : <p className="text-sm text-muted-foreground">...</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

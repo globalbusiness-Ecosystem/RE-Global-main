@@ -53,10 +53,10 @@ export default function BlockDates({ onUnauthorized }: { onUnauthorized: () => v
 
   return (
     <Card title="🔒 قفل أيام على فندق / إيجار">
-      <p className="mb-2 text-xs text-gray-400">الأيام المقفولة مش بتتحجز ولا بتتدفع. لو فيها حجز ضيف، الغي الحجز الأول من لوحة الحجوزات.</p>
-      {msg && <p className="mb-2 text-xs text-gray-200">{msg}</p>}
+      <p className="mb-2 text-xs text-muted-foreground">الأيام المقفولة مش بتتحجز ولا بتتدفع. لو فيها حجز ضيف، الغي الحجز الأول من لوحة الحجوزات.</p>
+      {msg && <p className="mb-2 text-xs text-foreground">{msg}</p>}
       {pid && (
-        <div className="mb-3 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300">
+        <div className="mb-3 rounded-xl border border-border bg-card p-3 text-xs text-foreground/80">
           <p className="mb-1">رابط التقويم (iCal) — حطه في Google Calendar أو Airbnb أو Booking عشان الأيام المحجوزة تتزامن:</p>
           <div className="flex items-center gap-2">
             <input readOnly aria-label="رابط التقويم (iCal)" dir="ltr" className={inputCls} value={feedUrl(pid)} onFocus={(e) => e.currentTarget.select()} />
@@ -85,7 +85,7 @@ export default function BlockDates({ onUnauthorized }: { onUnauthorized: () => v
       {pid && blocks.length > 0 && (
         <div className="mt-3 space-y-2">
           {blocks.map((b) => (
-            <div key={b.id} className="flex items-center justify-between gap-2 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300">
+            <div key={b.id} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-3 text-xs text-foreground/80">
               <span dir="ltr">{b.start} → {b.end}</span>
               <span className="min-w-0 flex-1 truncate">{b.note}</span>
               <Btn small kind="ghost" onClick={() => remove(b)} disabled={busy}>افتح</Btn>

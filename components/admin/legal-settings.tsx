@@ -45,7 +45,7 @@ export default function LegalSettings({ onUnauthorized }: { onUnauthorized: () =
 
   return (
     <Card title="⚖️ قانون كل دولة">
-      <p className="mb-3 text-xs text-gray-400">
+      <p className="mb-3 text-xs text-muted-foreground">
         نص العقد وتنبيه المشتري بيتحددوا حسب بلد العقار. النصوص الافتراضية عامة ومش بتذكر مواد قانونية. ياريت محامي البلد يراجعها ويعدّلها هنا قبل الاستخدام الحقيقي. التعديل بيسري على العقود الجديدة فقط.
       </p>
       <Field label="البلد">
@@ -53,7 +53,7 @@ export default function LegalSettings({ onUnauthorized }: { onUnauthorized: () =
           {Object.entries(COUNTRIES).map(([c, n]) => <option key={c} value={c}>{n.ar} ({c})</option>)}
         </select>
       </Field>
-      {!form && !msg && <p className="mt-3 text-xs text-gray-400">...جاري التحميل</p>}
+      {!form && !msg && <p className="mt-3 text-xs text-muted-foreground">...جاري التحميل</p>}
       {form && (
         <div className="mt-3 space-y-3">
           {FIELDS.map((f) => (
@@ -69,7 +69,7 @@ export default function LegalSettings({ onUnauthorized }: { onUnauthorized: () =
           </div>
         </div>
       )}
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

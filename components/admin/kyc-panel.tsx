@@ -97,35 +97,35 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const sorted = [...pending, ...rows.filter((r) => r.status !== 'pending')];
   return (
     <Card title={`🪪 التحقق من الهوية (${pending.length} في الانتظار)`}>
-      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
-      <label className="mb-3 flex items-center gap-2 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-sm text-gray-200">
+      {notice ? <p className="mb-2 text-xs text-foreground/80" role="status">{notice}</p> : null}
+      <label className="mb-3 flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm text-foreground">
         <input type="checkbox" checked={requireAll === true} disabled={requireAll === null} onChange={toggleAll} />
         إلزام توثيق الهوية لكل المستخدمين قبل الدفع (Pi كمان). حسابات الويب ملزمة دايمًا.
       </label>
       {ret ? (
-        <div className="mb-3 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-sm text-gray-200">
-          <p className="mb-2 font-semibold text-white">🗄️ الاحتفاظ ببيانات الهوية</p>
+        <div className="mb-3 rounded-xl border border-border bg-card p-3 text-sm text-foreground">
+          <p className="mb-2 font-semibold text-foreground">🗄️ الاحتفاظ ببيانات الهوية</p>
           <div className="flex flex-wrap items-center gap-3">
             <label className="flex items-center gap-2">مدة الاحتفاظ (سنين)
-              <input type="number" min={1} max={30} value={ret.years} onChange={(e) => setRet({ ...ret, years: Number(e.target.value) })} onBlur={() => saveRet({ years: ret.years, autoDelete: ret.autoDelete })} className="w-16 rounded-lg border border-[#2a2a2a] bg-[#0d0d0d] px-2 py-1 text-white" />
+              <input type="number" min={1} max={30} value={ret.years} onChange={(e) => setRet({ ...ret, years: Number(e.target.value) })} onBlur={() => saveRet({ years: ret.years, autoDelete: ret.autoDelete })} className="w-16 rounded-lg border border-border bg-input px-2 py-1 text-foreground" />
             </label>
             <label className="flex items-center gap-2">
               <input type="checkbox" checked={ret.autoDelete} onChange={() => saveRet({ years: ret.years, autoDelete: !ret.autoDelete })} />
               حذف تلقائي يومي
             </label>
-            <span className="text-xs text-gray-400">منتهية المدة دلوقتي: {ret.due}</span>
+            <span className="text-xs text-muted-foreground">منتهية المدة دلوقتي: {ret.due}</span>
             <Btn small onClick={runNow} disabled={ret.due === 0}>🗑 حذف المنتهي الآن</Btn>
           </div>
-          <p className="mt-2 text-xs text-gray-500">المدة بتتحسب من تاريخ القرار. الحذف التلقائي مقفول افتراضيًا. اللي عليه تجميد قانوني عمره ما بيتحذف.</p>
+          <p className="mt-2 text-xs text-muted-foreground">المدة بتتحسب من تاريخ القرار. الحذف التلقائي مقفول افتراضيًا. اللي عليه تجميد قانوني عمره ما بيتحذف.</p>
         </div>
       ) : null}
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };
           return (
-            <div key={r.uid} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
-              <p className="font-semibold text-white" dir="auto">{r.legalName}</p>
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-gray-400">
+            <div key={r.uid} className="rounded-xl border border-border bg-card p-3">
+              <p className="font-semibold text-foreground" dir="auto">{r.legalName}</p>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                 <Badge tone={st.tone}>{st.label}</Badge>
                 <span dir="ltr">{r.country}</span>
                 <span dir="ltr">{r.phone}</span>
@@ -134,22 +134,22 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 {r.reviewReasons?.length ? <span className="text-amber-500" dir="ltr">⚑ review: {r.reviewReasons.join(', ')}</span> : null}
                 {r.dupOf ? <span className="text-amber-500" dir="ltr">⚠ same ID as {r.dupOf}</span> : null}
                 {r.hold ? <span className="text-sky-400">🔒 تجميد قانوني</span> : null}
-                {r.consentAt ? <span className="text-gray-500">✔ موافقة {fmtDate(r.consentAt)}</span> : null}
+                {r.consentAt ? <span className="text-muted-foreground">✔ موافقة {fmtDate(r.consentAt)}</span> : null}
                 <span>{fmtDate(r.submittedAt)}</span>
                 <span className="truncate" dir="ltr">{r.uid}</span>
               </div>
               {r.files && r.files.length > 0 ? (
                 <div className="mt-2 flex flex-wrap gap-2">
-                  <span className="w-full text-xs text-gray-500">{r.docType === 'passport' ? 'جواز سفر' : 'بطاقة هوية'}: افتح كل صورة وقارنها بالاسم وبالسيلفي</span>
+                  <span className="w-full text-xs text-muted-foreground">{r.docType === 'passport' ? 'جواز سفر' : 'بطاقة هوية'}: افتح كل صورة وقارنها بالاسم وبالسيلفي</span>
                   {r.files.map((k) => (
-                    <a key={k} href={`/api/admin/kyc/file?uid=${encodeURIComponent(r.uid)}&kind=${k}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-[#2a2a2a] p-1 text-center text-xs text-gray-300">
+                    <a key={k} href={`/api/admin/kyc/file?uid=${encodeURIComponent(r.uid)}&kind=${k}`} target="_blank" rel="noopener noreferrer" className="rounded-lg border border-border p-1 text-center text-xs text-foreground/80">
                       <img src={`/api/admin/kyc/file?uid=${encodeURIComponent(r.uid)}&kind=${k}`} alt={k} className="h-24 w-32 rounded object-cover" loading="lazy" />
                       {k === 'front' ? 'الوش' : k === 'back' ? 'الضهر' : 'سيلفي'}
                     </a>
                   ))}
                 </div>
               ) : null}
-              {r.rejectReason ? <p className="mt-1 text-xs text-gray-500" dir="auto">❌ {r.rejectReason}</p> : null}
+              {r.rejectReason ? <p className="mt-1 text-xs text-muted-foreground" dir="auto">❌ {r.rejectReason}</p> : null}
               <div className="mt-2 flex flex-wrap gap-2">
                 <Btn small onClick={() => toggleHold(r.uid, !r.hold)}>{r.hold ? '🔓 شيل التجميد' : '🔒 تجميد قانوني'}</Btn>
                 {!r.hold && <Btn small onClick={() => purgeOne(r.uid)}>🗑 حذف بياناته</Btn>}

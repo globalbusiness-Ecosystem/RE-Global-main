@@ -9,12 +9,12 @@ type Data = { from: string; days: number; groups: ArrivalDay[]; totals: { arriva
 
 function Row({ r, kind }: { r: StayRow; kind: 'in' | 'out' }) {
   return (
-    <div className="rounded-lg bg-[#1a1a1a] p-2 text-xs text-gray-300">
+    <div className="rounded-lg bg-card p-2 text-xs text-foreground/80">
       <div className="flex items-center justify-between gap-2">
-        <span className="min-w-0 truncate font-semibold text-white">{r.propertyTitle}</span>
-        <span className="shrink-0 text-gray-400">@{r.username}</span>
+        <span className="min-w-0 truncate font-semibold text-foreground">{r.propertyTitle}</span>
+        <span className="shrink-0 text-muted-foreground">@{r.username}</span>
       </div>
-      <div className="mt-1 flex flex-wrap gap-x-3 text-gray-400">
+      <div className="mt-1 flex flex-wrap gap-x-3 text-muted-foreground">
         <span>{r.nights} ليلة</span>
         {r.guests ? <span>{r.guests} ضيف</span> : null}
         <span dir="ltr">{kind === 'in' ? `→ ${r.end}` : `${r.start} →`}</span>
@@ -57,12 +57,12 @@ export default function ArrivalsPanel({ onUnauthorized }: { onUnauthorized: () =
       </div>
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
       {data.groups.length === 0 ? (
-        <p className="text-xs text-gray-400">مفيش وصول ولا مغادرة في الفترة دي.</p>
+        <p className="text-xs text-muted-foreground">مفيش وصول ولا مغادرة في الفترة دي.</p>
       ) : (
         <div className="space-y-3">
           {data.groups.map((g) => (
-            <div key={g.day} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
-              <p className="mb-2 flex items-center gap-2 text-sm font-bold text-white" dir="ltr">{g.day}{g.day === data.from ? <Badge tone="gold">النهارده</Badge> : null}</p>
+            <div key={g.day} className="rounded-xl border border-border bg-card p-3">
+              <p className="mb-2 flex items-center gap-2 text-sm font-bold text-foreground" dir="ltr">{g.day}{g.day === data.from ? <Badge tone="gold">النهارده</Badge> : null}</p>
               <div className="space-y-2">
                 {g.arrivals.length > 0 && <p className="text-xs font-semibold text-green-300">⬇️ وصول ({g.arrivals.length})</p>}
                 {g.arrivals.map((r) => <Row key={`in-${r.id}`} r={r} kind="in" />)}

@@ -100,24 +100,24 @@ export default function CardOrdersPanel({ onUnauthorized }: { onUnauthorized: ()
       <div className="mb-2 flex flex-wrap items-center gap-2">
         <Btn onClick={anchor} disabled={busy === 'anchor'}>⛓️ ثبّت العقود على البلوك تشين</Btn>
         <Btn onClick={check} disabled={busy === 'check'}>🔍 افحص حساب المنصة</Btn>
-        {notice ? <span className="text-xs text-gray-300" role="status">{notice}</span> : null}
+        {notice ? <span className="text-xs text-foreground/80" role="status">{notice}</span> : null}
       </div>
       <div className="space-y-2">
         {sorted.slice(0, 100).map((r) => {
           const st = STATUS[r.status] ?? { label: r.status, tone: 'gold' as const };
           return (
-            <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+            <div key={r.id} className="rounded-xl border border-border bg-card p-3">
               <div className="flex items-start justify-between gap-2">
-                <p className="min-w-0 truncate text-xs text-gray-400" dir="ltr">{r.propertyId ?? '—'}</p>
+                <p className="min-w-0 truncate text-xs text-muted-foreground" dir="ltr">{r.propertyId ?? '—'}</p>
                 <span className="shrink-0 font-bold" style={{ color: GOLD }} dir="ltr">{(r.amountMinor / 100).toFixed(2)} {r.currency}</span>
               </div>
-              <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+              <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
                 <Badge tone={st.tone}>{st.label}</Badge>
                 {r.handedOverAt ? <Badge tone="green">تم التسليم</Badge> : null}
                 <span>{fmtDate(r.createdAt)}</span>
                 <span className="truncate" dir="ltr">{r.uid}</span>
               </div>
-              {r.note ? <p className="mt-1 text-xs text-gray-500" dir="auto">📝 {r.note}</p> : null}
+              {r.note ? <p className="mt-1 text-xs text-muted-foreground" dir="auto">📝 {r.note}</p> : null}
               {r.status === 'paid' && !r.handedOverAt && (
                 <div className="mt-2"><Btn small onClick={() => handOver(r.id)} disabled={busy === r.id}>✅ تم تسليم العقار</Btn></div>
               )}

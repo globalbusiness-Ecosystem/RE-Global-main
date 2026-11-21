@@ -53,19 +53,19 @@ export default function BookingsPanel({ onUnauthorized }: { onUnauthorized: () =
       )}
       <div className="space-y-2">
         {data.bookings.slice(0, 30).map((b) => (
-          <div key={b.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+          <div key={b.id} className="rounded-xl border border-border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 truncate font-bold text-white">{b.propertyTitle}</p>
-              <span className="shrink-0 text-xs text-gray-300">{b.amount} {b.currency && b.currency !== 'Pi' ? b.currency : 'π'}</span>
+              <p className="min-w-0 truncate font-bold text-foreground">{b.propertyTitle}</p>
+              <span className="shrink-0 text-xs text-foreground/80">{b.amount} {b.currency && b.currency !== 'Pi' ? b.currency : 'π'}</span>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
               <Badge tone={b.status === 'confirmed' ? 'green' : b.status === 'review' ? 'red' : 'gray'}>{LABEL[b.status] ?? b.status}</Badge>
               <span>@{b.username}</span>
               <span dir="ltr">{b.start} → {b.end}</span>
               <span>· {b.nights} ليلة</span>
               {b.guests ? <span>· {b.guests} ضيف</span> : null}
             </div>
-            {b.note ? <p className="mt-2 whitespace-pre-line break-words rounded-lg bg-[#1d1d1d] p-2 text-xs text-yellow-200">💬 {b.note}</p> : null}
+            {b.note ? <p className="mt-2 whitespace-pre-line break-words rounded-lg bg-muted p-2 text-xs text-yellow-200">💬 {b.note}</p> : null}
             {(b.status === 'confirmed' || b.status === 'review') && (
               <div className="mt-2"><Btn small kind="danger" onClick={() => cancel(b)} disabled={busy === b.id}>إلغاء + استرداد</Btn></div>
             )}

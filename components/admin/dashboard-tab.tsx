@@ -44,11 +44,11 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
         <div className="flex h-28 items-end gap-1" dir="ltr">
           {data.series.map((s: any) => (
             <div key={s.date} className="flex flex-1 flex-col items-center justify-end" title={`${s.date}: ${s.count} عقد · ${s.amount} π`}>
-              <div className="w-full rounded-t" style={{ height: `${Math.max(4, (s.count / max) * 100)}%`, background: s.count ? GOLD : '#2a2a2a' }} />
+              <div className="w-full rounded-t" style={{ height: `${Math.max(4, (s.count / max) * 100)}%`, background: s.count ? GOLD : 'var(--border)' }} />
             </div>
           ))}
         </div>
-        <div className="mt-1 flex justify-between text-[10px] text-gray-500" dir="ltr">
+        <div className="mt-1 flex justify-between text-[10px] text-muted-foreground" dir="ltr">
           <span>{data.series[0]?.date.slice(5)}</span><span>{data.series[data.series.length - 1]?.date.slice(5)}</span>
         </div>
       </Card>
@@ -77,18 +77,18 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
       <div className="grid gap-4 lg:grid-cols-2">
         <Card title="آخر العقود">
           {data.contracts.recent.length === 0 ? <Empty>مفيش عقود.</Empty> : data.contracts.recent.map((c: any) => (
-            <a key={c.id} href={'/verify/' + c.id} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 border-b border-[#222] py-2 text-sm last:border-0">
-              <span className="min-w-0 truncate text-white">{c.propertyTitle}<span className="block text-xs text-gray-500">@{c.buyerUsername} · {fmtDate(c.at)}</span></span>
+            <a key={c.id} href={'/verify/' + c.id} target="_blank" rel="noreferrer" className="flex items-center justify-between gap-2 border-b border-border py-2 text-sm last:border-0">
+              <span className="min-w-0 truncate text-foreground">{c.propertyTitle}<span className="block text-xs text-muted-foreground">@{c.buyerUsername} · {fmtDate(c.at)}</span></span>
               <span className="shrink-0 font-bold" style={{ color: GOLD }}>{c.amount} π</span>
             </a>
           ))}
         </Card>
         <Card title="آخر نشاط الأدمن">
           {data.activity.length === 0 ? <Empty>لسه مفيش نشاط مسجّل.</Empty> : data.activity.map((a: any) => (
-            <div key={a.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-              <span className="text-white">{auditLabel(a.action)}</span>
-              <span className="mx-2 text-xs text-gray-500">{auditSummary(a.action, a.detail)}</span>
-              <span className="block text-xs text-gray-600">{fmtDate(a.at)}</span>
+            <div key={a.id} className="border-b border-border py-2 text-sm last:border-0">
+              <span className="text-foreground">{auditLabel(a.action)}</span>
+              <span className="mx-2 text-xs text-muted-foreground">{auditSummary(a.action, a.detail)}</span>
+              <span className="block text-xs text-muted-foreground/70">{fmtDate(a.at)}</span>
             </div>
           ))}
         </Card>

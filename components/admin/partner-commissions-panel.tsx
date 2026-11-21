@@ -52,24 +52,24 @@ export default function PartnerCommissionsPanel({ onUnauthorized }: { onUnauthor
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="تصفية حسب الحالة">
         {COMMISSION_STATUSES.map((s) => (
           <button key={s} type="button" aria-pressed={filter === s} onClick={() => setFilter(s)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-[#d4af37] bg-[#d4af37] text-black' : 'border-[#3a3a3a] text-gray-300'}`}>
+            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-accent bg-accent text-black' : 'border-border text-foreground/80'}`}>
             {COMMISSION_STATUS_AR[s].label}
           </button>
         ))}
       </div>
-      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
+      {notice ? <p className="mb-2 text-xs text-foreground/80" role="status">{notice}</p> : null}
       {error ? <Empty>❌ {error}</Empty> : !rows ? null : rows.length === 0 ? <Empty>مفيش عمولات في الحالة دي.</Empty> : (
         <div className="space-y-2">
           {rows.map((r) => (
-            <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#101010] p-3">
+            <div key={r.id} className="rounded-xl border border-border bg-input p-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-white" dir="ltr">@{r.partner}</span>
+                <span className="font-semibold text-foreground" dir="ltr">@{r.partner}</span>
                 <Badge tone="blue">{ROLE_AR[r.role] ?? r.role}</Badge>
                 <Badge tone={COMMISSION_STATUS_AR[r.status].tone}>{COMMISSION_STATUS_AR[r.status].label}</Badge>
-                <span className="ms-auto font-bold text-[#d4af37]">{money(r.amount)} {r.currency}</span>
+                <span className="ms-auto font-bold text-accent">{money(r.amount)} {r.currency}</span>
               </div>
-              <p className="mt-1 text-xs text-gray-400"><span dir="ltr">{r.contractId}</span> · {money(r.base)} {r.currency} × {r.rate}% · {fmtDate(r.createdAt)}{r.paidAt ? ` · دُفعت ${fmtDate(r.paidAt)}` : ''}</p>
-              {r.note && <p className="mt-1 text-xs text-gray-300">📝 {r.note}</p>}
+              <p className="mt-1 text-xs text-muted-foreground"><span dir="ltr">{r.contractId}</span> · {money(r.base)} {r.currency} × {r.rate}% · {fmtDate(r.createdAt)}{r.paidAt ? ` · دُفعت ${fmtDate(r.paidAt)}` : ''}</p>
+              {r.note && <p className="mt-1 text-xs text-foreground/80">📝 {r.note}</p>}
               {r.status === 'accrued' && (
                 <div className="mt-2 flex gap-1.5">
                   <Btn small disabled={busy === r.id} onClick={() => act(r, 'paid')}>تم الدفع</Btn>

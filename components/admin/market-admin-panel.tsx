@@ -53,12 +53,12 @@ export default function MarketAdminPanel({ onUnauthorized }: { onUnauthorized: (
       )}
       <div className="space-y-2">
         {data.listings.slice(0, 30).map((l) => (
-          <div key={l.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+          <div key={l.id} className="rounded-xl border border-border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 truncate font-bold text-white">{l.propertyTitle}</p>
-              <span className="shrink-0 text-xs text-gray-300">{l.shares} × {l.pricePerShare} π</span>
+              <p className="min-w-0 truncate font-bold text-foreground">{l.propertyTitle}</p>
+              <span className="shrink-0 text-xs text-foreground/80">{l.shares} × {l.pricePerShare} π</span>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
               <Badge tone={l.status === 'open' ? 'gold' : l.status === 'sold' ? 'green' : 'gray'}>{L_LABEL[l.status] ?? l.status}</Badge>
               {l.reserved && <Badge tone="blue">حد بيدفع</Badge>}
               <span>@{l.sellerName}</span>

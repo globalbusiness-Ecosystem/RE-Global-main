@@ -88,14 +88,14 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
       setMsg('✅ الفيديو اترفع. اضغط "حفظ".');
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
-  const inp = 'w-full rounded-lg border border-[#3a3a3a] bg-[#161616] px-2 py-1.5 text-sm text-gray-100';
+  const inp = 'w-full rounded-lg border border-border bg-card px-2 py-1.5 text-sm text-foreground';
   const linkMode = (l: string | null) => (l === null ? 'none' : l.startsWith('page:') ? l : 'url');
 
   return (
     <Card title="📣 الإعلانات والفيديوهات في الرئيسية">
-      <p className="mb-3 text-xs text-gray-400">بتظهر مكان مربعات الإحصائيات القديمة (عقارات/دول/مستثمرين/حجم) اللي كانت أرقام تجريبية. العرض والفعالية بيختفوا تلقائياً تاني يوم من تاريخهم. الفيديو بيتحط كرابط يوتيوب أو فيمو أو ملف mp4 على https (مش رفع ملفات فيديو كبيرة).</p>
-      <label className="mb-2 flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} /> إظهار لوحة الإعلانات</label>
-      <label className="mb-4 flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={showStats} onChange={(e) => setShowStats(e.target.checked)} /> رجّع مربعات الإحصائيات القديمة (مش مفضّل: أرقامها تجريبية)</label>
+      <p className="mb-3 text-xs text-muted-foreground">بتظهر مكان مربعات الإحصائيات القديمة (عقارات/دول/مستثمرين/حجم) اللي كانت أرقام تجريبية. العرض والفعالية بيختفوا تلقائياً تاني يوم من تاريخهم. الفيديو بيتحط كرابط يوتيوب أو فيمو أو ملف mp4 على https (مش رفع ملفات فيديو كبيرة).</p>
+      <label className="mb-2 flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} /> إظهار لوحة الإعلانات</label>
+      <label className="mb-4 flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={showStats} onChange={(e) => setShowStats(e.target.checked)} /> رجّع مربعات الإحصائيات القديمة (مش مفضّل: أرقامها تجريبية)</label>
       <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
         <input className={inp} dir="ltr" maxLength={80} aria-label="عنوان اللوحة بالإنجليزي" placeholder="Board title (English)" value={title.en ?? ''} onChange={(e) => setTitle({ en: e.target.value, ar: title.ar })} />
         <input className={inp} dir="rtl" maxLength={80} aria-label="عنوان اللوحة بالعربي" placeholder="عنوان اللوحة (عربي)" value={title.ar ?? ''} onChange={(e) => setTitle({ en: title.en, ar: e.target.value })} />
@@ -104,12 +104,12 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
         {items.map((a, i) => {
           const vOk = !a.video || !!parseVideoUrl(a.video);
           return (
-            <div key={i} className="rounded-xl border border-[#2a2a2a] bg-[#101010] p-3">
+            <div key={i} className="rounded-xl border border-border bg-input p-3">
               <div className="mb-2 flex flex-wrap items-center gap-2">
                 <select aria-label="النوع" className={inp + ' !w-auto'} value={a.kind} onChange={(e) => upd(i, (x) => ({ ...x, kind: e.target.value as Announcement['kind'] }))}>
                   {ANNOUNCEMENT_KINDS.map((k) => <option key={k} value={k}>{ANN_EMOJI[k]} {KIND_AR[k]}</option>)}
                 </select>
-                <label className="flex items-center gap-1 text-xs text-gray-300"><input type="checkbox" checked={a.active} onChange={(e) => upd(i, (x) => ({ ...x, active: e.target.checked }))} /> ظاهر</label>
+                <label className="flex items-center gap-1 text-xs text-foreground/80"><input type="checkbox" checked={a.active} onChange={(e) => upd(i, (x) => ({ ...x, active: e.target.checked }))} /> ظاهر</label>
                 <input type="date" aria-label="التاريخ" className={inp + ' !w-auto'} value={a.date ?? ''} onChange={(e) => upd(i, (x) => ({ ...x, date: e.target.value || null }))} />
                 <span className="flex-1" />
                 <Btn small kind="ghost" onClick={() => move(i, -1)} disabled={i === 0}>↑</Btn>
@@ -123,7 +123,7 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
                 <input className={inp} dir="rtl" maxLength={MAX_ANN_TEXT} aria-label="الوصف بالعربي" placeholder="وصف قصير (اختياري)" value={a.d?.ar ?? ''} onChange={(e) => upd(i, (x) => ({ ...x, d: { en: x.d?.en, ar: e.target.value } }))} />
                 <div className="sm:col-span-2">
                   <input className={inp} dir="ltr" aria-label="رابط الفيديو" placeholder={a.kind === 'video' ? 'رابط الفيديو (مطلوب): YouTube / Vimeo / .mp4' : 'رابط فيديو (اختياري)'} value={a.video ?? ''} onChange={(e) => upd(i, (x) => ({ ...x, video: e.target.value || null }))} />
-                  <label className="mt-1 inline-block cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-1.5 text-xs text-gray-200 hover:bg-[#1f1f1f]">
+                  <label className="mt-1 inline-block cursor-pointer rounded-lg border border-border px-3 py-1.5 text-xs text-foreground hover:bg-muted">
                     أو ارفع ملف فيديو (MP4/WebM/MOV حتى 50MB)
                     <input type="file" accept="video/mp4,video/webm,video/quicktime" aria-label="رفع فيديو" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadVideo(i, f); e.target.value = ''; }} />
                   </label>
@@ -143,7 +143,7 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
                 )}
                 <div className="flex items-center gap-2 sm:col-span-2">
                   {a.img && /* eslint-disable-next-line @next/next/no-img-element */ <img src={a.img} alt="" className="h-12 w-20 rounded object-cover" />}
-                  <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-1.5 text-xs text-gray-200 hover:bg-[#1f1f1f]">
+                  <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 text-xs text-foreground hover:bg-muted">
                     {a.img ? 'تغيير الصورة' : 'رفع صورة (اختياري)'}
                     <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="رفع صورة الإعلان" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(i, f); e.target.value = ''; }} />
                   </label>
@@ -157,7 +157,7 @@ export default function AnnouncementsSettings({ onUnauthorized }: { onUnauthoriz
       <div className="flex flex-wrap items-center gap-2">
         <Btn kind="ghost" disabled={items.length >= MAX_ANNOUNCEMENTS || busy} onClick={() => setItems((l) => [...l, blank()])}>＋ إعلان جديد ({items.length}/{MAX_ANNOUNCEMENTS})</Btn>
         <Btn onClick={() => void save()} disabled={busy || !changed}>{busy ? '...' : 'حفظ'}</Btn>
-        {msg && <span className="text-xs text-gray-300">{msg}</span>}
+        {msg && <span className="text-xs text-foreground/80">{msg}</span>}
       </div>
     </Card>
   );

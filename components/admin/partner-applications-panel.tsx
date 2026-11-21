@@ -52,26 +52,26 @@ export default function PartnerApplicationsPanel({ onUnauthorized }: { onUnautho
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="تصفية حسب الحالة">
         {PARTNER_STATUSES.map((s) => (
           <button key={s} type="button" aria-pressed={filter === s} onClick={() => setFilter(s)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-[#d4af37] bg-[#d4af37] text-black' : 'border-[#3a3a3a] text-gray-300'}`}>
+            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-accent bg-accent text-black' : 'border-border text-foreground/80'}`}>
             {PARTNER_STATUS_AR[s].label} ({counts[s] ?? 0})
           </button>
         ))}
       </div>
-      {notice ? <p className="mb-2 text-xs text-gray-300" role="status">{notice}</p> : null}
+      {notice ? <p className="mb-2 text-xs text-foreground/80" role="status">{notice}</p> : null}
       {error ? <Empty>❌ {error}</Empty> : !rows ? null : rows.length === 0 ? <Empty>مفيش طلبات في الحالة دي.</Empty> : (
         <div className="space-y-2">
           {rows.map((p) => (
-            <div key={p.username} className="rounded-xl border border-[#2a2a2a] bg-[#101010] p-3">
+            <div key={p.username} className="rounded-xl border border-border bg-input p-3">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="font-semibold text-white" dir="auto">{p.company}</span>
+                <span className="font-semibold text-foreground" dir="auto">{p.company}</span>
                 <Badge tone="blue">{ROLE_AR[p.role]}</Badge>
                 <Badge tone={PARTNER_STATUS_AR[p.status].tone}>{PARTNER_STATUS_AR[p.status].label}</Badge>
                 {p.listed && <Badge>ظاهر في الدليل</Badge>}
               </div>
-              <p className="mt-1 text-xs text-gray-400" dir="auto">@{p.username} · {COUNTRIES[p.country]?.ar ?? p.country} · <span dir="ltr">{p.phone}</span> · {fmtDate(p.createdAt)}</p>
-              <p className="mt-2 text-sm text-gray-200" dir="auto">{p.about}</p>
-              {p.website && <a href={p.website} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 inline-block text-xs text-[#d4af37]" dir="ltr">{p.website}</a>}
-              {p.note && <p className="mt-2 rounded-md bg-[#1b1b1b] p-2 text-xs text-gray-300">📝 {p.note}</p>}
+              <p className="mt-1 text-xs text-muted-foreground" dir="auto">@{p.username} · {COUNTRIES[p.country]?.ar ?? p.country} · <span dir="ltr">{p.phone}</span> · {fmtDate(p.createdAt)}</p>
+              <p className="mt-2 text-sm text-foreground" dir="auto">{p.about}</p>
+              {p.website && <a href={p.website} target="_blank" rel="noopener noreferrer nofollow" className="mt-1 inline-block text-xs text-accent" dir="ltr">{p.website}</a>}
+              {p.note && <p className="mt-2 rounded-md bg-muted p-2 text-xs text-foreground/80">📝 {p.note}</p>}
               <div className="mt-2 flex flex-wrap gap-1.5">
                 {STEPS[p.status].map((s) => <Btn key={s.action} small kind={s.kind} disabled={busy === p.username} onClick={() => act(p, s)}>{s.label}</Btn>)}
               </div>

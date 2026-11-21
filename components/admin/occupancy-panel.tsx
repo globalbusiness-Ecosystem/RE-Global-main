@@ -46,15 +46,15 @@ export default function OccupancyPanel({ onUnauthorized }: { onUnauthorized: () 
       {error && <p className="mb-2 text-xs text-red-300">❌ {error}</p>}
       <div className="space-y-2">
         {data.rows.map((r) => (
-          <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300">
+          <div key={r.id} className="rounded-xl border border-border bg-card p-3 text-xs text-foreground/80">
             <div className="flex items-center justify-between gap-2">
-              <span className="min-w-0 truncate font-semibold text-white">{r.title}</span>
-              <span className="shrink-0 font-bold text-[#d4af37]" dir="ltr">{pct(r.rate)}</span>
+              <span className="min-w-0 truncate font-semibold text-foreground">{r.title}</span>
+              <span className="shrink-0 font-bold text-accent" dir="ltr">{pct(r.rate)}</span>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded bg-[#2a2a2a]">
-              <div className="h-full bg-[#d4af37]" style={{ width: `${Math.min(100, r.rate ?? 0)}%` }} />
+            <div className="mt-2 h-1.5 overflow-hidden rounded bg-border">
+              <div className="h-full bg-accent" style={{ width: `${Math.min(100, r.rate ?? 0)}%` }} />
             </div>
-            <div className="mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-gray-400">
+            <div className="mt-2 flex flex-wrap justify-between gap-x-3 gap-y-1 text-muted-foreground">
               <span>محجوز {r.booked}</span>
               <span>مقفول {r.blocked}</span>
               <span>فاضي {r.free}</span>

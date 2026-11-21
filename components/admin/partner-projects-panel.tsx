@@ -55,7 +55,7 @@ export default function PartnerProjectsPanel({ onUnauthorized }: { onUnauthorize
       <div className="mb-3 flex flex-wrap gap-2" role="group" aria-label="تصفية حسب الحالة">
         {ORDER.filter((s) => (PROJECT_STATUSES as readonly string[]).includes(s)).map((s) => (
           <button key={s} type="button" aria-pressed={filter === s} onClick={() => setFilter(s)}
-            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-[#d4af37] bg-[#d4af37] text-black' : 'border-[#3a3a3a] text-gray-300'}`}>
+            className={`rounded-full border px-3 py-1 text-xs font-semibold ${filter === s ? 'border-accent bg-accent text-black' : 'border-border text-foreground/80'}`}>
             {STATUS_AR[s].label} ({counts[s] ?? 0})
           </button>
         ))}
@@ -63,45 +63,45 @@ export default function PartnerProjectsPanel({ onUnauthorized }: { onUnauthorize
       {error ? <Empty>❌ {error}</Empty> : !rows ? null : rows.length === 0 ? <Empty>مفيش مشاريع في الحالة دي.</Empty> : (
         <div className="space-y-2">
           {rows.map((p) => (
-            <div key={p.id} className="rounded-xl border border-[#2a2a2a] bg-[#101010] p-3">
+            <div key={p.id} className="rounded-xl border border-border bg-input p-3">
               <div className="flex gap-3">
-                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-[#1b1b1b]">
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
                   {p.images[0] && <img src={p.images[0]} alt="" className="h-full w-full object-cover" />}
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="font-semibold text-white" dir="auto">{p.title}</span>
+                    <span className="font-semibold text-foreground" dir="auto">{p.title}</span>
                     <Badge tone={STATUS_AR[p.status].tone}>{STATUS_AR[p.status].label}</Badge>
                     <Badge tone="blue">{KIND_AR[p.kind] ?? p.kind}</Badge>
                   </div>
-                  <p className="mt-1 text-xs text-gray-400" dir="auto">{p.company} ({ROLE_AR[p.role] ?? p.role}) · @{p.owner} · {p.city}، {COUNTRIES[p.country]?.ar ?? p.country} · {formatMoney(p.price, p.currency, 'ar')} · {fmtDate(p.submittedAt ?? p.updatedAt ?? '')}</p>
+                  <p className="mt-1 text-xs text-muted-foreground" dir="auto">{p.company} ({ROLE_AR[p.role] ?? p.role}) · @{p.owner} · {p.city}، {COUNTRIES[p.country]?.ar ?? p.country} · {formatMoney(p.price, p.currency, 'ar')} · {fmtDate(p.submittedAt ?? p.updatedAt ?? '')}</p>
                 </div>
               </div>
-              <button type="button" onClick={() => setOpen(open === p.id ? '' : p.id)} className="mt-2 text-xs text-[#d4af37]" aria-expanded={open === p.id}>{open === p.id ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}</button>
+              <button type="button" onClick={() => setOpen(open === p.id ? '' : p.id)} className="mt-2 text-xs text-accent" aria-expanded={open === p.id}>{open === p.id ? 'إخفاء التفاصيل' : 'عرض التفاصيل'}</button>
               {open === p.id && (
                 <div className="mt-2 space-y-2">
-                  <p className="whitespace-pre-line text-sm text-gray-200" dir="auto">{p.description}</p>
+                  <p className="whitespace-pre-line text-sm text-foreground" dir="auto">{p.description}</p>
                   {p.images.length > 0 && (
                     <div className="flex gap-2 overflow-x-auto pb-1">
                       {p.images.map((u) => (
-                        <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="h-24 w-32 shrink-0 overflow-hidden rounded-lg bg-[#1b1b1b]">
+                        <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="h-24 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
                           <img src={u} alt="" className="h-full w-full object-cover" />
                         </a>
                       ))}
                     </div>
                   )}
-                  {p.contact && <p className="text-xs text-gray-300">☎️ <span dir="ltr">{p.contact}</span></p>}
-                  {p.installments.length === 0 ? <p className="text-xs text-gray-500">مفيش خطط تقسيط.</p> : (
-                    <ul className="space-y-1 text-xs text-gray-300">
+                  {p.contact && <p className="text-xs text-foreground/80">☎️ <span dir="ltr">{p.contact}</span></p>}
+                  {p.installments.length === 0 ? <p className="text-xs text-muted-foreground">مفيش خطط تقسيط.</p> : (
+                    <ul className="space-y-1 text-xs text-foreground/80">
                       {p.installments.map((pl, i) => {
                         const s = installmentSchedule(p.price, pl);
-                        return <li key={i} className="rounded-md bg-[#1b1b1b] p-2" dir="auto">{pl.label || `خطة ${i + 1}`}: مقدم {pl.downPct}% ({formatMoney(s.down, p.currency, 'ar')}) · {pl.months} شهر · زيادة {pl.extraPct}% · القسط {formatMoney(s.monthly, p.currency, 'ar')} · الإجمالي {formatMoney(s.total, p.currency, 'ar')}</li>;
+                        return <li key={i} className="rounded-md bg-muted p-2" dir="auto">{pl.label || `خطة ${i + 1}`}: مقدم {pl.downPct}% ({formatMoney(s.down, p.currency, 'ar')}) · {pl.months} شهر · زيادة {pl.extraPct}% · القسط {formatMoney(s.monthly, p.currency, 'ar')} · الإجمالي {formatMoney(s.total, p.currency, 'ar')}</li>;
                       })}
                     </ul>
                   )}
                 </div>
               )}
-              {p.note && <p className="mt-2 rounded-md bg-[#1b1b1b] p-2 text-xs text-gray-300">📝 {p.note}</p>}
+              {p.note && <p className="mt-2 rounded-md bg-muted p-2 text-xs text-foreground/80">📝 {p.note}</p>}
               {STEPS[p.status].length > 0 && (
                 <div className="mt-2 flex flex-wrap gap-1.5">
                   {STEPS[p.status].map((s) => <Btn key={s.action} small kind={s.kind} disabled={busy === p.id} onClick={() => act(p, s)}>{s.label}</Btn>)}

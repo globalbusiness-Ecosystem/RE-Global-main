@@ -60,18 +60,18 @@ export default function TextsEditor({ onUnauthorized, initialPage = 'inspections
   return (
     <div className="space-y-3">
       <Card title="✍️ نصوص الصفحات" right={<Btn small onClick={save} disabled={busy || saved === null}>{busy ? '...' : '💾 حفظ'}</Btn>}>
-        <p className="mb-3 text-xs text-gray-400">اختار الصفحة واللغة، واكتب النص الجديد تحت أي سطر. السطر الفاضي بيفضل زي ما هو. امسح النص عشان ترجع للأصلي.</p>
+        <p className="mb-3 text-xs text-muted-foreground">اختار الصفحة واللغة، واكتب النص الجديد تحت أي سطر. السطر الفاضي بيفضل زي ما هو. امسح النص عشان ترجع للأصلي.</p>
         <div className="flex flex-wrap gap-2">
           {(Object.keys(PAGES) as TextPage[]).map((p) => (
             <Btn key={p} small kind={page === p ? 'gold' : 'ghost'} onClick={() => setPage(p)}>{PAGES[p].label}</Btn>
           ))}
-          <span className="mx-1 w-px bg-[#2a2a2a]" />
+          <span className="mx-1 w-px bg-border" />
           <Btn small kind={lang === 'ar' ? 'gold' : 'ghost'} onClick={() => setLang('ar')}>عربي</Btn>
           <Btn small kind={lang === 'en' ? 'gold' : 'ghost'} onClick={() => setLang('en')}>English</Btn>
         </div>
         <input className={`${inputCls} mt-3`} placeholder="🔎 دوّر في النصوص..." aria-label="دوّر في النصوص..." value={q} onChange={(e) => setQ(e.target.value)} />
         <p className="mt-2 text-[11px]" style={{ color: GOLD }}>{changedCount} نص معدّل من {Object.keys(defaults).length}</p>
-        {msg && <p className="mt-1 text-xs text-gray-200">{msg}</p>}
+        {msg && <p className="mt-1 text-xs text-foreground">{msg}</p>}
       </Card>
       {saved === null && !msg && <Empty>...جاري التحميل</Empty>}
       {saved !== null && keys.length === 0 && <Empty>مفيش نتائج.</Empty>}
@@ -79,9 +79,9 @@ export default function TextsEditor({ onUnauthorized, initialPage = 'inspections
         const long = defaults[k].length > 80;
         const changed = !!edits[k]?.trim() && edits[k].trim() !== defaults[k];
         return (
-          <div key={k} className={`rounded-xl border p-3 ${changed ? 'border-[#d4af37]/60' : 'border-[#2a2a2a]'} bg-[#141414]`}>
-            <p className="text-[10px] text-gray-500" dir="ltr">{k}</p>
-            <p className="mb-2 text-xs text-gray-400" dir={lang === 'ar' ? 'rtl' : 'ltr'}>{defaults[k]}</p>
+          <div key={k} className={`rounded-xl border p-3 ${changed ? 'border-accent/60' : 'border-border'} bg-card`}>
+            <p className="text-[10px] text-muted-foreground" dir="ltr">{k}</p>
+            <p className="mb-2 text-xs text-muted-foreground" dir={lang === 'ar' ? 'rtl' : 'ltr'}>{defaults[k]}</p>
             {long ? (
               <textarea rows={3} className={inputCls} dir={lang === 'ar' ? 'rtl' : 'ltr'} placeholder="النص الجديد (اختياري)" aria-label="النص الجديد (اختياري)" value={edits[k] || ''} onChange={(e) => setEdits((s) => ({ ...s, [k]: e.target.value }))} />
             ) : (

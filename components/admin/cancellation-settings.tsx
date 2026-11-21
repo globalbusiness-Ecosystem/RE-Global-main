@@ -34,15 +34,15 @@ export default function CancellationSettings({ onUnauthorized }: { onUnauthorize
 
   return (
     <Card title="↩️ سياسة إلغاء الحجز">
-      <p className="mb-3 text-xs text-gray-400">الضيف يقدر يلغي حجزه بنفسه لحد اليوم اللي قبل الوصول. المبلغ اللي يرجعله بيتحسب حسب بدري قد إيه ألغى، وبيتسجل في المدفوعات كاسترداد مستني وإنت اللي بتدفعه.</p>
+      <p className="mb-3 text-xs text-muted-foreground">الضيف يقدر يلغي حجزه بنفسه لحد اليوم اللي قبل الوصول. المبلغ اللي يرجعله بيتحسب حسب بدري قد إيه ألغى، وبيتسجل في المدفوعات كاسترداد مستني وإنت اللي بتدفعه.</p>
       <div className="grid gap-2 sm:grid-cols-3">
         <Field label="استرداد كامل قبل الوصول بـ (يوم)"><input className={inputCls} type="number" min="1" max="90" dir="ltr" value={free} onChange={(e) => setFree(e.target.value)} disabled={!loaded} /></Field>
         <Field label="استرداد جزئي قبل الوصول بـ (يوم)"><input className={inputCls} type="number" min="0" dir="ltr" value={partDays} onChange={(e) => setPartDays(e.target.value)} disabled={!loaded} /></Field>
         <Field label="نسبة الاسترداد الجزئي % (0 = من غير جزئي)"><input className={inputCls} type="number" min="0" max="99" dir="ltr" value={partPct} onChange={(e) => setPartPct(e.target.value)} disabled={!loaded} /></Field>
       </div>
-      {p && <p className="mt-2 rounded-lg bg-[#141414] p-2 text-xs text-gray-300">الضيف هيشوف: {policyText('ar', p)}</p>}
+      {p && <p className="mt-2 rounded-lg bg-card p-2 text-xs text-foreground/80">الضيف هيشوف: {policyText('ar', p)}</p>}
       <div className="mt-3"><Btn onClick={save} disabled={busy || !p || !loaded}>{busy ? '...' : '💾 حفظ'}</Btn></div>
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

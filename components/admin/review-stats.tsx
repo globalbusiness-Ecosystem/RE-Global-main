@@ -24,13 +24,13 @@ export default function ReviewStats({ onUnauthorized }: { onUnauthorized: () => 
         <Stat label="تقييمات ظاهرة" value={o.count} />
         <Stat label="بدون رد" value={o.unanswered} />
       </div>
-      <p className="mb-2 text-xs text-gray-400">العقارات من الأقل تقييماً للأعلى (آخر 100 تقييم)</p>
+      <p className="mb-2 text-xs text-muted-foreground">العقارات من الأقل تقييماً للأعلى (آخر 100 تقييم)</p>
       <div className="space-y-1">
         {o.properties.map((p) => (
-          <div key={p.title} className="flex items-center justify-between gap-2 rounded-lg bg-[#141414] px-3 py-2 text-xs">
-            <span className="min-w-0 truncate text-gray-200">{p.title}</span>
+          <div key={p.title} className="flex items-center justify-between gap-2 rounded-lg bg-card px-3 py-2 text-xs">
+            <span className="min-w-0 truncate text-foreground">{p.title}</span>
             <span className="flex shrink-0 items-center gap-2">
-              <span className="text-gray-500">{p.count} تقييم</span>
+              <span className="text-muted-foreground">{p.count} تقييم</span>
               <Badge tone={p.avg < LOW_RATING ? 'red' : 'green'}>{p.avg.toFixed(1)} ★</Badge>
             </span>
           </div>

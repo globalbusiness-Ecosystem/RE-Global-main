@@ -30,10 +30,10 @@ export default function DisplaySettings({ onUnauthorized }: { onUnauthorized: ()
 
   return (
     <Card title="🧪 العقارات التجريبية">
-      <p className="mb-3 text-xs text-gray-400">دي العقارات النموذجية الجاهزة جوه التطبيق (مش من الأدمن). لما تجهز للإطلاق اخفيها عشان الزوار يشوفوا عقاراتك الحقيقية بس.</p>
-      <p className="mb-3 text-sm text-gray-100">الحالة: {show === null ? '...' : show ? '👁 ظاهرة للزوار' : '🙈 مخفية عن الزوار'}</p>
+      <p className="mb-3 text-xs text-muted-foreground">دي العقارات النموذجية الجاهزة جوه التطبيق (مش من الأدمن). لما تجهز للإطلاق اخفيها عشان الزوار يشوفوا عقاراتك الحقيقية بس.</p>
+      <p className="mb-3 text-sm text-foreground">الحالة: {show === null ? '...' : show ? '👁 ظاهرة للزوار' : '🙈 مخفية عن الزوار'}</p>
       <Btn onClick={toggle} disabled={busy || show === null}>{busy ? '...' : show ? '🙈 اخفيها' : '👁 اظهرها'}</Btn>
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

@@ -25,13 +25,13 @@ export default function ClientErrorsPanel({ onUnauthorized }: { onUnauthorized: 
   if (!rows) return <Empty>...جاري التحميل</Empty>;
   return (
     <Card title="🐞 أخطاء المستخدمين">
-      <p className="mb-2 text-[11px] text-gray-500">أي صفحة بتتعطل عند مستخدم بتتسجل هنا (من غير بيانات شخصية). أول مرة يظهر خطأ جديد بتوصلك رسالة على الإيميل.</p>
+      <p className="mb-2 text-[11px] text-muted-foreground">أي صفحة بتتعطل عند مستخدم بتتسجل هنا (من غير بيانات شخصية). أول مرة يظهر خطأ جديد بتوصلك رسالة على الإيميل.</p>
       {rows.length === 0 ? <Empty>مفيش أخطاء متسجلة. 👌</Empty> : rows.map((r) => (
-        <div key={r.id} className="border-b border-[#222] py-2 text-sm last:border-0">
-          <span className="text-white" dir="ltr">{r.message}</span>
-          <span className="mx-2 text-xs text-gray-500">{KIND[r.kind] ?? r.kind} · {r.count}×</span>
-          <span className="block text-xs text-gray-600" dir="ltr">{r.page} · {fmtDate(r.lastAt)}</span>
-          {r.stack && <pre className="mt-1 whitespace-pre-wrap text-[10px] text-gray-600" dir="ltr">{r.stack}</pre>}
+        <div key={r.id} className="border-b border-border py-2 text-sm last:border-0">
+          <span className="text-foreground" dir="ltr">{r.message}</span>
+          <span className="mx-2 text-xs text-muted-foreground">{KIND[r.kind] ?? r.kind} · {r.count}×</span>
+          <span className="block text-xs text-muted-foreground/70" dir="ltr">{r.page} · {fmtDate(r.lastAt)}</span>
+          {r.stack && <pre className="mt-1 whitespace-pre-wrap text-[10px] text-muted-foreground/70" dir="ltr">{r.stack}</pre>}
         </div>
       ))}
     </Card>

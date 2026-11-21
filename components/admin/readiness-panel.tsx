@@ -32,12 +32,12 @@ export default function ReadinessPanel({ onUnauthorized }: { onUnauthorized: () 
           if (rows.length === 0) return null;
           return (
             <div key={g}>
-              <p className="mb-1 text-xs font-semibold text-gray-400">{GROUP_LABELS[g]}</p>
+              <p className="mb-1 text-xs font-semibold text-muted-foreground">{GROUP_LABELS[g]}</p>
               <ul className="space-y-1">
                 {rows.map((c) => (
                   <li key={c.id} className="text-sm">
                     <span className={c.ok ? 'text-green-400' : c.blocking ? 'text-red-300' : 'text-yellow-300'}>{c.ok ? '✅' : c.blocking ? '⛔' : '⚠️'} {c.title}</span>
-                    {!c.ok && <span className="block pr-6 text-xs text-gray-400">{c.fix}</span>}
+                    {!c.ok && <span className="block pr-6 text-xs text-muted-foreground">{c.fix}</span>}
                   </li>
                 ))}
               </ul>
@@ -45,7 +45,7 @@ export default function ReadinessPanel({ onUnauthorized }: { onUnauthorized: () 
           );
         })}
       </div>
-      <p className="mt-3 text-xs text-gray-500">القايمة دي بتفحص الإعدادات والأرقام بس. مراجعة المحامي لسياسة الخصوصية والشروط، وترجمة اللغات، واختبار دفعة حقيقية، لازم تتعمل بإيدك قبل الإطلاق.</p>
+      <p className="mt-3 text-xs text-muted-foreground">القايمة دي بتفحص الإعدادات والأرقام بس. مراجعة المحامي لسياسة الخصوصية والشروط، وترجمة اللغات، واختبار دفعة حقيقية، لازم تتعمل بإيدك قبل الإطلاق.</p>
     </Card>
   );
 }

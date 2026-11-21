@@ -47,22 +47,22 @@ export default function PartnerReferralsPanel({ onUnauthorized }: { onUnauthoriz
         <Btn small disabled={busy || !q.trim()} onClick={() => search()}>بحث</Btn>
       </form>
       {error ? <p className="mt-2 text-xs text-red-400" role="alert">❌ {error}</p> : null}
-      {notice ? <p className="mt-2 text-xs text-gray-300" role="status">{notice}</p> : null}
+      {notice ? <p className="mt-2 text-xs text-foreground/80" role="status">{notice}</p> : null}
       {look && !look.found ? <div className="mt-3"><Empty>مفيش عميل بالاسم ده.</Empty></div> : null}
       {look?.found && (
-        <div className="mt-3 space-y-2 rounded-xl border border-[#2a2a2a] bg-[#101010] p-3 text-sm">
+        <div className="mt-3 space-y-2 rounded-xl border border-border bg-input p-3 text-sm">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-semibold text-white" dir="ltr">@{look.username}</span>
+            <span className="font-semibold text-foreground" dir="ltr">@{look.username}</span>
             {look.handle ? <Badge tone="blue">{look.handle}</Badge> : null}
             {look.referredBy ? <Badge tone="green">مدعو من @{look.referredBy}{look.linkedByAdmin ? ' (يدوي)' : ''}</Badge> : <Badge tone="red">مش مربوط بأي دعوة</Badge>}
           </div>
-          {look.referredAt ? <p className="text-xs text-gray-400">تاريخ الربط: {fmtDate(look.referredAt)}</p> : null}
-          <p className="text-xs text-gray-300">حجوزات مؤكدة: {look.confirmedBookings ?? 0} · عقود: {look.contracts?.length ?? 0}</p>
+          {look.referredAt ? <p className="text-xs text-muted-foreground">تاريخ الربط: {fmtDate(look.referredAt)}</p> : null}
+          <p className="text-xs text-foreground/80">حجوزات مؤكدة: {look.confirmedBookings ?? 0} · عقود: {look.contracts?.length ?? 0}</p>
           {(look.contracts ?? []).map((c) => (
-            <p key={c.id} className="text-xs text-gray-400"><span dir="ltr">{c.id}</span> · {c.type} · {c.amount} {c.currency} · {c.status} · {fmtDate(c.createdAt)}</p>
+            <p key={c.id} className="text-xs text-muted-foreground"><span dir="ltr">{c.id}</span> · {c.type} · {c.amount} {c.currency} · {c.status} · {fmtDate(c.createdAt)}</p>
           ))}
-          <p className="text-xs text-gray-300">عمولات اتكتبت من مشترياته: {look.commissions?.length ?? 0}</p>
-          {(look.commissions ?? []).map((c) => <p key={c.id} className="text-xs text-gray-400" dir="ltr">@{c.partner} · {c.amount} {c.currency} · {c.status}</p>)}
+          <p className="text-xs text-foreground/80">عمولات اتكتبت من مشترياته: {look.commissions?.length ?? 0}</p>
+          {(look.commissions ?? []).map((c) => <p key={c.id} className="text-xs text-muted-foreground" dir="ltr">@{c.partner} · {c.amount} {c.currency} · {c.status}</p>)}
           <div className="flex gap-2 pt-1">
             <input className={inputCls} dir="ltr" placeholder="الشريك (اسمه أو كوده)" aria-label="الشريك" value={partner} onChange={(e) => setPartner(e.target.value)} />
             <Btn small disabled={busy || !partner.trim()} onClick={() => link()}>اربطه</Btn>

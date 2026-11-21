@@ -55,36 +55,36 @@ export default function ReviewsPanel({ onUnauthorized }: { onUnauthorized: () =>
       <div className="mb-3 flex flex-wrap gap-2" role="tablist" aria-label="فلتر التقييمات">
         {REVIEW_FILTERS.map((f) => (
           <button key={f} type="button" role="tab" aria-selected={filter === f} onClick={() => setFilter(f)}
-            className={`rounded-full border px-3 py-1 text-xs ${filter === f ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-300' : 'border-[#2a2a2a] text-gray-400'}`}>
+            className={`rounded-full border px-3 py-1 text-xs ${filter === f ? 'border-yellow-500/60 bg-yellow-500/10 text-yellow-300' : 'border-border text-muted-foreground'}`}>
             {FILTER_LABEL[f]} ({countReviews(rows, f)})
           </button>
         ))}
       </div>
-      {shown.length === 0 && <p className="py-4 text-center text-xs text-gray-500">مفيش تقييمات في الفلتر ده</p>}
+      {shown.length === 0 && <p className="py-4 text-center text-xs text-muted-foreground">مفيش تقييمات في الفلتر ده</p>}
       <div className="space-y-2">
         {shown.map((r) => (
-          <div key={r.id} className={`rounded-xl border border-[#2a2a2a] bg-[#141414] p-3 text-xs text-gray-300 ${r.hidden ? 'opacity-60' : ''}`}>
+          <div key={r.id} className={`rounded-xl border border-border bg-card p-3 text-xs text-foreground/80 ${r.hidden ? 'opacity-60' : ''}`}>
             <div className="flex items-center justify-between gap-2">
-              <span className="min-w-0 truncate font-semibold text-white">{r.propertyTitle}</span>
+              <span className="min-w-0 truncate font-semibold text-foreground">{r.propertyTitle}</span>
               <span className="shrink-0 text-yellow-400">{'★'.repeat(r.rating)}{'☆'.repeat(5 - r.rating)}</span>
             </div>
             {r.comment && <p className="mt-1 whitespace-pre-line break-words">{r.comment}</p>}
             {r.reply && open !== r.id && (
-              <p className="mt-2 whitespace-pre-line break-words rounded-md border-s-2 border-yellow-500/60 bg-black/20 ps-2 py-1 text-gray-200">↩ {r.reply}</p>
+              <p className="mt-2 whitespace-pre-line break-words rounded-md border-s-2 border-yellow-500/60 bg-black/20 ps-2 py-1 text-foreground">↩ {r.reply}</p>
             )}
             {open === r.id && (
               <div className="mt-2 space-y-2">
                 <textarea value={draft} onChange={(e) => setDraft(e.target.value)} maxLength={REPLY_MAX} rows={3} placeholder="اكتب ردك العلني على التقييم" aria-label="اكتب ردك العلني على التقييم"
-                  className="w-full rounded-lg border border-[#2a2a2a] bg-[#0f0f0f] p-2 text-xs text-white outline-none focus:border-yellow-500/60" />
+                  className="w-full rounded-lg border border-border bg-sidebar p-2 text-xs text-foreground outline-none focus:border-yellow-500/60" />
                 <div className="flex flex-wrap items-center gap-2">
                   <Btn small onClick={() => saveReply(r, draft)} disabled={busy === r.id}>{draft.trim() ? 'انشر الرد' : 'احذف الرد'}</Btn>
                   <Btn small kind="ghost" onClick={() => setOpen('')}>إلغاء</Btn>
-                  <span className="text-[10px] text-gray-500">{draft.length}/{REPLY_MAX}</span>
+                  <span className="text-[10px] text-muted-foreground">{draft.length}/{REPLY_MAX}</span>
                 </div>
               </div>
             )}
             <div className="mt-2 flex items-center justify-between gap-2">
-              <span className="text-gray-500">{r.name} · {r.date}</span>
+              <span className="text-muted-foreground">{r.name} · {r.date}</span>
               <span className="flex items-center gap-2">
                 {r.reports > 0 && <Badge>🚩 {r.reports}</Badge>}
                 {r.hidden && <Badge>مخفي</Badge>}

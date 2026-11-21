@@ -33,20 +33,20 @@ export default function RewardsLeaderboard({ onUnauthorized }: { onUnauthorized:
         <Stat label="أكواد اتستخدمت" value={d.totals.redeemed} />
         <Stat label="إحالات مكتملة" value={d.totals.qualifiedReferrals} />
       </div>
-      <p className="mb-3 text-xs text-gray-400">
+      <p className="mb-3 text-xs text-muted-foreground">
         {Object.entries(d.totals.byTier).map(([t, n]) => `${TIER_AR[t]}: ${n}`).join(' · ')}
       </p>
       {d.truncated && <p className="mb-2 text-xs text-yellow-400">⚠️ البيانات كبيرة، الأرقام دي من أول 2000 سجل في كل جدول.</p>}
       {d.top.length === 0 && <Empty>لسه مفيش حد كسب نقاط.</Empty>}
       <div className="space-y-2">
         {d.top.map((m, i) => (
-          <div key={m.username} className="flex items-center justify-between gap-2 rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+          <div key={m.username} className="flex items-center justify-between gap-2 rounded-xl border border-border bg-card p-3">
             <div className="min-w-0">
-              <p className="truncate font-bold text-white">{i + 1}. @{m.username}</p>
-              <p className="text-xs text-gray-400">إقامات {m.stays} · شراء {m.purchases} · تقييمات {m.reviews} · إحالات {m.referrals}</p>
+              <p className="truncate font-bold text-foreground">{i + 1}. @{m.username}</p>
+              <p className="text-xs text-muted-foreground">إقامات {m.stays} · شراء {m.purchases} · تقييمات {m.reviews} · إحالات {m.referrals}</p>
             </div>
             <div className="shrink-0 text-end">
-              <p className="font-bold text-white">{m.points}</p>
+              <p className="font-bold text-foreground">{m.points}</p>
               <Badge tone={TIER_TONE[m.tier]}>{TIER_AR[m.tier]}</Badge>
             </div>
           </div>

@@ -53,12 +53,12 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
     <Card title={`💸 مستحقات سوق الحصص (${pending.length} معلّقة · ${Math.round(owed * 100) / 100} π)`} right={<Btn small onClick={exportCsv}>⬇️ CSV</Btn>}>
       <div className="space-y-2">
         {pendingFirst(rows).slice(0, 50).map((r) => (
-          <div key={r.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+          <div key={r.id} className="rounded-xl border border-border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 truncate font-bold text-white">@{r.username}</p>
+              <p className="min-w-0 truncate font-bold text-foreground">@{r.username}</p>
               <span className="shrink-0 font-bold" style={{ color: GOLD }}>{r.amount} {r.currency ?? 'π'}</span>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
               <Badge tone={r.kind === 'refund' ? 'red' : 'blue'}>{r.kind === 'refund' ? 'استرداد' : 'حصيلة بيع'}</Badge>
               <Badge tone={r.status === 'paid' ? 'green' : 'gold'}>{r.status === 'paid' ? 'اتحوّل' : 'معلّق'}</Badge>
               {r.currency ? <Badge tone="blue">بطاقة: رجّعها من لوحة شركة الدفع</Badge> : null}
@@ -66,7 +66,7 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
               {r.fee ? <span>· عمولة {r.fee} π</span> : null}
               <span className="truncate" dir="ltr">uid: {r.uid}</span>
             </div>
-            {r.status === 'paid' && r.note ? <p className="mt-1 text-xs text-gray-500" dir="auto">📝 {r.note}</p> : null}
+            {r.status === 'paid' && r.note ? <p className="mt-1 text-xs text-muted-foreground" dir="auto">📝 {r.note}</p> : null}
             {r.status === 'pending' && (
               <div className="mt-2 flex flex-wrap gap-2">
                 <Btn small onClick={() => navigator.clipboard?.writeText(`@${r.username} ${r.amount}`).catch(() => undefined)}>📋 نسخ الاسم والمبلغ</Btn>

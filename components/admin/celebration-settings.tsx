@@ -47,12 +47,12 @@ export default function CelebrationSettings({ onUnauthorized }: { onUnauthorized
     const s = c[k];
     const fu = c.founder;
     return (
-      <div className="mb-4 rounded-xl border border-[#2a2a2a] bg-[#0d0d0d] p-3">
-        <p className="mb-2 text-sm font-semibold text-[#d4af37]">{title}</p>
+      <div className="mb-4 rounded-xl border border-border bg-input p-3">
+        <p className="mb-2 text-sm font-semibold text-accent">{title}</p>
         <div className="grid gap-2 sm:grid-cols-2">
-          <label className="flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={s.enabled} onChange={(e) => setKind(k, { enabled: e.target.checked })} /> تشغيل الاحتفال</label>
-          <label className="flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={s.music} onChange={(e) => setKind(k, { music: e.target.checked })} /> موسيقى هادية</label>
-          {k === 'founder' && <label className="flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={fu.voice} onChange={(e) => setKind(k, { voice: e.target.checked })} /> صوت الترحيب</label>}
+          <label className="flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={s.enabled} onChange={(e) => setKind(k, { enabled: e.target.checked })} /> تشغيل الاحتفال</label>
+          <label className="flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={s.music} onChange={(e) => setKind(k, { music: e.target.checked })} /> موسيقى هادية</label>
+          {k === 'founder' && <label className="flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={fu.voice} onChange={(e) => setKind(k, { voice: e.target.checked })} /> صوت الترحيب</label>}
         </div>
         <div className="mt-2 grid gap-2 sm:grid-cols-2">
           <Field label={`مستوى الصوت: ${s.volume}%`}>
@@ -67,7 +67,7 @@ export default function CelebrationSettings({ onUnauthorized }: { onUnauthorized
         <Field label="موسيقى من عندك (اختياري، رابط https أو ارفع ملف). سيبه فاضي لموسيقى المنصة الهادية">
           <div className="flex flex-wrap items-center gap-2">
             <input className={inputCls + ' flex-1'} dir="ltr" placeholder="https://.../music.mp3" value={s.musicUrl ?? ''} onChange={(e) => setKind(k, { musicUrl: e.target.value })} />
-            <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-1.5 text-xs text-gray-100">⬆️ رفع<input type="file" accept="audio/*" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAudio((u) => setKind(k, { musicUrl: u }), f); e.target.value = ''; }} /></label>
+            <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 text-xs text-foreground">⬆️ رفع<input type="file" accept="audio/*" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAudio((u) => setKind(k, { musicUrl: u }), f); e.target.value = ''; }} /></label>
           </div>
         </Field>
         {k === 'founder' && (
@@ -83,7 +83,7 @@ export default function CelebrationSettings({ onUnauthorized }: { onUnauthorized
             <Field label="صوت ترحيب مسجّل بصوتك (اختياري، رابط https أو ارفع ملف). سيبه فاضي لصوت الجهاز التلقائي">
               <div className="flex flex-wrap items-center gap-2">
                 <input className={inputCls + ' flex-1'} dir="ltr" placeholder="https://.../welcome.mp3" value={fu.voiceUrl ?? ''} onChange={(e) => setKind(k, { voiceUrl: e.target.value })} />
-                <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-1.5 text-xs text-gray-100">⬆️ رفع<input type="file" accept="audio/*" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAudio((u) => setKind(k, { voiceUrl: u }), f); e.target.value = ''; }} /></label>
+                <label className="cursor-pointer rounded-lg border border-border px-3 py-1.5 text-xs text-foreground">⬆️ رفع<input type="file" accept="audio/*" className="hidden" disabled={busy} onChange={(e) => { const f = e.target.files?.[0]; if (f) void uploadAudio((u) => setKind(k, { voiceUrl: u }), f); e.target.value = ''; }} /></label>
               </div>
             </Field>
           </>
@@ -95,15 +95,15 @@ export default function CelebrationSettings({ onUnauthorized }: { onUnauthorized
 
   return (
     <Card title="🎉 الاحتفالات: توثيق الهوية والمؤسس">
-      <p className="mb-3 text-xs text-gray-400">لما حد يتوثق هويته بيظهرله احتفال بالورود والزينة مع موسيقى هادية. وللمؤسس احتفال أكبر مع صوت ترحيب. المتصفحات أوقات بتمنع الصوت لحد ما المستخدم يلمس الشاشة، فبيظهر زرار «اضغط لتشغيل الصوت» لو اتمنع. صوت الترحيب التلقائي بيستخدم صوت الجهاز، وبعض الأجهزة ما فيهاش صوت عربي، فالأضمن إنك ترفع تسجيل بصوتك.</p>
-      <label className="mb-3 flex items-center gap-2 text-sm text-gray-100"><input type="checkbox" checked={c.enabled} onChange={(e) => upd((x) => ({ ...x, enabled: e.target.checked }))} /> تشغيل كل الاحتفالات</label>
+      <p className="mb-3 text-xs text-muted-foreground">لما حد يتوثق هويته بيظهرله احتفال بالورود والزينة مع موسيقى هادية. وللمؤسس احتفال أكبر مع صوت ترحيب. المتصفحات أوقات بتمنع الصوت لحد ما المستخدم يلمس الشاشة، فبيظهر زرار «اضغط لتشغيل الصوت» لو اتمنع. صوت الترحيب التلقائي بيستخدم صوت الجهاز، وبعض الأجهزة ما فيهاش صوت عربي، فالأضمن إنك ترفع تسجيل بصوتك.</p>
+      <label className="mb-3 flex items-center gap-2 text-sm text-foreground"><input type="checkbox" checked={c.enabled} onChange={(e) => upd((x) => ({ ...x, enabled: e.target.checked }))} /> تشغيل كل الاحتفالات</label>
       {Kind({ k: 'user', title: '✅ احتفال المستخدم عند توثيق هويته' })}
       {Kind({ k: 'founder', title: '👑 احتفال المؤسس' })}
       <div className="flex flex-wrap gap-2">
         <Btn onClick={() => void save()} disabled={busy}>{busy ? '...' : '💾 حفظ'}</Btn>
         <Btn kind="ghost" onClick={() => setC(DEFAULT_CELEBRATION)} disabled={busy}>الإعدادات الافتراضية</Btn>
       </div>
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
       {preview && <CelebrationOverlay kind={preview} language="ar" level={preview === 'founder' ? 7 : 3} name="Elsayed" settings={c[preview]} greeting={preview === 'founder' ? greetingFor(c, 'ar') : undefined} onClose={() => setPreview(null)} />}
     </Card>
   );

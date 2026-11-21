@@ -67,7 +67,7 @@ export default function BrandingSettings({ onUnauthorized }: { onUnauthorized: (
 
   return (
     <Card title="🎨 لوجو المنصة">
-      <p className="mb-3 text-xs text-gray-400">ارفع لوجو جديد (JPG أو PNG أو WebP) وهيظهر في الهيدر وصفحات الدخول وفحص الهوية. لو شلته بيرجع اللوجو الأصلي. الأفضل صورة بخلفية واضحة والشعار في النص.</p>
+      <p className="mb-3 text-xs text-muted-foreground">ارفع لوجو جديد (JPG أو PNG أو WebP) وهيظهر في الهيدر وصفحات الدخول وفحص الهوية. لو شلته بيرجع اللوجو الأصلي. الأفضل صورة بخلفية واضحة والشعار في النص.</p>
       {draft ? (
         <>
           <div className="mb-4 flex flex-wrap items-center gap-6">
@@ -75,21 +75,21 @@ export default function BrandingSettings({ onUnauthorized }: { onUnauthorized: (
             <BrandLogo height={40} preview={draft} />
           </div>
           <div className="mb-3 flex flex-wrap items-center gap-2">
-            <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-2 text-sm text-gray-200 hover:bg-[#1f1f1f]">
+            <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
               {busy ? 'جاري الرفع...' : draft.logoUrl ? 'تغيير اللوجو' : 'رفع لوجو'}
               <input type="file" accept="image/jpeg,image/png,image/webp" aria-label="رفع لوجو المنصة" className="hidden" disabled={busy}
                 onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); e.target.value = ''; }} />
             </label>
             {draft.logoUrl && <Btn small kind="ghost" onClick={() => setDraft({ ...draft, logoUrl: null })}>رجوع للوجو الأصلي</Btn>}
           </div>
-          <label className="mb-4 flex items-center gap-2 text-sm text-gray-100">
+          <label className="mb-4 flex items-center gap-2 text-sm text-foreground">
             <input type="checkbox" checked={draft.animated} onChange={(e) => setDraft({ ...draft, animated: e.target.checked })} />
             لوجو متحرك (طفو خفيف + لمعة ذهبية + توهّج)
           </label>
           <Btn onClick={save} disabled={busy || !changed}>{busy ? '...' : '💾 حفظ'}</Btn>
         </>
-      ) : <p className="text-sm text-gray-400">...</p>}
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      ) : <p className="text-sm text-muted-foreground">...</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

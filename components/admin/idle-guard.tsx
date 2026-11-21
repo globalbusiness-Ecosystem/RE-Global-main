@@ -35,9 +35,9 @@ export default function IdleGuard({ onTimeout }: { onTimeout: () => void }) {
 
   if (state.phase !== 'warning') return null;
   return (
-    <div className="fixed inset-x-3 bottom-24 z-50 flex items-center justify-between gap-3 rounded-xl border border-[#d4af37] bg-[#141414] p-3 text-sm text-white shadow-lg md:bottom-6 md:left-auto md:right-6 md:max-w-sm" role="alert" dir="rtl">
+    <div className="fixed inset-x-3 bottom-24 z-50 flex items-center justify-between gap-3 rounded-xl border border-accent bg-card p-3 text-sm text-foreground shadow-lg md:bottom-6 md:left-auto md:right-6 md:max-w-sm" role="alert" dir="rtl">
       <span>هتخرج تلقائياً بعد {state.secondsLeft} ثانية لعدم النشاط.</span>
-      <button type="button" onClick={() => { last.current = Date.now(); tick(); }} className="rounded-lg bg-[#d4af37] px-3 py-1.5 font-semibold text-black">ابقَ متصل</button>
+      <button type="button" onClick={() => { last.current = Date.now(); tick(); }} className="rounded-lg bg-accent px-3 py-1.5 font-semibold text-black">ابقَ متصل</button>
     </div>
   );
 }

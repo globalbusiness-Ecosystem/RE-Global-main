@@ -51,12 +51,12 @@ export default function HoldingsPanel({ onUnauthorized }: { onUnauthorized: () =
       )}
       <div className="space-y-2">
         {data.holdings.slice(0, 30).map((h) => (
-          <div key={h.id} className="rounded-xl border border-[#2a2a2a] bg-[#141414] p-3">
+          <div key={h.id} className="rounded-xl border border-border bg-card p-3">
             <div className="flex items-start justify-between gap-2">
-              <p className="min-w-0 truncate font-bold text-white">{h.propertyTitle}</p>
-              <span className="shrink-0 text-xs text-gray-300">{h.amount} π</span>
+              <p className="min-w-0 truncate font-bold text-foreground">{h.propertyTitle}</p>
+              <span className="shrink-0 text-xs text-foreground/80">{h.amount} π</span>
             </div>
-            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-gray-400">
+            <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
               <Badge tone={h.status === 'confirmed' ? 'green' : h.status === 'review' ? 'red' : 'gray'}>{LABEL[h.status] ?? h.status}</Badge>
               <span>@{h.username}</span>
               <span>{h.shares} / {h.totalShares} حصة</span>

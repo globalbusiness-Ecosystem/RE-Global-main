@@ -35,17 +35,17 @@ export default function PartnerProgramSettings({ onUnauthorized }: { onUnauthori
     } catch (e) { fail(e); } finally { setBusy(false); }
   };
 
-  const inp = 'w-24 rounded-lg border border-[#3a3a3a] bg-[#161616] px-2 py-1.5 text-sm text-gray-100';
+  const inp = 'w-24 rounded-lg border border-border bg-card px-2 py-1.5 text-sm text-foreground';
   return (
     <Card title="📐 نسب عمولة الشركاء">
-      <p className="mb-3 text-xs text-gray-400">نسبة مئوية من قيمة كل عملية شراء عقار مكتملة لعميل جديد دخل بكود الشريك، بعد اعتماد الشريك (من 0 لحد {RATE_MAX}%). الصفر معناه مفيش عمولة. الدفع بيتم منك خارج المنصة وبتعلّمه «مدفوعة» من تبويب العمولات.</p>
-      <label className="mb-4 flex items-center gap-2 text-sm text-gray-100">
+      <p className="mb-3 text-xs text-muted-foreground">نسبة مئوية من قيمة كل عملية شراء عقار مكتملة لعميل جديد دخل بكود الشريك، بعد اعتماد الشريك (من 0 لحد {RATE_MAX}%). الصفر معناه مفيش عمولة. الدفع بيتم منك خارج المنصة وبتعلّمه «مدفوعة» من تبويب العمولات.</p>
+      <label className="mb-4 flex items-center gap-2 text-sm text-foreground">
         <input type="checkbox" checked={enabled} onChange={(e) => setEnabled(e.target.checked)} aria-label="تشغيل برنامج العمولات" />
         برنامج العمولات شغّال (لو وقفته الدعوات بتفضل بتتعدّ لكن مفيش عمولات جديدة)
       </label>
       <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
         {PARTNER_ROLES.map((k) => (
-          <label key={k} className="flex items-center justify-between gap-3 rounded-xl border border-[#2a2a2a] bg-[#101010] p-3 text-sm text-gray-200">
+          <label key={k} className="flex items-center justify-between gap-3 rounded-xl border border-border bg-input p-3 text-sm text-foreground">
             {ROLE_AR[k]}
             <span className="flex items-center gap-1"><input className={inp} dir="ltr" type="number" inputMode="decimal" min={0} max={RATE_MAX} step={0.25} aria-label={`نسبة عمولة ${ROLE_AR[k]}`} value={rates[k]} onChange={(e) => setRates({ ...rates, [k]: e.target.value })} />%</span>
           </label>
@@ -54,7 +54,7 @@ export default function PartnerProgramSettings({ onUnauthorized }: { onUnauthori
       {bad && <p className="mb-2 text-xs text-red-400">كل نسبة لازم تكون رقم من 0 لحد {RATE_MAX}.</p>}
       <div className="flex items-center gap-3">
         <Btn onClick={save} disabled={busy || bad || !changed}>{busy ? 'جارٍ الحفظ…' : 'حفظ'}</Btn>
-        {msg && <span className="text-xs text-gray-300" role="status">{msg}</span>}
+        {msg && <span className="text-xs text-foreground/80" role="status">{msg}</span>}
       </div>
     </Card>
   );

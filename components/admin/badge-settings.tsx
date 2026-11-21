@@ -33,7 +33,7 @@ export default function BadgeSettings({ onUnauthorized }: { onUnauthorized: () =
 
   return (
     <Card title="🎖️ الشارات: 7 مستويات بـ7 ألوان">
-      <p className="mb-3 text-xs text-gray-400">لون الشارة جنب الاسم بيتحدد من نقاط المكافآت (إقامات، مشتريات، تقييمات، أصدقاء). حدد هنا النقاط اللي كل مستوى بيبدأ منها. المستوى الأول دايماً من 0 وكل مستوى لازم يكون أعلى من اللي قبله.</p>
+      <p className="mb-3 text-xs text-muted-foreground">لون الشارة جنب الاسم بيتحدد من نقاط المكافآت (إقامات، مشتريات، تقييمات، أصدقاء). حدد هنا النقاط اللي كل مستوى بيبدأ منها. المستوى الأول دايماً من 0 وكل مستوى لازم يكون أعلى من اللي قبله.</p>
       <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
         {BADGE_LEVELS.map((l, i) => (
           <Field key={l} label={`${l} · ${badgeLevelName(l, 'ar')}`}>
@@ -49,7 +49,7 @@ export default function BadgeSettings({ onUnauthorized }: { onUnauthorized: () =
         <Btn onClick={() => void save()} disabled={busy || !parsed || !v}>{busy ? '...' : '💾 حفظ'}</Btn>
         <Btn kind="ghost" onClick={() => setV(BADGE_THRESHOLDS.map(String))} disabled={busy || !v}>الأرقام الافتراضية</Btn>
       </div>
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

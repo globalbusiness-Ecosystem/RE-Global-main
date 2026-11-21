@@ -39,14 +39,14 @@ export default function AdminPasskeysPanel({ onUnauthorized }: { onUnauthorized:
 
   return (
     <Card title="🔑 بصمة الأدمن (Face ID / بصمة الإصبع)">
-      <p className="mb-3 text-xs text-gray-400">بتدخل بالـ PIN + بصمتك بدل كود الـ 6 أرقام. البصمة نفسها مبتسيبش الجهاز. لو فقدت الجهاز، شيله من هنا أو من Firestore (collection ‏passkeys).</p>
+      <p className="mb-3 text-xs text-muted-foreground">بتدخل بالـ PIN + بصمتك بدل كود الـ 6 أرقام. البصمة نفسها مبتسيبش الجهاز. لو فقدت الجهاز، شيله من هنا أو من Firestore (collection ‏passkeys).</p>
       {items === null ? null : items.length === 0 ? <Empty>مفيش أجهزة مضافة لسه.</Empty> : (
         <ul className="mb-3 space-y-2">
           {items.map((p) => (
-            <li key={p.id} className="flex items-center justify-between gap-2 rounded-lg border border-[#2a2a2a] bg-[#101010] p-3">
+            <li key={p.id} className="flex items-center justify-between gap-2 rounded-lg border border-border bg-input p-3">
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold text-white" dir="auto">{p.label}</p>
-                <p className="text-xs text-gray-400">اتضاف {fmtDate(p.createdAt ?? '')} · آخر استخدام {p.lastUsedAt ? fmtDate(p.lastUsedAt) : 'لسه'}</p>
+                <p className="truncate text-sm font-semibold text-foreground" dir="auto">{p.label}</p>
+                <p className="text-xs text-muted-foreground">اتضاف {fmtDate(p.createdAt ?? '')} · آخر استخدام {p.lastUsedAt ? fmtDate(p.lastUsedAt) : 'لسه'}</p>
               </div>
               <Btn small kind="danger" onClick={() => remove(p)}>إزالة</Btn>
             </li>

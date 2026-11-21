@@ -121,7 +121,7 @@ function ItemForm({ kind, initial, onSaved, onCancel, fail }: { kind: Kind; init
               ) : f.type === 'image' ? (
                 <div className="flex items-center gap-3">
                   {form[f.k] && <img src={form[f.k]} alt="" className="h-20 w-32 rounded-lg object-cover" />}
-                  <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-2 text-sm text-gray-200 hover:bg-[#1f1f1f]">
+                  <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-sm text-foreground hover:bg-muted">
                     {busy ? 'جاري الرفع...' : form[f.k] ? 'تغيير الصورة' : 'رفع صورة'}
                     <input type="file" accept="image/jpeg,image/png,image/webp" className="hidden" disabled={busy}
                       onChange={(e) => { const file = e.target.files?.[0]; if (file) upload(f.k, file); e.target.value = ''; }} />
@@ -134,7 +134,7 @@ function ItemForm({ kind, initial, onSaved, onCancel, fail }: { kind: Kind; init
             </Field>
           </div>
         ))}
-        <label className="flex items-center gap-2 text-sm text-gray-200 sm:col-span-2">
+        <label className="flex items-center gap-2 text-sm text-foreground sm:col-span-2">
           <input type="checkbox" checked={form.active !== false} onChange={(e) => set('active', e.target.checked)} /> ظاهر للزوار
         </label>
       </div>
@@ -175,16 +175,16 @@ function Manager({ kind, onUnauthorized }: { kind: Kind; onUnauthorized: () => v
   return (
     <div className="space-y-3">
       <Card title={cfg.title} right={<Btn small onClick={() => setEditing(null)}>➕ جديد</Btn>}>
-        <p className="text-xs text-gray-400">{cfg.hint}</p>
+        <p className="text-xs text-muted-foreground">{cfg.hint}</p>
       </Card>
       {error && <Empty>❌ {error}</Empty>}
       {!items && !error && <Empty>...جاري التحميل</Empty>}
       {items && items.length === 0 && <Empty>{cfg.empty}</Empty>}
       {items?.map((it) => (
-        <div key={it.id} className={`flex gap-3 rounded-2xl border border-[#2a2a2a] bg-[#141414] p-3 ${it.active === false ? 'opacity-60' : ''}`}>
-          {it[cfg.imgKey] ? <img src={it[cfg.imgKey]} alt="" className="h-20 w-28 shrink-0 rounded-lg object-cover" /> : <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg bg-[#1f1f1f] text-2xl">🖼️</div>}
+        <div key={it.id} className={`flex gap-3 rounded-2xl border border-border bg-card p-3 ${it.active === false ? 'opacity-60' : ''}`}>
+          {it[cfg.imgKey] ? <img src={it[cfg.imgKey]} alt="" className="h-20 w-28 shrink-0 rounded-lg object-cover" /> : <div className="flex h-20 w-28 shrink-0 items-center justify-center rounded-lg bg-muted text-2xl">🖼️</div>}
           <div className="min-w-0 flex-1">
-            <p className="truncate font-bold text-white">{it[cfg.nameKey]}</p>
+            <p className="truncate font-bold text-foreground">{it[cfg.nameKey]}</p>
             <div className="mt-1 flex flex-wrap gap-1">
               <Badge tone="gold">ترتيب {it.order ?? 0}</Badge>
               {it.active === false ? <Badge tone="red">🙈 مخفي</Badge> : <Badge tone="green">ظاهر</Badge>}

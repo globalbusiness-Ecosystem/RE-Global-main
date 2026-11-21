@@ -52,7 +52,7 @@ export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: Su
         role="tablist"
         aria-orientation="horizontal"
         onKeyDown={onKey}
-        className="sticky top-[52px] z-[9] -mx-1 md:top-0 flex gap-1.5 overflow-x-auto bg-[#0a0a0a]/95 px-1 py-2 backdrop-blur"
+        className="sticky top-[52px] z-[9] -mx-1 md:top-0 flex gap-1.5 overflow-x-auto bg-background/95 px-1 py-2 backdrop-blur"
       >
         {tabs.map((t) => {
           const on = t.id === current.id;
@@ -68,11 +68,11 @@ export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: Su
               tabIndex={on ? 0 : -1}
               onClick={() => open(t.id)}
               className="inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl border px-3 py-2 text-sm font-bold transition"
-              style={on ? { background: GOLD, color: '#111', borderColor: GOLD } : { background: '#141414', color: '#d1d5db', borderColor: '#2a2a2a' }}
+              style={on ? { background: GOLD, color: 'var(--accent-foreground)', borderColor: GOLD } : { background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
             >
               <span aria-hidden>{t.icon}</span>
               {t.label}
-              {!!t.badge && <span className="rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-white">{t.badge}</span>}
+              {!!t.badge && <span className="rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-foreground">{t.badge}</span>}
             </button>
           );
         })}

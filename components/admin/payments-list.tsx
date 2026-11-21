@@ -53,18 +53,18 @@ export default function PaymentsList({ onUnauthorized }: { onUnauthorized: () =>
       </Card>
       {filtered.length === 0 && <Empty>مفيش مدفوعات مطابقة.</Empty>}
       {filtered.slice(0, shown).map((c) => (
-        <div key={c.id} className="rounded-2xl border border-[#2a2a2a] bg-[#141414] p-3">
+        <div key={c.id} className="rounded-2xl border border-border bg-card p-3">
           <div className="flex items-start justify-between gap-2">
-            <p className="min-w-0 truncate font-bold text-white">{c.propertyTitle}</p>
+            <p className="min-w-0 truncate font-bold text-foreground">{c.propertyTitle}</p>
             <span className="shrink-0 font-bold" style={{ color: GOLD }}>{c.amount} {c.currency}</span>
           </div>
-          <p className="text-xs text-gray-400">@{c.buyerUsername} · {fmtDate(c.createdAt)}</p>
+          <p className="text-xs text-muted-foreground">@{c.buyerUsername} · {fmtDate(c.createdAt)}</p>
           <div className="mt-1 flex flex-wrap items-center gap-1">
             <Badge tone="gold">{TYPE_LABELS[c.type] || c.type}</Badge>
             <Badge tone={c.status === 'completed' ? 'green' : 'gray'}>{c.status}</Badge>
             <a href={'/verify/' + c.id} target="_blank" rel="noreferrer" className="text-xs text-blue-400">فتح العقد ↗</a>
           </div>
-          {c.txid && <p className="mt-1 truncate text-[10px] text-gray-600" dir="ltr">tx: {c.txid}</p>}
+          {c.txid && <p className="mt-1 truncate text-[10px] text-muted-foreground/70" dir="ltr">tx: {c.txid}</p>}
         </div>
       ))}
       {filtered.length > shown && <div className="text-center"><Btn kind="ghost" onClick={() => setShown(shown + 30)}>عرض المزيد ({filtered.length - shown})</Btn></div>}

@@ -47,16 +47,16 @@ export default function AboutSettingsPanel({ onUnauthorized }: { onUnauthorized:
 
   return (
     <Card title="ℹ️ صفحة «نبذة عنا»: الغلاف وروابط التواصل">
-      <p className="mb-3 text-xs text-gray-400">الصفحة بتظهر في القائمة (☰ ← مساعدة ← نبذة عنا). الصورة بتتحط كخلفية خفيفة في أعلى الصفحة، وروابط التواصل بتظهر لو كتبتها. نصوص الصفحة تعدّلها من تحت.</p>
+      <p className="mb-3 text-xs text-muted-foreground">الصفحة بتظهر في القائمة (☰ ← مساعدة ← نبذة عنا). الصورة بتتحط كخلفية خفيفة في أعلى الصفحة، وروابط التواصل بتظهر لو كتبتها. نصوص الصفحة تعدّلها من تحت.</p>
       {draft ? (
         <>
           <div className="mb-4 flex items-center gap-4">
-            <div className="flex h-20 w-32 items-center justify-center overflow-hidden rounded-lg border border-[#3a3a3a] bg-[#101010]">
+            <div className="flex h-20 w-32 items-center justify-center overflow-hidden rounded-lg border border-border bg-input">
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              {draft.coverUrl ? <img src={draft.coverUrl} alt="" className="h-full w-full object-cover" /> : <span className="text-[11px] text-gray-500">من غير غلاف</span>}
+              {draft.coverUrl ? <img src={draft.coverUrl} alt="" className="h-full w-full object-cover" /> : <span className="text-[11px] text-muted-foreground">من غير غلاف</span>}
             </div>
             <div className="flex flex-col gap-2">
-              <label className="cursor-pointer rounded-lg border border-[#3a3a3a] px-3 py-2 text-center text-sm text-gray-200 hover:bg-[#1f1f1f]">
+              <label className="cursor-pointer rounded-lg border border-border px-3 py-2 text-center text-sm text-foreground hover:bg-muted">
                 {draft.coverUrl ? 'تغيير الغلاف' : 'اختيار غلاف'}
                 <input type="file" accept="image/png,image/jpeg,image/webp" aria-label="اختيار صورة الغلاف" className="hidden" disabled={busy}
                   onChange={(e) => { const f = e.target.files?.[0]; if (f) void upload(f); e.target.value = ''; }} />
@@ -71,8 +71,8 @@ export default function AboutSettingsPanel({ onUnauthorized }: { onUnauthorized:
           </div>
           <Btn onClick={save} disabled={busy || !changed}>{busy ? '...' : '💾 حفظ'}</Btn>
         </>
-      ) : <p className="text-sm text-gray-400">...</p>}
-      {msg && <p className="mt-2 text-xs text-gray-200">{msg}</p>}
+      ) : <p className="text-sm text-muted-foreground">...</p>}
+      {msg && <p className="mt-2 text-xs text-foreground">{msg}</p>}
     </Card>
   );
 }

@@ -88,11 +88,11 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
       {items && filtered.length === 0 && <Empty>{items.length === 0 ? 'لسه مفيش عقارات. اضغط "عقار جديد" لإضافة أول عقار.' : 'مفيش نتائج مطابقة.'}</Empty>}
 
       {filtered.slice(0, shown).map((p) => (
-        <div key={p.id} className={`flex gap-3 rounded-2xl border border-[#2a2a2a] bg-[#141414] p-3 ${p.hidden ? 'opacity-60' : ''}`}>
-          {p.image ? <img src={p.image} alt="" className="h-20 w-24 shrink-0 rounded-lg object-cover" /> : <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-[#1f1f1f] text-2xl">🏠</div>}
+        <div key={p.id} className={`flex gap-3 rounded-2xl border border-border bg-card p-3 ${p.hidden ? 'opacity-60' : ''}`}>
+          {p.image ? <img src={p.image} alt="" className="h-20 w-24 shrink-0 rounded-lg object-cover" /> : <div className="flex h-20 w-24 shrink-0 items-center justify-center rounded-lg bg-muted text-2xl">🏠</div>}
           <div className="min-w-0 flex-1">
-            <p className="truncate font-bold text-white">{p.title}</p>
-            <p className="truncate text-xs text-gray-400">{p.location} · <span style={{ color: GOLD }}>{p.price} {p.currency}</span></p>
+            <p className="truncate font-bold text-foreground">{p.title}</p>
+            <p className="truncate text-xs text-muted-foreground">{p.location} · <span style={{ color: GOLD }}>{p.price} {p.currency}</span></p>
             <div className="mt-1 flex flex-wrap gap-1">
               <Badge tone="gold">{TYPE_LABELS[p.type] || p.type}</Badge>
               <Badge tone={p.status === 'sold' ? 'red' : 'green'}>{STATUS_LABELS[p.status] || p.status}</Badge>

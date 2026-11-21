@@ -24,7 +24,7 @@ export default function UserPasskeyReset({ onUnauthorized }: { onUnauthorized: (
 
   return (
     <Card title="🔓 إعادة ضبط بصمة مستخدم (ضاع جهازه)">
-      <p className="mb-3 text-xs text-gray-400">لو مستخدم فعّل قفل البصمة وفقد جهازه، حط الـ uid بتاعه (حساب Pi أو web_…) هنا. بيمسح بصماته وإعداد القفل، وبيتسجّل في سجل الأدمن.</p>
+      <p className="mb-3 text-xs text-muted-foreground">لو مستخدم فعّل قفل البصمة وفقد جهازه، حط الـ uid بتاعه (حساب Pi أو web_…) هنا. بيمسح بصماته وإعداد القفل، وبيتسجّل في سجل الأدمن.</p>
       <div className="flex flex-wrap gap-2">
         <input aria-label="uid المستخدم" dir="ltr" placeholder="uid" maxLength={140} value={uid} onChange={(e) => setUid(e.target.value)} className={`${inputCls} min-w-0 flex-1`} />
         <Btn kind="danger" disabled={busy || !uid.trim()} onClick={reset}>{busy ? 'جاري…' : 'مسح البصمات'}</Btn>
