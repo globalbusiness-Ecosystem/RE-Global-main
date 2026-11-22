@@ -2,7 +2,7 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
-import { listAdmins, createAdmin, suspendAdmin, resumeAdmin, setAdminRole, resetAdminPin, deleteAdmin } from '@/lib/admin-accounts';
+import { listAdmins, createAdmin, suspendAdmin, resumeAdmin, setAdminRole, resetAdminPin, resetAdminTotp, deleteAdmin } from '@/lib/admin-accounts';
 import { activityReport } from '@/lib/admin-report-store';
 import { cleanUsername } from '@/lib/admin-pin';
 
@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, id: r.id, pin: r.pin }, { headers: H });
 }
 
-// { id, action: 'suspend' | 'resume' | 'role' | 'resetPin', reason?, role? }
+// { id, action: 'suspend' | 'resume' | 'role' | 'resetPin' | 'resetTotp', reason?, role? }
 export async function PATCH(req: NextRequest) {
   if (!(await isAdminRequest(req))) return unauthorized();
   const b = (await req.json().catch(() => null)) as Record<string, unknown> | null;
@@ -41,6 +41,7 @@ export async function PATCH(req: NextRequest) {
     case 'suspend': ok = await suspendAdmin(id, typeof b.reason === 'string' ? b.reason : ''); break;
     case 'resume': ok = await resumeAdmin(id); break;
     case 'role': ok = await setAdminRole(id, b.role); break;
+    case 'resetTotp': ok = await resetAdminTotp(id); break;
     case 'resetPin': pin = await resetAdminPin(id); ok = !!pin; break;
     default: return bad();
   }
