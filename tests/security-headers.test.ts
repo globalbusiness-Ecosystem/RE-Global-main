@@ -19,6 +19,8 @@ describe('security headers', () => {
     expect(csp).toContain("object-src 'none'");
     expect(csp).toContain("base-uri 'self'");
     expect(csp).toContain('frame-ancestors');
+    expect(csp).toContain("form-action 'self'");
+    expect(header(all, 'X-XSS-Protection')).toBeUndefined();
   });
 
   it('keeps the Pi browser allowed to embed the app, and nobody else', async () => {
@@ -43,5 +45,7 @@ describe('report-only content security policy', () => {
     expect(ro).toContain('report-uri /api/csp-report');
     expect(ro).toContain('https://sdk.minepi.com');
     expect(header(all, 'Content-Security-Policy')).not.toContain('script-src');
+    // eval is not allowed in the trial policy: reports will show if any dependency really needs it.
+    expect(ro).not.toContain('unsafe-eval');
   });
 });

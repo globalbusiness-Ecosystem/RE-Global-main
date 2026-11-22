@@ -54,11 +54,7 @@ const nextConfig = {
             // Allows Pi's sandbox/browser to embed the app; blocks everyone else.
             key: 'Content-Security-Policy',
             value:
-              "object-src 'none'; base-uri 'self'; frame-ancestors 'self' https://sandbox.minepi.com https://*.minepi.com https://*.pinet.com",
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
+              "object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'self' https://sandbox.minepi.com https://*.minepi.com https://*.pinet.com",
           },
           // Always HTTPS, even for first-time visitors on a downgraded link.
           { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains' },
@@ -71,7 +67,7 @@ const nextConfig = {
           {
             key: 'Content-Security-Policy-Report-Only',
             value:
-              "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://sdk.minepi.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:; worker-src 'self' blob:; report-uri /api/csp-report",
+              "default-src 'self'; script-src 'self' 'unsafe-inline' https://sdk.minepi.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; img-src 'self' data: blob: https:; font-src 'self' data: https://fonts.gstatic.com; connect-src 'self' https: wss:; media-src 'self' blob: https:; frame-src 'self' https:; worker-src 'self' blob:; report-uri /api/csp-report",
           },
         ],
       },

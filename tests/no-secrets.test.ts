@@ -15,7 +15,8 @@ const PATTERNS: Record<string, RegExp> = {
   'Resend API key': /\bre_[A-Za-z0-9]{24,}\b/,
   'secret assigned in code': /\b(?:admin_pin|admin_session_secret|cron_secret|pi_api_key|resend_api_key|kyc_enc_key)\b\s*[:=]\s*['"](?!test|dummy|example|your|xxx|changeme)[^'"\s]{8,}['"]/i,
 };
-const SKIP = /(pnpm-lock\.yaml|\.(png|jpe?g|webp|ico|svg|woff2?|mp3|mp4|pdf)$)/i;
+// This file holds the sample strings that prove the patterns work, so it must not scan itself.
+const SKIP = /(pnpm-lock\.yaml|^tests\/no-secrets\.test\.ts$|\.(png|jpe?g|webp|ico|svg|woff2?|mp3|mp4|pdf)$)/i;
 
 describe('no secrets in the repository', () => {
   const files = execFileSync('git', ['ls-files'], { encoding: 'utf8' }).split('\n').filter((f) => f && !SKIP.test(f));
