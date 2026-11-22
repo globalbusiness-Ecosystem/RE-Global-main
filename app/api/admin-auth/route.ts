@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { matchTotp } from '@/lib/totp';
 import { ADMIN_COOKIE_NAME, isAdminSessionConfigured } from '@/lib/admin-session';
-import { isAdminRequest } from '@/lib/admin-guard';
+import { isAdminRequest, adminWho } from '@/lib/admin-guard';
 import { clientKey, safeEqual, registerFailure, loginGate, completeAdminLogin, getDb } from '@/lib/admin-login-guard';
 import { adminHasPasskeys } from '@/lib/admin-passkeys';
 
@@ -59,7 +59,8 @@ export async function POST(req: NextRequest) {
   return completeAdminLogin(req, key, totpSecret ? 'totp' : 'pin');
 }
 export async function GET(req: NextRequest) {
-  return NextResponse.json({ ok: await isAdminRequest(req), twoFactor: !!process.env.ADMIN_TOTP_SECRET?.trim(), passkey: await adminHasPasskeys() });
+  const who = await adminWho(req);
+  return NextResponse.json({ ok: !!who, role: who?.role ?? null, name: who?.name ?? null, twoFactor: !!process.env.ADMIN_TOTP_SECRET?.trim(), passkey: await adminHasPasskeys() });
 }
 export async function DELETE() {
   const res = NextResponse.json({ ok: true });

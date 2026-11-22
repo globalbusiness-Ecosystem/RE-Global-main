@@ -32,10 +32,12 @@ async function hmacKey(secret: string, usage: 'sign' | 'verify'): Promise<Crypto
 export function isAdminSessionConfigured(): boolean {
   return getSecret() !== null;
 }
-export async function createAdminToken(): Promise<string | null> {
+/** Who a session belongs to. A session without it (the PIN login, and every session issued before staff accounts existed) is the owner. */
+export type AdminIdentity = { sub: string; role: string; name?: string };
+export async function createAdminToken(who?: AdminIdentity): Promise<string | null> {
   const secret = getSecret();
   if (!secret) return null;
-  const payload = toB64Url(enc.encode(JSON.stringify({ v: 1, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS })));
+  const payload = toB64Url(enc.encode(JSON.stringify({ v: 1, iat: Math.floor(Date.now() / 1000), exp: Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS, ...(who ? { sub: who.sub, role: who.role, name: who.name } : {}) })));
   const key = await hmacKey(secret, 'sign');
   const sig = new Uint8Array(await crypto.subtle.sign('HMAC', key, enc.encode(payload)));
   return `${payload}.${toB64Url(sig)}`;
@@ -62,6 +64,13 @@ export function adminTokenIssuedAt(token: string | undefined | null): number {
     const data = JSON.parse(new TextDecoder().decode(fromB64Url(String(token).split('.')[0])));
     return typeof data?.iat === 'number' ? data.iat : 0;
   } catch { return 0; }
+}
+/** The identity inside a token (call only after verifyAdminToken). No identity = the owner. */
+export function adminTokenIdentity(token: string | undefined | null): AdminIdentity {
+  try {
+    const d = JSON.parse(new TextDecoder().decode(fromB64Url(String(token).split('.')[0])));
+    return typeof d?.sub === 'string' && typeof d?.role === 'string' ? { sub: d.sub, role: d.role, name: typeof d.name === 'string' ? d.name : undefined } : { sub: 'owner', role: 'owner' };
+  } catch { return { sub: 'owner', role: 'owner' }; }
 }
 export async function isAdminRequest(req: { cookies: { get(name: string): { value: string } | undefined } }): Promise<boolean> {
   // Signature and expiry only (middleware runs on the edge). API routes use isAdminRequest from lib/admin-guard.

@@ -7,6 +7,8 @@ import PaymentsTab from '@/components/admin/payments-tab';
 import UsersTab from '@/components/admin/users-tab';
 import ContentTab from '@/components/admin/content-tab';
 import IdleGuard from '@/components/admin/idle-guard';
+import AdminsPanel from '@/components/admin/admins-panel';
+import { TAB_ACCESS, isRole, type AdminRole } from '@/lib/admin-roles';
 import { passkeysAvailable, answerChallenge } from '@/lib/passkey-client';
 
 const TABS = [
@@ -15,6 +17,7 @@ const TABS = [
   { id: 'payments', icon: '💳', label: 'المدفوعات' },
   { id: 'users', icon: '👥', label: 'المستخدمون' },
   { id: 'content', icon: '🧩', label: 'المحتوى' },
+  { id: 'admins', icon: '🛡️', label: 'الأدمن' },
 ] as const;
 type TabId = (typeof TABS)[number]['id'];
 
@@ -29,11 +32,15 @@ export default function AdminDashboard() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
   const [tab, setTab] = useState<TabId>('dashboard');
+  const [role, setRole] = useState<AdminRole>('owner');
+  const [staffMode, setStaffMode] = useState(false);
+  const [username, setUsername] = useState('');
+  const tabs = TABS.filter((t) => TAB_ACCESS[role].includes(t.id));
 
   useEffect(() => {
     fetch('/api/admin-auth')
       .then((res) => res.json())
-      .then((data) => { setAuthenticated(!!data.ok); setTwoFactor(!!data.twoFactor); setHasPasskey(!!data.passkey); })
+      .then((data) => { setAuthenticated(!!data.ok); if (isRole(data.role)) setRole(data.role); setTwoFactor(!!data.twoFactor); setHasPasskey(!!data.passkey); })
       .catch(() => setAuthenticated(false))
       .finally(() => setCheckingSession(false));
     passkeysAvailable().then(setDeviceCanPasskey);
@@ -53,12 +60,17 @@ export default function AdminDashboard() {
   const handleLogin = async () => {
     setLoginError('');
     try {
-      const res = await fetch('/api/admin-auth', {
+      const res = await fetch(staffMode ? '/api/admin-auth/staff' : '/api/admin-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ pin, code }),
+        body: JSON.stringify(staffMode ? { username, pin } : { pin, code }),
       });
-      if (res.ok) { setAuthenticated(true); setPin(''); setCode(''); }
+      if (res.ok) {
+        const who = await fetch('/api/admin-auth', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
+        setRole(isRole(who?.role) ? who.role : 'owner');
+        setTab('dashboard');
+        setAuthenticated(true); setPin(''); setCode(''); setUsername('');
+      }
       else setLoginError(res.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : twoFactor ? 'PIN أو الكود غلط!' : 'PIN غلط!');
     } catch {
       setLoginError('حصل خطأ في الاتصال، حاول تاني.');
@@ -95,15 +107,20 @@ export default function AdminDashboard() {
       <div dir="rtl" className="dark flex min-h-screen items-center justify-center bg-background p-4">
         <form onSubmit={(e) => { e.preventDefault(); handleLogin(); }} className="w-full max-w-sm rounded-2xl border border-accent bg-card p-8 text-center">
           <h1 className="mb-5 text-xl font-bold text-accent">🔐 لوحة تحكم RE Global</h1>
+          {staffMode && (
+            <input type="text" autoComplete="username" autoCapitalize="none" placeholder="اسم الدخول" aria-label="اسم الدخول" value={username} onChange={(e) => setUsername(e.target.value)}
+              className="mb-3 w-full rounded-lg border border-accent bg-background px-3 py-3 text-center text-foreground focus:outline-none" />
+          )}
           <input type="password" autoComplete="current-password" placeholder="PIN" aria-label="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
             className="mb-3 w-full rounded-lg border border-accent bg-background px-3 py-3 text-center text-foreground focus:outline-none" />
-          {twoFactor && (
+          {twoFactor && !staffMode && (
             <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="كود التحقق (6 أرقام)" aria-label="كود التحقق (6 أرقام)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               className="mb-3 w-full rounded-lg border border-accent bg-background px-3 py-3 text-center tracking-widest text-foreground focus:outline-none" />
           )}
           {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}
           <button type="submit" className="w-full rounded-lg bg-accent py-3 font-bold text-black">دخول</button>
-          {hasPasskey && deviceCanPasskey && (
+          <button type="button" onClick={() => { setStaffMode((v) => !v); setLoginError(''); }} className="mt-3 w-full text-xs text-muted-foreground underline">{staffMode ? 'دخول المالك' : 'دخول موظف'}</button>
+          {hasPasskey && deviceCanPasskey && !staffMode && (
             <button type="button" disabled={passkeyBusy} onClick={handlePasskeyLogin} className="mt-3 w-full rounded-lg border border-accent py-3 font-bold text-accent disabled:opacity-60">{passkeyBusy ? 'في انتظار جهازك…' : '🔑 الدخول بالبصمة (مع الـ PIN)'}</button>
           )}
         </form>
@@ -118,7 +135,7 @@ export default function AdminDashboard() {
       <aside className="hidden w-56 shrink-0 border-l border-border bg-sidebar p-4 md:flex md:flex-col">
         <h1 className="mb-6 text-lg font-bold text-accent">🏠 RE Global</h1>
         <nav className="flex flex-1 flex-col gap-1">
-          {TABS.map((t) => (
+          {tabs.map((t) => (
             <button key={t.id} onClick={() => go(t.id)}
               className={`rounded-lg px-3 py-2.5 text-right text-sm font-semibold transition ${tab === t.id ? 'bg-accent text-black' : 'text-foreground/80 hover:bg-muted'}`}>
               {t.icon} {t.label}
@@ -142,12 +159,13 @@ export default function AdminDashboard() {
           {tab === 'payments' && <PaymentsTab onUnauthorized={expired} />}
           {tab === 'users' && <UsersTab onUnauthorized={expired} />}
           {tab === 'content' && <ContentTab onUnauthorized={expired} />}
+          {tab === 'admins' && role === 'owner' && <AdminsPanel onUnauthorized={expired} />}
         </main>
       </div>
 
       {/* Bottom tab bar (mobile) */}
-      <nav className="fixed inset-x-0 bottom-0 z-20 grid grid-cols-6 border-t border-border bg-sidebar md:hidden">
-        {TABS.map((t) => (
+      <nav style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
+        {tabs.map((t) => (
           <button key={t.id} onClick={() => go(t.id)} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-accent' : 'text-muted-foreground'}`}>
             <span className="block text-lg leading-none">{t.icon}</span>{t.label}
           </button>

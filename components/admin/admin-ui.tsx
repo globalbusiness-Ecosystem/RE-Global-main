@@ -13,7 +13,12 @@ export async function adminApi<T = any>(url: string, init?: RequestInit): Promis
     headers: init?.body && !(init.body instanceof FormData) ? { 'Content-Type': 'application/json', ...init.headers } : init?.headers,
   });
   const data = await res.json().catch(() => ({}));
-  if (res.status === 401) throw new UnauthorizedError('Unauthorized');
+  if (res.status === 401) {
+    // A staff account without the right for this area also gets 401 from the routes. Only a really dead session logs out.
+    const alive = await fetch('/api/admin-auth', { cache: 'no-store' }).then((r) => r.json()).then((j) => !!j?.ok).catch(() => false);
+    if (alive) throw new Error('مش مسموحلك بالقسم ده (صلاحيات حسابك)');
+    throw new UnauthorizedError('Unauthorized');
+  }
   if (!res.ok || data?.ok === false) throw new Error(data?.error || 'حصل خطأ، حاول تاني');
   return data as T;
 }

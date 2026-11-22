@@ -5,7 +5,7 @@ import { NextResponse } from 'next/server';
 import { logAdmin } from '@/lib/admin-audit';
 import { alertAdmin, adminAlertContext } from '@/lib/admin-alert';
 import { spendLoginAttempt } from '@/lib/admin-login-budget';
-import { ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken } from '@/lib/admin-session';
+import { ADMIN_COOKIE_NAME, ADMIN_SESSION_TTL_SECONDS, createAdminToken, type AdminIdentity } from '@/lib/admin-session';
 
 // What every way of signing in to the admin panel shares: the lock after repeated failures, the global attempt budget,
 // and the final step that logs the sign-in, alerts the owner and sets the session cookie.
@@ -83,12 +83,12 @@ export async function loginGate(req: NextRequest, key: string): Promise<NextResp
 }
 
 /** The sign-in succeeded: forget the failures, log it, alert the owner and answer with the session cookie. `method` says which second step was used. */
-export async function completeAdminLogin(req: NextRequest, key: string, method: 'pin' | 'totp' | 'passkey'): Promise<NextResponse> {
+export async function completeAdminLogin(req: NextRequest, key: string, method: 'pin' | 'totp' | 'passkey', who?: AdminIdentity): Promise<NextResponse> {
   await clearFailures(key);
-  await logAdmin('admin.login', { twoFactor: method !== 'pin', method });
+  await logAdmin('admin.login', { twoFactor: method !== 'pin', method, actor: who?.sub ?? 'owner', role: who?.role ?? 'owner' });
   const label = method === 'passkey' ? 'بصمة' : method === 'totp' ? 'كود التحقق' : 'مقفول';
-  await alertAdmin('login', 'تسجيل دخول جديد للأدمن', { ...adminAlertContext(req), 'التحقق بخطوتين': label });
-  const token = await createAdminToken();
+  await alertAdmin(who ? `login-${who.sub}` : 'login', who ? `دخول الأدمن ${who.name ?? who.sub} (${who.role})` : 'تسجيل دخول جديد للأدمن', { ...adminAlertContext(req), 'التحقق بخطوتين': label });
+  const token = await createAdminToken(who);
   if (!token) return NextResponse.json({ ok: false, error: 'Server not configured' }, { status: 500 });
   const res = NextResponse.json({ ok: true });
   res.cookies.set(ADMIN_COOKIE_NAME, token, {

@@ -9,6 +9,8 @@ import { sendEmail, emailConfigured } from '@/lib/send-email';
 import { siteUrl } from '@/lib/site-url';
 import { sendGuestReminders } from '@/lib/guest-reminders-server';
 import { syncCardContracts } from '@/lib/chain-sync';
+import { activityReport } from '@/lib/admin-report-store';
+import { buildAdminReportHtml } from '@/lib/admin-report';
 
 export const dynamic = 'force-dynamic';
 
@@ -33,6 +35,13 @@ export async function GET(req: NextRequest) {
   }
   const to = digestRecipient();
   if (!to || !emailConfigured()) return NextResponse.json({ ok: true, sent: false, reason: 'no-recipient' }, { headers: { 'Cache-Control': 'no-store' } });
+  // Each staff admin's activity of the last day goes to the owner (nothing is sent when no staff account did anything). Never blocks the summary.
+  try {
+    const rep = buildAdminReportHtml((await activityReport(24)).filter((s) => s.actor !== 'owner'), 24, `${siteUrl()}/admin`);
+    if (rep) await sendEmail({ to, subject: rep.subject, html: rep.html });
+  } catch (err) {
+    console.error('[cron/admin-report] error:', err);
+  }
   try {
     const items = await gatherAttention();
     let errors = 0;
