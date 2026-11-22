@@ -29,6 +29,9 @@ export type AttentionInput = {
   /** Paid card orders of web buyers that have no signed contract (the buyer sees nothing in Contracts). */
   cardOrdersWithoutContract?: number;
   kycPending?: number;
+  /** Compliance register: incidents or privacy requests past their deadline / within a day or so of it. */
+  complianceLate?: number;
+  complianceSoon?: number;
   /** Hours the oldest identity request has been waiting (people are blocked from paying until it is decided). */
   kycOldestHours?: number;
   /** The test payment provider is switched on (CARD_SANDBOX_SECRET is set). */
@@ -65,6 +68,8 @@ export function buildAttention(i: AttentionInput): AttentionItem[] {
     const late = h >= KYC_LATE_HOURS;
     out.push({ id: 'kyc-pending', level: late ? 'bad' : 'warn', text: `${i.kycPending} طلب تحقق هوية مستني مراجعتك${h >= 1 ? ` (أقدم واحد مستني من ${h >= 48 ? `${Math.floor(h / 24)} يوم` : `${h} ساعة`})` : ''}، ومستخدمو الويب مش هيقدروا يدفعوا قبل الموافقة${late ? ': اتأخر، راجعه النهاردة' : ''}: المدفوعات ← التحقق من الهوية.`, tab: 'payments' });
   }
+  if ((i.complianceLate ?? 0) > 0) out.push({ id: 'compliance-late', level: 'bad', text: `${i.complianceLate} بند في سجل الامتثال عدّى موعده (إخطار حادثة أمنية أو رد على طلب بيانات): المدفوعات ← سجل الامتثال.`, tab: 'payments' });
+  else if ((i.complianceSoon ?? 0) > 0) out.push({ id: 'compliance-soon', level: 'warn', text: `${i.complianceSoon} بند في سجل الامتثال موعده قرّب: المدفوعات ← سجل الامتثال.`, tab: 'payments' });
   const m = i.shareMismatches ?? [];
   if (m.length > 0) out.push({ id: 'share-mismatch', level: 'warn', text: `${m.length} عقار عدّاد الحصص المباعة فيه مش مطابق لمشتريات المستثمرين (${m.slice(0, 3).join('، ')}${m.length > 3 ? '...' : ''}): راجعهم قبل ما تعدّل في الحصص.`, tab: 'payments' });
   if ((i.openReports ?? 0) > 0) out.push({ id: 'reports', level: 'warn', text: `${i.openReports} بلاغ على عقارات مستني مراجعتك (من صفحة العقار العامة): افتح لوحة التحكم ← بلاغات العقارات.`, tab: 'dashboard' });

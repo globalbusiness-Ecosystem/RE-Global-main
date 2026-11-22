@@ -3,6 +3,7 @@
 import PayoutsPanel from './payouts-panel';
 import CardOrdersPanel from './card-orders-panel';
 import KycPanel from './kyc-panel';
+import CompliancePanel from './compliance-panel';
 import MarketFeeSettings from './market-fee-settings';
 import MarketAdminPanel from './market-admin-panel';
 import BookingsPanel from './bookings-panel';
@@ -31,6 +32,7 @@ export default function PaymentsTab({ onUnauthorized }: { onUnauthorized: () => 
         { id: 'payments', icon: '💳', label: 'المدفوعات', render: () => <PaymentsList onUnauthorized={u} /> },
         { id: 'card-orders', icon: '🧾', label: 'طلبات البطاقة', render: () => <CardOrdersPanel onUnauthorized={u} /> },
         { id: 'kyc', icon: '🪪', label: 'التحقق من الهوية', render: () => <KycPanel onUnauthorized={u} /> },
+        { id: 'compliance', icon: '🛡️', label: 'سجل الامتثال', render: () => <CompliancePanel onUnauthorized={u} /> },
         { id: 'partners', icon: '🤝', label: 'الشركاء', render: () => (<><PartnerApplicationsPanel onUnauthorized={u} /><div className="mt-4"><PartnerProjectsPanel onUnauthorized={u} /></div><div className="mt-4"><PartnerProgramSettings onUnauthorized={u} /></div><div className="mt-4"><PartnerCommissionsPanel onUnauthorized={u} /></div><div className="mt-4"><PartnerReferralsPanel onUnauthorized={u} /></div></>) },
         { id: 'payouts', icon: '💸', label: 'التحويلات والاستردادات', render: () => <PayoutsPanel onUnauthorized={u} /> },
         {

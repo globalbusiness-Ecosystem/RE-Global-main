@@ -20,7 +20,7 @@ export type AdminGroup = 'session' | 'overview' | 'kyc' | 'kycAdmin' | 'finance'
 const prefixes = (list: string[]) => (p: string) => list.some((x) => p === `/api/admin/${x}` || p.startsWith(`/api/admin/${x}/`));
 const isOverview = prefixes(['stats', 'attention', 'readiness']);
 const isKyc = prefixes(['kyc']);
-const isKycAdmin = prefixes(['kyc-policy', 'kyc-watchlist', 'kyc-retention', 'kyc-vault', 'kyc-four-eyes']);
+const isKycAdmin = prefixes(['kyc-policy', 'kyc-watchlist', 'kyc-retention', 'kyc-vault', 'kyc-four-eyes', 'compliance-register']);
 const isFinance = prefixes(['payouts', 'card-orders', 'partner-commissions', 'market', 'market-settings', 'holdings', 'bookings', 'arrivals', 'occupancy', 'blocks', 'cancellation', 'pricing', 'partner-program', 'partner-projects', 'partner-referrals', 'partners', 'contracts', 'upload-contract']);
 const isUsers = prefixes(['users', 'user-detail']);
 const isContent = prefixes(['content', 'texts', 'properties', 'announcements', 'about', 'branding', 'app-icon', 'badges', 'celebration', 'display-settings', 'home-features', 'lock-image', 'translate', 'geocode', 'audio-upload-url', 'video-upload-url', 'upload-image', 'legal', 'reviews', 'listing-reports', 'rewards', 'founder']);
