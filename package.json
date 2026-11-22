@@ -11,11 +11,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "0.110.0",
+    "@anthropic-ai/sdk": "1.12.0",
     "@google/generative-ai": "0.24.1",
     "@radix-ui/react-slot": "1.5.0",
-    "@simplewebauthn/browser": "13.3.0",
-    "@simplewebauthn/server": "13.3.3",
+    "@simplewebauthn/browser": "14.0.0",
+    "@simplewebauthn/server": "14.1.0",
     "@stellar/stellar-sdk": "^16.2.0",
     "ai": "6.0.142",
     "class-variance-authority": "^0.7.1",
@@ -36,7 +36,7 @@
     "resend": "^6.39.0",
     "server-only": "^0.0.1",
     "sonner": "^2.0.8",
-    "tailwind-merge": "^2.5.5",
+    "tailwind-merge": "^3.7.1",
     "zod": "4.6.7"
   },
   "devDependencies": {

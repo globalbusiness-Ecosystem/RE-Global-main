@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { Timestamp } from 'firebase-admin/firestore';
 import {
   generateRegistrationOptions, verifyRegistrationResponse, generateAuthenticationOptions, verifyAuthenticationResponse,
-  type AuthenticationResponseJSON, type RegistrationResponseJSON, type AuthenticatorTransportFuture,
+  type AuthenticationResponseJSON, type RegistrationResponseJSON, type AuthenticatorTransport,
 } from '@simplewebauthn/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { CHALLENGE_TTL_MS, MAX_PASSKEYS, RP_NAME, cleanLabel, isCredentialId, matchOrigin, rpIdOf, type PasskeyPurpose } from '@/lib/passkeys';
@@ -128,7 +128,7 @@ export async function finishAuthentication(purpose: Exclude<PasskeyPurpose, 'reg
   try {
     v = await verifyAuthenticationResponse({
       response, expectedChallenge: challenge, expectedOrigin: o, expectedRPID: rpIdOf(o), requireUserVerification: true,
-      credential: { id, publicKey: Buffer.from(String(d.publicKey), 'base64url'), counter: Number(d.counter) || 0, transports: (d.transports ?? []) as AuthenticatorTransportFuture[] },
+      credential: { id, publicKey: Buffer.from(String(d.publicKey), 'base64url'), counter: Number(d.counter) || 0, transports: (d.transports ?? []) as AuthenticatorTransport[] },
     });
   } catch { return { ok: false, status: 400, error: 'verify' }; }
   if (!v.verified) return { ok: false, status: 400, error: 'verify' };
