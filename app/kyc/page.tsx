@@ -152,7 +152,6 @@ export default function KycPage() {
                 </label>
                 <label className="text-sm">{kl('idNumber', language)}
                   <input className={`${input} mt-1`} dir="ltr" value={idNumber} onChange={(e) => setIdNumber(e.target.value)} maxLength={40} autoComplete="off" autoCapitalize="characters" />
-                  <span className="mt-1 block text-xs text-muted-foreground">{kl('idNumberHint', language)}</span>
                 </label>
               </div>
               {!me.hosted && (
@@ -167,7 +166,6 @@ export default function KycPage() {
                   <div className="rounded-xl border border-accent/30 bg-muted/50 p-3">
                     <p className="mb-2 text-xs font-semibold text-accent">{kl('guideTitle', language)}</p>
                     <ul className="grid grid-cols-1 gap-1.5 sm:grid-cols-2">{tips}</ul>
-                    <p className="mt-2 text-xs text-muted-foreground">{kl('photoHint', language)}</p>
                   </div>
                   {requiredKinds(docType).map((k) => {
                     const art: SlotArt = k === 'selfie' ? 'selfie' : k === 'back' ? 'back' : docType === 'passport' ? 'passport' : 'front';
