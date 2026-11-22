@@ -1,7 +1,7 @@
 'use client';
 import type { NavLanguage } from '@/lib/nav-i18n';
 
-import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, Video, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
+import { Building2, Home, Hotel, TrendingUp, Globe, FileText, MapPin, Users, Zap, BarChart3, Bot, Glasses, ScrollText, ShieldCheck, Languages, Coins, ScanLine, ArrowLeftRight, Link2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import HeroSlider from '@/components/hero-slider';
@@ -19,8 +19,9 @@ import { pickText } from '@/lib/home-features';
 import type { HomeFeatureCard } from '@/lib/home-features';
 import AIAdvisorChat from '@/components/ai-advisor-chat';
 import AIAdvisorVoiceChat from '@/components/ai-advisor-voice-chat';
-import { VRPropertyTourViewer } from '@/components/vr-property-tour-viewer';
-import { DEMO_PROPERTY } from '@/lib/vr-tour-config';
+import { TourPicker } from '@/components/tour-picker';
+import { useTours } from '@/lib/use-tours';
+import { showToursEntry } from '@/lib/tours';
 import { HOME_CATEGORIES, HOME_FEATURES, HOME_STATS, HOME_UI, tt } from '@/lib/home-i18n';
 
 interface HomePageProps {
@@ -42,8 +43,7 @@ const categories = [
   { id: 'map', titleEn: 'Map', titleAr: 'الخريطة', icon: MapPin },
   { id: 'partners', titleEn: 'Partners', titleAr: 'الشركاء', icon: Users },
   { id: 'analytics', titleEn: 'Analytics', titleAr: 'إحصائيات', icon: BarChart3 },
-  { id: 'vr-tour', titleEn: 'VR Tour', titleAr: 'جولة واقع معزز', icon: Glasses },
-  { id: 'ai-tour', titleEn: 'AI Tour', titleAr: 'جولة ذكية', icon: Video },
+  { id: 'virtual-tour', titleEn: '360° Tours', titleAr: 'جولات 360°', icon: Glasses },
   { id: 'ai-advisor', titleEn: 'Aladdin', titleAr: 'علاء الدين', icon: Bot },
   { id: 'contracts', titleEn: 'Contracts', titleAr: 'العقود', icon: ScrollText },
   { id: 'inspections', titleEn: 'Inspect', titleAr: 'الفحص', icon: ScanLine },
@@ -59,6 +59,7 @@ export default function HomePage({
   const [showAdvisor, setShowAdvisor] = useState(false);
   const [useVoiceAdvisor, setUseVoiceAdvisor] = useState(false);
   const [showVRTour, setShowVRTour] = useState(false);
+  const tours = useTours();
   const homeFeatures = useHomeFeatures();
   const announcements = useAnnouncements();
   // null until the browser has been asked, so a card someone hid never flashes back
@@ -120,13 +121,13 @@ export default function HomePage({
           {tt(HOME_UI.exploreCategories, language)}
         </h3>
         <div className="grid grid-cols-3 gap-5 mb-12">
-          {categories.map((cat) => {
+          {categories.filter((c) => c.id !== 'virtual-tour' || showToursEntry(tours ? { enabled: tours.enabled, demo: tours.demo, count: tours.items.length } : null)).map((cat) => {
             const Icon = cat.icon;
             return (
               <button
                 key={cat.id}
                 onClick={() => {
-                  if (cat.id === 'vr-tour' || cat.id === 'ai-tour') {
+                  if (cat.id === 'virtual-tour') {
                     setShowVRTour(true);
                   } else if (cat.id === 'ai-advisor') {
                     setShowAdvisor(true);
@@ -200,13 +201,7 @@ export default function HomePage({
 
       </div>
 
-      {showVRTour && (
-        <VRPropertyTourViewer
-          property={DEMO_PROPERTY}
-          onClose={() => setShowVRTour(false)}
-          onBuyClick={() => alert('Integrate with Pi payment SDK')}
-        />
-      )}
+      {showVRTour && tours && <TourPicker tours={tours} language={language} onClose={() => setShowVRTour(false)} />}
 
       {showAdvisor && (
         useVoiceAdvisor ? (

@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, inputCls, TYPE_LABELS, STATUS_LABELS, GOLD } from './admin-ui';
 import PropertyForm from './property-form';
 import DisplaySettings from './display-settings';
+import ToursSettings from './tours-settings';
 import BrandingSettings from './branding-settings';
 import AppIconSettings from './app-icon-settings';
 import LockImageSettings from './lock-image-settings';
@@ -117,7 +118,7 @@ export default function PropertiesTab({ onUnauthorized }: { onUnauthorized: () =
             </>
           ),
         },
-        { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => <DisplaySettings onUnauthorized={onUnauthorized} /> },
+        { id: 'display', icon: '⚙️', label: 'إعدادات العرض', render: () => (<><DisplaySettings onUnauthorized={onUnauthorized} /><div className="mt-4"><ToursSettings onUnauthorized={onUnauthorized} /></div></>) },
         { id: 'announcements', icon: '📣', label: 'الإعلانات والفيديو', render: () => <AnnouncementsSettings onUnauthorized={onUnauthorized} /> },
         { id: 'homefeatures', icon: '✨', label: 'شريط الرئيسية', render: () => <HomeFeaturesSettings onUnauthorized={onUnauthorized} /> },
         { id: 'branding', icon: '🎨', label: 'اللوجو', render: () => (<><BrandingSettings onUnauthorized={onUnauthorized} /><div className="mt-4"><AppIconSettings onUnauthorized={onUnauthorized} /></div><div className="mt-4"><LockImageSettings onUnauthorized={onUnauthorized} /></div></>) },

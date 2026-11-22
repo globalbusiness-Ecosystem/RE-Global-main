@@ -23,7 +23,7 @@ const isKyc = prefixes(['kyc']);
 const isKycAdmin = prefixes(['kyc-policy', 'kyc-watchlist', 'kyc-retention', 'kyc-vault', 'kyc-four-eyes', 'compliance-register']);
 const isFinance = prefixes(['payouts', 'card-orders', 'partner-commissions', 'market', 'market-settings', 'holdings', 'bookings', 'arrivals', 'occupancy', 'blocks', 'cancellation', 'pricing', 'partner-program', 'partner-projects', 'partner-referrals', 'partners', 'contracts', 'upload-contract']);
 const isUsers = prefixes(['users', 'user-detail']);
-const isContent = prefixes(['content', 'texts', 'properties', 'announcements', 'about', 'branding', 'app-icon', 'badges', 'celebration', 'display-settings', 'home-features', 'lock-image', 'translate', 'geocode', 'audio-upload-url', 'video-upload-url', 'upload-image', 'legal', 'reviews', 'listing-reports', 'rewards', 'founder']);
+const isContent = prefixes(['content', 'texts', 'properties', 'announcements', 'about', 'branding', 'app-icon', 'badges', 'celebration', 'display-settings', 'tours', 'home-features', 'lock-image', 'translate', 'geocode', 'audio-upload-url', 'video-upload-url', 'upload-image', 'legal', 'reviews', 'listing-reports', 'rewards', 'founder']);
 
 /** The area a request belongs to. Anything not listed (backup, security, sessions, admins, logs…) is owner-only. */
 export function groupOf(pathname: string): AdminGroup {
