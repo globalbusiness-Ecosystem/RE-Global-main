@@ -1,5 +1,5 @@
 import 'server-only';
-import { Timestamp } from 'firebase-admin/firestore';
+import { FieldValue, Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { requiredKinds } from './kyc-files';
 import { parseNameMode, type NameMode } from './contract-identity';
@@ -79,7 +79,7 @@ export async function decideKyc(uid: string, to: 'approved' | 'rejected', reason
     if (!s.exists) return 404 as const;
     const cur = s.data()?.status as KycStatus;
     if (!canMoveKyc(cur, to)) return 409 as const;
-    tx.update(ref, { status: to, decidedAt: Timestamp.now(), rejectReason: to === 'rejected' ? reason : null });
+    tx.update(ref, { status: to, decidedAt: Timestamp.now(), rejectReason: to === 'rejected' ? reason : null, proposal: FieldValue.delete() });
     return 200 as const;
   });
 }
@@ -90,6 +90,6 @@ export async function listKyc(status?: KycStatus): Promise<Record<string, unknow
   const iso = (v: any) => (v?.toDate ? v.toDate().toISOString() : null);
   return snap.docs
     .filter((d) => d.data().status !== 'none') // a deleted (purged) person is only an empty stub
-    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, hold: x.hold === true, consentAt: iso(x.consent?.at), consentVersion: x.consent?.version ?? null, screenHits: Array.isArray(x.screen?.hits) ? x.screen.hits : [], reviewReasons: Array.isArray(x.review?.reasons) ? x.review.reasons : [], files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
+    .map((d) => { const x = d.data(); return { uid: d.id, status: x.status, legalName: x.legalName ?? '', country: x.country ?? '', phone: decryptField(x.phone), docType: x.docType ?? '', idNumber: decryptField(x.idNumber), dupOf: x.dupOf ?? null, hold: x.hold === true, consentAt: iso(x.consent?.at), consentVersion: x.consent?.version ?? null, screenHits: Array.isArray(x.screen?.hits) ? x.screen.hits : [], reviewReasons: Array.isArray(x.review?.reasons) ? x.review.reasons : [], proposal: x.proposal ? { decision: x.proposal.decision, reason: x.proposal.reason ?? '', byName: x.proposal.byName ?? x.proposal.by ?? '', by: x.proposal.by ?? '', at: iso(x.proposal.at) } : null, files: Array.isArray(x.files) ? x.files.filter((f: unknown) => typeof f === 'string') : [], submittedAt: iso(x.submittedAt), decidedAt: iso(x.decidedAt), rejectReason: x.rejectReason ?? '' }; })
     .sort((a, b) => String(b.submittedAt).localeCompare(String(a.submittedAt)));
 }

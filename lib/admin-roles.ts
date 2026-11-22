@@ -9,7 +9,7 @@ export const STAFF_ROLES: AdminRole[] = ['compliance', 'reviewer', 'finance', 'c
 export const ROLE_LABELS: Record<AdminRole, string> = {
   owner: 'المالك (كل الصلاحيات)',
   compliance: 'مسؤول امتثال (KYC والاحتفاظ)',
-  reviewer: 'مراجع (يشوف طلبات KYC فقط)',
+  reviewer: 'مراجع (يشوف طلبات KYC ويوصي بقرار)',
   finance: 'مالية (الدفعات والعمولات والمستخدمين)',
   content: 'محتوى (العقارات والنصوص)',
   viewer: 'مشاهد (قراءة فقط)',
@@ -20,7 +20,7 @@ export type AdminGroup = 'session' | 'overview' | 'kyc' | 'kycAdmin' | 'finance'
 const prefixes = (list: string[]) => (p: string) => list.some((x) => p === `/api/admin/${x}` || p.startsWith(`/api/admin/${x}/`));
 const isOverview = prefixes(['stats', 'attention', 'readiness']);
 const isKyc = prefixes(['kyc']);
-const isKycAdmin = prefixes(['kyc-policy', 'kyc-watchlist', 'kyc-retention', 'kyc-vault']);
+const isKycAdmin = prefixes(['kyc-policy', 'kyc-watchlist', 'kyc-retention', 'kyc-vault', 'kyc-four-eyes']);
 const isFinance = prefixes(['payouts', 'card-orders', 'partner-commissions', 'market', 'market-settings', 'holdings', 'bookings', 'arrivals', 'occupancy', 'blocks', 'cancellation', 'pricing', 'partner-program', 'partner-projects', 'partner-referrals', 'partners', 'contracts', 'upload-contract']);
 const isUsers = prefixes(['users', 'user-detail']);
 const isContent = prefixes(['content', 'texts', 'properties', 'announcements', 'about', 'branding', 'app-icon', 'badges', 'celebration', 'display-settings', 'home-features', 'lock-image', 'translate', 'geocode', 'audio-upload-url', 'video-upload-url', 'upload-image', 'legal', 'reviews', 'listing-reports', 'rewards', 'founder']);
@@ -44,7 +44,7 @@ type Grant = { read: AdminGroup[]; write: AdminGroup[] };
 const GRANTS: Record<AdminRole, Grant> = {
   owner: { read: [], write: [] }, // handled as "everything"
   compliance: { read: ['overview', 'kyc', 'kycAdmin', 'users'], write: ['kyc', 'kycAdmin'] },
-  reviewer: { read: ['overview', 'kyc'], write: [] },
+  reviewer: { read: ['overview', 'kyc'], write: ['kyc'] }, // a reviewer's decision is only ever a recommendation (see kyc-four-eyes)
   finance: { read: ['overview', 'finance', 'users'], write: ['finance'] },
   content: { read: ['overview', 'content'], write: ['content'] },
   viewer: { read: ['overview', 'content'], write: [] },

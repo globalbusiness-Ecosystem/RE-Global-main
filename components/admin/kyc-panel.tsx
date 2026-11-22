@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, fmtDate } from './admin-ui';
 
-type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; dupOf?: string | null; hold?: boolean; consentAt?: string | null; screenHits?: string[]; reviewReasons?: string[]; files?: string[] };
+type Req = { uid: string; status: string; legalName: string; country: string; phone: string; submittedAt: string | null; decidedAt: string | null; rejectReason: string; docType?: string; idNumber?: string; dupOf?: string | null; hold?: boolean; consentAt?: string | null; screenHits?: string[]; reviewReasons?: string[]; files?: string[]; proposal?: { decision: 'approved' | 'rejected'; reason: string; byName: string; by: string; at: string | null } | null };
 
 const STATUS: Record<string, { label: string; tone: 'green' | 'gold' | 'red' | 'blue' }> = {
   pending: { label: 'في الانتظار', tone: 'gold' },
@@ -19,6 +19,12 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   const [notice, setNotice] = useState('');
   const [requireAll, setRequireAll] = useState<boolean | null>(null);
   const [ret, setRet] = useState<{ years: number; autoDelete: boolean; due: number } | null>(null);
+  const [fourEyes, setFourEyes] = useState<boolean | null>(null);
+  useEffect(() => { adminApi<{ enabled: boolean }>('/api/admin/kyc-four-eyes').then((d) => setFourEyes(d.enabled)).catch(() => {}); }, []);
+  const toggleFourEyes = async (enabled: boolean) => {
+    try { const d = await adminApi<{ enabled: boolean }>('/api/admin/kyc-four-eyes', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) }); setFourEyes(d.enabled); }
+    catch (e) { if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message); }
+  };
 
   const load = useCallback(() => {
     adminApi<{ requests: Req[] }>('/api/admin/kyc')
@@ -81,7 +87,8 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
     } else if (!window.confirm('وافق بس بعد ما تراجع الاسم والدولة وتفحص قوائم العقوبات (AML). متأكد؟')) return;
     setBusy(uid);
     try {
-      const res = await adminApi<{ mailed?: boolean }>('/api/admin/kyc', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, decision, reason }) });
+      const res = await adminApi<{ mailed?: boolean; proposed?: boolean }>('/api/admin/kyc', { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ uid, decision, reason }) });
+      if (res?.proposed) { setNotice('🟡 اتسجّلت توصيتك. القرار النهائي لازم يعتمده شخص تاني.'); load(); return; }
       setNotice(res?.mailed ? '✉️ اتبعت إيميل بالقرار للمستخدم.' : 'القرار اتسجّل. مفيش إيميل اتبعت (إيميل المستخدم مش متأكد أو الإيميل مش متضبط).');
       load();
     } catch (e) {
@@ -98,6 +105,12 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
   return (
     <Card title={`🪪 التحقق من الهوية (${pending.length} في الانتظار)`}>
       {notice ? <p className="mb-2 text-xs text-foreground/80" role="status">{notice}</p> : null}
+      {fourEyes !== null ? (
+        <label className="mb-3 flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm text-foreground">
+          <input type="checkbox" checked={fourEyes} onChange={(e) => toggleFourEyes(e.target.checked)} />
+          "٤ عيون": قرار الهوية بيحتاج توصية من شخص واعتماد من شخص تاني (المالك يقرر مباشرة دايمًا، والمراجع يوصي بس).
+        </label>
+      ) : null}
       <label className="mb-3 flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm text-foreground">
         <input type="checkbox" checked={requireAll === true} disabled={requireAll === null} onChange={toggleAll} />
         إلزام توثيق الهوية لكل المستخدمين قبل الدفع (Pi كمان). حسابات الويب ملزمة دايمًا.
@@ -150,6 +163,7 @@ export default function KycPanel({ onUnauthorized }: { onUnauthorized: () => voi
                 </div>
               ) : null}
               {r.rejectReason ? <p className="mt-1 text-xs text-muted-foreground" dir="auto">❌ {r.rejectReason}</p> : null}
+              {r.status === 'pending' && r.proposal ? <p className="mt-1 text-xs text-accent" dir="auto">🟡 توصية من {r.proposal.byName}: {r.proposal.decision === 'approved' ? 'قبول' : 'رفض'}{r.proposal.reason ? ` (${r.proposal.reason})` : ''}. في انتظار اعتماد شخص تاني.</p> : null}
               <div className="mt-2 flex flex-wrap gap-2">
                 <Btn small onClick={() => toggleHold(r.uid, !r.hold)}>{r.hold ? '🔓 شيل التجميد' : '🔒 تجميد قانوني'}</Btn>
                 {!r.hold && <Btn small onClick={() => purgeOne(r.uid)}>🗑 حذف بياناته</Btn>}

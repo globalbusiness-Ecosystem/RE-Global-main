@@ -1,6 +1,9 @@
 import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
-import { isAdminRequest } from '@/lib/admin-guard';
+import { isAdminRequest, adminWho } from '@/lib/admin-guard';
+import { logAdmin } from '@/lib/admin-audit';
+import { nextStep } from '@/lib/kyc-four-eyes';
+import { getFourEyes, getProposal, saveProposal } from '@/lib/kyc-four-eyes-store';
 import { listKyc } from '@/lib/kyc-store';
 import { applyKycDecision } from '@/lib/kyc-decision';
 import { cleanNote } from '@/lib/kyc-rules';
@@ -22,6 +25,7 @@ export async function GET(req: NextRequest) {
 }
 
 // { uid, decision: 'approved' | 'rejected', reason? } — a rejection needs a reason the person will see.
+// Four eyes: depending on who asks, this either records a recommendation ({ proposed: true }) or makes the decision.
 export async function PATCH(req: NextRequest) {
   if (!(await isAdminRequest(req))) return unauthorized();
   const b = await req.json().catch(() => null);
@@ -30,7 +34,16 @@ export async function PATCH(req: NextRequest) {
   const reason = cleanNote(b?.reason);
   if (!uid.startsWith('web_') || !decision || (decision === 'rejected' && !reason)) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
   try {
-    const r = await applyKycDecision(uid, decision, reason, 'admin');
+    const who = await adminWho(req);
+    if (!who) return unauthorized();
+    const proposal = await getProposal(uid);
+    const step = nextStep({ enabled: (await getFourEyes()).enabled, role: who.role, actor: who.sub, proposal });
+    if (step === 'propose') {
+      if (!(await saveProposal(uid, { decision, reason, by: who.sub, byName: who.name }))) return NextResponse.json({ ok: false, error: 'This request cannot move to that status' }, { status: 409 });
+      await logAdmin('kyc.proposed', { uid, decision, reason, by: who.sub });
+      return NextResponse.json({ ok: true, proposed: true });
+    }
+    const r = await applyKycDecision(uid, decision, reason, proposal && proposal.by !== who.sub ? `${who.sub} (recommended by ${proposal.by}: ${proposal.decision})` : who.sub);
     if (r.code === 404) return NextResponse.json({ ok: false, error: 'Not found' }, { status: 404 });
     if (r.code === 409) return NextResponse.json({ ok: false, error: 'This request cannot move to that status' }, { status: 409 });
     return NextResponse.json({ ok: true, mailed: r.mailed });
