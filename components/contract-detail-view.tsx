@@ -112,7 +112,44 @@ export function ContractDetailView({ contract, onClose, language = 'en' }: { con
 
     drawWatermark();
 
+    // jsPDF's built-in fonts have no Arabic glyphs (the name came out as symbols). A line that contains Arabic is drawn by the browser
+    // (which shapes and orders Arabic correctly) and placed in the PDF as an image; every other line stays real text.
+    const ARABIC = /[\u0600-\u06FF\u0750-\u077F\uFB50-\uFDFF\uFE70-\uFEFF]/;
+    const writeShaped = (text: string, size: number, bold: boolean): boolean => {
+      const scale = 3;
+      const maxPx = Math.floor(maxWidth * scale);
+      const lhPx = lineHeight * scale;
+      const font = `${bold ? 'bold ' : ''}${size * scale}px "Noto Naskh Arabic","Noto Sans Arabic",Tahoma,Arial,sans-serif`;
+      const measure = document.createElement('canvas').getContext('2d');
+      if (!measure) return false;
+      measure.font = font;
+      const rows: string[] = [];
+      for (const para of text.split('\n')) {
+        let cur = '';
+        for (const w of para.split(' ')) {
+          const t = cur ? `${cur} ${w}` : w;
+          if (cur && measure.measureText(t).width > maxPx) { rows.push(cur); cur = w; } else cur = t;
+        }
+        rows.push(cur);
+      }
+      for (const row of rows) {
+        if (y > pageHeight - margin - 20) { drawFooter(); doc.addPage(); y = margin; drawWatermark(); }
+        if (row) {
+          const c = document.createElement('canvas');
+          c.width = maxPx; c.height = lhPx;
+          const ctx = c.getContext('2d');
+          if (!ctx) return false;
+          ctx.font = font; ctx.fillStyle = '#141414'; ctx.textBaseline = 'alphabetic'; ctx.direction = 'ltr';
+          ctx.fillText(row, 0, lhPx * 0.75);
+          doc.addImage(c.toDataURL('image/png'), 'PNG', margin, y - lineHeight * 0.75, maxWidth, lineHeight);
+        }
+        y += lineHeight;
+      }
+      return true;
+    };
+
     const writeLine = (text: string, size = 11, bold = false) => {
+      if (ARABIC.test(text) && writeShaped(text, size, bold)) return;
       doc.setFontSize(size);
       doc.setFont('helvetica', bold ? 'bold' : 'normal');
       doc.setTextColor(20, 20, 20);
