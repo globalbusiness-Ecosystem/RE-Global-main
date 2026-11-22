@@ -1,0 +1,16 @@
+version: 2
+updates:
+  # Security and version updates for the packages the app ships with. One grouped pull request per week keeps the noise down.
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      minor-and-patch:
+        update-types: [minor, patch]
+  # The CI actions themselves are part of the supply chain.
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
