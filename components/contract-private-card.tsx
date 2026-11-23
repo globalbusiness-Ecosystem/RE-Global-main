@@ -12,6 +12,7 @@ export function ContractPrivateCard({ contractId, language }: { contractId: stri
   const [has, setHas] = useState(false);
   const [data, setData] = useState<Priv | null>(null);
   const [open, setOpen] = useState(false);
+  const [busy, setBusy] = useState(false);
   const url = `/api/contracts/private?id=${encodeURIComponent(contractId)}`;
 
   useEffect(() => {
@@ -30,7 +31,7 @@ export function ContractPrivateCard({ contractId, language }: { contractId: stri
     <div className="mx-6 mb-4 rounded-lg border border-border bg-card p-3">
       <div className="flex items-center gap-2 text-xs font-semibold text-foreground"><Lock className="w-3.5 h-3.5 text-accent" aria-hidden />{cv('privTitle', language)}</div>
       <p className="mt-1 text-[11px] text-muted-foreground">{cv('privNote', language)}</p>
-      <button type="button" onClick={() => setOpen((v) => !v)} className="mt-2 rounded-full border border-accent/40 px-3 py-1 text-xs font-medium text-accent hover:bg-accent/10 transition">
+      <button type="button" disabled={busy} onClick={() => { setBusy(true); setOpen((v) => !v); setBusy(false); }} className="mt-2 rounded-full border border-accent/40 px-3 py-1 text-xs font-medium text-accent hover:bg-accent/10 transition">
         {open ? cv('privHide', language) : cv('privShow', language)}
       </button>
       {open && (

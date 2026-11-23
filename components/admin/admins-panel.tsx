@@ -4,7 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, fmtDate } from './admin-ui';
 import { STAFF_ROLES, ROLE_LABELS, type AdminRole } from '@/lib/admin-roles';
 
-type Row = { id: string; username: string; name: string; role: AdminRole; status: 'active' | 'suspended'; lastLoginAt: string | null; suspendedReason: string };
+type Row = { id: string; username: string; name: string; role: AdminRole; status: 'active' | 'suspended'; lastLoginAt: string | null; suspendedReason: string; totp?: boolean };
 type Rep = { actor: string; name: string; role: string; writes: number; logins: number; failedLogins: number; byGroup: Record<string, number>; lastAtMs: number };
 const HOURS = [{ h: 24, l: 'آخر 24 ساعة' }, { h: 168, l: 'آخر 7 أيام' }, { h: 720, l: 'آخر 30 يوم' }];
 
@@ -20,6 +20,12 @@ export default function AdminsPanel({ onUnauthorized }: { onUnauthorized: () => 
   const [name, setName] = useState('');
   const [role, setRole] = useState<AdminRole>('viewer');
   const [busy, setBusy] = useState(false);
+  const [requireTotp, setRequireTotp] = useState<boolean | null>(null);
+  useEffect(() => { adminApi<{ requireTotp: boolean }>('/api/admin/staff-security').then((d) => setRequireTotp(d.requireTotp)).catch(() => {}); }, []);
+  const saveRequireTotp = async (v: boolean) => {
+    try { const d = await adminApi<{ requireTotp: boolean }>('/api/admin/staff-security', { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ requireTotp: v }) }); setRequireTotp(d.requireTotp); }
+    catch (e) { if (e instanceof UnauthorizedError) onUnauthorized(); else setError((e as Error).message); }
+  };
 
   const load = useCallback((h: number) => {
     adminApi<{ admins: Row[]; report: Rep[] }>(`/api/admin/admins?hours=${h}`)
@@ -51,6 +57,10 @@ export default function AdminsPanel({ onUnauthorized }: { onUnauthorized: () => 
   };
   const resume = async (r: Row) => { if (await call('PATCH', { id: r.id, action: 'resume' })) setNotice(`اتفعّل ${r.username} تاني.`); };
   const changeRole = async (r: Row, next: AdminRole) => { if (await call('PATCH', { id: r.id, action: 'role', role: next })) setNotice(`اتغيّر دور ${r.username} (هيسجّل دخول من جديد).`); };
+  const resetTotp = async (r: Row) => {
+    if (!window.confirm(`إلغاء تطبيق المصادقة بتاع ${r.username}؟ جلساته هتقفل وهيفعّله من جديد عند الدخول.`)) return;
+    if (await call('PATCH', { id: r.id, action: 'resetTotp' })) setNotice(`اتلغى تطبيق المصادقة بتاع ${r.username}.`);
+  };
   const resetPin = async (r: Row) => {
     if (!window.confirm(`PIN جديد لـ ${r.username}؟ جلساته الحالية هتقفل.`)) return;
     const d = await call('PATCH', { id: r.id, action: 'resetPin' });
@@ -76,6 +86,13 @@ export default function AdminsPanel({ onUnauthorized }: { onUnauthorized: () => 
       {notice ? <p className="text-xs text-foreground/80" role="status">{notice}</p> : null}
       {error ? <p className="text-xs text-red-400" role="alert">❌ {error}</p> : null}
 
+      {requireTotp !== null ? (
+        <label className="flex items-center gap-2 rounded-xl border border-border bg-card p-3 text-sm text-foreground">
+          <input type="checkbox" checked={requireTotp} onChange={(e) => saveRequireTotp(e.target.checked)} />
+          إلزام كل الموظفين بكود من تطبيق المصادقة عند الدخول (اللي مفعّلوش لسه هيفعّله في أول دخول).
+        </label>
+      ) : null}
+
       <Card title={`👥 حسابات الأدمن (${rows.length})`}>
         {rows.length === 0 ? <p className="text-sm text-muted-foreground">مفيش حسابات موظفين لسه. إنت (المالك) بتدخل بالـ PIN بتاعك وليك كل الصلاحيات.</p> : null}
         <div className="space-y-2">
@@ -85,6 +102,7 @@ export default function AdminsPanel({ onUnauthorized }: { onUnauthorized: () => 
                 <span className="font-semibold text-foreground" dir="ltr">{r.username}</span>
                 <span className="text-sm text-foreground/80" dir="auto">{r.name}</span>
                 <Badge tone={r.status === 'active' ? 'green' : 'red'}>{r.status === 'active' ? 'شغّال' : 'موقوف'}</Badge>
+                <Badge tone={r.totp ? 'green' : 'gold'}>{r.totp ? '🔐 كود تطبيق' : 'PIN بس'}</Badge>
                 <span className="text-xs text-muted-foreground">آخر دخول: {fmtDate(r.lastLoginAt)}</span>
               </div>
               {r.suspendedReason ? <p className="mt-1 text-xs text-muted-foreground" dir="auto">سبب الإيقاف: {r.suspendedReason}</p> : null}
@@ -94,6 +112,7 @@ export default function AdminsPanel({ onUnauthorized }: { onUnauthorized: () => 
                 </select>
                 {r.status === 'active' ? <Btn small kind="danger" onClick={() => suspend(r)} disabled={busy}>⛔ إيقاف فوري</Btn> : <Btn small onClick={() => resume(r)} disabled={busy}>▶ تفعيل</Btn>}
                 <Btn small kind="ghost" onClick={() => resetPin(r)} disabled={busy}>🔑 PIN جديد</Btn>
+                {r.totp ? <Btn small kind="ghost" onClick={() => resetTotp(r)} disabled={busy}>📱 إلغاء كود التطبيق</Btn> : null}
                 <Btn small kind="ghost" onClick={() => remove(r)} disabled={busy}>🗑 حذف</Btn>
               </div>
             </div>

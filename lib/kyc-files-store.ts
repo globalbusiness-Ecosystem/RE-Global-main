@@ -6,7 +6,7 @@ import { FILE_KINDS, type FileKind } from './kyc-files';
 
 // Identity photos: one Firestore document per photo (kyc_files/{uid}__{kind}), written and read by the server only.
 const id = (uid: string, kind: FileKind) => `${uid}__${kind}`;
-const okUid = (uid: string) => !!uid && uid.startsWith('web_') && !uid.includes('/') && uid.length <= 140;
+const okUid = (uid: string) => !!uid && !uid.includes('/') && uid.length <= 140;
 const col = () => adminDb.collection('kyc_files');
 
 export async function putKycFile(uid: string, kind: FileKind, mime: string, bytes: Uint8Array): Promise<void> {

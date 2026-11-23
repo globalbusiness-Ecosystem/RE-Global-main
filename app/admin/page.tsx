@@ -10,6 +10,7 @@ import IdleGuard from '@/components/admin/idle-guard';
 import AdminsPanel from '@/components/admin/admins-panel';
 import { TAB_ACCESS, isRole, type AdminRole } from '@/lib/admin-roles';
 import { passkeysAvailable, answerChallenge } from '@/lib/passkey-client';
+import QRCode from 'qrcode';
 
 const TABS = [
   { id: 'dashboard', icon: '📊', label: 'الرئيسية' },
@@ -35,6 +36,8 @@ export default function AdminDashboard() {
   const [role, setRole] = useState<AdminRole>('owner');
   const [staffMode, setStaffMode] = useState(false);
   const [username, setUsername] = useState('');
+  const [staffCode, setStaffCode] = useState(false); // this staff account needs an authenticator code
+  const [enroll, setEnroll] = useState<{ secret: string; qr: string } | null>(null); // setting the app up
   const tabs = TABS.filter((t) => TAB_ACCESS[role].includes(t.id));
 
   useEffect(() => {
@@ -63,7 +66,7 @@ export default function AdminDashboard() {
       const res = await fetch(staffMode ? '/api/admin-auth/staff' : '/api/admin-auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(staffMode ? { username, pin } : { pin, code }),
+        body: JSON.stringify(staffMode ? { username, pin, code } : { pin, code }),
       });
       if (res.ok) {
         const who = await fetch('/api/admin-auth', { cache: 'no-store' }).then((r) => r.json()).catch(() => null);
@@ -71,10 +74,31 @@ export default function AdminDashboard() {
         setTab('dashboard');
         setAuthenticated(true); setPin(''); setCode(''); setUsername('');
       }
+      else if (staffMode && res.status === 401) {
+        const d = await res.json().catch(() => ({}));
+        if (d?.needCode) { setStaffCode(true); setLoginError(code ? 'الكود غلط أو اتستخدم قبل كده.' : 'اكتب الكود من تطبيق المصادقة.'); }
+        else if (d?.needEnroll) await startEnroll();
+        else setLoginError('الاسم أو الـ PIN أو الكود غلط!');
+      }
       else setLoginError(res.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : twoFactor ? 'PIN أو الكود غلط!' : 'PIN غلط!');
     } catch {
       setLoginError('حصل خطأ في الاتصال، حاول تاني.');
     }
+  };
+
+  // Setting up the authenticator app (the PIN proves who is asking; the secret is shown once).
+  const startEnroll = async () => {
+    const r = await fetch('/api/admin-auth/staff-totp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, pin, step: 'begin' }) });
+    if (!r.ok) { setLoginError(r.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'مش قادر أبدأ تفعيل التطبيق. كلّم المالك.'); return; }
+    const d = await r.json();
+    setEnroll({ secret: d.secret, qr: await QRCode.toDataURL(d.uri, { width: 220, margin: 1 }) });
+    setCode(''); setLoginError('');
+  };
+  const confirmEnroll = async () => {
+    const r = await fetch('/api/admin-auth/staff-totp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ username, pin, step: 'confirm', code }) });
+    if (!r.ok) { setLoginError(r.status === 429 ? 'محاولات كتير، استنى شوية وحاول تاني.' : 'الكود غلط، جرّب الكود الحالي.'); return; }
+    setEnroll(null); setStaffCode(true); setCode('');
+    setLoginError('اتفعّل التطبيق. استنى الكود الجديد (حوالي 30 ثانية) واكتبه واضغط دخول.');
   };
 
   // PIN + fingerprint: the server checks the PIN on both calls, the device signs the challenge in between.
@@ -113,13 +137,23 @@ export default function AdminDashboard() {
           )}
           <input type="password" autoComplete="current-password" placeholder="PIN" aria-label="PIN" value={pin} onChange={(e) => setPin(e.target.value)}
             className="mb-3 w-full rounded-lg border border-accent bg-background px-3 py-3 text-center text-foreground focus:outline-none" />
-          {twoFactor && !staffMode && (
+          {enroll && staffMode && (
+            <div className="mb-3 rounded-lg border border-border bg-background p-3 text-sm text-foreground">
+              <p className="mb-2">افتح تطبيق مصادقة (Google/Microsoft Authenticator) وامسح الكود، أو اكتب المفتاح بإيدك:</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={enroll.qr} alt="QR" width={220} height={220} className="mx-auto rounded bg-white" />
+              <p className="mt-2 select-all break-all font-mono text-xs" dir="ltr">{enroll.secret}</p>
+              <p className="mt-2 text-xs text-muted-foreground">بعدها اكتب أول كود ظهر في التطبيق واضغط «تأكيد التفعيل».</p>
+              <button type="button" onClick={confirmEnroll} disabled={code.length !== 6} className="mt-2 w-full rounded-lg border border-accent py-2 font-bold text-accent disabled:opacity-60">تأكيد التفعيل</button>
+            </div>
+          )}
+          {((twoFactor && !staffMode) || (staffMode && (staffCode || enroll))) && (
             <input type="text" inputMode="numeric" autoComplete="one-time-code" maxLength={6} placeholder="كود التحقق (6 أرقام)" aria-label="كود التحقق (6 أرقام)" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
               className="mb-3 w-full rounded-lg border border-accent bg-background px-3 py-3 text-center tracking-widest text-foreground focus:outline-none" />
           )}
           {loginError && <p className="mb-3 text-sm text-red-400">{loginError}</p>}
           <button type="submit" className="w-full rounded-lg bg-accent py-3 font-bold text-black">دخول</button>
-          <button type="button" onClick={() => { setStaffMode((v) => !v); setLoginError(''); }} className="mt-3 w-full text-xs text-muted-foreground underline">{staffMode ? 'دخول المالك' : 'دخول موظف'}</button>
+          <button type="button" onClick={() => { setStaffMode((v) => !v); setLoginError(''); setStaffCode(false); setEnroll(null); setCode(''); }} className="mt-3 w-full text-xs text-muted-foreground underline">{staffMode ? 'دخول المالك' : 'دخول موظف'}</button>
           {hasPasskey && deviceCanPasskey && !staffMode && (
             <button type="button" disabled={passkeyBusy} onClick={handlePasskeyLogin} className="mt-3 w-full rounded-lg border border-accent py-3 font-bold text-accent disabled:opacity-60">{passkeyBusy ? 'في انتظار جهازك…' : '🔑 الدخول بالبصمة (مع الـ PIN)'}</button>
           )}

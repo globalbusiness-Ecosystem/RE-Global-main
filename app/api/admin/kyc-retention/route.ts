@@ -31,7 +31,7 @@ export async function PUT(req: NextRequest) {
   }
 }
 
-// { action: 'run', confirm: true } deletes everything due now | { action: 'purge', uid, confirm: true } deletes one person | { action: 'hold', uid, hold: boolean }
+// { action: 'run', confirm: true } deletes everything due now | { action: 'purge', uid } deletes one person | { action: 'hold', uid, hold: boolean }
 export async function POST(req: NextRequest) {
   if (!(await isAdminRequest(req))) return unauthorized();
   const b = (await req.json().catch(() => null)) as Record<string, unknown> | null;
