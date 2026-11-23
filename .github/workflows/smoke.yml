@@ -1,0 +1,30 @@
+name: Smoke test
+
+# After Vercel finishes a production deployment, check the live site (database, login signing, passkeys, tours, admin protection).
+# A failure sends a GitHub notification, so a broken release is noticed in minutes, not hours.
+# Needs one repository variable: SMOKE_URL (the live address, e.g. https://your-domain). Without it this job is skipped.
+on:
+  deployment_status:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    if: github.event.deployment_status.state == 'success' && github.event.deployment.environment == 'Production' && vars.SMOKE_URL != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Check the live site (3 tries, the domain can take a moment to switch)
+        env:
+          SMOKE_URL: ${{ vars.SMOKE_URL }}
+        run: |
+          for i in 1 2 3; do
+            sleep 20
+            if node scripts/smoke-test.mjs "$SMOKE_URL"; then exit 0; fi
+          done
+          exit 1

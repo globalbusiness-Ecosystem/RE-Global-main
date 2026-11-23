@@ -136,3 +136,11 @@
   4. ضيف `REGISTRY_CONTRACT_ID=<contract ID>` في Vercel وأعد النشر.
 - بعد كده كل عقد بطاقة بيتسجل لوحده. اللي فشل بيظهر في "محتاج انتباهك"، وزرار ⛓️ في طلبات البطاقة بيعيد المحاولة.
 - مفتاح المنصة السري ما بيتكتبش في أي أمر هنا: الـ CLI بياخده من هويتك المحفوظة عندك (`stellar keys`).
+
+## 9) إصدار آمن (بعد كل نشر)
+- غيّر حاجة واحدة في المرة (ترقية مكتبة واحدة أو ميزة واحدة)، وانشرها، وتأكد إنها شغالة قبل اللي بعدها. الدفعات الكبيرة بتخلي سبب العطل مجهول.
+- الفحص التلقائي: بعد كل نشر على Production بيشتغل `.github/workflows/smoke.yml` ويفحص الموقع الحي (قاعدة البيانات والاستعلامات وتوقيع الدخول والبصمة والجولات وحماية الأدمن). لتفعيله: GitHub ← Settings ← Secrets and variables ← Actions ← Variables ← أضف `SMOKE_URL` = عنوان الموقع الحي. لو فشل بتوصلك رسالة من GitHub.
+- الفحص اليدوي في أي وقت: `node scripts/smoke-test.mjs https://عنوان-الموقع`. ولأي رابط نشر محمي من Vercel حط `VERCEL_BYPASS_TOKEN` (Settings ← Deployment Protection ← Protection Bypass for Automation).
+- لو بعد النشر حاجة اتكسرت: Vercel ← Deployments ← النسخة السليمة ← ⋯ ← Promote to Production (ثواني)، وبعدين شوف السبب بهدوء.
+- `/api/system-health` بيرجّع أي جزء فشل (`database` أو `queries` أو `auth` أو `passkeys`) كـ true/false، والسبب نفسه بيتكتب في Runtime Logs في Vercel بسطر `[health] ... failed`.
+- علّم كل نسخة مستقرة بعلامة: `git tag stable-YYYY-MM-DD && git push origin --tags`.

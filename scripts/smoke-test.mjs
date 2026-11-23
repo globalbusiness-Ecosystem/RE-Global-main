@@ -2,9 +2,11 @@
 // Read-only checks (GET, plus one POST that is refused before doing anything). It never logs in and sends no secrets.
 const base = (process.argv[2] || 'https://re-global-main.vercel.app').replace(/\/+$/, '');
 const results = [];
+// Vercel protects deployment URLs; with a "Protection Bypass for Automation" secret this script can still reach them.
+const bypass = process.env.VERCEL_BYPASS_TOKEN ? { 'x-vercel-protection-bypass': process.env.VERCEL_BYPASS_TOKEN } : {};
 
 async function get(path, init = {}) {
-  const res = await fetch(base + path, { redirect: 'manual', ...init });
+  const res = await fetch(base + path, { redirect: 'manual', ...init, headers: { ...bypass, ...(init.headers || {}) } });
   let text = '';
   try { text = await res.text(); } catch { /* ignore */ }
   return { res, text };
@@ -30,7 +32,9 @@ await run('health endpoint', async () => {
   const { res, text } = await get('/api/system-health');
   let j = {}; try { j = JSON.parse(text); } catch { /* ignore */ }
   check('health endpoint answers', [200, 503].includes(res.status) && !!j.status, 'status ' + res.status + ' ' + (j.status || ''));
-  check('health says healthy', j.status === 'healthy', JSON.stringify(j.checks || {}));
+  const bad = Object.entries(j.checks || {}).filter(([k, v]) => v !== true && k !== 'ai').map(([k]) => k);
+  check('health says healthy', j.status === 'healthy', bad.length ? 'failing: ' + bad.join(', ') : JSON.stringify(j.checks || {}));
+  for (const k of ['database', 'queries', 'auth', 'passkeys']) check('health part works: ' + k, (j.checks || {})[k] === true);
 });
 
 await run('admin API is closed', async () => {
@@ -63,6 +67,9 @@ await run('payment route refuses anonymous calls', async () => {
 await run('public data', async () => {
   const p = await get('/api/pricing');
   check('pricing endpoint answers', p.res.status === 200, 'status ' + p.res.status);
+  const t = await get('/api/tours');
+  let tj = {}; try { tj = JSON.parse(t.text); } catch { /* ignore */ }
+  check('tours endpoint answers with the expected shape', t.res.status === 200 && typeof tj.enabled === 'boolean' && Array.isArray(tj.items), 'status ' + t.res.status);
   const r = await get('/robots.txt');
   check('robots.txt hides /admin and /api', /Disallow:\s*\/admin/.test(r.text) && /Disallow:\s*\/api\//.test(r.text));
   const s = await get('/.well-known/security.txt');
