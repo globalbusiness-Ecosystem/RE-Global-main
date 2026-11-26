@@ -13,7 +13,8 @@ import { finalizeSale } from '@/lib/property-reserve';
 import { getLegalProfile } from '@/lib/legal-server';
 import { accrueForContract } from '@/lib/partners-server';
 import { identityFor, privateRef } from '@/lib/contract-private-store';
-import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
+import { hashContract, signContractHash } from '@/lib/contract-signing';
+import { buildContractText } from '@/lib/contract-framework';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
 export const dynamic = 'force-dynamic';
@@ -84,6 +85,7 @@ export async function POST(req: NextRequest) {
   // 3) Property title: prefer our own record; fall back to a sanitised client value.
   let propertyTitle = cleanText(body.propertyTitle, 150);
   let propertyCountry = '';
+  let propertyShariah = false;
   if (!propertyId.includes('/')) {
     try {
       const snap = await Promise.race([
@@ -93,6 +95,7 @@ export async function POST(req: NextRequest) {
       const t = snap && snap.exists ? cleanText(snap.data()?.title, 150) : '';
       if (t) propertyTitle = t;
       if (snap && snap.exists && typeof snap.data()?.country === 'string') propertyCountry = snap.data()?.country;
+      if (snap && snap.exists) propertyShariah = snap.data()?.shariah === true;
     } catch {
       /* use client title */
     }
@@ -136,7 +139,7 @@ export async function POST(req: NextRequest) {
         return { record: d };
       }
       const contractId = `${paymentId}-${Date.now().toString(36)}`;
-      const contractText = generateContractText({
+      const contractText = buildContractText({
         contractId,
         propertyId,
         propertyTitle,
@@ -151,7 +154,7 @@ export async function POST(req: NextRequest) {
         shares: quote.shares ? { count: quote.shares.count, totalShares: quote.shares.totalShares } : undefined,
         legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
         identity: identity?.proof,
-      });
+      }, { shariah: propertyShariah });
       const contractHash = hashContract(contractText);
       const record = {
         uid: user.uid,

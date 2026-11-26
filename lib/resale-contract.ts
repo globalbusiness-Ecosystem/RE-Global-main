@@ -4,7 +4,8 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { getLegalProfile } from '@/lib/legal-server';
 import { feePctOf, feeSplit } from '@/lib/market-rules';
-import { generateResaleContractText, hashContract, signContractHash } from '@/lib/contract-signing';
+import { hashContract, signContractHash } from '@/lib/contract-signing';
+import { buildResaleContractText } from '@/lib/contract-framework';
 
 const cleanName = (v: unknown, max: number) => String(v ?? '').replace(/[\u0000-\u001f\u007f]+/g, ' ').trim().slice(0, max);
 
@@ -33,12 +34,12 @@ export async function signResaleContract(a: { paymentId: string; txid: string; l
   const contractId = `${a.paymentId}-${Date.now().toString(36)}`;
   const propertyTitle = cleanName(l.propertyTitle, 150) || `Property ${propertyId}`;
   const sellerUsername = cleanName(l.sellerName, 64) || 'seller';
-  const text = generateResaleContractText({
+  const text = buildResaleContractText({
     contractId, propertyId, propertyTitle, sellerUsername, buyerUsername: a.buyerName,
     shares: Number(l.shares) || 0, totalShares, pricePerShare: Number(l.pricePerShare) || 0,
     amount: a.amount, fee, proceeds, currency: 'Pi', paymentId: a.paymentId, txid: a.txid,
     legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
-  });
+  }, { shariah: p.shariah === true });
   const contractHash = hashContract(text);
   const signedAt = new Date().toISOString();
   const platformSignature = signContractHash(contractHash, secretKey);

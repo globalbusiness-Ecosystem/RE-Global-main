@@ -1,4 +1,5 @@
 import type { NavLanguage } from './nav-i18n';
+import { isFrameworkText } from './contract-framework';
 
 interface Tpl {
   dir: 'ltr' | 'rtl';
@@ -167,6 +168,8 @@ interface TranslatableContract {
 export function translateContract(lang: NavLanguage, c: TranslatableContract): string {
   if (lang === 'en') return c.contractText ?? '';
   const t = T[lang];
+  // Contracts written with the framework have their own terms, which the fixed six-clause template below does not describe: show the signed English text with the note instead of a translation that would not match it.
+  if (isFrameworkText(c.contractText)) return `${t.note}\n\n${c.contractText}`;
   const contractId = c.contractText?.match(/^Contract ID:\s*(.+)$/m)?.[1]?.trim() || c.id;
   let when = '';
   if (c.signedAt) {

@@ -1,7 +1,8 @@
 import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
-import { generateContractText, hashContract, signContractHash } from '@/lib/contract-signing';
+import { hashContract, signContractHash } from '@/lib/contract-signing';
+import { buildContractText } from '@/lib/contract-framework';
 import { getLegalProfile } from '@/lib/legal-server';
 import { anchorHash } from '@/lib/chain-anchor';
 import { anchorSecret, publicOf } from '@/lib/signing-keys';
@@ -64,13 +65,13 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
     const snap = await tx.get(ref);
     if (snap.exists) return String(snap.data()?.contractId ?? '');
     const id = `${o.id}-${Date.now().toString(36)}`;
-    const text = generateContractText({
+    const text = buildContractText({
       contractId: id, propertyId: o.propertyId!, propertyTitle: title, buyerUsername: shownName, sellerUsername: 'RE-Global-Platform',
       type, amount, currency: o.currency, paymentId: o.id, txid: '',
       booking: o.booking ? { start: o.booking.start, end: o.booking.end, nights: o.booking.nights } : undefined,
       legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
       card: { orderId: o.id, buyerName, nameMode, inviteCode, proof: identity?.proof },
-    });
+    }, { shariah: p.shariah === true });
     const hash = hashContract(text);
     const signedAt = new Date().toISOString();
     const base = {
