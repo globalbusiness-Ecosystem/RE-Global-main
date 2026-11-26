@@ -33,7 +33,7 @@ export default function PricingSettings({ onUnauthorized }: { onUnauthorized: ()
   return (
     <Card title="💱 سعر Pi مقابل الدولار">
       <p className="mb-3 text-xs text-muted-foreground">
-        العقار اللي تسعّره بالدولار (USD) بيفضل سعره ثابت، وبيدفع المشتري بالـ π حسب السعر اللي تكتبه هنا. غيّر الرقم متى شئت، والتغيير بيسري خلال دقيقة تقريباً. لو العقار فيه "المبلغ المطلوب دفعه بالـ π" بيتقدم عليه.
+        العقار اللي تسعّره بالدولار (USD) بيفضل سعره ثابت، وبيدفع المشتري بالـ π حسب السعر اللي تكتبه هنا. غيّر الرقم متى شئت، والتغيير بيسري خلال دقيقة تقريباً. لو العقار فيه &quot;المبلغ المطلوب دفعه بالـ π&quot; بيتقدم عليه.
       </p>
       <Field label="1 π = كام دولار؟">
         <input className={inputCls} type="number" step="any" min="0" dir="ltr" placeholder="مثال: 0.20" value={rate} onChange={(e) => setRate(e.target.value)} disabled={!loaded} />

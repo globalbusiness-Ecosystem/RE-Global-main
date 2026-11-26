@@ -66,6 +66,7 @@ export default function PartnerProjectsPanel({ onUnauthorized }: { onUnauthorize
             <div key={p.id} className="rounded-xl border border-border bg-input p-3">
               <div className="flex gap-3">
                 <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg bg-muted">
+                  { }
                   {p.images[0] && <img src={p.images[0]} alt="" className="h-full w-full object-cover" />}
                 </div>
                 <div className="min-w-0 flex-1">
@@ -85,6 +86,7 @@ export default function PartnerProjectsPanel({ onUnauthorized }: { onUnauthorize
                     <div className="flex gap-2 overflow-x-auto pb-1">
                       {p.images.map((u) => (
                         <a key={u} href={u} target="_blank" rel="noopener noreferrer" className="h-24 w-32 shrink-0 overflow-hidden rounded-lg bg-muted">
+                          { }
                           <img src={u} alt="" className="h-full w-full object-cover" />
                         </a>
                       ))}

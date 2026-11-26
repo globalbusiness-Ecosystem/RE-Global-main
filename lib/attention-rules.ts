@@ -29,7 +29,7 @@ export type AttentionInput = {
   /** Paid card orders of web buyers that have no signed contract (the buyer sees nothing in Contracts). */
   cardOrdersWithoutContract?: number;
   kycPending?: number;
-  /** Compliance register: incidents or privacy requests past their deadline / within a day or so of it. */
+  /** Compliance register: incidents or privacy requests past their deadline / within a day or so of it, and incidents nobody has started on. */
   complianceLate?: number;
   complianceSoon?: number;
   /** Hours the oldest identity request has been waiting (people are blocked from paying until it is decided). */

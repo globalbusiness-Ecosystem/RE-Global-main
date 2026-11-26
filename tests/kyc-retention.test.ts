@@ -52,7 +52,7 @@ describe('wiring', () => {
   it('the admin route is admin-only and deleting needs an explicit confirm', () => {
     const r = src('app/api/admin/kyc-retention/route.ts');
     expect((r.match(/isAdminRequest\(/g) ?? []).length).toBe(3);
-    expect(r).toContain('b.confirm === true');
+    expect(r).toContain("b.confirm === true");
   });
   it('the daily job deletes identity data only when automatic deletion is on', () => {
     const c = src('app/api/cron/retention/route.ts');

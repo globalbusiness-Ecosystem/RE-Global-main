@@ -68,6 +68,7 @@ export async function clearFailures(key: string): Promise<void> {
   if (db) { try { await db.collection('admin_login_attempts').doc(key).delete(); } catch { /* ignore */ } }
 }
 
+
 /** Refuses (429) when this caller is locked out or the global budget is spent; null when the attempt may go on. */
 export async function loginGate(req: NextRequest, key: string): Promise<NextResponse | null> {
   if (await checkLocked(key)) {

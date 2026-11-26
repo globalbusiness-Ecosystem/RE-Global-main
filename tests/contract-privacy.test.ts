@@ -85,10 +85,11 @@ describe('wiring', () => {
   });
   it('the public contract documents and responses never receive the private fields', () => {
     for (const f of ['lib/card-contract.ts', 'app/api/contracts/sign/route.ts']) {
-      expect(src(f)).not.toMatch(/idNumber|legalName:/);
+      const t = src(f);
+      expect(t).not.toMatch(/idNumber|legalName:/);
     }
   });
-  it('the contract page shows the owner card, which reads only the owner route', () => {
+  it('the contract page shows the owner card, and the owner card fetches only on request of the server', () => {
     expect(src('components/contract-detail-view.tsx')).toContain('ContractPrivateCard');
     expect(src('components/contract-private-card.tsx')).toContain('/api/contracts/private');
   });

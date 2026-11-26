@@ -15,7 +15,7 @@ describe('no dead or repeated text on the identity page', () => {
     expect(Object.keys(KYC_LABELS)).not.toContain('photoHint');
     expect(Object.keys(KYC_LABELS)).not.toContain('idNumberHint');
   });
-  it('explanations stay short: no identity label is longer than 200 characters in any language', () => {
+  it('explanations stay short: no identity label is longer than 180 characters in any language', () => {
     for (const [k, row] of Object.entries(KYC_LABELS)) for (const [lang, v] of Object.entries(row as Record<string, string>)) expect(v.length, `${k}.${lang}`).toBeLessThanOrEqual(200);
   });
 });
