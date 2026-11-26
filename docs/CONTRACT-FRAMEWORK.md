@@ -65,6 +65,20 @@ The references are where counsel should look first. They are not claims of compl
 6. Shari'ah: the clause only says that no certification is stated unless the Listing names a board and certificate. A property is flagged by a boolean `shariah: true` on its record. There is no admin field for it yet, so today it is set directly in the database. A Shari'ah supervisory board must review before any offering is described as compliant. The installment markup ("extra percent") in partner projects needs its own review under that.
 7. Data retention periods that the Personal data clause refers to.
 
+## Editing the terms from the admin panel (Phase 286)
+
+Admin, tab Content, section Legal, panel "Contract terms" (owner account only).
+
+- Locked clauses (payment, refund, electronic execution, personal data, liability, governing law, pilot phase) cannot be edited there. They change in code, with counsel.
+- Editable clauses can get a new text. Inspection, transfers, Shari'ah and events beyond control can also be switched off.
+- Up to 10 custom clauses can be added; they print just before the governing-law clause.
+- Text rules, checked on the server: English only (the English text is the signed original), one paragraph, 20 to 2000 characters, no links or emails, only the variables `{{governingLaw}}`, `{{amount}}`, `{{currency}}`, and none of the phrases that promise a return or claim compliance, certification or approval. "Does not guarantee any return" stays allowed.
+- Every publish makes a new revision (stored in `settings/contractTerms`, copy in `contract_terms_history`), is written to the admin activity log, and is printed in the contract marker line as `terms rN`. The last 20 revisions can be restored; a restore is itself a new revision.
+- "Preview" prints the terms of one kind of deal without saving.
+- Contracts already signed keep their text. Only new contracts use the published terms.
+- If the stored document is missing, empty or fails the rules, the built-in text is used.
+- Edits do not replace counsel's review. They make it quick to apply what counsel decides.
+
 ## Rolling back
 
 Set `CONTRACT_FRAMEWORK=legacy` in Vercel and redeploy: new contracts use the original six clauses again. Contracts already created with the framework stay valid and keep their text.

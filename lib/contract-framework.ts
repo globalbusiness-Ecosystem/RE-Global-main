@@ -1,4 +1,5 @@
 import { generateContractText, generateResaleContractText } from '@/lib/contract-signing';
+import { DISABLEABLE_IDS, EDITABLE_IDS, hasOverrides, renderVars, type TermsOverrides } from '@/lib/contract-terms';
 
 // RE Global Contract Framework: one library of clauses, one template per kind of deal.
 //
@@ -35,6 +36,8 @@ export type FrameworkParams = {
   /** Resale only. */
   resale?: { fee: number; proceeds: number };
   hasInspection?: boolean;
+  /** The admin's edits (see lib/contract-terms.ts). Locked clauses ignore them. */
+  overrides?: TermsOverrides;
 };
 
 export type Clause = {
@@ -184,11 +187,30 @@ export function clausesFor(p: FrameworkParams): Clause[] {
   return CLAUSES.filter((c) => (c.kinds === 'all' || c.kinds.includes(p.kind)) && (c.when ? c.when(p) : true));
 }
 
-/** The numbered TERMS text for one deal. */
+/** The numbered TERMS text for one deal, with the admin's edits applied to the editable clauses only. */
 export function frameworkTerms(p: FrameworkParams): string {
-  const list = clausesFor(p);
-  const body = list.map((c, i) => `${i + 1}. ${c.title}. ${c.body(p)}`).join('\n');
-  return `${FRAMEWORK_MARKER}${FRAMEWORK_VERSION} (${p.kind})\n${body}`;
+  const ov = p.overrides && hasOverrides(p.overrides) ? p.overrides : undefined;
+  const vars = { governingLaw: p.governingLaw, amount: p.amount, currency: p.currency };
+  const rows: { title: string; text: string }[] = [];
+  for (const c of clausesFor(p)) {
+    const e = ov?.clauses[c.id];
+    const editable = EDITABLE_IDS.includes(c.id);
+    if (c.id === 'law') for (const x of ov?.custom ?? []) rows.push({ title: x.title, text: renderVars(x.text, vars) });
+    if (editable && e?.disabled && DISABLEABLE_IDS.includes(c.id)) continue;
+    rows.push({ title: c.title, text: editable && e?.text ? renderVars(e.text, vars) : c.body(p) });
+  }
+  const body = rows.map((r, i) => `${i + 1}. ${r.title}. ${r.text}`).join('\n');
+  const rev = ov ? ` terms r${ov.revision}` : '';
+  return `${FRAMEWORK_MARKER}${FRAMEWORK_VERSION} (${p.kind})${rev}\n${body}`;
+}
+
+/** What the admin sees before publishing: the terms of one kind of deal with sample figures. */
+export function previewFrameworkTerms(kind: FrameworkKind, overrides?: TermsOverrides, shariah = false): string {
+  return frameworkTerms({
+    kind, rail: 'pi', governingLaw: 'the laws of the selected country', shariah, currency: 'Pi', amount: 100,
+    paymentId: 'PAYMENT-ID', txid: 'TRANSACTION-ID', hasInspection: true,
+    resale: kind === 'resale' ? { fee: 2, proceeds: 98 } : undefined, overrides,
+  });
 }
 
 export const isFrameworkText = (text: string | undefined | null): boolean => !!text && text.includes(`\n${FRAMEWORK_MARKER}`);
@@ -213,25 +235,25 @@ const headOf = (text: string): string => {
 };
 
 /** The contract text a buyer signs: the original header and parties, then the framework TERMS (or the original text when switched to legacy). */
-export function buildContractText(c: ContractArgs, opts: { shariah?: boolean; hasInspection?: boolean } = {}): string {
+export function buildContractText(c: ContractArgs, opts: { shariah?: boolean; hasInspection?: boolean; overrides?: TermsOverrides } = {}): string {
   const legacy = generateContractText(c);
   if (!frameworkEnabled()) return legacy;
   const p: FrameworkParams = {
     kind: frameworkKindOf(c), rail: c.card ? 'card' : 'pi',
     governingLaw: c.legal?.governingLaw ?? 'the laws of the United Arab Emirates', extraClause: c.legal?.extraClause,
-    shariah: opts.shariah, hasInspection: opts.hasInspection,
+    shariah: opts.shariah, hasInspection: opts.hasInspection, overrides: opts.overrides,
     currency: c.currency, amount: c.amount, paymentId: c.paymentId, txid: c.txid, orderId: c.card?.orderId,
   };
   return `${headOf(legacy)}\nTERMS\n${frameworkTerms(p)}`;
 }
 
-export function buildResaleContractText(c: ResaleArgs, opts: { shariah?: boolean } = {}): string {
+export function buildResaleContractText(c: ResaleArgs, opts: { shariah?: boolean; overrides?: TermsOverrides } = {}): string {
   const legacy = generateResaleContractText(c);
   if (!frameworkEnabled()) return legacy;
   const p: FrameworkParams = {
     kind: 'resale', rail: 'pi',
     governingLaw: c.legal?.governingLaw ?? 'the laws of the United Arab Emirates', extraClause: c.legal?.extraClause,
-    shariah: opts.shariah,
+    shariah: opts.shariah, overrides: opts.overrides,
     currency: c.currency, amount: c.amount, paymentId: c.paymentId, txid: c.txid,
     resale: { fee: c.fee, proceeds: c.proceeds },
   };

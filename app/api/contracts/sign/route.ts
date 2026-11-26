@@ -15,6 +15,7 @@ import { accrueForContract } from '@/lib/partners-server';
 import { identityFor, privateRef } from '@/lib/contract-private-store';
 import { hashContract, signContractHash } from '@/lib/contract-signing';
 import { buildContractText } from '@/lib/contract-framework';
+import { getContractTerms } from '@/lib/contract-terms-server';
 import { cleanText, isValidPaymentId, isValidTxid, validatePiPayment, PiPayment } from '@/lib/contract-guard';
 
 export const dynamic = 'force-dynamic';
@@ -102,6 +103,7 @@ export async function POST(req: NextRequest) {
   }
   if (!propertyTitle) propertyTitle = `Property ${propertyId}`;
   const legal = await getLegalProfile(propertyCountry);
+  const termsOverrides = await getContractTerms();
   const identity = await identityFor(user.uid); // null unless this buyer passed the Platform's KYC
 
   // 4) One payment -> one signed contract. Repeat calls return the stored one.
@@ -154,7 +156,7 @@ export async function POST(req: NextRequest) {
         shares: quote.shares ? { count: quote.shares.count, totalShares: quote.shares.totalShares } : undefined,
         legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
         identity: identity?.proof,
-      }, { shariah: propertyShariah });
+      }, { shariah: propertyShariah, overrides: termsOverrides });
       const contractHash = hashContract(contractText);
       const record = {
         uid: user.uid,

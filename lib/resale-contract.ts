@@ -3,6 +3,7 @@ import 'server-only';
 import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { getLegalProfile } from '@/lib/legal-server';
+import { getContractTerms } from '@/lib/contract-terms-server';
 import { feePctOf, feeSplit } from '@/lib/market-rules';
 import { hashContract, signContractHash } from '@/lib/contract-signing';
 import { buildResaleContractText } from '@/lib/contract-framework';
@@ -29,6 +30,7 @@ export async function signResaleContract(a: { paymentId: string; txid: string; l
   const p = (pSnap && pSnap.exists ? pSnap.data() : {}) as Record<string, unknown>;
   const totalShares = Number(p.totalShares) > 0 ? Number(p.totalShares) : null;
   const legal = await getLegalProfile(typeof p.country === 'string' ? p.country : '');
+  const termsOverrides = await getContractTerms();
   const { fee, proceeds } = feeSplit(a.amount, feePctOf(l.feePct));
 
   const contractId = `${a.paymentId}-${Date.now().toString(36)}`;
@@ -39,7 +41,7 @@ export async function signResaleContract(a: { paymentId: string; txid: string; l
     shares: Number(l.shares) || 0, totalShares, pricePerShare: Number(l.pricePerShare) || 0,
     amount: a.amount, fee, proceeds, currency: 'Pi', paymentId: a.paymentId, txid: a.txid,
     legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
-  }, { shariah: p.shariah === true });
+  }, { shariah: p.shariah === true, overrides: termsOverrides });
   const contractHash = hashContract(text);
   const signedAt = new Date().toISOString();
   const platformSignature = signContractHash(contractHash, secretKey);

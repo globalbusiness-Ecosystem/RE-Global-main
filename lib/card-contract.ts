@@ -4,6 +4,7 @@ import { adminDb } from '@/lib/firebase-admin';
 import { hashContract, signContractHash } from '@/lib/contract-signing';
 import { buildContractText } from '@/lib/contract-framework';
 import { getLegalProfile } from '@/lib/legal-server';
+import { getContractTerms } from '@/lib/contract-terms-server';
 import { anchorHash } from '@/lib/chain-anchor';
 import { anchorSecret, publicOf } from '@/lib/signing-keys';
 import { buyerRef, recordOnRegistry, registryKind } from '@/lib/registry-client';
@@ -50,6 +51,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
   const buyerName = String(kyc.data()?.legalName ?? '').slice(0, 100) || 'verified buyer';
   const title = String(p.title ?? '').slice(0, 150) || `Property ${o.propertyId}`;
   const legal = await getLegalProfile(typeof p.country === 'string' ? p.country : '');
+  const termsOverrides = await getContractTerms();
   const buyerUsername = webUsername(o.uid.slice(4));
   const nameMode = parseNameMode(kyc.data()?.contractName);
   // The username the buyer chose is the name the contract shows (the account name above stays the technical id).
@@ -71,7 +73,7 @@ export async function createCardContract(o: CardOrder): Promise<string | null> {
       booking: o.booking ? { start: o.booking.start, end: o.booking.end, nights: o.booking.nights } : undefined,
       legal: { statusLine: legal.statusLine, governingLaw: legal.governingLaw, extraClause: legal.extraClause },
       card: { orderId: o.id, buyerName, nameMode, inviteCode, proof: identity?.proof },
-    }, { shariah: p.shariah === true });
+    }, { shariah: p.shariah === true, overrides: termsOverrides });
     const hash = hashContract(text);
     const signedAt = new Date().toISOString();
     const base = {
