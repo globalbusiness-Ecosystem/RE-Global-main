@@ -7,7 +7,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
   'admin.login': 'تسجيل دخول الأدمن', 'admin.revoke': 'خروج من كل جلسات الأدمن', 'admin.backup': 'تصدير نسخة احتياطية',
-  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'contract.terms': 'تعديل بنود العقد', 'property.owner': 'تعديل مالك عقار', 'texts.save': 'حفظ نصوص الموقع', 'display.demo': 'إظهار/إخفاء العقارات التجريبية', 'display.tours': 'إظهار/إخفاء الجولات 360',
+  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'contract.terms': 'تعديل بنود العقد', 'property.owner': 'تعديل مالك عقار', 'distribution.save': 'حفظ مسودة توزيع عوائد', 'distribution.cancel': 'إلغاء مسودة توزيع عوائد', 'texts.save': 'حفظ نصوص الموقع', 'display.demo': 'إظهار/إخفاء العقارات التجريبية', 'display.tours': 'إظهار/إخفاء الجولات 360',
 };
 
 export function auditLabel(action: string): string {
