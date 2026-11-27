@@ -20,6 +20,7 @@ const s = (v: unknown) => (typeof v === 'string' || typeof v === 'number' ? Stri
 export function auditSummary(action: string, detail: Record<string, unknown> | null | undefined): string {
   const d = detail ?? {};
   switch (action) {
+    case 'property.edit': return [s(d.title), d.shariah === true ? 'بند الشريعة: مفعّل' : d.shariah === false ? 'بند الشريعة: متوقف' : ''].filter(Boolean).join(' · ');
     case 'booking.cancel': return [s(d.title), d.guest ? `@${s(d.guest)}` : '', d.refund != null ? `استرداد ${s(d.refund)} π` : ''].filter(Boolean).join(' · ');
     case 'booking.block': case 'booking.unblock': return [s(d.title), d.start && d.end ? `${s(d.start)} → ${s(d.end)}` : '', s(d.note)].filter(Boolean).join(' · ');
     case 'review.hide': case 'review.show': case 'review.reply': case 'review.reply.clear': return s(d.title);

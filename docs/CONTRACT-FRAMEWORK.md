@@ -93,6 +93,10 @@ A rent contract now has, besides the common clauses: "Period, handover and retur
 The owner has no account. In the admin payments list, a rent contract has the button "copy link for the owner": the public verification page shows the signed contract and needs no login.
 For counsel: whether a lump-sum rent with the Platform as the contracting party matches the real lease structure in each country, whether the lessor must sign or be named in full, whether stays of 30 nights or more need a registered lease, and whether a deposit and an instalment schedule are needed before real money is used.
 
+## Shari'ah flag on a listing (Phase 291)
+
+The admin ticks "offered as following Shari'ah-aligned principles" in the property form. This only adds the "Shari'ah status" clause to that property's contracts. The clause says the Listing states the intention and that the contract does not say a supervisory board has certified it. The flag is not shown publicly and is not a certificate. Do not tick it for a property until the Shari'ah board has reviewed the offering. A change of the flag is written in the activity log.
+
 ## Rolling back
 
 Set `CONTRACT_FRAMEWORK=legacy` in Vercel and redeploy: new contracts use the original six clauses again. Contracts already created with the framework stay valid and keep their text.

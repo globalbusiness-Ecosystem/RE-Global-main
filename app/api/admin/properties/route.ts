@@ -89,11 +89,15 @@ export async function PATCH(req: NextRequest) {
     const prev = (snap.data() ?? {}) as Record<string, unknown>;
     const keep: Record<string, unknown> = {};
     for (const k of ['soldTo', 'soldAt', 'soldPaymentId', 'sharesSold']) if (prev[k] !== undefined) keep[k] = prev[k];
+    // A save that does not mention the flag (an old client) must not erase it.
+    if (b.shariah === undefined && prev.shariah === true) keep.shariah = true;
+    const shariahNow = (keep.shariah ?? parsed.doc.shariah) === true;
+    const shariahChange = shariahNow !== (prev.shariah === true) ? { shariah: shariahNow } : {};
     const sharesSold = Number(prev.sharesSold) || 0;
     const newTotal = Number(parsed.doc.totalShares) || 0;
     if (sharesSold > 0 && newTotal < sharesSold) return bad(`Total shares cannot be lower than the ${sharesSold} shares already sold`);
     await ref.set({ ...parsed.doc, ...keep, createdAt, updatedAt: Timestamp.now() });
-    await logAdmin('property.edit', { id, title: parsed.doc.title });
+    await logAdmin('property.edit', { id, title: parsed.doc.title, ...shariahChange });
     return NextResponse.json({ ok: true });
   } catch (err) {
     console.error('[admin/properties] update error:', err);

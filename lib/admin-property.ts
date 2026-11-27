@@ -118,6 +118,8 @@ export function parsePropertyInput(b: any): ParsedProperty {
   if (isCountry(b.country)) doc.country = b.country;
   doc.featured = b.featured === true;
   doc.hidden = b.hidden === true;
+  // The listing says it is meant to follow Shari'ah-aligned principles. This only adds a clause to contracts; it never claims a certificate.
+  if (b.shariah === true) doc.shariah = true;
   const lat = num(b.lat, -90, 90);
   const lng = num(b.lng, -180, 180);
   if (lat === null || lng === null) return fail('Invalid coordinates');

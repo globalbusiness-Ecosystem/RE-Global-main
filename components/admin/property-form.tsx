@@ -22,7 +22,7 @@ function blank() {
   return {
     title: '', price: '', payAmountPi: '', cardPrice: '', totalShares: '', currency: 'Pi', location: '', country: '', type: 'buy', propertyType: 'apartment', status: 'available',
     bedrooms: '', bathrooms: '', area: '', lat: '', lng: '', description: '', image: '', images: [] as string[],
-    vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false,
+    vrUrl: '', contractUrl: '', tokenized: false, featured: false, hidden: false, shariah: false,
     checkInTime: '', checkOutTime: '', maxGuests: '', minNights: '', maxNights: '',
     amenities: { pool: false, gym: false, parking: false, security: false } as Record<string, boolean>,
   };
@@ -40,7 +40,7 @@ function fromProperty(p: any) {
     vrUrl: p.vrUrl || '', contractUrl: p.contractUrl || '', tokenized: p.tokenized === true, featured: p.featured === true,
     checkInTime: p.checkInTime || '', checkOutTime: p.checkOutTime || '', maxGuests: p.maxGuests ? String(p.maxGuests) : '',
     minNights: p.minNights ? String(p.minNights) : '', maxNights: p.maxNights ? String(p.maxNights) : '',
-    hidden: p.hidden === true, amenities: { ...f.amenities, ...(p.amenities || {}) },
+    hidden: p.hidden === true, shariah: p.shariah === true, amenities: { ...f.amenities, ...(p.amenities || {}) },
   };
 }
 
@@ -290,6 +290,7 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.tokenized} onChange={(e) => set({ tokenized: e.target.checked })} />عقار مرمّز (Tokenized)</label>
         <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} />⭐ مميز</label>
         <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.hidden} onChange={(e) => set({ hidden: e.target.checked })} />🙈 مخفي عن الزوار</label>
+        <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.shariah} onChange={(e) => set({ shariah: e.target.checked })} />☪️ يُعرض كمتوافق مع مبادئ شرعية (بيضيف بند في العقد)</label>
       </div>
 
       {editing && <PropertyOwnerPanel propertyId={initial.id} />}
