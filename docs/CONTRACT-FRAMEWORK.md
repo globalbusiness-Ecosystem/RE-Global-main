@@ -79,6 +79,14 @@ Admin, tab Content, section Legal, panel "Contract terms" (owner account only).
 - If the stored document is missing, empty or fails the rules, the built-in text is used.
 - Edits do not replace counsel's review. They make it quick to apply what counsel decides.
 
+## Owner of the property (Phase 287)
+
+- Admin, edit a property, section "Owner": type (individual or company), official name, registration or ID number (optional). Owner only.
+- It is stored in `property_owners/{propertyId}`, server only, apart from the public catalogue. The activity log keeps the property id, never the name.
+- A contract prints one masked line in the clause "Owner of the Property": a company by name, a person by initials, the number by its last 4 characters. Without a recorded owner the clause is not printed.
+- The owner is named for information. It is not a signatory, has no account, and the clause says the Platform does not guarantee the details beyond the Listing.
+- For counsel: whether naming the owner this way matches the real arrangement between the Platform and the owner (agency, lease, management agreement), and whether the lessor of a rent contract must sign or be identified in full.
+
 ## Rolling back
 
 Set `CONTRACT_FRAMEWORK=legacy` in Vercel and redeploy: new contracts use the original six clauses again. Contracts already created with the framework stay valid and keep their text.

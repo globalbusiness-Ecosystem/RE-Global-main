@@ -26,7 +26,7 @@ describe('areas and roles', () => {
   });
   it('every admin route folder is classified on purpose (a new one is owner-only until someone adds it)', () => {
     const dirs = readdirSync('app/api/admin').filter((d) => statSync(join('app/api/admin', d)).isDirectory());
-    const ownerOnly = ['audit', 'backup', 'client-errors', 'csp-reports', 'passkey-reset', 'passkeys', 'revoke-sessions', 'admins', 'notify-test', 'staff-security', 'contract-terms'];
+    const ownerOnly = ['audit', 'backup', 'client-errors', 'csp-reports', 'passkey-reset', 'passkeys', 'revoke-sessions', 'admins', 'notify-test', 'staff-security', 'contract-terms', 'property-owner'];
     for (const d of dirs) if (!ownerOnly.includes(d)) expect(groupOf(`/api/admin/${d}`), d).not.toBe('owner');
   });
   it('the owner can do everything; others only their areas', () => {

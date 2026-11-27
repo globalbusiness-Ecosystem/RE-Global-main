@@ -36,6 +36,8 @@ export type FrameworkParams = {
   /** Resale only. */
   resale?: { fee: number; proceeds: number };
   hasInspection?: boolean;
+  /** The masked owner line (lib/property-owner.ts). The Owner clause is printed only when it is set. */
+  owner?: string;
   /** The admin's edits (see lib/contract-terms.ts). Locked clauses ignore them. */
   overrides?: TermsOverrides;
 };
@@ -84,6 +86,11 @@ export const CLAUSES: Clause[] = [
   {
     id: 'subject-resale', title: 'Transfer of Shares', kinds: ['resale'], basis: [...ASSETS, ...CONTRACT],
     body: () => 'The Seller transfers the Shares stated in the Subject to the Buyer, who accepts them with the rights the Listing attaches to them. The Seller confirms that it holds those Shares, that they are free of any pledge or claim known to it, and that it has the right to transfer them. The transfer is recorded in the Platform register and takes effect when the payment below is confirmed.',
+  },
+  {
+    id: 'owner', title: 'Owner of the Property', kinds: 'all', basis: [...CONTRACT, 'FATF Recommendations 24 and 25 (transparency of legal persons and arrangements)'],
+    when: (p) => !!p.owner,
+    body: (p) => `The Listing records the owner of the Property${p.kind === 'rent' ? ' (the lessor)' : ''} as ${p.owner}. The owner is named for information and is not a signatory to this contract. These details come from the Listing, the Platform does not guarantee them beyond what the Listing states, and the Buyer may ask the Platform support channel to confirm them.`,
   },
   {
     id: 'price-pi', title: 'Price and payment', kinds: 'all', basis: [...EC, ...CONSUMER],
@@ -235,25 +242,25 @@ const headOf = (text: string): string => {
 };
 
 /** The contract text a buyer signs: the original header and parties, then the framework TERMS (or the original text when switched to legacy). */
-export function buildContractText(c: ContractArgs, opts: { shariah?: boolean; hasInspection?: boolean; overrides?: TermsOverrides } = {}): string {
+export function buildContractText(c: ContractArgs, opts: { shariah?: boolean; hasInspection?: boolean; overrides?: TermsOverrides; owner?: string } = {}): string {
   const legacy = generateContractText(c);
   if (!frameworkEnabled()) return legacy;
   const p: FrameworkParams = {
     kind: frameworkKindOf(c), rail: c.card ? 'card' : 'pi',
     governingLaw: c.legal?.governingLaw ?? 'the laws of the United Arab Emirates', extraClause: c.legal?.extraClause,
-    shariah: opts.shariah, hasInspection: opts.hasInspection, overrides: opts.overrides,
+    shariah: opts.shariah, hasInspection: opts.hasInspection, overrides: opts.overrides, owner: opts.owner,
     currency: c.currency, amount: c.amount, paymentId: c.paymentId, txid: c.txid, orderId: c.card?.orderId,
   };
   return `${headOf(legacy)}\nTERMS\n${frameworkTerms(p)}`;
 }
 
-export function buildResaleContractText(c: ResaleArgs, opts: { shariah?: boolean; overrides?: TermsOverrides } = {}): string {
+export function buildResaleContractText(c: ResaleArgs, opts: { shariah?: boolean; overrides?: TermsOverrides; owner?: string } = {}): string {
   const legacy = generateResaleContractText(c);
   if (!frameworkEnabled()) return legacy;
   const p: FrameworkParams = {
     kind: 'resale', rail: 'pi',
     governingLaw: c.legal?.governingLaw ?? 'the laws of the United Arab Emirates', extraClause: c.legal?.extraClause,
-    shariah: opts.shariah, overrides: opts.overrides,
+    shariah: opts.shariah, overrides: opts.overrides, owner: opts.owner,
     currency: c.currency, amount: c.amount, paymentId: c.paymentId, txid: c.txid,
     resale: { fee: c.fee, proceeds: c.proceeds },
   };

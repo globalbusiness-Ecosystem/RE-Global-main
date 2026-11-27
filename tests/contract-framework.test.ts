@@ -166,7 +166,7 @@ describe('the clause library', () => {
     for (const k of ['UNCITRAL', 'UNIDROIT', 'eIDAS', 'GDPR', 'Consumer', 'IOSCO', 'MiCA', 'FATF', 'AAOIFI']) expect(joined, k).toContain(k);
   });
   it('every clause is used by at least one kind', () => {
-    const p = (kind: FrameworkKind, rail: 'pi' | 'card' = 'pi'): FrameworkParams => ({ kind, rail, governingLaw: 'x', currency: 'Pi', amount: 1, paymentId: 'a', txid: 'b', shariah: true });
+    const p = (kind: FrameworkKind, rail: 'pi' | 'card' = 'pi'): FrameworkParams => ({ kind, rail, governingLaw: 'x', currency: 'Pi', amount: 1, paymentId: 'a', txid: 'b', shariah: true, owner: 'X (company)' });
     const used = new Set(FRAMEWORK_KINDS.flatMap((k) => ['pi', 'card'].flatMap((r) => clausesFor(p(k, r as 'pi' | 'card')).map((c) => c.id))));
     for (const c of CLAUSES) expect(used.has(c.id), c.id).toBe(true);
   });

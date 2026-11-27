@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { adminApi, Btn, Card, Field, inputCls, GOLD, TYPE_LABELS, STATUS_LABELS } from './admin-ui';
 import { osmLink } from '@/lib/geocode';
+import PropertyOwnerPanel from './property-owner-panel';
 import { hasValidCoords } from '@/lib/map-focus';
 
 const TR_LANGS = [
@@ -290,6 +291,8 @@ export default function PropertyForm({ initial, onSaved, onCancel }: { initial: 
         <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.featured} onChange={(e) => set({ featured: e.target.checked })} />⭐ مميز</label>
         <label className="flex items-center gap-1.5 text-foreground"><input type="checkbox" checked={form.hidden} onChange={(e) => set({ hidden: e.target.checked })} />🙈 مخفي عن الزوار</label>
       </div>
+
+      {editing && <PropertyOwnerPanel propertyId={initial.id} />}
 
       <div className="mt-5 flex gap-2">
         <Btn onClick={save} disabled={saving || busy}>{saving ? '...جاري الحفظ' : editing ? 'حفظ التعديلات' : 'إضافة العقار'}</Btn>

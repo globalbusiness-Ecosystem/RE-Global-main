@@ -14,7 +14,7 @@ export type CustomClause = { title: string; text: string };
 export type TermsOverrides = { revision: number; clauses: Record<string, ClauseEdit>; custom: CustomClause[] };
 export type TermsDraft = { clauses: Record<string, ClauseEdit>; custom: CustomClause[] };
 
-export const LOCKED_IDS = ['price-pi', 'price-card', 'resale-settlement', 'e-execution', 'cancellation', 'data', 'liability', 'law', 'pilot'];
+export const LOCKED_IDS = ['owner', 'price-pi', 'price-card', 'resale-settlement', 'e-execution', 'cancellation', 'data', 'liability', 'law', 'pilot'];
 export const EDITABLE_IDS = ['definitions', 'subject-sale', 'subject-invest', 'subject-rent', 'subject-hotel', 'subject-resale', 'compliance', 'inspection', 'risk', 'risk-short', 'distributions', 'transfers', 'roles', 'shariah', 'force-majeure', 'disputes', 'general'];
 export const DISABLEABLE_IDS = ['inspection', 'transfers', 'shariah', 'force-majeure'];
 
