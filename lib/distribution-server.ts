@@ -3,6 +3,7 @@ import { Timestamp } from 'firebase-admin/firestore';
 import { adminDb } from '@/lib/firebase-admin';
 import { computeRun, confirmationOk, parsePeriod, payoutIdFor, periodsOverlap, shareDays, splitByKyc, type LedgerEvent, type Row, type Run } from '@/lib/distribution';
 import { totalSharesOf } from '@/lib/share-rules';
+import { distributionsAllowed, platformMode } from '@/lib/platform-mode';
 
 // Reads the share ledger of one property and works out a distribution. Nothing here moves money or creates a payout:
 // a saved run is a draft the admin can look at and export. Paying it comes in a later, separate step.
@@ -33,8 +34,8 @@ export async function loadLedger(propertyId: string): Promise<LedgerEvent[]> {
   return out;
 }
 
-/** Paying a run needs this switch on in Vercel (DISTRIBUTIONS_ENABLED=1). Off by default, so nothing here can create a payout. */
-export const distributionsUnlocked = (): boolean => process.env.DISTRIBUTIONS_ENABLED === '1';
+/** Paying a run needs two things in Vercel: PLATFORM_MODE other than SANDBOX, and DISTRIBUTIONS_ENABLED=1. Off by default, so nothing here can create a payout. */
+export const distributionsUnlocked = (): boolean => distributionsAllowed(platformMode(), process.env.DISTRIBUTIONS_ENABLED);
 
 export type RunRequest = { propertyId: unknown; start: unknown; end: unknown; gross: unknown; feePct: unknown };
 export type Computed = { ok: true; propertyId: string; propertyTitle: string; start: string; end: string; run: Run } | { ok: false; status: number; error: string };
@@ -83,7 +84,7 @@ export async function cancelDraft(id: string) {
  * Safe to repeat: a run left half done ('approving') is finished by approving it again; a payout that exists is never touched.
  */
 export async function approveRun(id: string, typed: unknown) {
-  if (!distributionsUnlocked()) return { ok: false as const, status: 403, error: 'Paying distributions is locked (set DISTRIBUTIONS_ENABLED=1)' };
+  if (!distributionsUnlocked()) return { ok: false as const, status: 403, error: 'Paying distributions is locked (needs PLATFORM_MODE other than SANDBOX and DISTRIBUTIONS_ENABLED=1)' };
   if (!okId(id)) return { ok: false as const, status: 400, error: 'Invalid run' };
   const ref = adminDb.collection('distributions').doc(id);
   const claim = await adminDb.runTransaction(async (tx) => {

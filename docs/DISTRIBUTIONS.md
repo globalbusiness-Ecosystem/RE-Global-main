@@ -24,7 +24,7 @@ Confirmed purchases from the platform (`share_holdings`) and confirmed transfers
 
 ## Approval (Phase 290)
 
-- Locked by default. It works only when `DISTRIBUTIONS_ENABLED=1` is set in Vercel and the app is redeployed. Do not set it before counsel has answered the questions below.
+- Locked by default. It works only when `PLATFORM_MODE` is `SOFT_LAUNCH` or `LIVE` (see docs/PLATFORM-MODE.md) and `DISTRIBUTIONS_ENABLED=1` is set in Vercel and the app is redeployed. Do not set either before counsel has answered the questions below.
 - Only a draft can be approved. The admin must type the net amount of the run.
 - Approval creates one pending payout (kind `distribution`, id `dist-<run>-<uid>`) for each holder whose identity check (KYC) is approved. Holders without an approved KYC are listed on the run as held, with their amount, and no payout is created for them.
 - It is safe to repeat: a payout that already exists is never touched, and a run left half done ("approving") is finished by approving it again.

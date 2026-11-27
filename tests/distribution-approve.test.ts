@@ -52,10 +52,10 @@ describe('the confirmation', () => {
 
 describe('the lock and the safe retry', () => {
   const server = read('lib/distribution-server.ts');
-  afterEach(() => { delete process.env.DISTRIBUTIONS_ENABLED; });
-  it('is off unless the switch is exactly 1', async () => {
+  afterEach(() => { delete process.env.DISTRIBUTIONS_ENABLED; delete process.env.PLATFORM_MODE; });
+  it('is off unless the mode allows real money and the switch is exactly 1', async () => {
     const src = server.match(/export const distributionsUnlocked = \(\): boolean => (.*);/)?.[1] ?? '';
-    expect(src).toBe("process.env.DISTRIBUTIONS_ENABLED === '1'");
+    expect(src).toBe('distributionsAllowed(platformMode(), process.env.DISTRIBUTIONS_ENABLED)');
     expect(server.indexOf('distributionsUnlocked()')).toBeLessThan(server.indexOf("collection('payouts')"));
   });
   it('approving checks the lock first, then the status and the typed amount, inside one transaction', () => {

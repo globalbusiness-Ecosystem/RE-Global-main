@@ -1,5 +1,7 @@
 // "Can we open the site to the public?" Pure: takes yes/no flags and counts (never secret values) and lists checks.
 
+import { MODE_AR, type PlatformMode } from '@/lib/platform-mode';
+
 export type ReadinessInput = {
   env: {
     PI_API_KEY: boolean; PI_ISSUER_SECRET_KEY: boolean; PI_ISSUER_PUBLIC_KEY: boolean;
@@ -7,6 +9,8 @@ export type ReadinessInput = {
     EMAIL_CONFIGURED: boolean; FIREBASE_WEB_CONFIG: boolean; CUSTOM_DOMAIN: boolean; REGISTRY_CONTRACT_ID: boolean;
   };
   cardSandboxOn: boolean;
+  /** PLATFORM_MODE from the environment (SANDBOX when it is not set). */
+  platformMode: PlatformMode;
   /** A real card company is connected (not the test provider). */
   realCardProvider: boolean;
   /** Identity checks are done by a company (true) or by hand (false). */
@@ -60,6 +64,7 @@ export function buildReadiness(i: ReadinessInput): ReadinessCheck[] {
     c('review', 'content', i.reviewCases === 0, true, 'مفيش حجوزات أو حصص محتاجة مراجعة', 'افتح المدفوعات والغي الحالات اللي محتاجة استرداد.'),
     c('shares', 'content', i.shareMismatches === 0, false, 'عدّادات الحصص مطابقة للمشتريات', 'راجع العقارات اللي ظاهرة في "محتاج انتباهك".'),
     c('firebase-web', 'site', e.FIREBASE_WEB_CONFIG, true, 'إعدادات Firebase للويب كاملة (تسجيل الدخول بجوجل والإيميل)', 'ضيف متغيرات NEXT_PUBLIC_FIREBASE_* في Vercel.'),
+    c('platform-mode', 'site', true, false, `وضع المنصة: ${MODE_AR[i.platformMode]}`, 'اضبط PLATFORM_MODE في Vercel (SANDBOX أو SOFT_LAUNCH أو LIVE) وأعد النشر. من غيره الوضع تجريبي ومفيش حاجة بتدفع فلوس حقيقية.'),
     c('domain', 'site', e.CUSTOM_DOMAIN, false, 'دومين خاص متضبط (NEXT_PUBLIC_BASE_URL)', 'لو عندك دومين، ضيفه في Vercel وفي NEXT_PUBLIC_BASE_URL.'),
   ];
 }

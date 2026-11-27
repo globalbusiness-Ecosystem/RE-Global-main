@@ -10,6 +10,7 @@ import { ensureProviders } from '@/lib/card-pay/registry';
 import { ensureKycProviders } from '@/lib/kyc-provider/registry';
 import { activeKycProvider } from '@/lib/kyc-provider/provider';
 import { buildReadiness, readinessSummary, type ReadinessInput } from '@/lib/launch-readiness';
+import { platformMode } from '@/lib/platform-mode';
 
 const has = (k: string) => !!process.env[k];
 const count = async (q: FirebaseFirestore.Query) => (await q.count().get()).data().count;
@@ -41,6 +42,7 @@ export async function gatherReadiness() {
       REGISTRY_CONTRACT_ID: has('REGISTRY_CONTRACT_ID'),
     },
     cardSandboxOn: sandboxOn,
+    platformMode: platformMode(),
     // Only the test provider exists today; a real company counts once its adapter is registered (and it is not the sandbox).
     realCardProvider: false,
     kycByCompany: activeKycProvider() !== null,

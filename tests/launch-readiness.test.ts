@@ -4,7 +4,7 @@ import { buildReadiness, readinessSummary, GROUP_LABELS, type ReadinessInput } f
 
 const good: ReadinessInput = {
   env: { PI_API_KEY: true, PI_ISSUER_SECRET_KEY: true, PI_ISSUER_PUBLIC_KEY: true, ADMIN_SESSION_SECRET: true, ADMIN_TOTP_SECRET: true, ADMIN_PIN_STRONG: true, ADMIN_ALERT_EMAIL: true, CRON_SECRET: true, EMAIL_CONFIGURED: true, FIREBASE_WEB_CONFIG: true, CUSTOM_DOMAIN: true, REGISTRY_CONTRACT_ID: true },
-  cardSandboxOn: false, realCardProvider: true, kycByCompany: false,
+  cardSandboxOn: false, platformMode: 'SANDBOX', realCardProvider: true, kycByCompany: false,
   visibleProperties: 3, incompleteListings: 0, usdProperties: 0, piRateSet: false, reviewCases: 0, shareMismatches: 0, kycPending: 0, kycOldestHours: 0,
 };
 const failed = (i: ReadinessInput) => buildReadiness(i).filter((c) => !c.ok).map((c) => c.id);
