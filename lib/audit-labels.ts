@@ -7,7 +7,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   'market.fee': 'تعديل عمولة إعادة البيع', 'pricing.rate': 'تعديل سعر Pi/USD', 'payout.paid': 'تعليم مستحق كمدفوع',
   'content.create': 'إضافة محتوى', 'content.update': 'تعديل محتوى', 'content.delete': 'حذف محتوى', 'content.toggle': 'تفعيل/إيقاف محتوى',
   'admin.login': 'تسجيل دخول الأدمن', 'admin.revoke': 'خروج من كل جلسات الأدمن', 'admin.backup': 'تصدير نسخة احتياطية',
-  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'contract.terms': 'تعديل بنود العقد', 'property.owner': 'تعديل مالك عقار', 'distribution.save': 'حفظ مسودة توزيع عوائد', 'distribution.cancel': 'إلغاء مسودة توزيع عوائد', 'texts.save': 'حفظ نصوص الموقع', 'display.demo': 'إظهار/إخفاء العقارات التجريبية', 'display.tours': 'إظهار/إخفاء الجولات 360',
+  'listing.report.resolve': 'قفل بلاغ على عقار', 'legal.save': 'حفظ إعدادات قانونية', 'contract.terms': 'تعديل بنود العقد', 'property.owner': 'تعديل مالك عقار', 'distribution.save': 'حفظ مسودة توزيع عوائد', 'distribution.cancel': 'إلغاء مسودة توزيع عوائد', 'distribution.approve': 'اعتماد توزيع عوائد وإنشاء مستحقات', 'texts.save': 'حفظ نصوص الموقع', 'display.demo': 'إظهار/إخفاء العقارات التجريبية', 'display.tours': 'إظهار/إخفاء الجولات 360',
 };
 
 export function auditLabel(action: string): string {
@@ -34,6 +34,7 @@ export function auditSummary(action: string, detail: Record<string, unknown> | n
     case 'payout.paid': return [s(d.id), s(d.note)].filter(Boolean).join(' · ');
     case 'user.ban': case 'user.unban': return [d.username ? `@${s(d.username)}` : '', s(d.reason)].filter(Boolean).join(' · ');
     case 'legal.save': return s(d.country);
+    case 'distribution.approve': return `${s(d.paid)} مستحق · ${s(d.held)} محجوز`;
     case 'contract.terms': return `نسخة ${s(d.revision)}${d.note ? ' · ' + s(d.note) : ''}`;
     case 'texts.save': return [s(d.page), s(d.lang)].filter(Boolean).join(' · ');
     default: return s(d.title) || s(d.username) || s(d.id) || s(d.kind);

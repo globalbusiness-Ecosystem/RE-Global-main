@@ -98,5 +98,28 @@ export function computeRun(i: RunInput): { ok: true; run: Run } | { ok: false; e
   return { ok: true, run: { gross: fromUnits(grossU), feePct: pct, fee: fromUnits(feeU), net: fromUnits(netU), allocated: fromUnits(paidU), unallocated: fromUnits(netU - paidU), days: i.period.days, totalShares: i.totalShares, rows } };
 }
 
+export type ApprovalRow = Row & { reason?: string };
+
+/** Who gets a payout record now (identity verified) and who is held back. A held holder keeps their amount in the run; nothing is created for them. */
+export function splitByKyc(rows: Row[], approved: ReadonlySet<string>): { pay: Row[]; held: ApprovalRow[] } {
+  const pay: Row[] = [];
+  const held: ApprovalRow[] = [];
+  for (const r of rows) {
+    if (!r.uid || r.uid.includes('/') || r.uid.length > 100) held.push({ ...r, reason: 'invalid account' });
+    else if (!approved.has(r.uid)) held.push({ ...r, reason: 'identity not verified' });
+    else pay.push(r);
+  }
+  return { pay, held };
+}
+
+/** One payout record per holder per run: the id makes a repeated approval harmless. */
+export const payoutIdFor = (runId: string, uid: string): string => `dist-${runId}-${uid}`;
+
+/** The admin must type the net amount of the run before it is approved. */
+export const confirmationOk = (typed: unknown, net: number): boolean => {
+  const t = typeof typed === 'number' ? typed : Number(String(typed ?? '').trim().replace(/,/g, ''));
+  return Number.isFinite(t) && Math.round(t * UNIT) === Math.round(net * UNIT);
+};
+
 /** True when two periods (inclusive 'YYYY-MM-DD' ranges) share a day. */
 export const periodsOverlap = (a: { start: string; end: string }, b: { start: string; end: string }): boolean => a.start <= b.end && b.start <= a.end;

@@ -222,7 +222,7 @@ export default function SharesMarketPage() {
             {me.payouts.map((p) => (
               <article key={p.id} className={`${card} flex items-center justify-between gap-3 !space-y-0`}>
                 <div>
-                  <p className="text-sm text-foreground/80">{p.kind === 'refund' ? mk('refund', language) : mk('proceeds', language)}</p>
+                  <p className="text-sm text-foreground/80">{p.kind === 'refund' ? mk('refund', language) : p.kind === 'distribution' ? mk('distribution', language) : mk('proceeds', language)}</p>
                   <p className="text-lg font-bold text-foreground"><Pi value={p.amount} /></p>
                 </div>
                 <span className={`rounded-full px-2.5 py-1 text-xs font-semibold ${p.status === 'paid' ? 'bg-emerald-500/15 text-emerald-400' : 'bg-yellow-500/15 text-yellow-400'}`}>{p.status === 'paid' ? mk('paid', language) : mk('pending', language)}</span>

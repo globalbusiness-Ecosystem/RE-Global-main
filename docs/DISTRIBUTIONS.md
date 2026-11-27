@@ -1,6 +1,6 @@
-# Distribution of income to Share holders (Phase 289)
+# Distribution of income to Share holders (Phases 289 and 290)
 
-This phase only calculates and saves drafts. It does not move money, create a payout, or touch a balance or a Share count. Paying a run is a later, separate step.
+Phase 289 calculates and saves drafts. Phase 290 adds the approval that creates the payouts. Neither moves money by itself: a payout is a record the admin pays by hand, like refunds and resale proceeds. Neither touches a balance or a Share count.
 
 Admin, Payments, tab "Distributions". Owner account only.
 
@@ -21,6 +21,15 @@ Confirmed purchases from the platform (`share_holdings`) and confirmed transfers
 ## What is saved
 
 `distributions/{id}`: property, period, gross, fee, net, allocated, unallocated, one row per holder, status `draft` or `cancelled`. A draft can be exported as CSV or cancelled.
+
+## Approval (Phase 290)
+
+- Locked by default. It works only when `DISTRIBUTIONS_ENABLED=1` is set in Vercel and the app is redeployed. Do not set it before counsel has answered the questions below.
+- Only a draft can be approved. The admin must type the net amount of the run.
+- Approval creates one pending payout (kind `distribution`, id `dist-<run>-<uid>`) for each holder whose identity check (KYC) is approved. Holders without an approved KYC are listed on the run as held, with their amount, and no payout is created for them.
+- It is safe to repeat: a payout that already exists is never touched, and a run left half done ("approving") is finished by approving it again.
+- The holder sees it under "Owed to me" as "Property income" in the market page and as an alert in 7 languages. The admin sees it in Payments, "Transfers and refunds", and marks it paid after sending the Pi, as for the other payouts.
+- An approved run cannot be cancelled. A wrong payout is handled by hand.
 
 ## For counsel before real money is used
 

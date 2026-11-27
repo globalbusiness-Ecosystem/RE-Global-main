@@ -29,6 +29,7 @@ export const MARKET_LABELS = {
   owedToMe: { en: 'Owed to me', ar: 'مستحقاتي', fr: 'Sommes dues', es: 'Pagos pendientes a mi favor', pt: 'Valores a receber', ur: 'میرے واجبات', zh: '应收款项' },
   refund: { en: 'Refund', ar: 'استرداد', fr: 'Remboursement', es: 'Reembolso', pt: 'Reembolso', ur: 'رقم کی واپسی', zh: '退款' },
   proceeds: { en: 'Sale proceeds', ar: 'حصيلة بيع', fr: 'Produit de la vente', es: 'Ingresos de la venta', pt: 'Receita da venda', ur: 'فروخت کی آمدنی', zh: '销售所得' },
+  distribution: { en: 'Property income', ar: 'عوائد عقار', fr: 'Revenus de l’immeuble', es: 'Ingresos del inmueble', pt: 'Rendimentos do imóvel', ur: 'جائیداد کی آمدنی', zh: '房产收益' },
   paid: { en: 'Paid', ar: 'تم التحويل', fr: 'Payé', es: 'Pagado', pt: 'Pago', ur: 'ادا ہو گئی', zh: '已支付' },
   pending: { en: 'Pending', ar: 'قيد التحويل', fr: 'En attente', es: 'Pendiente', pt: 'Pendente', ur: 'زیر التوا', zh: '待处理' },
   manualNote: { en: 'The platform team sends these by hand.', ar: 'يتم التحويل يدويًا من فريق المنصة.', fr: 'L’équipe de la plateforme les envoie manuellement.', es: 'El equipo de la plataforma los envía manualmente.', pt: 'A equipe da plataforma envia estes valores manualmente.', ur: 'پلیٹ فارم ٹیم یہ رقوم خود بھیجتی ہے۔', zh: '平台团队会手动发送这些款项。' },

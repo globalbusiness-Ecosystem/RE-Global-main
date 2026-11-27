@@ -18,25 +18,26 @@ export function payoutAlerts(payouts: PayoutRow[], nowMs: number): SmartAlert[] 
     if (!p || typeof p.id !== 'string' || !p.id) continue;
     const amount = Number.isFinite(p.amount) ? p.amount : 0;
     const refund = p.kind === 'refund';
+    const dist = p.kind === 'distribution';
     if (p.status === 'paid') {
       const at = when(p.paidAt ?? p.createdAt, nowMs);
       if (nowMs - at > PAID_WINDOW_DAYS * DAY_MS) continue;
       out.push({
         id: `payout-paid-${p.id}`, type: 'payout', createdAt: new Date(at),
-        titleEn: refund ? 'Your refund was sent' : 'Your sale proceeds were sent',
-        titleAr: refund ? 'تم تحويل الاسترداد' : 'تم تحويل حصيلة البيع',
+        titleEn: refund ? 'Your refund was sent' : dist ? 'Your property income was sent' : 'Your sale proceeds were sent',
+        titleAr: refund ? 'تم تحويل الاسترداد' : dist ? 'تم تحويل عوائد حصصك' : 'تم تحويل حصيلة البيع',
         descriptionEn: `${amount} π was transferred to your Pi wallet. Check your wallet.`,
         descriptionAr: `${amount} π اتحوّلت لمحفظتك على Pi. راجع محفظتك.`,
-        i18n: { title: refund ? 'refundSentT' : 'saleSentT', description: 'paidD', vars: { amount } },
+        i18n: { title: refund ? 'refundSentT' : dist ? 'distSentT' : 'saleSentT', description: 'paidD', vars: { amount } },
       });
     } else if (p.status === 'pending') {
       out.push({
         id: `payout-pending-${p.id}`, type: 'payout', createdAt: new Date(when(p.createdAt, nowMs)),
-        titleEn: refund ? 'Refund on its way' : 'Sale proceeds on their way',
-        titleAr: refund ? 'الاسترداد في الطريق' : 'حصيلة البيع في الطريق',
+        titleEn: refund ? 'Refund on its way' : dist ? 'Property income on its way' : 'Sale proceeds on their way',
+        titleAr: refund ? 'الاسترداد في الطريق' : dist ? 'عوائد حصصك في الطريق' : 'حصيلة البيع في الطريق',
         descriptionEn: `${amount} π is waiting for the manual transfer from the team.`,
         descriptionAr: `${amount} π مستنية التحويل اليدوي من الفريق.`,
-        i18n: { title: refund ? 'refundPendT' : 'salePendT', description: 'pendD', vars: { amount } },
+        i18n: { title: refund ? 'refundPendT' : dist ? 'distPendT' : 'salePendT', description: 'pendD', vars: { amount } },
       });
     }
   }

@@ -59,7 +59,7 @@ export default function PayoutsPanel({ onUnauthorized }: { onUnauthorized: () =>
               <span className="shrink-0 font-bold" style={{ color: GOLD }}>{r.amount} {r.currency ?? 'π'}</span>
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">
-              <Badge tone={r.kind === 'refund' ? 'red' : 'blue'}>{r.kind === 'refund' ? 'استرداد' : 'حصيلة بيع'}</Badge>
+              <Badge tone={r.kind === 'refund' ? 'red' : r.kind === 'distribution' ? 'gold' : 'blue'}>{r.kind === 'refund' ? 'استرداد' : r.kind === 'distribution' ? 'توزيع عوائد' : 'حصيلة بيع'}</Badge>
               <Badge tone={r.status === 'paid' ? 'green' : 'gold'}>{r.status === 'paid' ? 'اتحوّل' : 'معلّق'}</Badge>
               {r.currency ? <Badge tone="blue">بطاقة: رجّعها من لوحة شركة الدفع</Badge> : null}
               <span>{fmtDate(r.createdAt)}</span>

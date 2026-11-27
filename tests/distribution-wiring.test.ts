@@ -4,7 +4,7 @@ import { auditLabel } from '@/lib/audit-labels';
 
 const read = (p: string) => readFileSync(p, 'utf8');
 
-describe('distribution is calculation and draft only', () => {
+describe('distribution calculates and saves drafts; only approve creates payouts', () => {
   it('the route is guarded, never cached, and logged', () => {
     const s = read('app/api/admin/distributions/route.ts');
     expect(s).toContain('isAdminRequest');
@@ -12,13 +12,14 @@ describe('distribution is calculation and draft only', () => {
     expect(s).toContain("logAdmin('distribution.save'");
     expect(s).toContain("logAdmin('distribution.cancel'");
   });
-  it('nothing in the distribution code creates a payout, touches a balance or a share count', () => {
+  it('the distribution code never touches a balance or a share count, and only approve writes payouts', () => {
     for (const f of ['lib/distribution.ts', 'lib/distribution-server.ts', 'app/api/admin/distributions/route.ts']) {
       const s = read(f);
-      expect(s, f).not.toMatch(/collection\('payouts'\)|walletBalances|sharesSold|share_holdings'\)\.(doc|add)|\.(set|update)\(.*share_/);
+      expect(s, f).not.toMatch(/walletBalances|sharesSold|share_holdings'\)\.(doc|add)|\.(set|update)\(.*share_/);
     }
     const server = read('lib/distribution-server.ts');
-    expect([...new Set([...server.matchAll(/adminDb\.collection\('([a-z_]+)'\)/g)].map((m) => m[1]))].sort()).toEqual(['distributions', 'properties', 'share_holdings', 'share_transfers']);
+    expect(server.match(/collection\('payouts'\)/g)?.length).toBe(1);
+    expect([...new Set([...server.matchAll(/adminDb\.collection\('([a-z_]+)'\)/g)].map((m) => m[1]))].sort()).toEqual(['distributions', 'kyc', 'payouts', 'properties', 'share_holdings', 'share_transfers']);
     expect(server).toContain("tx.update(ref, { status: 'cancelled'");
   });
   it('the ledger counts only confirmed purchases and transfers', () => {
@@ -34,10 +35,9 @@ describe('distribution is calculation and draft only', () => {
     expect(auditLabel('distribution.save')).toBe('حفظ مسودة توزيع عوائد');
     expect(auditLabel('distribution.cancel')).toBe('إلغاء مسودة توزيع عوائد');
   });
-  it('the panel only previews, saves a draft, opens, cancels and exports', () => {
+  it('the panel can preview, save, open, cancel, export and (when unlocked) approve, and never marks anything paid', () => {
     const s = read('components/admin/distributions-panel.tsx');
-    expect(s).toContain("'preview'");
-    expect(s).toContain("'save'");
-    expect(s).not.toMatch(/payouts|markPaid|approve/);
+    for (const a of ["'preview'", "'save'", "'approve'"]) expect(s).toContain(a);
+    expect(s).not.toMatch(/markPaid|status: 'paid'/);
   });
 });

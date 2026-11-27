@@ -6,16 +6,17 @@ import { adminApi, UnauthorizedError, Btn, Card, Badge, Field, inputCls, fmtDate
 
 type Row = { uid: string; username: string; shareDays: number; sharesAtEnd: number; amount: number };
 type Run = { gross: number; feePct: number; fee: number; net: number; allocated: number; unallocated: number; days: number; totalShares: number; rows: Row[] };
-type Saved = { id: string; propertyTitle: string; start: string; end: string; net: number; allocated: number; unallocated: number; status: string; note: string; holders: number; createdAt: string | null };
+type Saved = { id: string; propertyTitle: string; start: string; end: string; net: number; allocated: number; unallocated: number; status: string; note: string; holders: number; paidRows: number | null; heldRows: number | null; createdAt: string | null };
 type Prop = { id: string; title: string; totalShares?: number };
 
-const STATUS: Record<string, string> = { draft: 'مسودة', cancelled: 'ملغي' };
+const STATUS: Record<string, string> = { draft: 'مسودة', cancelled: 'ملغي', approving: 'جاري الاعتماد', approved: 'معتمد' };
 
-// Works out how a property's income is shared between its Share holders, day by day. It only calculates and saves a draft:
-// nothing is paid and no payout is created from here.
+// Works out how a property's income is shared between its Share holders, day by day, saves a draft, and (only when the owner has
+// switched DISTRIBUTIONS_ENABLED on) approves it: one pending payout per verified holder, paid by hand like the other payouts.
 export default function DistributionsPanel({ onUnauthorized }: { onUnauthorized: () => void }) {
   const [props, setProps] = useState<Prop[]>([]);
   const [saved, setSaved] = useState<Saved[]>([]);
+  const [unlocked, setUnlocked] = useState(false);
   const [propertyId, setPropertyId] = useState('');
   const [start, setStart] = useState('');
   const [end, setEnd] = useState('');
@@ -28,7 +29,7 @@ export default function DistributionsPanel({ onUnauthorized }: { onUnauthorized:
 
   const fail = useCallback((e: any) => { if (e instanceof UnauthorizedError) onUnauthorized(); else setMsg('❌ ' + e.message); }, [onUnauthorized]);
   const load = useCallback(() => {
-    adminApi<{ runs: Saved[] }>('/api/admin/distributions').then((d) => setSaved(d.runs)).catch(fail);
+    adminApi<{ runs: Saved[]; unlocked: boolean }>('/api/admin/distributions').then((d) => { setSaved(d.runs); setUnlocked(d.unlocked === true); }).catch(fail);
   }, [fail]);
   useEffect(() => {
     adminApi<{ properties: Prop[] }>('/api/admin/properties').then((d) => setProps(d.properties.filter((p) => Number(p.totalShares) > 0))).catch(fail);
@@ -52,10 +53,22 @@ export default function DistributionsPanel({ onUnauthorized }: { onUnauthorized:
     setBusy(false);
   };
 
+  const approve = async (s: Saved) => {
+    const typed = window.prompt(`ده هيعمل مستحقات فعلية لأصحاب الحصص اللي هويتهم متحقق منها. اكتب الصافي (${s.net}) للتأكيد:`);
+    if (typed === null) return;
+    setBusy(true); setMsg('');
+    try {
+      const r = await adminApi<{ paid: number; paidAmount: number; held: number; heldAmount: number }>('/api/admin/distributions', { method: 'POST', body: JSON.stringify({ action: 'approve', id: s.id, confirm: typed }) });
+      setMsg(`✅ اتعمل ${r.paid} مستحق (${r.paidAmount} Pi) في تبويب التحويلات. محجوز لحد التحقق من الهوية: ${r.held} (${r.heldAmount} Pi).`);
+      load();
+    } catch (e: any) { fail(e); }
+    setBusy(false);
+  };
+
   return (
-    <Card title="📊 توزيع عوائد الحصص (حساب ومسودة فقط)">
+    <Card title="📊 توزيع عوائد الحصص">
       <p className="mb-3 text-xs text-muted-foreground">
-        بيحسب نصيب كل مالك حصص من الدخل الصافي للعقار، يوم بيوم: الحصة بتتحسب لمن يملكها في آخر اليوم، فلو اتباعت في نص الفترة البايع ياخد لحد اليوم اللي قبل البيع والمشتري من يوم البيع. نصيب الحصص اللي لسه ما اتباعتش بيفضل "غير موزّع". الكسور بتتقطع لأقرب 4 أرقام لتحت، فالمجموع ما يزيدش عن الصافي أبدًا. المسودة ما بتحرّك فلوس ولا بتعمل مستحقات؛ تقدر تصدّرها CSV. الدفع نفسه مرحلة تانية.
+        بيحسب نصيب كل مالك حصص من الدخل الصافي للعقار، يوم بيوم: الحصة بتتحسب لمن يملكها في آخر اليوم، فلو اتباعت في نص الفترة البايع ياخد لحد اليوم اللي قبل البيع والمشتري من يوم البيع. نصيب الحصص اللي لسه ما اتباعتش بيفضل "غير موزّع". الكسور بتتقطع لأقرب 4 أرقام لتحت، فالمجموع ما يزيدش عن الصافي أبدًا. المسودة ما بتحرّك فلوس ولا بتعمل مستحقات؛ تقدر تصدّرها CSV. الاعتماد (بعد المسودة) هو اللي بيعمل المستحقات، وهو مقفول لحد ما المالك يفعّل DISTRIBUTIONS_ENABLED في Vercel. {unlocked ? '🔓 الاعتماد مفعّل.' : '🔒 الاعتماد مقفول حاليًا.'}
       </p>
       <div className="grid gap-3 sm:grid-cols-2">
         <Field label="العقار">
@@ -100,11 +113,12 @@ export default function DistributionsPanel({ onUnauthorized }: { onUnauthorized:
           <div className="mb-1 text-sm font-bold">المسودات المحفوظة</div>
           {saved.map((s) => (
             <div key={s.id} className="flex flex-wrap items-center justify-between gap-2 border-t border-border py-1.5 text-xs">
-              <span>{s.propertyTitle} · {s.start} → {s.end} · صافي {s.net} · {s.holders} مالك · {fmtDate(s.createdAt)} {s.note && `· ${s.note}`}</span>
+              <span>{s.propertyTitle} · {s.start} → {s.end} · صافي {s.net} · {s.holders} مالك{s.paidRows !== null ? ` (مستحقات ${s.paidRows}، محجوز ${s.heldRows ?? 0})` : ''} · {fmtDate(s.createdAt)} {s.note && `· ${s.note}`}</span>
               <span className="flex items-center gap-1">
-                <Badge tone={s.status === 'draft' ? 'gold' : 'gray'}>{STATUS[s.status] || s.status}</Badge>
+                <Badge tone={s.status === 'draft' || s.status === 'approved' ? 'gold' : 'gray'}>{STATUS[s.status] || s.status}</Badge>
                 <Btn small kind="ghost" onClick={() => openSaved(s.id)}>فتح</Btn>
                 {s.status === 'draft' && <Btn small kind="danger" disabled={busy} onClick={() => cancel(s.id)}>إلغاء</Btn>}
+                {(s.status === 'draft' || s.status === 'approving') && <Btn small disabled={busy || !unlocked} onClick={() => approve(s)}>{unlocked ? 'اعتماد وإنشاء المستحقات' : '🔒 الاعتماد مقفول'}</Btn>}
               </span>
             </div>
           ))}

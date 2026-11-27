@@ -2,14 +2,14 @@ import 'server-only';
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdminRequest } from '@/lib/admin-guard';
 import { logAdmin } from '@/lib/admin-audit';
-import { cancelDraft, computeForProperty, getRun, listRuns, saveDraft } from '@/lib/distribution-server';
+import { approveRun, cancelDraft, computeForProperty, distributionsUnlocked, getRun, listRuns, saveDraft } from '@/lib/distribution-server';
 
 export const dynamic = 'force-dynamic';
 
 const HEADERS = { 'Cache-Control': 'no-store' };
 const fail = (error: string, status = 400) => NextResponse.json({ ok: false, error }, { status, headers: HEADERS });
 
-// Working out and saving a distribution never moves money and never creates a payout. It is a draft to read and export.
+// Working out and saving a distribution never moves money and never creates a payout. Only 'approve' does, and only when DISTRIBUTIONS_ENABLED=1.
 export async function GET(req: NextRequest) {
   if (!(await isAdminRequest(req))) return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   try {
@@ -18,14 +18,14 @@ export async function GET(req: NextRequest) {
       const run = await getRun(id);
       return run ? NextResponse.json({ ok: true, run }, { headers: HEADERS }) : fail('Run not found', 404);
     }
-    return NextResponse.json({ ok: true, runs: await listRuns() }, { headers: HEADERS });
+    return NextResponse.json({ ok: true, runs: await listRuns(), unlocked: distributionsUnlocked() }, { headers: HEADERS });
   } catch (err) {
     console.error('[admin/distributions] read error:', err);
     return fail('Server error', 500);
   }
 }
 
-// { action: 'preview' | 'save' | 'cancel', ... }
+// { action: 'preview' | 'save' | 'cancel' | 'approve', ... }
 export async function POST(req: NextRequest) {
   if (!(await isAdminRequest(req))) return NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
   const b = await req.json().catch(() => null);
@@ -36,6 +36,12 @@ export async function POST(req: NextRequest) {
       if (!r.ok) return fail(r.error, r.status);
       await logAdmin('distribution.cancel', { id: String(b.id) });
       return NextResponse.json({ ok: true }, { headers: HEADERS });
+    }
+    if (b.action === 'approve') {
+      const r = await approveRun(String(b.id ?? ''), b.confirm);
+      if (!r.ok) return fail(r.error, r.status);
+      await logAdmin('distribution.approve', { id: String(b.id), paid: r.paid, held: r.held });
+      return NextResponse.json({ ok: true, paid: r.paid, paidAmount: r.paidAmount, held: r.held, heldAmount: r.heldAmount }, { headers: HEADERS });
     }
     const q = { propertyId: b.propertyId, start: b.start, end: b.end, gross: b.gross, feePct: b.feePct };
     if (b.action === 'preview') {
