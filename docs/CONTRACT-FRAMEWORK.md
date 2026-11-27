@@ -87,6 +87,12 @@ Admin, tab Content, section Legal, panel "Contract terms" (owner account only).
 - The owner is named for information. It is not a signatory, has no account, and the clause says the Platform does not guarantee the details beyond the Listing.
 - For counsel: whether naming the owner this way matches the real arrangement between the Platform and the owner (agency, lease, management agreement), and whether the lessor of a rent contract must sign or be identified in full.
 
+## Rent contracts (Phase 288)
+
+A rent contract now has, besides the common clauses: "Period, handover and return", "Early departure and holding over" (both editable from the admin), and "Rent and payment schedule" (locked): the whole rent is paid once at booking, there are no instalments, and the Platform takes no deposit and holds none. If the owner and the tenant agree a deposit directly, it is outside the contract.
+The owner has no account. In the admin payments list, a rent contract has the button "copy link for the owner": the public verification page shows the signed contract and needs no login.
+For counsel: whether a lump-sum rent with the Platform as the contracting party matches the real lease structure in each country, whether the lessor must sign or be named in full, whether stays of 30 nights or more need a registered lease, and whether a deposit and an instalment schedule are needed before real money is used.
+
 ## Rolling back
 
 Set `CONTRACT_FRAMEWORK=legacy` in Vercel and redeploy: new contracts use the original six clauses again. Contracts already created with the framework stay valid and keep their text.

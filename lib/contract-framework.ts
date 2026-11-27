@@ -88,6 +88,14 @@ export const CLAUSES: Clause[] = [
     body: () => 'The Seller transfers the Shares stated in the Subject to the Buyer, who accepts them with the rights the Listing attaches to them. The Seller confirms that it holds those Shares, that they are free of any pledge or claim known to it, and that it has the right to transfer them. The transfer is recorded in the Platform register and takes effect when the payment below is confirmed.',
   },
   {
+    id: 'rent-period', title: 'Period, handover and return', kinds: ['rent'], basis: CONTRACT,
+    body: () => 'The tenant may enter from the check-in time and must leave by the check-out time stated in the Listing, on the end date shown in the Subject. The Property is handed over in the condition the Listing describes. The tenant tells the Platform support channel promptly of any defect or damage, keeps to the number of occupants and the house rules in the Listing, and returns the Property clean and with its contents, fair wear excepted. Utilities and services are as the Listing states.',
+  },
+  {
+    id: 'rent-end', title: 'Early departure and holding over', kinds: ['rent'], basis: [...CONTRACT, ...CONSUMER],
+    body: () => 'If the tenant leaves before the end date, no refund is due unless the cancellation policy in the Listing or the law provides one. If the tenant stays after the end date without written agreement, the tenant is responsible for the loss this causes, to the extent the law allows. The Property may be recovered earlier only for a serious breach of this contract or of the house rules, and after notice where the law requires it.',
+  },
+  {
     id: 'owner', title: 'Owner of the Property', kinds: 'all', basis: [...CONTRACT, 'FATF Recommendations 24 and 25 (transparency of legal persons and arrangements)'],
     when: (p) => !!p.owner,
     body: (p) => `The Listing records the owner of the Property${p.kind === 'rent' ? ' (the lessor)' : ''} as ${p.owner}. The owner is named for information and is not a signatory to this contract. These details come from the Listing, the Platform does not guarantee them beyond what the Listing states, and the Buyer may ask the Platform support channel to confirm them.`,
@@ -101,6 +109,10 @@ export const CLAUSES: Clause[] = [
     id: 'price-card', title: 'Price and payment', kinds: 'all', basis: [...EC, ...CONSUMER],
     when: (p) => p.rail === 'card',
     body: (p) => `The Buyer has paid ${money(p)} by card through the Platform's payment provider (Order ID: ${p.orderId ?? p.paymentId}). The price is the whole price for what the Subject describes; any taxes or charges that the law places on a party are borne by that party. The payment provider's record of the order is evidence of the payment.`,
+  },
+  {
+    id: 'rent-payment', title: 'Rent and payment schedule', kinds: ['rent'], basis: [...EC, ...CONSUMER],
+    body: () => 'The whole rent for the period is paid in one payment when the booking is made, as stated in the clause on price and payment above. There are no instalments, and the Platform takes no security deposit. Any deposit or other sum that the tenant and the owner agree directly is outside this contract; the Platform is not a party to it and does not hold it.',
   },
   {
     id: 'resale-settlement', title: 'Fee and settlement', kinds: ['resale'], basis: CONSUMER,

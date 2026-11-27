@@ -63,6 +63,7 @@ export default function PaymentsList({ onUnauthorized }: { onUnauthorized: () =>
             <Badge tone="gold">{TYPE_LABELS[c.type] || c.type}</Badge>
             <Badge tone={c.status === 'completed' ? 'green' : 'gray'}>{c.status}</Badge>
             <a href={'/verify/' + c.id} target="_blank" rel="noreferrer" className="text-xs text-blue-400">فتح العقد ↗</a>
+            {c.type === 'rent' && <Btn small kind="ghost" onClick={() => { try { navigator.clipboard.writeText(location.origin + '/verify/' + c.id); } catch { /* clipboard not available */ } }}>📋 نسخ رابط للمالك</Btn>}
           </div>
           {c.txid && <p className="mt-1 truncate text-[10px] text-muted-foreground/70" dir="ltr">tx: {c.txid}</p>}
         </div>
