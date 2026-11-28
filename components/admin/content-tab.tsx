@@ -11,6 +11,7 @@ import BadgeSettings from './badge-settings';
 import CelebrationSettings from './celebration-settings';
 import RewardsSettings from './rewards-settings';
 import RewardsLeaderboard from './rewards-leaderboard';
+import SubTabs from './sub-tabs';
 import { adminApi, UnauthorizedError, Btn, Card, Badge, Empty, Field, inputCls, GOLD } from './admin-ui';
 
 type Kind = 'banners' | 'partners';
@@ -205,20 +206,19 @@ function Manager({ kind, onUnauthorized }: { kind: Kind; onUnauthorized: () => v
 }
 
 export default function ContentTab({ onUnauthorized }: { onUnauthorized: () => void }) {
-  const [kind, setKind] = useState<Kind | 'texts' | 'pricing' | 'legal' | 'rewards' | 'about'>('banners');
+  const u = onUnauthorized;
   return (
-    <div className="space-y-3">
-      <div className="flex gap-2">
-        {(Object.keys(CONFIG) as Kind[]).map((k) => (
-          <Btn key={k} small kind={kind === k ? 'gold' : 'ghost'} onClick={() => setKind(k)}>{CONFIG[k].title}</Btn>
-        ))}
-        <Btn small kind={kind === 'texts' ? 'gold' : 'ghost'} onClick={() => setKind('texts')}>✍️ نصوص الصفحات</Btn>
-        <Btn small kind={kind === 'pricing' ? 'gold' : 'ghost'} onClick={() => setKind('pricing')}>💱 سعر Pi</Btn>
-        <Btn small kind={kind === 'legal' ? 'gold' : 'ghost'} onClick={() => setKind('legal')}>⚖️ القانون</Btn>
-        <Btn small kind={kind === 'rewards' ? 'gold' : 'ghost'} onClick={() => setKind('rewards')}>🎁 المكافآت</Btn>
-        <Btn small kind={kind === 'about' ? 'gold' : 'ghost'} onClick={() => setKind('about')}>ℹ️ نبذة عنا</Btn>
-      </div>
-      {kind === 'about' ? <><AboutSettingsPanel onUnauthorized={onUnauthorized} /><FounderSettings onUnauthorized={onUnauthorized} /><TextsEditor key="about-texts" initialPage="about" onUnauthorized={onUnauthorized} /></> : kind === 'texts' ? <TextsEditor onUnauthorized={onUnauthorized} /> : kind === 'pricing' ? <PricingSettings onUnauthorized={onUnauthorized} /> : kind === 'legal' ? <><LegalSettings onUnauthorized={onUnauthorized} /><ContractTermsPanel onUnauthorized={onUnauthorized} /></> : kind === 'rewards' ? <><RewardsSettings onUnauthorized={onUnauthorized} /><BadgeSettings onUnauthorized={onUnauthorized} /><CelebrationSettings onUnauthorized={onUnauthorized} /><RewardsLeaderboard onUnauthorized={onUnauthorized} /></> : <Manager key={kind} kind={kind} onUnauthorized={onUnauthorized} />}
-    </div>
+    <SubTabs
+      storeKey="content"
+      tabs={[
+        { id: 'banners', icon: '🖼️', label: 'بانرات الصفحة الرئيسية', render: () => <Manager key="banners" kind="banners" onUnauthorized={u} /> },
+        { id: 'partners', icon: '🤝', label: 'الشركاء', render: () => <Manager key="partners" kind="partners" onUnauthorized={u} /> },
+        { id: 'texts', icon: '✍️', label: 'نصوص الصفحات', render: () => <TextsEditor onUnauthorized={u} /> },
+        { id: 'pricing', icon: '💱', label: 'سعر Pi', render: () => <PricingSettings onUnauthorized={u} /> },
+        { id: 'legal', icon: '⚖️', label: 'القانون وبنود العقد', render: () => (<><LegalSettings onUnauthorized={u} /><ContractTermsPanel onUnauthorized={u} /></>) },
+        { id: 'rewards', icon: '🎁', label: 'المكافآت', render: () => (<><RewardsSettings onUnauthorized={u} /><BadgeSettings onUnauthorized={u} /><CelebrationSettings onUnauthorized={u} /><RewardsLeaderboard onUnauthorized={u} /></>) },
+        { id: 'about', icon: 'ℹ️', label: 'نبذة عنا', render: () => (<><AboutSettingsPanel onUnauthorized={u} /><FounderSettings onUnauthorized={u} /><TextsEditor key="about-texts" initialPage="about" onUnauthorized={u} /></>) },
+      ]}
+    />
   );
 }

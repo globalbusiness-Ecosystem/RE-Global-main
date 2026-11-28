@@ -3,10 +3,11 @@
 import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { keyTab, pickTab } from '@/lib/sub-tabs';
 import { GOLD } from './admin-ui';
+import { NAV_EVENT, SUB_STORE_PREFIX } from '@/lib/admin-nav';
 
 type SubTab = { id: string; icon: string; label: string; badge?: number; render: () => ReactNode };
 
-const KEY = 'admin-sub-';
+const KEY = SUB_STORE_PREFIX;
 
 // A tab bar for one admin section. Only the open tab is mounted, so closed
 // sections do not load their data. The last open tab is remembered per browser.
@@ -32,6 +33,17 @@ export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: Su
       /* ignore */
     }
   };
+
+  // The "jump to" box asks a bar that is already open to switch tab.
+  useEffect(() => {
+    const on = (ev: Event) => {
+      const d = (ev as CustomEvent<{ storeKey?: string; id?: string }>).detail;
+      if (d?.storeKey === storeKey && d.id && ids.includes(d.id)) open(d.id);
+    };
+    window.addEventListener(NAV_EVENT, on);
+    return () => window.removeEventListener(NAV_EVENT, on);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [storeKey, ids.join('|')]);
 
   const onKey = (e: React.KeyboardEvent) => {
     const rtl = bar.current ? getComputedStyle(bar.current).direction === 'rtl' : false;

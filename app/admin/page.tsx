@@ -8,6 +8,8 @@ import UsersTab from '@/components/admin/users-tab';
 import ContentTab from '@/components/admin/content-tab';
 import IdleGuard from '@/components/admin/idle-guard';
 import AdminsPanel from '@/components/admin/admins-panel';
+import QuickNav from '@/components/admin/quick-nav';
+import { NAV, NAV_EVENT, SUB_STORE_PREFIX, type NavEntry } from '@/lib/admin-nav';
 import { TAB_ACCESS, isRole, type AdminRole } from '@/lib/admin-roles';
 import { passkeysAvailable, answerChallenge } from '@/lib/passkey-client';
 import QRCode from 'qrcode';
@@ -33,6 +35,7 @@ export default function AdminDashboard() {
   const [checkingSession, setCheckingSession] = useState(true);
   const [loginError, setLoginError] = useState('');
   const [tab, setTab] = useState<TabId>('dashboard');
+  const [quick, setQuick] = useState(false);
   const [role, setRole] = useState<AdminRole>('owner');
   const [staffMode, setStaffMode] = useState(false);
   const [username, setUsername] = useState('');
@@ -56,6 +59,23 @@ export default function AdminDashboard() {
   const go = (t: string) => {
     setTab(t as TabId);
     try { localStorage.setItem('admin_tab', t); } catch { /* ignore */ }
+  };
+  // "Jump to": Ctrl/Cmd+K or the search button opens a box that lists every section.
+  useEffect(() => {
+    if (!authenticated) return;
+    const onKey = (ev: KeyboardEvent) => {
+      if ((ev.ctrlKey || ev.metaKey) && ev.key.toLowerCase() === 'k') { ev.preventDefault(); setQuick((v) => !v); }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [authenticated]);
+  const navEntries = NAV.filter((n) => tabs.some((t) => t.id === n.tab));
+  const pick = (n: NavEntry) => {
+    setQuick(false);
+    if (n.storeKey && n.sub) { try { localStorage.setItem(SUB_STORE_PREFIX + n.storeKey, n.sub); } catch { /* ignore */ } }
+    go(n.tab);
+    // A section that is already open switches tab on this event; one that has to open first reads the saved tab itself.
+    if (n.storeKey && n.sub) setTimeout(() => window.dispatchEvent(new CustomEvent(NAV_EVENT, { detail: { storeKey: n.storeKey, id: n.sub } })), 60);
   };
   // Called by any tab when the server says the session is gone.
   const expired = useCallback(() => setAuthenticated(false), []);
@@ -175,6 +195,7 @@ export default function AdminDashboard() {
               {t.icon} {t.label}
             </button>
           ))}
+          <button onClick={() => setQuick(true)} className="rounded-lg px-3 py-2.5 text-right text-sm font-semibold text-foreground/80 hover:bg-muted">🔎 انتقل بسرعة <span className="text-xs opacity-60" dir="ltr">Ctrl+K</span></button>
           <a href="/admin/security" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🛡️ الأمان</a>
           <a href="/" target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🌐 فتح الموقع</a>
         </nav>
@@ -184,7 +205,10 @@ export default function AdminDashboard() {
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur md:hidden">
           <h1 className="font-bold text-accent">🏠 RE Global — الأدمن</h1>
-          <button onClick={logout} className="text-xs text-muted-foreground">خروج</button>
+          <div className="flex items-center gap-3">
+            <button onClick={() => setQuick(true)} aria-label="انتقل بسرعة" className="text-lg">🔎</button>
+            <button onClick={logout} className="text-xs text-muted-foreground">خروج</button>
+          </div>
         </header>
         <main className="mx-auto w-full max-w-5xl p-4 md:p-6">
           <h2 className="mb-4 hidden text-xl font-bold md:block">{TABS.find((t) => t.id === tab)?.icon} {TABS.find((t) => t.id === tab)?.label}</h2>
@@ -196,6 +220,8 @@ export default function AdminDashboard() {
           {tab === 'admins' && role === 'owner' && <AdminsPanel onUnauthorized={expired} />}
         </main>
       </div>
+
+      {quick && <QuickNav entries={navEntries} onPick={pick} onClose={() => setQuick(false)} />}
 
       {/* Bottom tab bar (mobile) */}
       <nav style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
