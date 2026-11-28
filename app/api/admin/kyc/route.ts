@@ -6,7 +6,7 @@ import { nextStep } from '@/lib/kyc-four-eyes';
 import { getFourEyes, getProposal, saveProposal } from '@/lib/kyc-four-eyes-store';
 import { listKyc } from '@/lib/kyc-store';
 import { applyKycDecision } from '@/lib/kyc-decision';
-import { cleanNote } from '@/lib/kyc-rules';
+import { canKyc, cleanNote } from '@/lib/kyc-rules';
 
 export const dynamic = 'force-dynamic';
 const unauthorized = () => NextResponse.json({ ok: false, error: 'Unauthorized' }, { status: 401 });
@@ -32,7 +32,8 @@ export async function PATCH(req: NextRequest) {
   const uid = typeof b?.uid === 'string' ? b.uid : '';
   const decision = b?.decision === 'approved' || b?.decision === 'rejected' ? b.decision : null;
   const reason = cleanNote(b?.reason);
-  if (!uid.startsWith('web_') || !decision || (decision === 'rejected' && !reason)) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
+  // Any account that sent a request (Pi accounts too, see canKyc), not only web sign-ins.
+  if (!canKyc(uid) || !decision || (decision === 'rejected' && !reason)) return NextResponse.json({ ok: false, error: 'Invalid request' }, { status: 400 });
   try {
     const who = await adminWho(req);
     if (!who) return unauthorized();

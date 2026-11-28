@@ -59,7 +59,7 @@ describe('wiring', () => {
     const a = src('app/api/admin/kyc/route.ts');
     expect(a.match(/isAdminRequest\(req\)/g)?.length).toBe(2);
     expect(src('lib/kyc-decision.ts')).toContain("logAdmin(`kyc.${decision}`");
-    expect(a).toContain("uid.startsWith('web_')");
+    expect(a).toContain('!canKyc(uid)');
   });
   it('a rejection needs a reason', () => {
     expect(src('app/api/admin/kyc/route.ts')).toContain("decision === 'rejected' && !reason");
