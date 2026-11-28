@@ -186,11 +186,11 @@ export default function AdminDashboard() {
     <div dir="rtl" className="dark min-h-screen bg-background text-foreground md:flex">
       <IdleGuard onTimeout={logout} />
       {/* Sidebar (desktop) */}
-      <aside className="hidden w-56 shrink-0 border-l border-border bg-sidebar p-4 md:flex md:flex-col">
+      <aside aria-label="القائمة الجانبية" className="hidden w-56 shrink-0 border-l border-border bg-sidebar p-4 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:self-start md:overflow-y-auto">
         <h1 className="mb-6 text-lg font-bold text-accent">🏠 RE Global</h1>
-        <nav className="flex flex-1 flex-col gap-1">
+        <nav aria-label="الأقسام" className="flex flex-1 flex-col gap-1">
           {tabs.map((t) => (
-            <button key={t.id} onClick={() => go(t.id)}
+            <button key={t.id} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined}
               className={`rounded-lg px-3 py-2.5 text-right text-sm font-semibold transition ${tab === t.id ? 'bg-accent text-black' : 'text-foreground/80 hover:bg-muted'}`}>
               {t.icon} {t.label}
             </button>
@@ -210,7 +210,7 @@ export default function AdminDashboard() {
             <button onClick={logout} className="text-xs text-muted-foreground">خروج</button>
           </div>
         </header>
-        <main className="mx-auto w-full max-w-5xl p-4 md:p-6">
+        <main className="mx-auto w-full max-w-5xl p-4 md:p-6 xl:max-w-6xl 2xl:max-w-7xl">
           <h2 className="mb-4 hidden text-xl font-bold md:block">{TABS.find((t) => t.id === tab)?.icon} {TABS.find((t) => t.id === tab)?.label}</h2>
           {tab === 'dashboard' && <DashboardTab onUnauthorized={expired} goto={go} />}
           {tab === 'properties' && <PropertiesTab onUnauthorized={expired} />}
@@ -224,9 +224,9 @@ export default function AdminDashboard() {
       {quick && <QuickNav entries={navEntries} onPick={pick} onClose={() => setQuick(false)} />}
 
       {/* Bottom tab bar (mobile) */}
-      <nav style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
+      <nav aria-label="التنقل السفلي" style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
         {tabs.map((t) => (
-          <button key={t.id} onClick={() => go(t.id)} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-accent' : 'text-muted-foreground'}`}>
+          <button key={t.id} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-accent' : 'text-muted-foreground'}`}>
             <span className="block text-lg leading-none">{t.icon}</span>{t.label}
           </button>
         ))}

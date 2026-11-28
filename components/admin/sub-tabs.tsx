@@ -64,7 +64,7 @@ export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: Su
         role="tablist"
         aria-orientation="horizontal"
         onKeyDown={onKey}
-        className="sticky top-[52px] z-[9] -mx-1 md:top-0 flex gap-1.5 overflow-x-auto bg-background/95 px-1 py-2 backdrop-blur"
+        className="sticky top-[52px] z-[9] -mx-1 flex gap-1.5 overflow-x-auto bg-background/95 px-1 py-2 backdrop-blur md:static md:flex-wrap md:overflow-visible"
       >
         {tabs.map((t) => {
           const on = t.id === current.id;
