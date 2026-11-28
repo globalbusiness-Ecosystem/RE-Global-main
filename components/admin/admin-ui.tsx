@@ -39,9 +39,10 @@ export function Card({ title, right, children, className = '' }: { title?: React
 
 export function Stat({ label, value, sub }: { label: string; value: ReactNode; sub?: ReactNode }) {
   return (
-    <div className="rounded-xl border border-border bg-input p-3">
+    <div className="min-w-0 rounded-xl border border-border bg-input p-3">
       <p className="text-xs text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-bold text-foreground">{value}</p>
+      {/* A long number wraps inside its card instead of running under the next one. */}
+      <p className="mt-1 break-words text-xl font-bold tabular-nums text-foreground sm:text-2xl [overflow-wrap:anywhere]">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
     </div>
   );

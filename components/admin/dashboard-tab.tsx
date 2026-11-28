@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { adminApi, UnauthorizedError, Card, Stat, Empty, Badge, TYPE_LABELS, fmtDate, GOLD } from './admin-ui';
 import AttentionPanel from './attention-panel';
+import { formatNumber } from '@/lib/format';
 import ReadinessPanel from './readiness-panel';
 import ActivityLog from './activity-log';
 import CspPanel from './csp-panel';
@@ -36,7 +37,7 @@ export default function DashboardTab({ onUnauthorized, goto }: { onUnauthorized:
       <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         <Stat label="العقارات" value={data.properties.total} sub={`${data.properties.hidden} مخفي · ${data.properties.featured} مميز`} />
         <Stat label="العقود الموقّعة" value={data.contracts.total} sub={`آخر 7 أيام: ${data.contracts.last7.count}`} />
-        <Stat label="إجمالي المدفوعات" value={`${data.contracts.totalAmount} π`} sub={`آخر 7 أيام: ${data.contracts.last7.amount} π`} />
+        <Stat label="إجمالي المدفوعات" value={`${formatNumber(data.contracts.totalAmount, 'en', 4)} π`} sub={`آخر 7 أيام: ${formatNumber(data.contracts.last7.amount, 'en', 4)} π`} />
         <Stat label="المستخدمون" value={data.users.profiles} sub={`${data.users.banned} محظور`} />
       </div>
 

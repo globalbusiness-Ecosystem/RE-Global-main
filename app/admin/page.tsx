@@ -198,7 +198,7 @@ export default function AdminDashboard() {
       </div>
 
       {/* Bottom tab bar (mobile) */}
-      <nav style={{ gridTemplateColumns: `repeat(${tabs.length}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
+      <nav style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => go(t.id)} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-accent' : 'text-muted-foreground'}`}>
             <span className="block text-lg leading-none">{t.icon}</span>{t.label}
