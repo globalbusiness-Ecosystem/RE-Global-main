@@ -212,10 +212,12 @@ export const VRPropertyTourViewer = ({
   };
 
   const toggleAutoRotate = () => {
-    setAutoRotate(!autoRotate);
-    if (viewerRef.current) {
-      viewerRef.current.setAutoRotate(!autoRotate ? -2 : 0);
-    }
+    const next = !autoRotate;
+    setAutoRotate(next);
+    // Pannellum has startAutoRotate / stopAutoRotate (there is no setAutoRotate).
+    const v = viewerRef.current;
+    if (next) v?.startAutoRotate?.(-2);
+    else v?.stopAutoRotate?.();
   };
 
   const handleZoom = (direction: 'in' | 'out') => {
