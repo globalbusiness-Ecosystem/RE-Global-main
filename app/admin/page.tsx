@@ -9,6 +9,8 @@ import ContentTab from '@/components/admin/content-tab';
 import IdleGuard from '@/components/admin/idle-guard';
 import AdminsPanel from '@/components/admin/admins-panel';
 import QuickNav from '@/components/admin/quick-nav';
+import { AdminLangContext } from '@/components/admin/admin-lang';
+import { LANG_KEY, dirOf, otherLang, parseLang, tabLabel, tr, type AdminLang } from '@/lib/admin-i18n';
 import { NAV, NAV_EVENT, SUB_STORE_PREFIX, type NavEntry } from '@/lib/admin-nav';
 import { TAB_ACCESS, isRole, type AdminRole } from '@/lib/admin-roles';
 import { passkeysAvailable, answerChallenge } from '@/lib/passkey-client';
@@ -36,6 +38,7 @@ export default function AdminDashboard() {
   const [loginError, setLoginError] = useState('');
   const [tab, setTab] = useState<TabId>('dashboard');
   const [quick, setQuick] = useState(false);
+  const [lang, setLangState] = useState<AdminLang>('ar');
   const [role, setRole] = useState<AdminRole>('owner');
   const [staffMode, setStaffMode] = useState(false);
   const [username, setUsername] = useState('');
@@ -51,6 +54,7 @@ export default function AdminDashboard() {
       .finally(() => setCheckingSession(false));
     passkeysAvailable().then(setDeviceCanPasskey);
     try {
+      setLangState(parseLang(localStorage.getItem(LANG_KEY)));
       const saved = localStorage.getItem('admin_tab') as TabId | null;
       if (saved && TABS.some((t) => t.id === saved)) setTab(saved);
     } catch { /* storage unavailable */ }
@@ -59,6 +63,10 @@ export default function AdminDashboard() {
   const go = (t: string) => {
     setTab(t as TabId);
     try { localStorage.setItem('admin_tab', t); } catch { /* ignore */ }
+  };
+  const setLang = (l: AdminLang) => {
+    setLangState(l);
+    try { localStorage.setItem(LANG_KEY, l); } catch { /* ignore */ }
   };
   // "Jump to": Ctrl/Cmd+K or the search button opens a box that lists every section.
   useEffect(() => {
@@ -183,35 +191,38 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div dir="rtl" className="dark min-h-screen bg-background text-foreground md:flex">
+    <AdminLangContext.Provider value={{ lang, setLang }}>
+    <div dir={dirOf(lang)} lang={lang} className="dark min-h-screen bg-background text-foreground md:flex">
       <IdleGuard onTimeout={logout} />
       {/* Sidebar (desktop) */}
-      <aside aria-label="القائمة الجانبية" className="hidden w-56 shrink-0 border-l border-border bg-sidebar p-4 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:self-start md:overflow-y-auto">
+      <aside aria-label={tr('sidebarAria', lang)} className="hidden w-56 shrink-0 border-e border-border bg-sidebar p-4 md:sticky md:top-0 md:flex md:h-screen md:flex-col md:self-start md:overflow-y-auto">
         <h1 className="mb-6 text-lg font-bold text-accent">🏠 RE Global</h1>
-        <nav aria-label="الأقسام" className="flex flex-1 flex-col gap-1">
+        <nav aria-label={tr('sectionsAria', lang)} className="flex flex-1 flex-col gap-1">
           {tabs.map((t) => (
             <button key={t.id} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined}
-              className={`rounded-lg px-3 py-2.5 text-right text-sm font-semibold transition ${tab === t.id ? 'bg-accent text-black' : 'text-foreground/80 hover:bg-muted'}`}>
-              {t.icon} {t.label}
+              className={`rounded-lg px-3 py-2.5 text-start text-sm font-semibold transition ${tab === t.id ? 'bg-accent text-black' : 'text-foreground/80 hover:bg-muted'}`}>
+              {t.icon} {tabLabel(t.id, lang, t.label)}
             </button>
           ))}
-          <button onClick={() => setQuick(true)} className="rounded-lg px-3 py-2.5 text-right text-sm font-semibold text-foreground/80 hover:bg-muted">🔎 انتقل بسرعة <span className="text-xs opacity-60" dir="ltr">Ctrl+K</span></button>
-          <a href="/admin/security" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🛡️ الأمان</a>
-          <a href="/" target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🌐 فتح الموقع</a>
+          <button onClick={() => setQuick(true)} className="rounded-lg px-3 py-2.5 text-start text-sm font-semibold text-foreground/80 hover:bg-muted">🔎 {tr('quick', lang)} <span className="text-xs opacity-60" dir="ltr">Ctrl+K</span></button>
+          <a href="/admin/security" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🛡️ {tr('security', lang)}</a>
+          <a href="/" target="_blank" rel="noreferrer" className="rounded-lg px-3 py-2.5 text-sm font-semibold text-foreground/80 hover:bg-muted">🌐 {tr('openSite', lang)}</a>
         </nav>
-        <button onClick={logout} className="rounded-lg border border-border py-2 text-sm text-muted-foreground hover:bg-muted">تسجيل خروج</button>
+        <button onClick={() => setLang(otherLang(lang))} aria-label={tr('langAria', lang)} className="mb-2 rounded-lg border border-border py-2 text-sm text-foreground/80 hover:bg-muted">🌍 {tr('langSwitch', lang)}</button>
+        <button onClick={logout} className="rounded-lg border border-border py-2 text-sm text-muted-foreground hover:bg-muted">{tr('logout', lang)}</button>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col pb-20 md:pb-0">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-border bg-background/95 px-4 py-3 backdrop-blur md:hidden">
-          <h1 className="font-bold text-accent">🏠 RE Global — الأدمن</h1>
+          <h1 className="font-bold text-accent">🏠 {tr('title', lang)}</h1>
           <div className="flex items-center gap-3">
-            <button onClick={() => setQuick(true)} aria-label="انتقل بسرعة" className="text-lg">🔎</button>
-            <button onClick={logout} className="text-xs text-muted-foreground">خروج</button>
+            <button onClick={() => setQuick(true)} aria-label={tr('quick', lang)} className="text-lg">🔎</button>
+            <button onClick={() => setLang(otherLang(lang))} aria-label={tr('langAria', lang)} className="text-xs font-bold text-foreground/80">{tr('langSwitchShort', lang)}</button>
+            <button onClick={logout} className="text-xs text-muted-foreground">{tr('logoutShort', lang)}</button>
           </div>
         </header>
         <main className="mx-auto w-full max-w-5xl p-4 md:p-6 xl:max-w-6xl 2xl:max-w-7xl">
-          <h2 className="mb-4 hidden text-xl font-bold md:block">{TABS.find((t) => t.id === tab)?.icon} {TABS.find((t) => t.id === tab)?.label}</h2>
+          <h2 className="mb-4 hidden text-xl font-bold md:block">{TABS.find((t) => t.id === tab)?.icon} {tabLabel(tab, lang)}</h2>
           {tab === 'dashboard' && <DashboardTab onUnauthorized={expired} goto={go} />}
           {tab === 'properties' && <PropertiesTab onUnauthorized={expired} />}
           {tab === 'payments' && <PaymentsTab onUnauthorized={expired} />}
@@ -224,16 +235,17 @@ export default function AdminDashboard() {
       {quick && <QuickNav entries={navEntries} onPick={pick} onClose={() => setQuick(false)} />}
 
       {/* Bottom tab bar (mobile) */}
-      <nav aria-label="التنقل السفلي" style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
+      <nav aria-label={tr('bottomAria', lang)} style={{ gridTemplateColumns: `repeat(${tabs.length + 1}, minmax(0, 1fr))` }} className="fixed inset-x-0 bottom-0 z-20 grid border-t border-border bg-sidebar md:hidden">
         {tabs.map((t) => (
           <button key={t.id} onClick={() => go(t.id)} aria-current={tab === t.id ? 'page' : undefined} className={`py-2.5 text-[11px] font-semibold ${tab === t.id ? 'text-accent' : 'text-muted-foreground'}`}>
-            <span className="block text-lg leading-none">{t.icon}</span>{t.label}
+            <span className="block text-lg leading-none">{t.icon}</span>{tabLabel(t.id, lang, t.label)}
           </button>
         ))}
         <a href="/admin/security" className="py-2.5 text-center text-[11px] font-semibold text-muted-foreground">
-          <span className="block text-lg leading-none">🛡️</span>الأمان
+          <span className="block text-lg leading-none">🛡️</span>{tr('security', lang)}
         </a>
       </nav>
     </div>
+    </AdminLangContext.Provider>
   );
 }

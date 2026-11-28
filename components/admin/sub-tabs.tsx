@@ -4,6 +4,8 @@ import { useEffect, useRef, useState, type ReactNode } from 'react';
 import { keyTab, pickTab } from '@/lib/sub-tabs';
 import { GOLD } from './admin-ui';
 import { NAV_EVENT, SUB_STORE_PREFIX } from '@/lib/admin-nav';
+import { useAdminLang } from './admin-lang';
+import { subLabel } from '@/lib/admin-i18n';
 
 type SubTab = { id: string; icon: string; label: string; badge?: number; render: () => ReactNode };
 
@@ -14,6 +16,7 @@ const KEY = SUB_STORE_PREFIX;
 export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: SubTab[] }) {
   const ids = tabs.map((t) => t.id);
   const [active, setActive] = useState(ids[0] ?? '');
+  const { lang } = useAdminLang();
   const bar = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -83,7 +86,7 @@ export default function SubTabs({ storeKey, tabs }: { storeKey: string; tabs: Su
               style={on ? { background: GOLD, color: 'var(--accent-foreground)', borderColor: GOLD } : { background: 'var(--card)', color: 'var(--foreground)', borderColor: 'var(--border)' }}
             >
               <span aria-hidden>{t.icon}</span>
-              {t.label}
+              {subLabel(storeKey, t.id, lang, t.label)}
               {!!t.badge && <span className="rounded-full bg-red-500 px-1.5 text-[10px] font-bold text-foreground">{t.badge}</span>}
             </button>
           );

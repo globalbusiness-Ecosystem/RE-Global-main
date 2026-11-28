@@ -17,9 +17,9 @@ describe('admin on a laptop', () => {
     expect(s).toContain('md:static md:flex-wrap md:overflow-visible');
   });
   it('both menus have a name for screen readers and mark the open section', () => {
-    expect(page).toContain('aria-label="القائمة الجانبية"');
-    expect(page).toContain('aria-label="الأقسام"');
-    expect(page).toContain('aria-label="التنقل السفلي"');
+    expect(page).toContain("aria-label={tr('sidebarAria', lang)}");
+    expect(page).toContain("aria-label={tr('sectionsAria', lang)}");
+    expect(page).toContain("aria-label={tr('bottomAria', lang)}");
     expect(page.match(/aria-current=\{tab === t\.id \? 'page' : undefined\}/g)?.length).toBe(2);
   });
 });
